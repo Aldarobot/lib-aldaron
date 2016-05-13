@@ -1,3 +1,5 @@
+![alt text](https://sites.google.com/site/plopgrizzly/jl-lib/JL_Lib.png)
+
 
 # INTRODUCTION
 
@@ -37,14 +39,17 @@ Need help porting:
 # CLEAN
 
 __use only when you don't want to use current builds anymore!__
-* Clean all build folders:
-	make clean-all --silent
-* Clean all dependencies:
-	make clean-deps --silent
-* Clean all of the build folder:
-	make clean-build --silent
+* Clean all build folders: `make clean-all --silent`
+* Clean all dependencies: `make clean-deps --silent`
+* Clean all of the build folder: `make clean-build --silent`
 
 # HOW TO BUILD PROJECTS WITH JL_LIB
+- Make a makefile that links to compile-scripts/ProjectMakefile.mk
+- To compile with maximum optimization use, `make release`
+- To compile for testing use, `make test`
+- To  run in gdb use, `make debug`
+- To build the android apk, sign and install use, `make android`
+- To clean builds use, `make clean`
 
 # CODE STYLE
 - Indentation is with tabs [ standard length - 8 ]

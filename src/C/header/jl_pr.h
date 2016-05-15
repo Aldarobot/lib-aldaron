@@ -52,7 +52,6 @@ char *jl_gem(void);
 uint32_t jl_gem_size(void);
 
 // Main - Prototypes
-	double jl_sdl_seconds_past__(jl_t* jl);
 	str_t jl_file_convert__(jl_t* jl, str_t filename);
 	jl_ctx_t* jl_thread_get_safe__(jl_t* jl);
 

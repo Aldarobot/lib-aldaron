@@ -11,7 +11,7 @@
 static void jlgr_thread_resize(jlgr_t* jlgr, u16_t w, u16_t h) {
 	jl_print(jlgr->jl, "Resizing to %dx%d....", w, h);
 	// Reset aspect ratio stuff.
-	jl_dl_resz__(jlgr, w, h);
+	jl_wm_resz__(jlgr, w, h);
 	// Update the actual window.
 	jl_gl_resz__(jlgr);
 	// Update the size of the background.
@@ -77,7 +77,7 @@ static void jlgr_thread_resize_event(jl_t* jl, void* data) {
 			uint16_t h = packet->y;
 			jl_print(jlgr->jl, "Resizing to %dx%d....", w, h);
 			// Reset aspect ratio stuff.
-			jl_dl_resz__(jlgr, w, h);
+			jl_wm_resz__(jlgr, w, h);
 			// Update the actual window.
 			jl_gl_resz__(jlgr);
 			break;
@@ -105,7 +105,7 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 
 	// Initialize subsystems
 	JL_PRINT_DEBUG(jl, "Creating the window....");
-	jl_dl_init__(jlgr);
+	jl_wm_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "Resize Adjust");
 	jlgr->draw.rtn = 0;
 	while(jlgr->draw.rtn != 2) {
@@ -153,9 +153,9 @@ int jlgr_thread_draw(void* data) {
 		//Redraw screen.
 		_jl_sg_loop(jlgr);
 		//Update Screen.
-		jl_dl_loop__(jlgr);
+		jl_wm_loop__(jlgr);
 	}
-	jl_dl_kill__(jlgr); // Kill window
+	jl_wm_kill__(jlgr); // Kill window
 	jlgr_pr_old(jlgr, jlgr->sg.bg.up);
 	jlgr_pr_old(jlgr, jlgr->sg.bg.dn);
 	return 0;

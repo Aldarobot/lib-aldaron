@@ -8,6 +8,7 @@
 
 //Initialize The Libraries Needed At Very Beginning: The Base Of It All
 static inline jl_t* jl_init_essential__(void) {
+	JL_PRINT("Starting JL_Lib - Version "JL_VERSION"....");
 	// Memory
 	jvct_t* _jl = jl_mem_init__(); // Create The Library Context
 	// Printing to terminal
@@ -29,7 +30,7 @@ static inline void jl_init_libs__(jl_t* jl) {
 }
 
 static inline void jl_init__(jl_t* jl,jl_fnct _fnc_init_,str_t nm,u64_t ctx1s) {
-	jl_print(jl, "Starting JL_Lib - Version "JL_VERSION"....");
+	jl_print(jl, "Initializing subsystems....");
 	// Run the library's init function.
 	jl_init_libs__(jl);
 	// Allocate the program's context.
@@ -41,7 +42,6 @@ static inline void jl_init__(jl_t* jl,jl_fnct _fnc_init_,str_t nm,u64_t ctx1s) {
 }
 
 static void jl_time_reset__(jl_t* jl, u8_t on_time) {
-	jl->time.prev_tick = jl->time.this_tick;
 	if(jl->jlgr) {
 		jlgr_t* jlgr = jl->jlgr;
 
@@ -52,10 +52,10 @@ static void jl_time_reset__(jl_t* jl, u8_t on_time) {
 
 //return how many seconds passed since last call
 static inline void jl_seconds_passed__(jl_t* jl) {
-	int diff;
+	int diff = jl->time.timer;
 
-	jl->time.psec = jl_sdl_seconds_past__(jl);
-	diff = jl->time.this_tick - jl->time.prev_tick;
+	jl->time.psec = jl_sdl_timer(jl, &jl->time.timer);
+	diff = jl->time.timer - diff;
 	if(diff) jl->time.fps = round(1000./((double)diff));
 	else jl->time.fps = 25000;
 	// Tell if fps is 60 fps or better
@@ -138,6 +138,10 @@ JNIEXPORT void JNICALL
 Java_org_libsdl_app_SDLActivity_nativeJlSendData( JNIEnv *env, jobject obj,
 	jstring data)
 {
+	// Enable SDL standard application logging
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
+	//
+	SDL_Log("nativeJlSendData\n");
 	JL_FL_BASE = (*env)->GetStringUTFChars(env, data, 0);
 	SDL_Log("nativeJlSendData \"%s\"\n", JL_FL_BASE);
 }

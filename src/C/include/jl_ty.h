@@ -80,10 +80,9 @@ typedef struct{
 		SDL_mutex* mutex; // Mutex for printing to terminal
 	}print;
 	struct{
-		m_f64_t psec; // Seconds since last frame.
-		m_u32_t prev_tick; // Time 1 frame ago started
-		m_u32_t this_tick; // Time this frame started
-		m_u16_t fps; // Frames per second.
+		double psec; // Seconds since last frame.
+		uint32_t timer; // Time 1 frame ago started
+		uint16_t fps; // Frames per second.
 	}time;
 	struct {
 		jl_mode_t *mdes; // Array Sizof Number Of Modes

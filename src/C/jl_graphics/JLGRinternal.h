@@ -67,19 +67,19 @@ void jl_gl_pr_off(jlgr_t* jlgr);
 void jl_gl_pr_scr(jlgr_t* jlgr);
 
 //DL
-void _jl_dl_loop(jvct_t* _jlc);
+void _jl_wm_loop(jvct_t* _jlc);
 void _jl_sg_loop(jlgr_t* jlgr);
 float jl_sg_seconds_past_(jl_t* jlc);
 data_t* jl_vi_make_jpeg_(jl_t* jlc,i32_t quality,m_u8_t* pxdata,u16_t w,u16_t h);
 m_u8_t* jl_vi_load_(jl_t* jlc, data_t* data, m_u16_t* w, m_u16_t* h);
 
 // Resize function
-void jl_dl_resz__(jlgr_t* jlgr, uint16_t x, uint16_t y);
+void jl_wm_resz__(jlgr_t* jlgr, uint16_t x, uint16_t y);
 void jl_gl_resz__(jlgr_t* jlgr);
 void jl_sg_resz__(jl_t* jlc);
 void jlgr_resz(jlgr_t* jlgr, u16_t x, u16_t y);
 // init functions.
-void jl_dl_init__(jlgr_t* jlgr);
+void jl_wm_init__(jlgr_t* jlgr);
 void jl_sg_inita__(jlgr_t* jlgr);
 void jl_gl_init__(jlgr_t* jlgr);
 void jlgr_init__(jlgr_t* jlgr);
@@ -90,10 +90,10 @@ void jlgr_mouse_init__(jlgr_t* jlgr);
 void jlgr_thread_init(jlgr_t* jlgr);
 // loop
 void jl_ct_loop__(jlgr_t* jlgr);
-void jl_dl_loop__(jlgr_t* jlgr);
+void jl_wm_loop__(jlgr_t* jlgr);
 void _jlgr_loopa(jlgr_t* jlgr);
 // kill
-void jl_dl_kill__(jlgr_t* jlgr);
+void jl_wm_kill__(jlgr_t* jlgr);
 void jlgr_thread_kill(jlgr_t* jlgr);
 //
 void jlgr_thread_send(jlgr_t* jlgr, u8_t id, u16_t x, u16_t y, jl_fnct fn);

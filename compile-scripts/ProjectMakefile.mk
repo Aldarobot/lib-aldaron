@@ -175,7 +175,7 @@ $(BUILD_DEPS)/%.o: %.c $(HEADERS_DEPS)
 	printf "[COMP] Linking ....\n"
 	$(CC) $(OBJS) $(LIB) -o $(JL_OUT) $(CFLAGS) \
 		-lm -lz -ldl -lpthread -lstdc++ -ljpeg \
-		`$(shell echo $(JLL_HOME))/deps/SDL2-2.0.3/sdl2-config --libs` \
+		`$(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/sdl2-config --libs` \
 		$(LINKER_LIBS) $(PLATFORM_CFLAGS) \
 		$(GL_VERSION) $(JL_DEBUG)
 	printf "[COMP] Done [ OpenGL Version = $(GL_VERSION) ]!\n"

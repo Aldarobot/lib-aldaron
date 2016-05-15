@@ -250,10 +250,6 @@ void jl_print_init_thread__(jl_t* jl, u8_t thread_id) {
 }
 
 void jl_print_init__(jl_t* jl) {
-	#if JL_PLAT == JL_PLAT_PHONE
-	// Enable standard application logging
-	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
-	#endif
 	jl->print.mutex = jl_thread_mutex_new(jl);
 	jl_print_set(jl, NULL);
 	jl_print_init_thread__(jl, 0);

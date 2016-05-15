@@ -136,10 +136,10 @@ else
 fi
 
 # Link user sources
-rm -rf $BUILDPATH/jni/src/
-mkdir -p $BUILDPATH/jni/src/
+#rm -rf $BUILDPATH/jni/src/
+#mkdir -p $BUILDPATH/jni/src/
 
-cp $SDLPATH/android-project/jni/src/Android.mk $BUILDPATH/jni/src/
+cp -u $SDLPATH/android-project/jni/src/Android.mk $BUILDPATH/jni/src/
 
 for src in "${SOURCES[@]}"
 do
@@ -191,6 +191,7 @@ $ZIPALIGN -v 4 bin/$APP-release-unsigned.apk $APK
 if [ -f "$APK" ]; then
 	$ADB install -r $APK
 	$ADB shell am start -a android.intent.action.MAIN -n $APP/.$ACTIVITY
+#	$ADB logcat "*:E"
 	$ADB logcat | grep I\/SDL\/APP
 	exit 0
 fi

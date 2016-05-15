@@ -318,6 +318,7 @@ typedef struct{
 		double ar;
 	}wm;
 
+	uint32_t timer;
 	double psec;
 
 	jl_sprite_t* temp_sprite;

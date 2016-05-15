@@ -6,19 +6,19 @@
 #include "JLGRinternal.h"
 #include "jl_opengl.h"
 
-#define JL_DL_INIT SDL_INIT_AUDIO|SDL_INIT_VIDEO
-#define JL_DL_FULLSCREEN SDL_WINDOW_FULLSCREEN_DESKTOP
+#define JL_WM_INIT SDL_INIT_AUDIO|SDL_INIT_VIDEO
+#define JL_WM_FULLSCREEN SDL_WINDOW_FULLSCREEN_DESKTOP
 
 //PROTOTYPES
-static void _jl_dl_fscreen(jlgr_t* jlgr, uint8_t a);
+static void _jl_wm_fscreen(jlgr_t* jlgr, uint8_t a);
 
 //EXPORT FUNCTIONS
 void jlgr_wm_setfullscreen(jlgr_t* jlgr, uint8_t is) {
-	_jl_dl_fscreen(jlgr, is);
+	_jl_wm_fscreen(jlgr, is);
 }
 
 void jlgr_wm_togglefullscreen(jlgr_t* jlgr) {
-	_jl_dl_fscreen(jlgr, !jlgr->wm.fullscreen);
+	_jl_wm_fscreen(jlgr, !jlgr->wm.fullscreen);
 }
 
 uint16_t jlgr_wm_getw(jlgr_t* jlgr) {
@@ -47,13 +47,13 @@ void jlgr_wm_setwindowname(jlgr_t* jlgr, str_t window_name) {
 }
 
 //STATIC FUNCTIONS
-static void jl_dl_killedit(jl_t* jl, char *str) {
+static void jl_wm_killedit(jl_t* jl, char *str) {
 	jl_print(jl, str);
 	jl_print(jl, SDL_GetError());
 	exit(-1);
 }
 
-static SDL_Window* jl_dl_mkwindow(jlgr_t* jlgr, u32_t width, u32_t height) {
+static inline SDL_Window* jl_wm_mkwindow(jlgr_t* jlgr, u32_t width, u32_t height) {
 	int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 	if(jlgr->wm.fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
 	SDL_Window* rtn = SDL_CreateWindow(
@@ -62,27 +62,27 @@ static SDL_Window* jl_dl_mkwindow(jlgr_t* jlgr, u32_t width, u32_t height) {
 		SDL_WINDOWPOS_UNDEFINED,		// initial y position
 		width, height, flags
     	);
-	#if JL_PLAT == JL_PLAT_COMPUTER
+	if(rtn == NULL) jl_wm_killedit(jlgr->jl, "SDL_CreateWindow");
+#if JL_PLAT == JL_PLAT_COMPUTER
 	SDL_ShowCursor(SDL_DISABLE);
-	#endif
-	if(rtn == NULL) jl_dl_killedit(jlgr->jl, "SDL_CreateWindow");
+#endif
 	return rtn;
 }
 
-static SDL_GLContext* jl_dl_gl_context(jlgr_t* jlgr) {
+static inline SDL_GLContext* jl_wm_gl_context(jlgr_t* jlgr) {
 	SDL_GLContext* rtn = SDL_GL_CreateContext(jlgr->wm.displayWindow->w);
-	if(rtn == NULL) jl_dl_killedit(jlgr->jl, "SDL_GL_CreateContext");
+	if(rtn == NULL) jl_wm_killedit(jlgr->jl, "SDL_GL_CreateContext");
 	return rtn;
 }
 
 // Set fullscreen or not.
-static void _jl_dl_fscreen(jlgr_t* jlgr, uint8_t a) {
+static void _jl_wm_fscreen(jlgr_t* jlgr, uint8_t a) {
 	// Make sure the fullscreen value is either a 1 or a 0.
 	jlgr->wm.fullscreen = !!a;
 	// Actually set whether fullscreen or not.
 	if(SDL_SetWindowFullscreen(jlgr->wm.displayWindow->w,
-	 JL_DL_FULLSCREEN * jlgr->wm.fullscreen))
-		jl_dl_killedit(jlgr->jl, "SDL_SetWindowFullscreen");
+	 JL_WM_FULLSCREEN * jlgr->wm.fullscreen))
+		jl_wm_killedit(jlgr->jl, "SDL_SetWindowFullscreen");
 	JL_PRINT_DEBUG(jlgr->jl, "Switched fullscreen on/off");
 	// Resize window
 	jlgr_resz(jlgr, 0, 0);
@@ -109,12 +109,12 @@ static inline void jlgr_wm_create__(jlgr_t* jlgr, u32_t w, u32_t h) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 	// Create window.
-	jlgr->wm.displayWindow->w = jl_dl_mkwindow(jlgr, w, h);
+	jlgr->wm.displayWindow->w = jl_wm_mkwindow(jlgr, w, h);
 //	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 0);
-	jlgr->wm.displayWindow->c = jl_dl_gl_context(jlgr);
+	jlgr->wm.displayWindow->c = jl_wm_gl_context(jlgr);
 	// Clear and update
 	jl_gl_clear(jlgr, 2, 255, 5, 255);
-	jl_dl_loop__(jlgr);
+	jl_wm_loop__(jlgr);
 }
 
 // ETOM FUNCTIONS
@@ -122,7 +122,7 @@ static inline void jlgr_wm_create__(jlgr_t* jlgr, u32_t w, u32_t h) {
 int oldtick = 0;
 int newtick = 0;
 
-void jl_dl_loop__(jlgr_t* jlgr) {
+void jl_wm_loop__(jlgr_t* jlgr) {
 	//Update Screen
 	SDL_GL_SwapWindow(jlgr->wm.displayWindow->w); //end current draw
 	// Clear the screen of anything wierd.
@@ -131,12 +131,12 @@ void jl_dl_loop__(jlgr_t* jlgr) {
 	oldtick = newtick;
 	newtick = SDL_GetTicks();
 	// milliseconds / 1000 to get seconds
-	jlgr->psec = ((double)(newtick - oldtick)) / 1000.;
+	jlgr->psec = jl_sdl_timer(jlgr->jl, &jlgr->timer);
 
 //JL_PRINT("GR %f, N %f\n", 1./jlgr->psec, 1./jlgr->jl->time.psec);
 }
 
-void jl_dl_resz__(jlgr_t* jlgr, uint16_t w, uint16_t h) {
+void jl_wm_resz__(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	jlgr->wm.w = w;
 	jlgr->wm.h = h;
 	jlgr->wm.ar = ((double)h) / ((double)w);
@@ -144,10 +144,10 @@ void jl_dl_resz__(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	JL_PRINT_DEBUG(jlgr->jl, "Resized");
 }
 
-void jl_dl_init__(jlgr_t* jlgr) {
+void jl_wm_init__(jlgr_t* jlgr) {
 	SDL_DisplayMode current;
 
-	SDL_Init(JL_DL_INIT);
+	SDL_Init(JL_WM_INIT);
 	// Get Information On How Big To Make Window
 	if(SDL_GetCurrentDisplayMode(0, &current)) {
 		jl_print(jlgr->jl, "failed to get current display mode:%s",
@@ -163,12 +163,12 @@ void jl_dl_init__(jlgr_t* jlgr) {
 	jl_wm_updatewh_(jlgr);
 	JL_PRINT_DEBUG(jlgr->jl, "size = %dx%d", jlgr->wm.w, jlgr->wm.h);
 	//Update screensize to fix any rendering glitches
-	jl_dl_resz__(jlgr, jlgr->wm.w, jlgr->wm.h);
+	jl_wm_resz__(jlgr, jlgr->wm.w, jlgr->wm.h);
 	// Update The Screen
-	jl_dl_loop__(jlgr);
+	jl_wm_loop__(jlgr);
 }
 
-void jl_dl_kill__(jlgr_t* jlgr) {
+void jl_wm_kill__(jlgr_t* jlgr) {
 	JL_PRINT_DEBUG(jlgr->jl, "Closing Window....");
 	if (jlgr->wm.displayWindow->c != NULL) {
 //		SDL_free(jlgr->wm.displayWindow->c);

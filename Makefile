@@ -4,6 +4,7 @@ DEPS_VER_SDL_IMAGE = SDL2_image-2.0.1
 DEPS_VER_SDL_MIXER = SDL2_mixer-2.0.1
 DEPS_VER_SDL_NET = SDL2_net-2.0.1
 DEPS_VER_ZIP = libzip-1.1.2
+SRC_NDK = android-ndk-r11c
 
 ifneq ("$(shell uname | grep Linux)", "")
  ifneq ("$(shell uname -m | grep arm)", "")
@@ -38,10 +39,6 @@ OBJS = $(addprefix $(BUILD)/, $(addsuffix .o,$(MODULES)))
 SHARED = $(BUILD)/jl.so
 STATIC = $(BUILD)/jl.a
 
-# Locations
-LIBZIP = build/android/jni/src/lib/libzip/
-SRC_NDK = android-ndk-r10e
-
 # The Set-Up Options.
 init-all: init-build deps-all
 init-most: init-build deps-most
@@ -57,55 +54,8 @@ clean-build:
 	printf "[COMP] Done!\n"
 clean-build-all:
 	rm -r build/
-clean-build-andr:
-	rm -r build/android/
 clean-deps:
 	rm -r deps/
-
-# The Build Options.
-build-android-jl_lib:
-	# Copy android build files into android build project.
-	cp -u -t build/android/jni/ android-src/*.mk
-	cp -u -t build/android/ android-src/*.properties
-	cp -u -t build/android/src/org/libsdl/app/ android-src/SDL*.java 
-	cp -u --recursive -t build/android/jni/src/ src/*
-build-android: build-android-jl_lib
-	# Copy SDL2 into android build project
-	cp -u android-src/SDL_android_main.c build/android/jni/SDL_android_main.c
-	cp -u --recursive -t build/android/jni/src/lib/sdl/\
-	 deps/$(DEPS_VER_SDL)/src/*
-	cp -u build/android/jni/src/lib/include/SDL_config_android.h\
-	 build/android/jni/src/lib/include/SDL_config.h
-	# Copy Libzip into android project
-	cp -u deps/$(DEPS_VER_ZIP)/config.h build/android/jni/src/lib/libzip/
-	cp -u --recursive -t build/android/jni/src/lib/libzip/\
-	 deps/$(DEPS_VER_ZIP)/lib/*.c
-	cp -u --recursive -t build/android/jni/src/lib/libzip/\
-	 deps/$(DEPS_VER_ZIP)/lib/*.h
-	rm $(LIBZIP)zipwin32.h $(LIBZIP)*win32*.c $(LIBZIP)zip_add.c \
-		$(LIBZIP)zip_add_dir.c $(LIBZIP)zip_error_get.c \
-		$(LIBZIP)zip_error_get_sys_type.c $(LIBZIP)zip_error_to_str.c \
-		$(LIBZIP)zip_file_error_get.c $(LIBZIP)zip_get_file_comment.c \
-		$(LIBZIP)zip_get_num_files.c $(LIBZIP)zip_rename.c \
-		$(LIBZIP)zip_replace.c $(LIBZIP)zip_set_file_comment.c
-	# Copy SDL2_mixer into the android project.
-	cp -u --recursive -t build/android/jni/src/lib/sdl-mixer/external/\
-	 deps/$(DEPS_VER_SDL_MIXER)/external/*
-	cp -u --recursive -t build/android/jni/src/lib/sdl-mixer/\
-	 deps/$(DEPS_VER_SDL_MIXER)/*.c
-	cp -u --recursive -t build/android/jni/src/lib/sdl-mixer/\
-	 deps/$(DEPS_VER_SDL_MIXER)/*.h
-	rm build/android/jni/src/lib/sdl-mixer/play*.c
-	# Copy SDL2_image into the android project.
-	cp -u --recursive -t build/android/jni/src/lib/sdl-image/\
-	 deps/$(DEPS_VER_SDL_IMAGE)/*
-	cp -u android-src/jconfig.h\
-	 build/android/jni/src/lib/sdl-image/external/jpeg-9/jconfig.h
-	# Copy SDL2_net into the android project.
-	cp -u --recursive -t build/android/jni/src/lib/sdl-net/\
-	 deps/$(DEPS_VER_SDL_NET)/*.c
-	cp -u --recursive -t build/android/jni/src/lib/sdl-net/\
-	 deps/$(DEPS_VER_SDL_NET)/*.h
 
 $(BUILD)/%.o: %.c $(HEADERS)
 	printf "[COMP] compiling $<....\n"
@@ -165,11 +115,14 @@ download-ems:
 
 download-ndk:
 	cd deps/ && \
-	wget http://dl.google.com/android/ndk/$SRC_NDK-linux-x86_64.bin\
-	 --progress=bar && \
-	chmod a+x $SRC_NDK-linux-x86_64.bin && \
-	./$SRC_NDK-linux-x86_64.bin && \
-	rm $SRC_NDK-linux-x86_64.bin
+	wget https://dl.google.com/android/repository/$(SRC_NDK)-linux-x86_64.zip &&\
+	unzip $(SRC_NDK)-linux-x86_64.zip && \
+	rm $(SRC_NDK)-linux-x86_64.zip
+#	wget http://dl.google.com/android/ndk/$SRC_NDK-linux-x86_64.bin\
+#	 --progress=bar && \
+#	chmod a+x $SRC_NDK-linux-x86_64.bin && \
+#	./$SRC_NDK-linux-x86_64.bin && \
+#	rm $SRC_NDK-linux-x86_64.bin
 
 download-sdk:
 	cd deps/ && \

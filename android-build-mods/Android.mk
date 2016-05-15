@@ -27,7 +27,7 @@ LOCAL_SRC_FILES += $(subst $(LOCAL_PATH)/,, \
 	$(shell find $(LOCAL_PATH)/C/ -type f -name '*.c') \
 	$(shell find $(LOCAL_PATH)/src/ -type f -name '*.c'))
 
-LOCAL_SHARED_LIBRARIES := SDL2
+LOCAL_SHARED_LIBRARIES := SDL2 clump zip SDL2_image SDL2_net SDL2_mixer
 
 LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2 -llog
 

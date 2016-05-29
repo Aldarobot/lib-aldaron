@@ -17,15 +17,10 @@ static void jlgr_thread_resize(jlgr_t* jlgr, u16_t w, u16_t h) {
 	// Update the size of the background.
 	jl_sg_resz__(jlgr->jl);
 	// Taskbar resize.
-	if(jlgr->menubar.menubar) {
-		jl_menubar_t *ctx = jlgr->menubar.menubar->ctx;
-
-		//Menu Bar
-		ctx->redraw = 2;
-		jlgr_sprite_resize(jlgr, jlgr->menubar.menubar, NULL);
-	}
+//	if(jlgr->menubar.menubar)
+//		jlgr_sprite_resize(jlgr, jlgr->menubar.menubar, NULL);
 	// Mouse resize
-	if(jlgr->mouse) jlgr_sprite_resize(jlgr, jlgr->mouse, NULL );
+	if(jlgr->mouse) jlgr_sprite_resize(jlgr, jlgr->mouse, NULL);
 	// Program's Resize
 	jl_fnct resize_ = jlgr->draw.redraw.resize;
 	resize_(jlgr->jl);
@@ -118,6 +113,8 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	jl_gl_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "Load graphics....");
 	jlgr_init__(jlgr);
+	JL_PRINT_DEBUG(jl, "Set up screens....");
+	jl_sg_initb__(jlgr);
 	JL_PRINT_DEBUG(jl, "Creating Taskbar sprite....");
 	jlgr_menubar_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "Creating Mouse sprite....");
@@ -156,8 +153,8 @@ int jlgr_thread_draw(void* data) {
 		jl_wm_loop__(jlgr);
 	}
 	jl_wm_kill__(jlgr); // Kill window
-	jlgr_pr_old(jlgr, jlgr->sg.bg.up);
-	jlgr_pr_old(jlgr, jlgr->sg.bg.dn);
+	jlgr_sprite_old(jlgr, jlgr->sg.bg.up);
+	jlgr_sprite_old(jlgr, jlgr->sg.bg.dn);
 	return 0;
 }
 

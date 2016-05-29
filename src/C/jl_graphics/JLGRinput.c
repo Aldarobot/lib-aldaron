@@ -38,36 +38,35 @@ static void jl_input_state(jlgr_t* jlgr, const uint8_t read) {
 	jlgr->main.ct.checked[read] = 0;
 }
 
-static void _jl_ct_press(jlgr_t* jlgr, jlgr_input_t* input, u8_t countit) {
+static void _jl_ct_press(jlgr_t* jlgr, u8_t countit) {
 	if(jlgr->main.ct.checked[countit]) jl_input_state(jlgr, countit); 
 	//hrxypk
-	input->h = jlgr->main.ct.states[jlgr->main.ct.current_event];
-	input->r = 0.;
-	input->x = jl_ct_gmousex(jlgr);
-	input->y = jl_ct_gmousey(jlgr);
+	jlgr->input.input.h = jlgr->main.ct.states[jlgr->main.ct.current_event];
+	jlgr->input.input.r = 0.;
+	jlgr->input.input.x = jl_ct_gmousex(jlgr);
+	jlgr->input.input.y = jl_ct_gmousey(jlgr);
 	if(countit) {
-		input->k = 1;
-		input->p = 1.;
+		jlgr->input.input.k = 1;
+		jlgr->input.input.p = 1.;
 	}else{
-		input->k = 0;
-		input->p = 0.;
+		jlgr->input.input.k = 0;
+		jlgr->input.input.p = 0.;
 	}
 }
 
 void jl_ct_key(jlgr_t *jlgr, jlgr_input_fnct inputfn, uint8_t key) {
-	jlgr_input_t input;
 	uint8_t a = jl_ct_key_pressed(jlgr, key);
 
-	input.h = a;
-	input.r = 0.;
+	jlgr->input.input.h = a;
+	jlgr->input.input.r = 0.;
 	if(a && (a!=3)) {
-		input.p = 1.;
-		input.k = key;
+		jlgr->input.input.p = 1.;
+		jlgr->input.input.k = key;
 	}else{
-		input.p = 0.;
-		input.k = 0;
+		jlgr->input.input.p = 0.;
+		jlgr->input.input.k = 0;
 	}
-	inputfn(jlgr, input);
+	inputfn(jlgr, jlgr->input.input);
 }
 
 #if JL_PLAT == JL_PLAT_COMPUTER
@@ -109,106 +108,84 @@ void jl_ct_key(jlgr_t *jlgr, jlgr_input_fnct inputfn, uint8_t key) {
 	}
 	
 	void jl_ct_left_click(jlgr_t *jlgr, jlgr_input_fnct inputfn) {
-		jlgr_input_t input;
-
-		_jl_ct_press(jlgr, &input, jlgr->main.ct.input.click);
-		inputfn(jlgr, input);
+		_jl_ct_press(jlgr, jlgr->main.ct.input.click);
+		inputfn(jlgr, jlgr->input.input);
 	}
 
 #elif JL_PLAT == JL_PLAT_PHONE //if Android
 	void tuch_cntr(jlgr_t *jlgr, jlgr_input_fnct inputfn) { //touch center
-		jlgr_input_t input;
-
-		_jl_ct_press(jlgr, &input, jlgr->main.ct.input.click &&
+		_jl_ct_press(jlgr, jlgr->main.ct.input.click &&
 			(jlgr->main.ct.msy > .4f * jl_gl_ar(jlgr)) &&
 			(jlgr->main.ct.msy < .6f * jl_gl_ar(jlgr)) &&
 			(jlgr->main.ct.msx > .4f) &&
 			(jlgr->main.ct.msx < .6f));
-		inputfn(jlgr, input);
+		inputfn(jlgr, jlgr->input.input);
 	}
 	//
 	void tuch_nrrt(jlgr_t *jlgr, jlgr_input_fnct inputfn) { //near right
-		jlgr_input_t input;
-
-		_jl_ct_press(jlgr, &input, jlgr->main.ct.input.click &&
+		_jl_ct_press(jlgr, jlgr->main.ct.input.click &&
 			(jlgr->main.ct.msx > .6f) &&
 			(jlgr->main.ct.msx < .8f) &&
 			(jlgr->main.ct.msy * jl_gl_ar(jlgr)>.2f) &&
 			(jlgr->main.ct.msy * jl_gl_ar(jlgr)<.8f));
-		inputfn(jlgr, input);
+		inputfn(jlgr, jlgr->input.input);
 	}
 
 	void tuch_nrlt(jlgr_t *jlgr, jlgr_input_fnct inputfn) { //near left
-		jlgr_input_t input;
-
-		_jl_ct_press(jlgr, &input, jlgr->main.ct.input.click &&
+		_jl_ct_press(jlgr, jlgr->main.ct.input.click &&
 			(jlgr->main.ct.msx < .4f) &&
 			(jlgr->main.ct.msx > .2f) &&
 			(jlgr->main.ct.msy > .2f * jl_gl_ar(jlgr)) &&
 			(jlgr->main.ct.msy < .8f * jl_gl_ar(jlgr)));
-		inputfn(jlgr, input);
+		inputfn(jlgr, jlgr->input.input);
 	}
 
 	void tuch_nrup(jlgr_t *jlgr, jlgr_input_fnct inputfn) { //near up
-		jlgr_input_t input;
-
-		_jl_ct_press(jlgr, &input, jlgr->main.ct.input.click &&
+		_jl_ct_press(jlgr, jlgr->main.ct.input.click &&
 			(jlgr->main.ct.msy < .4f * jl_gl_ar(jlgr)) &&
 			(jlgr->main.ct.msy > .2f * jl_gl_ar(jlgr)) &&
 			(jlgr->main.ct.msx >.2f) &&
 			(jlgr->main.ct.msx <.8f));
-		inputfn(jlgr, input);
+		inputfn(jlgr, jlgr->input.input);
 	}
 
 	void tuch_nrdn(jlgr_t *jlgr, jlgr_input_fnct inputfn) { //near down
-		jlgr_input_t input;
-
-		_jl_ct_press(jlgr, &input, jlgr->main.ct.input.click &&
+		_jl_ct_press(jlgr, jlgr->main.ct.input.click &&
 			(jlgr->main.ct.msy > .6f * jl_gl_ar(jlgr)) &&
 			(jlgr->main.ct.msy < .8f * jl_gl_ar(jlgr)) &&
 			(jlgr->main.ct.msx > .2f) &&
 			(jlgr->main.ct.msx < .8f));
-		inputfn(jlgr, input);
+		inputfn(jlgr, jlgr->input.input);
 	}
 	//
 
 	void tuch_frrt(jlgr_t *jlgr, jlgr_input_fnct inputfn) {//far right
-		jlgr_input_t input;
-
-		_jl_ct_press(jlgr, &input, jlgr->main.ct.input.click &&
+		_jl_ct_press(jlgr, jlgr->main.ct.input.click &&
 			(jlgr->main.ct.msx>.8f));
-		inputfn(jlgr, input);
+		inputfn(jlgr, jlgr->input.input);
 	}
 
 	void tuch_frlt(jlgr_t *jlgr, jlgr_input_fnct inputfn) {//far left
-		jlgr_input_t input;
-
-		_jl_ct_press(jlgr, &input, jlgr->main.ct.input.click &&
+		_jl_ct_press(jlgr, jlgr->main.ct.input.click &&
 			(jlgr->main.ct.msx<.2f));
-		inputfn(jlgr, input);
+		inputfn(jlgr, jlgr->input.input);
 	}
 
 	void tuch_frup(jlgr_t *jlgr, jlgr_input_fnct inputfn) {//far up
-		jlgr_input_t input;
-
-		_jl_ct_press(jlgr, &input, jlgr->main.ct.input.click &&
+		_jl_ct_press(jlgr, jlgr->main.ct.input.click &&
 			(jlgr->main.ct.msy<.2f * jl_gl_ar(jlgr)));
-		inputfn(jlgr, input);
+		inputfn(jlgr, jlgr->input.input);
 	}
 
 	void tuch_frdn(jlgr_t *jlgr, jlgr_input_fnct inputfn) {//far down
-		jlgr_input_t input;
-
-		_jl_ct_press(jlgr, &input, jlgr->main.ct.input.click &&
+		_jl_ct_press(jlgr, jlgr->main.ct.input.click &&
 			(jlgr->main.ct.msy>.8f * jl_gl_ar(jlgr)));
-		inputfn(jlgr, input);
+		inputfn(jlgr, jlgr->input.input);
 	}
 
 	void tuch(jlgr_t *jlgr, jlgr_input_fnct inputfn) {//Any touch
-		jlgr_input_t input;
-
-		_jl_ct_press(jlgr, &input, jlgr->main.ct.input.click);
-		inputfn(jlgr, input);
+		_jl_ct_press(jlgr, jlgr->main.ct.input.click);
+		inputfn(jlgr, jlgr->input.input);
 	}
 #endif
 
@@ -231,11 +208,17 @@ void jl_ct_txtn(void) {
 }
 
 float jl_ct_gmousex(jlgr_t* jlgr) {
-	return jlgr->main.ct.msx;
+	float x = jlgr->main.ct.msx;
+//	x -= jlgr->gl.cp->cb.x;
+//	x /= jlgr->gl.cp->cb.w;
+	return x;
 }
 
 float jl_ct_gmousey(jlgr_t* jlgr) {
-	return jlgr->main.ct.msy;
+	float y = jlgr->main.ct.msy;
+//	y -= jlgr->gl.cp->cb.y;
+//	y /= jlgr->gl.cp->cb.h;
+	return y;
 }
 
 static inline void _jl_ct_handle_events_platform_dependant(jlgr_t* jlgr) {
@@ -315,11 +298,6 @@ static inline void _jl_ct_handle_events(jlgr_t* jlgr) {
 	_jl_ct_handle_events_platform_dependant(jlgr);
 }
 
-static inline void _jl_ct_process_events(jlgr_t* jlgr) {
-#if JL_PLAT == JL_PLAT_PHONE
-#endif
-}
-
 static void jl_ct_testquit__(jlgr_t* jlgr) {
 	if(jlgr->main.ct.back == 1) jl_mode_exit(jlgr->jl); // Back Button/Key
 }
@@ -328,21 +306,24 @@ static void jl_ct_testquit__(jlgr_t* jlgr) {
  * THREAD: Main thread.
  * For a certain input, do something.
  * @param jlgr: The library context.
- * @param whichevent: The event id
- * @param inputfn: The function to run for the event.
+ * @param event: The event id
+ * @param fn: The function to run for the event.
+ * @param data: Parameter to "fn": "jlgr_input_t->data"
 */
-void jlgr_input_do(jlgr_t *jlgr, uint8_t whichevent, jlgr_input_fnct inputfn) {
-	void (*FunctionToRun_)(jlgr_t *jlgr, jlgr_input_fnct inputfn) =
-		jlgr->main.ct.getEvents[whichevent];
+void jlgr_input_do(jlgr_t *jlgr, uint8_t event, jlgr_input_fnct fn, void* data){
+	void (*FunctionToRun_)(jlgr_t *jlgr, jlgr_input_fnct fn) =
+		jlgr->main.ct.getEvents[event];
 
-	if(jlgr->main.ct.getEvents[whichevent] == NULL) {
+	if(jlgr->main.ct.getEvents[event] == NULL) {
 		jl_print(jlgr->jl,"Null Pointer: jlgr->main.ct.getEvents.Event");
-		jl_print(jlgr->jl,"pevent=%d", whichevent);
+		jl_print(jlgr->jl,"event=%d", event);
 		jl_sg_kill(jlgr->jl);
 	}
 	// Get the input.
-	jlgr->main.ct.current_event = whichevent;
-	FunctionToRun_(jlgr, inputfn);
+	jlgr->main.ct.current_event = event;
+	// Run input function.
+	jlgr->input.input.data = data;
+	FunctionToRun_(jlgr, fn);
 }
 
 void jl_ct_getevents_(jlgr_t* jlgr) {
@@ -378,7 +359,6 @@ void jl_ct_loop__(jlgr_t* jlgr) {
 	_jl->has.quickloop = 0;
 	//Get the information on current events
 	jl_ct_getevents_(jlgr);
-	_jl_ct_process_events(jlgr);
 	#if JL_PLAT == JL_PLAT_COMPUTER
 		//Get Whether mouse is down or not and xy coordinates
 		SDL_GetMouseState(&jlgr->main.ct.msxi,&jlgr->main.ct.msyi);

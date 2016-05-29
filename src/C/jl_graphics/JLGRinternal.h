@@ -1,20 +1,6 @@
 #include "JLgr.h"
 #include "jl_pr.h"
 
-typedef struct{
-	// Used for all icons on the menubar.
-	jl_vo_t* icon;
-	// Not Pressed & Pressed & Redraw Functions for 10 icons.
-	jlgr_input_fnct inputfn[10];
-	jlgr_fnct redrawfn[10];
-	// Redraw? - 0 = no, 1 = yes
-	m_u8_t redraw;
-	// Draw thread Cursor
-	m_i8_t draw_cursor;
-	// Main thread cursor
-	m_i8_t main_cursor;
-}jl_menubar_t;
-
 typedef enum{
 	JLGR_ID_NULL,
 	JLGR_ID_UNKNOWN,
@@ -61,10 +47,8 @@ void jl_gl_draw(jlgr_t* jlgr, jl_vo_t* pv);
 void jl_gl_draw_chr(jlgr_t* jlgr, jl_vo_t* pv,
 	m_f32_t r, m_f32_t g, m_f32_t b, m_f32_t a);
 void jl_gl_draw_pr_(jl_t* jlc, jl_pr_t* pr);
-uint8_t jl_gl_pr_isi_(jlgr_t* jlgr, jl_pr_t* pr);
-void jl_gl_pr_use(jlgr_t* jlgr, jl_vo_t* pv);
-void jl_gl_pr_off(jlgr_t* jlgr);
-void jl_gl_pr_scr(jlgr_t* jlgr);
+void jl_gl_vo_free(jlgr_t* jlgr, jl_vo_t *pv);
+uint32_t jl_gl_w(jlgr_t* jlgr);
 
 //DL
 void _jl_wm_loop(jvct_t* _jlc);
@@ -81,6 +65,7 @@ void jlgr_resz(jlgr_t* jlgr, u16_t x, u16_t y);
 // init functions.
 void jl_wm_init__(jlgr_t* jlgr);
 void jl_sg_inita__(jlgr_t* jlgr);
+void jl_sg_initb__(jlgr_t* jlgr);
 void jl_gl_init__(jlgr_t* jlgr);
 void jlgr_init__(jlgr_t* jlgr);
 void jl_ct_init__(jlgr_t* jlgr);

@@ -6,9 +6,7 @@
 #ifndef JLL
 #define JLL
 
-#include <time.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include "jl_me.h" // Simple CPU info
 #include "jl_en.h" // Enumerations
 #include "jl_ty.h" // Variable Types

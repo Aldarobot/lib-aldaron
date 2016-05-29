@@ -7,15 +7,20 @@
  * 	This allows you to modify the file system.  It uses libzip.
  */
 #include "jl_pr.h"
-#if JL_PLAT == JL_PLAT_PHONE
-	#include <sys/stat.h>
-#endif
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+// LIBZIP
+#define ZIP_DISABLE_DEPRECATED //Don't allow the old functions.
+#include "zip.h"
 
 #define PKFMAX 10000000
 #define JL_FL_PERMISSIONS ( S_IRWXU | S_IRWXG | S_IRWXO )
 
 #if JL_PLAT == JL_PLAT_PHONE
-	extern str_t JL_FL_BASE;
+	extern char* JL_FL_BASE;
 #endif
 
 /** @cond **/

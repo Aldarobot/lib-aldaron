@@ -206,30 +206,17 @@ jl_comm_t* jl_thread_comm_make(jl_t* jl, u32_t size) {
  *	jl_thread_comm_new().
 **/
 void jl_thread_comm_send(jl_t* jl, jl_comm_t* comm, const void* src) {
-	uint8_t stall = 0;
 	SDL_LockMutex(comm->lock);
 	// Copy to next packet location
 	jl_mem_copyto(src, comm->data[comm->pnum], comm->size);
 	// Advance number of packets.
 	comm->pnum++;
 	// If maxed out on packets, then stall.
-	if(comm->pnum == 16) {
-		JL_PRINT_DEBUG(jl,"WARNING: \"jl_thread_comm_send\" Stalling....");
-		stall = 1;
+	if(comm->pnum == 32) {
+		jl_print(jl, "Error: Other thread wouldn't respond!");
+		exit(-1);
 	}
 	SDL_UnlockMutex(comm->lock);
-	// If 1 second passed, and still stalling, then quit.
-	while(stall) {
-		if(stall > 10) {
-			jl_print(jl, "Other thread wouldn't respond!");
-			exit(-1);
-		}
-		SDL_LockMutex(comm->lock);
-		if(comm->pnum != 16) break;
-		SDL_UnlockMutex(comm->lock);
-		SDL_Delay(100);
-		stall++;
-	}
 }
 
 /**

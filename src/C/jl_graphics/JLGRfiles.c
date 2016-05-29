@@ -215,10 +215,10 @@ void jlgr_openfile_loop(jlgr_t* jlgr) {
 	jlgr_draw_text(jlgr, "Select File", (jl_vec3_t) { .02, .02, 0. },
 		jlgr->font);
 
-	jlgr_input_do(jlgr, JL_CT_MAINUP, _jl_fl_user_select_up);
-	jlgr_input_do(jlgr, JL_CT_MAINDN, _jl_fl_user_select_dn);
-	jlgr_input_do(jlgr, JL_CT_MAINRT, _jl_fl_user_select_rt);
-	jlgr_input_do(jlgr, JL_CT_MAINLT, _jl_fl_user_select_lt);
+	jlgr_input_do(jlgr, JL_CT_MAINUP, _jl_fl_user_select_up, NULL);
+	jlgr_input_do(jlgr, JL_CT_MAINDN, _jl_fl_user_select_dn, NULL);
+	jlgr_input_do(jlgr, JL_CT_MAINRT, _jl_fl_user_select_rt, NULL);
+	jlgr_input_do(jlgr, JL_CT_MAINLT, _jl_fl_user_select_lt, NULL);
 	//Draw files
 	for(i = 0; i < cl_list_count(_jl->fl.filelist); i++) {
 		stringtoprint = cl_list_iterator_next(iterator);
@@ -270,7 +270,7 @@ void jlgr_openfile_loop(jlgr_t* jlgr) {
 			(jl_vec3_t) { .02, jl_gl_ar(jlgr) - .02, 0. },
 			(jl_font_t) { 0, JL_IMGI_ICON, 0,
 				jlgr->fontcolor, .02});
-		jlgr_input_do(jlgr, JL_CT_SELECT, _jl_fl_user_select_do);
+		jlgr_input_do(jlgr, JL_CT_SELECT, _jl_fl_user_select_do, NULL);
 	}
 	jlgr_sprite_loop(jlgr, _jl->fl.btns[0]);
 	jlgr_sprite_loop(jlgr, _jl->fl.btns[1]);
@@ -295,17 +295,18 @@ static void _jl_fl_btn_makefile_press(jlgr_t* jlgr, jlgr_input_t input) {
 	_jl->fl.prompt = 1;
 }
 
-static void _jl_fl_btn_makefile_loop(jl_t* jl, jl_sprite_t* sprite) {
+static void* _jl_fl_btn_makefile_loop(jl_t* jl, jl_sprite_t* sprite) {
 	jlgr_t* jlgr = jl->jlgr;
 	jvct_t *_jl = jlgr->jl->_jl;
 
 	//TODO: make graphic: 0, 1, 1, 255
-	if(!_jl->fl.newfiledata) return;
+	if(!_jl->fl.newfiledata) return NULL;
 	jlgr_glow_button_draw(jlgr, _jl->fl.btns[0], "+ New File",
 		_jl_fl_btn_makefile_press);
+	return NULL;
 }
 
-static void _jl_fl_btn_makefile_draw(jl_t* jl, jl_sprite_t* sprite) {
+static void _jl_fl_btn_makefile_draw(jl_t* jl, uint8_t resize, void* ctx) {
 	jlgr_t* jlgr = jl->jlgr;
 	jl_rect_t rc = { 0., 0., jl_gl_ar(jlgr), jl_gl_ar(jlgr) };
 	jl_vec3_t tr = { 0., 0., 0. };
@@ -314,16 +315,17 @@ static void _jl_fl_btn_makefile_draw(jl_t* jl, jl_sprite_t* sprite) {
 	jlgr_draw_vo(jlgr, jlgr->gl.temp_vo, &tr);
 }
 
-static void _jl_fl_btn_makefolder_loop(jl_t* jl, jl_sprite_t* sprite) {
+static void* _jl_fl_btn_makefolder_loop(jl_t* jl, jl_sprite_t* sprite) {
 	jlgr_t* jlgr = jl->jlgr;
 	jvct_t *_jl = jlgr->jl->_jl;
 	
 	//TODO: make graphic: 0, 1, 2, 255,
 	jlgr_glow_button_draw(jlgr, _jl->fl.btns[1], "+ New Folder",
 		_jl_fl_btn_makefile_press);
+	return NULL;
 }
 
-static void _jl_fl_btn_makefolder_draw(jl_t* jl, jl_sprite_t* sprite) {
+static void _jl_fl_btn_makefolder_draw(jl_t* jl, uint8_t resize, void* ctx) {
 	jlgr_t* jlgr = jl->jlgr;
 	jl_rect_t rc = { 0., 0., jl_gl_ar(jlgr), jl_gl_ar(jlgr) };
 	jl_vec3_t tr = { 0., 0., 0. };
@@ -341,8 +343,10 @@ void jlgr_fl_init(jlgr_t* jlgr) {
 	_jl->fl.filelist = cl_list_create();
 	_jl->fl.inloop = 0;
 	_jl->fl.btns[0] = jlgr_sprite_new(jlgr, rc1,
-		_jl_fl_btn_makefile_draw, _jl_fl_btn_makefile_loop, 0);
+		_jl_fl_btn_makefile_loop, _jl_fl_btn_makefile_draw,
+		NULL, 0, NULL, 0);
 	_jl->fl.btns[1] = jlgr_sprite_new(jlgr, rc2,
-		_jl_fl_btn_makefolder_draw, _jl_fl_btn_makefolder_loop, 0);
+		_jl_fl_btn_makefolder_loop, _jl_fl_btn_makefolder_draw,
+		NULL, 0, NULL, 0);
 	_jl->has.fileviewer = 1;
 }

@@ -49,7 +49,7 @@ typedef struct{
 	SDL_mutex *lock;	/** The mutex lock on the "data" */
 	m_u8_t pnum;		/** Number of packets in structure (upto 16 ) */
 	m_u32_t size;		/** Size of "data" */
-	void* data[16];		/** The data attached to the mutex */
+	void* data[32];		/** The data attached to the mutex */
 }jl_comm_t;
 
 //Standard Mode Class

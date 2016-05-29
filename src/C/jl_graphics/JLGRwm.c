@@ -92,6 +92,8 @@ static void _jl_wm_fscreen(jlgr_t* jlgr, uint8_t a) {
 void jl_wm_updatewh_(jlgr_t* jlgr) {
 	// Get Window Size
 	SDL_GetWindowSize(jlgr->wm.displayWindow->w, &jlgr->wm.w, &jlgr->wm.h);
+	// Get Aspect Ratio
+	jlgr->wm.ar = ((double)jlgr->wm.h) / ((double)jlgr->wm.w);
 }
 
 //This is the code that actually creates the window by accessing SDL

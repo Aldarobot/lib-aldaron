@@ -1,19 +1,9 @@
 // JL_LIB
-	#include "../include/jl.h"
-// LIBZIP
-	#define ZIP_DISABLE_DEPRECATED //Don't allow the old functions.
-	#include "zip.h"
+	#include "jl.h"
 // Standard Libraries
-	#include <sys/types.h>
-	#include <sys/stat.h>
-	#include <fcntl.h>
-	#include <errno.h>
 	#include <stdio.h>
-	#include <unistd.h>
-	#include <string.h>
-	#include <stdlib.h>
-	#include <math.h>
 	#include <dirent.h>
+	#include <errno.h>
 // Variable Map
 	#include "jl_vm.h"
 

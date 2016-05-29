@@ -12,6 +12,27 @@ typedef enum {
 
 // Types:
 
+// Coordinate Structures
+typedef struct{
+	float x, y, w, h;
+}jl_rect_t;
+
+typedef struct{
+	float x, y, z;
+}jl_vec3_t;
+
+typedef struct{
+	jl_vec3_t pt1;
+	jl_vec3_t pt2;
+}jl_line_t;
+
+// Collision Box.
+typedef struct{
+	m_f32_t x, y, z;
+	m_f32_t w, h, d; // Width, Height, Depth.
+}jl_cb_t;
+
+// Graphical stuff
 typedef struct {
 	SDL_Window* w;		// Window
 	SDL_GLContext* c;	// GL Context
@@ -24,6 +45,7 @@ typedef struct {
 	void* pixels;
 }jl_tex_t;
 
+// Pre-renderer
 typedef struct {
 	// What to render
 	uint32_t tx;	// ID to texture.
@@ -33,14 +55,10 @@ typedef struct {
 	// Render Area
 	uint32_t gl;	// GL Vertex Buffer Object [ 0 = Not Enabled ]
 	float ar;	// Aspect Ratio: h:w
-	float* cv;	// Converted Vertices
+	float cv[4*3];	// Converted Vertices
+	jl_cb_t cb;	// 2D/3D collision box.
+	jl_vec3_t scl;	// Scaling vector.
 }jl_pr_t;
-
-// Collision Box.
-typedef struct{
-	m_f32_t x, y, z;
-	m_f32_t w, h, d; // Width, Height, Depth.
-}jl_cb_t;
 
 //Vertex Object
 typedef struct{
@@ -57,24 +75,7 @@ typedef struct{
 	// Texturing:
 	uint32_t tx;	// ID to texture.
 	float a;	// Converted Alpha.
-	jl_pr_t *pr;	// Pre-renderer.
-	// Collision Box
-	jl_cb_t cb;	// 2D/3D collision box.
 }jl_vo_t;
-
-// Coordinate Structures
-typedef struct{
-	float x, y, w, h;
-}jl_rect_t;
-
-typedef struct{
-	float x, y, z;
-}jl_vec3_t;
-
-typedef struct{
-	jl_vec3_t pt1;
-	jl_vec3_t pt2;
-}jl_line_t;
 
 typedef struct {
 	m_i32_t g, i; // Group ID, Image ID
@@ -84,17 +85,20 @@ typedef struct {
 }jl_font_t;
 
 typedef struct{
-	SDL_mutex* mutex;	// The mutex for threads to use sprite.
-	jl_rect_t cb;		// Collision Box
+	SDL_mutex* mutex;	// The mutex for writing/reading ctx_draw.
 	float rh, rw;		// Real Height & Width
-	void* ctx;		// The sprite's context.
-	void* loop;		// (jlgr_sprite_fnt) Loop function
-	void* draw;		// (jlgr_sprite_fnt) Draw function
+	void* ctx_main;		// The sprite's context.
+	void* ctx_draw;		// Information required for drawing.
+	uint32_t ctx_draw_size;	// Size of "ctx_draw"
+	void* loop;		// (jlgr_sprite_loop_fnt) Loop function
+	void* kill;		// (jlgr_sprite_loop_fnt) Kill function
+	void* draw;		// (jlgr_sprite_draw_fnt) Draw function
 	uint8_t update;		// Whether sprite should redraw or not.
-	jl_pr_t *pr;		// Pre-renderer.
+	jl_pr_t pr;		// Pre-renderer / collision box.
 }jl_sprite_t;
 
-typedef void(*jlgr_sprite_fnt)(jl_t* ctx, jl_sprite_t* spr);
+typedef void  (*jlgr_sprite_draw_fnt)(jl_t* jl, uint8_t resize, void* ctx_draw);
+typedef void* (*jlgr_sprite_loop_fnt)(jl_t* jl, jl_sprite_t* spr);
 
 typedef struct{
 	char *opt;
@@ -121,6 +125,7 @@ typedef struct{
 	float p; // Pressure 0-1
 	uint8_t h; // How long held down.
 	uint8_t k; // Which key [ a-z , left/right click ]
+	void* data; // Parameter
 }jlgr_input_t;
 
 typedef struct{
@@ -138,6 +143,10 @@ typedef struct{
 	struct {
 		SDL_mutex *usr_ctx;
 	}mutexs;
+
+	struct{
+		jlgr_input_t input;
+	}input;
 
 	struct {
 		//Input Information
@@ -202,13 +211,11 @@ typedef struct{
 		uint16_t igid;
 		data_t* image_data;
 		
-		// 1 Background for each screen
+		// Each screen is a sprite.
 		struct {
-			jl_vo_t* up;
-			jl_vo_t* dn;
+			jl_sprite_t* up;
+			jl_sprite_t* dn;
 		}bg;
-
-		float screen_height;
 
 		void* loop; // ( jlgr_fnct ) For upper or lower screen.
 		m_u8_t cs; // The current screen "jlgr_which_screen_t"
@@ -276,7 +283,6 @@ typedef struct{
 		uint32_t default_tc;
 		
 		jl_pr_t* cp; // Renderer currently being drawn on.
-		jl_pr_t* bg; // Screen currently being drawn on.
 	}gl;
 
 	struct {
@@ -320,8 +326,6 @@ typedef struct{
 
 	uint32_t timer;
 	double psec;
-
-	jl_sprite_t* temp_sprite;
 }jlgr_t;
 
 typedef void(*jlgr_fnct)(jlgr_t* jlgr);
@@ -335,16 +339,19 @@ void jlgr_loop(jlgr_t* jlgr);
 void jlgr_kill(jlgr_t* jlgr);
 
 // JLGRsprite.c
-void jlgr_sprite_dont(jl_t* jl, jl_sprite_t* sprite);
+void* jlgr_sprite_dont(jl_t* jl, jl_sprite_t* sprite);
 void jlgr_sprite_redraw(jlgr_t* jlgr, jl_sprite_t *spr);
 void jlgr_sprite_resize(jlgr_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc);
 void jlgr_sprite_loop(jlgr_t* jlgr, jl_sprite_t *spr);
 void jlgr_sprite_draw(jlgr_t* jlgr, jl_sprite_t *spr);
-jl_sprite_t * jlgr_sprite_new(jlgr_t* jlgr, jl_rect_t rc,
-	jlgr_sprite_fnt draw, jlgr_sprite_fnt loop, u32_t ctxs);
+jl_sprite_t* jlgr_sprite_new(jlgr_t* jlgr, jl_rect_t rc,
+	jlgr_sprite_loop_fnt loopfn, jlgr_sprite_draw_fnt drawfn,
+	void* main_ctx, uint32_t main_ctx_size,
+	void* draw_ctx, uint32_t draw_ctx_size);
+void jlgr_sprite_old(jlgr_t* jlgr, jl_sprite_t* sprite);
 u8_t jlgr_sprite_collide(jlgr_t* jlgr,
 	jl_sprite_t *sprite1, jl_sprite_t *sprite2);
-void* jlgr_sprite_getcontext(jl_sprite_t *sprite1);
+void* jlgr_sprite_getcontext(jl_sprite_t *sprite);
 
 // JLGRmenu.c
 void jlgr_menu_toggle(jlgr_t* jlgr);
@@ -358,10 +365,7 @@ void jlgr_menu_addicon_name(jlgr_t* jlgr);
 void jlgr_dont(jlgr_t* jlgr);
 void jlgr_fill_image_set(jlgr_t* jlgr, u16_t g, u16_t i, u8_t c, u8_t a);
 void jlgr_fill_image_draw(jlgr_t* jlgr);
-void jlgr_pr_old(jlgr_t* jlgr, jl_vo_t* pv);
-void jlgr_pr_new(jlgr_t* jlgr, jl_vo_t* pv, u16_t xres);
-void jlgr_pr(jlgr_t* jlgr, jl_vo_t* vo, jl_fnct par__redraw);
-void jlgr_pr_draw(jlgr_t* jlgr, jl_vo_t* pv, jl_vec3_t* vec);
+void jlgr_draw_bg(jlgr_t* jlgr, u16_t g, u16_t i, u8_t c);
 jl_ccolor_t* jlgr_convert_color(jlgr_t* jlgr, uint8_t *rgba, uint32_t vc,
 	uint8_t gradient);
 void jlgr_vo_color(jlgr_t* jlgr, jl_vo_t* pv, jl_ccolor_t* cc);
@@ -408,7 +412,7 @@ void jl_gl_maketexture(jlgr_t* jlgr, uint16_t gid, uint16_t id,
 double jl_gl_ar(jlgr_t* jlgr);
 void jl_gl_clear(jlgr_t* jlgr, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 void jl_gl_pr_rsz(jlgr_t* jlgr, jl_pr_t *pr, f32_t w, f32_t h, u16_t w_px);
-jl_pr_t * jl_gl_pr_new(jlgr_t* jlgr, f32_t w, f32_t h, u16_t w_px);
+void jl_gl_pr_new(jlgr_t* jlgr, jl_pr_t * pr, float w, float h, uint16_t w_px);
 void jl_gl_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, jl_vec3_t* scl);
 void jl_gl_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
 
@@ -421,7 +425,7 @@ void jl_sg_kill(jl_t* jl);
 void jl_sg_add_image(jl_t* jl, str_t pzipfile, u16_t pigid);
 
 // JLGRinput.c
-void jlgr_input_do(jlgr_t *jlgr, uint8_t whichevent, jlgr_input_fnct inputfn);
+void jlgr_input_do(jlgr_t *jlgr, uint8_t event, jlgr_input_fnct fn, void* data);
 void jlgr_input_dont(jlgr_t* jlgr, jlgr_input_t input);
 void jl_ct_quickloop_(jlgr_t* jlgr);
 float jl_ct_gmousex(jlgr_t* jlgr);

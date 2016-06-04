@@ -62,6 +62,7 @@ void jl_wm_resz__(jlgr_t* jlgr, uint16_t x, uint16_t y);
 void jl_gl_resz__(jlgr_t* jlgr);
 void jl_sg_resz__(jl_t* jlc);
 void jlgr_resz(jlgr_t* jlgr, u16_t x, u16_t y);
+void jlgr_menu_resize_(jlgr_t* jlgr);
 // init functions.
 void jl_wm_init__(jlgr_t* jlgr);
 void jl_sg_inita__(jlgr_t* jlgr);

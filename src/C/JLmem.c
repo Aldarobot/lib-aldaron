@@ -178,6 +178,7 @@ jvct_t* jl_mem_init__(void) {
 	_jl->has.fileviewer = 0;
 	_jl->has.filesys = 0;
 	_jl->has.input = 0;
+	_jl->fl.inloop = 1;
 	_jl->me.status = JL_STATUS_GOOD;
 	return _jl;
 }

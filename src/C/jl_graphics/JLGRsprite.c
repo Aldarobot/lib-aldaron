@@ -21,14 +21,18 @@ static void jlgr_sprite_redraw_tex__(jlgr_t* jlgr, jl_sprite_t *spr) {
 
 // Redraw a sprite
 static inline void jlgr_sprite_redraw__(jlgr_t* jlgr, jl_sprite_t *spr) {
+	jl_print_function(jlgr->jl, "Sprite Redraw!");
 	// If pre-renderer hasn't been intialized, initialize & redraw.
 	if(!spr->pr.tx) jlgr_sprite_resize(jlgr, spr, NULL);
 	// Else, Redraw texture.
 	else jlgr_sprite_redraw_tex__(jlgr, spr);
+	// Don't Redraw Again.
+	spr->update = 0;
+	jl_print_return(jlgr->jl, "Sprite Redraw!");
 }
 
-static inline void jlgr_sprite_sync__(jl_t* jl,jl_sprite_t *spr,void* ctx_draw){
-	jl_thread_mutex_cpy(jl, spr->mutex, ctx_draw, spr->ctx_draw,
+static inline void jlgr_sprite_sync__(jl_t* jl, jl_sprite_t *spr, void* ctx) {
+	jl_thread_mutex_cpy(jl, spr->mutex, ctx, spr->ctx_draw,
 		spr->ctx_draw_size);
 }
 
@@ -40,9 +44,9 @@ static inline void jlgr_sprite_sync__(jl_t* jl,jl_sprite_t *spr,void* ctx_draw){
  * THREAD: Any thread.
  * Empty sprite loop. ( Don't do anything )
  * @param jl: The library context
- * @param spr: The sprite
+ * @param sprite: The sprite
 **/
-void* jlgr_sprite_dont(jl_t* jl, jl_sprite_t* sprite) { return NULL; }
+void jlgr_sprite_dont(jl_t* jl, jl_sprite_t* sprite) { }
 
 /**
  * THREAD: Main thread only.
@@ -50,11 +54,15 @@ void* jlgr_sprite_dont(jl_t* jl, jl_sprite_t* sprite) { return NULL; }
  *
  * @param jl: The library context
  * @param spr: Which sprite to draw.
+ * @param ctx: Data to copy to drawing thread's context.
 **/
-void jlgr_sprite_redraw(jlgr_t* jlgr, jl_sprite_t *spr) {
+void jlgr_sprite_redraw(jlgr_t* jlgr, jl_sprite_t *spr, void* ctx) {
+	// Tell drawing thread to redraw.
 	jl_thread_mutex_lock(jlgr->jl, spr->mutex);
 	spr->update = 1;
 	jl_thread_mutex_unlock(jlgr->jl, spr->mutex);
+	// Copy drawing context up to drawing thread.
+	if(ctx) jlgr_sprite_sync__(jlgr->jl, spr, ctx);
 }
 
 /**
@@ -65,19 +73,20 @@ void jlgr_sprite_redraw(jlgr_t* jlgr, jl_sprite_t *spr) {
  * @param spr: The sprite.
 **/
 void jlgr_sprite_draw(jlgr_t* jlgr, jl_sprite_t *spr) {
+	jl_print_function(jlgr->jl, "Sprite Draw!");
 	jl_thread_mutex_lock(jlgr->jl, spr->mutex);
 
 	// Redraw if needed.
 	if(spr->update) jlgr_sprite_redraw__(jlgr, spr);
-	spr->update = 0;
-
-	jl_gl_transform_pr_(jlgr, &spr->pr,
-		spr->pr.cb.x, spr->pr.cb.y, spr->pr.cb.z,
+	jl_gl_pr_draw(jlgr, &spr->pr, &spr->pr.cb.pos, &spr->pr.scl);
+/*	jl_gl_transform_pr_(jlgr, &spr->pr,
+		spr->pr.cb.pos.x, spr->pr.cb.pos.y, spr->pr.cb.pos.z,
 		spr->pr.scl.x, spr->pr.scl.y, spr->pr.scl.z);
 
-	jl_gl_draw_pr_(jlgr->jl, &spr->pr);
+	jl_gl_draw_pr_(jlgr->jl, &spr->pr);*/
 	//
 	jl_thread_mutex_unlock(jlgr->jl, spr->mutex);
+	jl_print_return(jlgr->jl, "Sprite Draw!");
 }
 
 /**
@@ -89,8 +98,8 @@ void jlgr_sprite_draw(jlgr_t* jlgr, jl_sprite_t *spr) {
 void jlgr_sprite_resize(jlgr_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc) {
 	if(rc) {
 		// Set collision box.
-		spr->pr.cb.x = rc->x; spr->pr.cb.y = rc->y;
-		spr->pr.cb.w = rc->w; spr->pr.cb.h = rc->h;
+		spr->pr.cb.pos.x = rc->x; spr->pr.cb.pos.y = rc->y;
+		spr->pr.cb.ofs.x = rc->w; spr->pr.cb.ofs.y = rc->h;
 		// Set real dimensions
 		spr->rw = rc->w;
 		spr->rh = rc->h;
@@ -111,9 +120,8 @@ void jlgr_sprite_resize(jlgr_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc) {
 **/
 void jlgr_sprite_loop(jlgr_t* jlgr, jl_sprite_t *spr) {
 	jl_print_function(jlgr->jl, "Sprite/Loop");
-	void* ctx_draw = ((jlgr_sprite_loop_fnt)spr->loop)(jlgr->jl, spr);
+	((jlgr_sprite_loop_fnt)spr->loop)(jlgr->jl, spr);
 	jl_print_return(jlgr->jl, "Sprite/Loop");
-	if(ctx_draw) jlgr_sprite_sync__(jlgr->jl, spr, ctx_draw);
 }
 
 /**
@@ -142,8 +150,8 @@ jl_sprite_t* jlgr_sprite_new(jlgr_t* jlgr, jl_rect_t rc,
 	// Make pre-renderer
 	jl_gl_pr_new(jlgr, &spr->pr, rc.w, rc.h, jl_gl_w(jlgr) * spr->rw);
 	// Set collision box.
-	spr->pr.cb.x = rc.x; spr->pr.cb.y = rc.y;
-	spr->pr.cb.w = rc.w; spr->pr.cb.h = rc.h;
+	spr->pr.cb.pos.x = rc.x; spr->pr.cb.pos.y = rc.y;
+	spr->pr.cb.ofs.x = rc.w; spr->pr.cb.ofs.y = rc.h;
 	// Set draw function.
 	spr->draw = drawfn;
 	// Set loop
@@ -173,19 +181,17 @@ void jlgr_sprite_old(jlgr_t* jlgr, jl_sprite_t* sprite) {
  * test if 2 sprites collide.
  *
  * @param 'jl': library context
- * @param 'sprite1': sprite 1
- * @param 'sprite2': sprite 2
+ * @param 'spr1': sprite 1
+ * @param 'spr2': sprite 2
  * @return 0: if the sprites don't collide in their bounding boxes.
  * @return 1: if the sprites do collide in their bounding boxes.
 **/
-u8_t jlgr_sprite_collide(jlgr_t* jlgr,
-	jl_sprite_t *sprite1, jl_sprite_t *sprite2)
-{
+u8_t jlgr_sprite_collide(jlgr_t* jlgr, jl_sprite_t *spr1, jl_sprite_t *spr2) {
 	if (
-		(sprite1->pr.cb.y >= (sprite2->pr.cb.y+sprite2->pr.cb.h)) ||
-		(sprite1->pr.cb.x >= (sprite2->pr.cb.x+sprite2->pr.cb.w)) ||
-		(sprite2->pr.cb.y >= (sprite1->pr.cb.y+sprite1->pr.cb.h)) ||
-		(sprite2->pr.cb.x >= (sprite1->pr.cb.x+sprite1->pr.cb.w)) )
+		(spr1->pr.cb.pos.y >= (spr2->pr.cb.pos.y+spr2->pr.cb.ofs.y)) ||
+		(spr1->pr.cb.pos.x >= (spr2->pr.cb.pos.x+spr2->pr.cb.ofs.x)) ||
+		(spr2->pr.cb.pos.y >= (spr1->pr.cb.pos.y+spr1->pr.cb.ofs.y)) ||
+		(spr2->pr.cb.pos.x >= (spr1->pr.cb.pos.x+spr1->pr.cb.ofs.x)) )
 	{
 		return 0;
 	}else{
@@ -195,4 +201,12 @@ u8_t jlgr_sprite_collide(jlgr_t* jlgr,
 
 void* jlgr_sprite_getcontext(jl_sprite_t *sprite) {
 	return sprite->ctx_main;
+}
+
+/**
+ * THREAD: Draw thread only.
+ * @parm sprite: The sprite to get the  contxt from.
+**/
+void* jlgr_sprite_getdrawctx(jl_sprite_t *sprite) {
+	return sprite->ctx_draw;
 }

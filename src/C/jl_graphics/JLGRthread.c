@@ -17,8 +17,7 @@ static void jlgr_thread_resize(jlgr_t* jlgr, u16_t w, u16_t h) {
 	// Update the size of the background.
 	jl_sg_resz__(jlgr->jl);
 	// Taskbar resize.
-//	if(jlgr->menubar.menubar)
-//		jlgr_sprite_resize(jlgr, jlgr->menubar.menubar, NULL);
+	jlgr_menu_resize_(jlgr);
 	// Mouse resize
 	if(jlgr->mouse) jlgr_sprite_resize(jlgr, jlgr->mouse, NULL);
 	// Program's Resize

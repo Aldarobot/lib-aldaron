@@ -108,6 +108,7 @@ static const float DEFAULT_TC[] = {
 static void jl_gl_framebuffer_addtx__(jlgr_t* jlgr, u32_t tx);
 static void jl_gl_framebuffer_adddb__(jlgr_t* jlgr, u32_t db);
 static void jl_gl_framebuffer_status__(jlgr_t* jlgr);
+static void jl_gl_framebuffer_use__(jlgr_t* jlgr, jl_pr_t* pr);
 
 // Definitions:
 #ifdef JL_DEBUG_LIB
@@ -610,8 +611,7 @@ static void jl_gl_framebuffer_off__(jlgr_t* jlgr) {
 	jl_gl_viewport_screen(jlgr);
 }
 
-static void jl_gl_framebuffer_use__(jlgr_t* jlgr, jl_pr_t* pr) {
-	jl_print_function(jlgr->jl, "jl_gl_framebuffer_use__");
+static void jl_gl_framebuffer_init__(jlgr_t* jlgr, jl_pr_t* pr) {
 	if(pr->fb == 0 || pr->tx == 0/* || pr->db == 0*/) {
 		// Make frame buffer
 		jl_gl_framebuffer_make__(jlgr, &pr->fb);
@@ -635,7 +635,13 @@ static void jl_gl_framebuffer_use__(jlgr_t* jlgr, jl_pr_t* pr) {
 		jl_gl_viewport__(jlgr, pr->w, pr->h);
 		// Clear the pre-renderer.
 		jl_gl_clear(jlgr, 0, 0, 0, 0);
-	}else if(pr->w == 0) {
+	}
+}
+
+static void jl_gl_framebuffer_use__(jlgr_t* jlgr, jl_pr_t* pr) {
+	jl_print_function(jlgr->jl, "jl_gl_framebuffer_use__");
+	jl_gl_framebuffer_init__(jlgr, pr);
+	if(pr->w == 0) {
 		jl_print(jlgr->jl,
 		 "jl_gl_framebuffer_use__ failed: 'w' must be more than 0");
 		jl_sg_kill(jlgr->jl);
@@ -658,7 +664,6 @@ static void jl_gl_framebuffer_use__(jlgr_t* jlgr, jl_pr_t* pr) {
 	JL_GL_ERROR(jlgr, pr->fb,"glBindFramebuffer");
 	// Render on the whole framebuffer [ lower left -> upper right ]
 	jl_gl_viewport__(jlgr, pr->w, pr->h);
-	printf("PR VIEWPORT: %d, %d (%d, %d)\n", pr->w, pr->h, jlgr->wm.w, jlgr->wm.h);
 	jl_print_return(jlgr->jl, "jl_gl_framebuffer_use__");
 }
 
@@ -932,12 +937,14 @@ static void jl_gl_transform__(jlgr_t* jlgr, i32_t shader, i8_t which, float x,
 void jl_gl_transform_pr_(jlgr_t* jlgr, jl_pr_t* pr, float x, float y, float z,
 	float xm, float ym, float zm)
 {
+	jl_print_function(jlgr->jl, "OPENGL TRANSFORM!");
 	f64_t ar = jl_gl_ar(jlgr);
 
 	jl_gl_translate__(jlgr, jlgr->gl.prm.uniforms.translate, JL_GL_SLPR_PRM,
 		x, y, z, ar);
 	jl_gl_transform__(jlgr, jlgr->gl.prm.uniforms.transform, JL_GL_SLPR_PRM,
 		xm, ym, zm, ar);
+	jl_print_return(jlgr->jl, "OPENGL TRANSFORM!");
 }
 
 void jl_gl_transform_vo_(jlgr_t* jlgr, jl_vo_t* vo, float x, float y, float z,
@@ -1020,6 +1027,9 @@ void jl_gl_draw_chr(jlgr_t* jlgr, jl_vo_t* pv,
 void jl_gl_draw_pr_(jl_t* jl, jl_pr_t* pr) {
 	jlgr_t* jlgr = jl->jlgr;
 
+	jl_print_function(jlgr->jl, "DRAW PR!");
+	// Initialize Framebuffer, if not already init'd
+	jl_gl_framebuffer_init__(jlgr, pr);
 	// Use pre-mixed texturing shader.
 	_jl_gl_setp(jlgr, JL_GL_SLPR_PRM);
 	// Bind Texture Coordinates to shader
@@ -1030,6 +1040,7 @@ void jl_gl_draw_pr_(jl_t* jl, jl_pr_t* pr) {
 	_jl_gl_setv(jlgr, &pr->gl, jlgr->gl.prm.attr.position, 3);
 	// Draw the image on the screen!
 	_jl_gl_draw_arrays(jlgr, GL_TRIANGLE_FAN, 4);
+	jl_print_return(jlgr->jl, "DRAW PR!");
 }
 
 int32_t _jl_gl_getu(jlgr_t* jlgr, GLuint prg, char *var) {
@@ -1189,8 +1200,6 @@ static void jl_gl_pr_set__(jl_pr_t *pr, f32_t w, f32_t h, u16_t w_px) {
 	pr->h = h_px;
 	// Set aspect ratio.
 	pr->ar = ar;
-
-	printf("w:%d h:%d\n", pr->w, pr->h);
 }
 
 /**	  @endcond	  **/
@@ -1288,7 +1297,6 @@ void jl_gl_clear(jlgr_t* jlgr, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
  * @param w_px: The resolution in pixels along the x axis [ 1- ]
 **/
 void jl_gl_pr_rsz(jlgr_t* jlgr, jl_pr_t *pr, f32_t w, f32_t h, u16_t w_px) {
-	printf("resizeing %p %f %f\n", pr, w, h);
 	const float xyzw[] = {
 		0.f,	h,	0.f,
 		0.f,	0.f,	0.f,

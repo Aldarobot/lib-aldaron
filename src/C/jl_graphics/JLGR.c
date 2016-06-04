@@ -103,8 +103,6 @@ void jlgr_loop(jlgr_t* jlgr) {
 	jlgr_sprite_loop(jlgr, jlgr->menubar.menubar);
 	// Update mouse
 	if(jlgr->mouse) jlgr_sprite_loop(jlgr, jlgr->mouse);
-	// Tell menubar to redraw.
-	jlgr_sprite_redraw(jlgr, jlgr->menubar.menubar);
 }
 
 /**

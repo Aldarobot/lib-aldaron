@@ -21,16 +21,11 @@ typedef struct{
 	float x, y, z;
 }jl_vec3_t;
 
+// Collision Box / Line / Etc.
 typedef struct{
-	jl_vec3_t pt1;
-	jl_vec3_t pt2;
-}jl_line_t;
-
-// Collision Box.
-typedef struct{
-	m_f32_t x, y, z;
-	m_f32_t w, h, d; // Width, Height, Depth.
-}jl_cb_t;
+	jl_vec3_t pos; // Position ( X/Y/Z )
+	jl_vec3_t ofs; // Position Offset ( W/H/D )
+}jl_area_t;
 
 // Graphical stuff
 typedef struct {
@@ -56,7 +51,7 @@ typedef struct {
 	uint32_t gl;	// GL Vertex Buffer Object [ 0 = Not Enabled ]
 	float ar;	// Aspect Ratio: h:w
 	float cv[4*3];	// Converted Vertices
-	jl_cb_t cb;	// 2D/3D collision box.
+	jl_area_t cb;	// 2D/3D collision box.
 	jl_vec3_t scl;	// Scaling vector.
 }jl_pr_t;
 
@@ -97,8 +92,8 @@ typedef struct{
 	jl_pr_t pr;		// Pre-renderer / collision box.
 }jl_sprite_t;
 
-typedef void  (*jlgr_sprite_draw_fnt)(jl_t* jl, uint8_t resize, void* ctx_draw);
-typedef void* (*jlgr_sprite_loop_fnt)(jl_t* jl, jl_sprite_t* spr);
+typedef void (*jlgr_sprite_draw_fnt)(jl_t* jl, uint8_t resize, void* ctx_draw);
+typedef void (*jlgr_sprite_loop_fnt)(jl_t* jl, jl_sprite_t* spr);
 
 typedef struct{
 	char *opt;
@@ -339,8 +334,8 @@ void jlgr_loop(jlgr_t* jlgr);
 void jlgr_kill(jlgr_t* jlgr);
 
 // JLGRsprite.c
-void* jlgr_sprite_dont(jl_t* jl, jl_sprite_t* sprite);
-void jlgr_sprite_redraw(jlgr_t* jlgr, jl_sprite_t *spr);
+void jlgr_sprite_dont(jl_t* jl, jl_sprite_t* sprite);
+void jlgr_sprite_redraw(jlgr_t* jlgr, jl_sprite_t *spr, void* ctx);
 void jlgr_sprite_resize(jlgr_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc);
 void jlgr_sprite_loop(jlgr_t* jlgr, jl_sprite_t *spr);
 void jlgr_sprite_draw(jlgr_t* jlgr, jl_sprite_t *spr);
@@ -352,6 +347,7 @@ void jlgr_sprite_old(jlgr_t* jlgr, jl_sprite_t* sprite);
 u8_t jlgr_sprite_collide(jlgr_t* jlgr,
 	jl_sprite_t *sprite1, jl_sprite_t *sprite2);
 void* jlgr_sprite_getcontext(jl_sprite_t *sprite);
+void* jlgr_sprite_getdrawctx(jl_sprite_t *sprite);
 
 // JLGRmenu.c
 void jlgr_menu_toggle(jlgr_t* jlgr);

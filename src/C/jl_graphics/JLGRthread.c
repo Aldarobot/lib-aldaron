@@ -29,6 +29,7 @@ static void jlgr_thread_event(jl_t* jl, void* data) {
 	jlgr_t* jlgr = jl->jlgr;
 	jlgr_thread_packet_t* packet = data;
 
+	JL_PRINT("THREAD_EVENT");
 	switch(packet->id) {
 		case JLGR_COMM_RESIZE: {
 			jl_wm_updatewh_(jlgr);
@@ -102,10 +103,6 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	jl_wm_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "Resize Adjust");
 	jlgr->draw.rtn = 0;
-	while(jlgr->draw.rtn != 2) {
-		jl_thread_comm_recv(jl, jlgr->comm2draw,
-			jlgr_thread_resize_event);
-	}
 	JL_PRINT_DEBUG(jl, "Loading default graphics from package....");
 	jl_sg_inita__(jlgr);
 	JL_PRINT_DEBUG(jl, "Setting up OpenGL....");
@@ -119,6 +116,10 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	JL_PRINT_DEBUG(jl, "Creating Mouse sprite....");
 	jlgr_mouse_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "User's Init....");
+	while(jlgr->draw.rtn != 2) {
+		jl_thread_comm_recv(jl, jlgr->comm2draw,
+			jlgr_thread_resize_event);
+	}
 	jlgr->draw.fn(jl);
 	jlgr_thread_resize(jlgr, jlgr_wm_getw(jlgr), jlgr_wm_geth(jlgr));
 	jlgr_wm_setwindowname(jlgr, jl->name);

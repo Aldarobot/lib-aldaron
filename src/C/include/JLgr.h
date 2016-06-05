@@ -319,7 +319,7 @@ typedef struct{
 		double ar;
 	}wm;
 
-	uint32_t timer;
+	double timer;
 	double psec;
 }jlgr_t;
 

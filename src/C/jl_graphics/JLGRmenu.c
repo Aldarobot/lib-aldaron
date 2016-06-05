@@ -69,6 +69,7 @@ static void jlgr_menubar_draw_(jl_t* jl, uint8_t resize, void* ctx_draw) {
 	jlgr_t* jlgr = jl->jlgr;
 	jl_menu_draw_t* menu_draw = ctx_draw;
 
+	jl_print(jl, "MENU %d", menu_draw->cursor);
 	// If needed, draw shadow.
 	if(menu_draw->cursor < 0) {
 		// Complete redraw of taskbar.
@@ -136,9 +137,9 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 	jlgr->menubar.menubar->loop = jlgr_menubar_loop_;
 }
 
-static void jlgr_menubar_text__(jlgr_t* jlgr, m_u8_t* color, str_t text) {
+static void jlgr_menubar_text__(jlgr_t* jlgr,uint8_t* color,float y,str_t text){
 	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(jlgr->menubar.menubar);
-	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), 0., 0. };
+	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), y, 0. };
 
 	jlgr_draw_text(jlgr, text, tr,
 		(jl_font_t) { 0, JL_IMGI_ICON, 0, color, 
@@ -186,23 +187,24 @@ static void jlgr_menu_name_draw__(jlgr_t* jlgr) {
 
 static void jlgr_menu_slow_draw__(jlgr_t* jlgr) {
 	jl_t* jl = jlgr->jl;
-	m_u8_t color[] = { 255, 255, 255, 255 };
+	m_u8_t color[] = { 127, 127, 255, 255 };
 
 	// Draw the icon based on whether on time or not.
 	jlgr_menu_draw_icon(jlgr, 0, JL_IMGI_ICON, jlgr->sg.on_time ?
 		JLGR_ID_GOOD_IMAGE : JLGR_ID_SLOW_IMAGE);
-	// If not on time report the seconds that passed.
-	if(!jlgr->sg.on_time)
-		jlgr_menubar_text__(jlgr, color,
-			jl_mem_format(jl, "%d fps", jl->time.fps));
+	// Report the seconds that passed.
+	printf("DRAWING MENUBAR SLOW\n");
+	jlgr_menubar_text__(jlgr, color,
+		0., jl_mem_format(jl, "DrawFPS:%d", (int)(1. / jlgr->psec)));
+	jlgr_menubar_text__(jlgr, color,
+		.05, jl_mem_format(jl, "MainFPS:%d", (int)(1. / jl->time.psec)));
 }
 
 static void jlgr_menu_slow_loop__(jlgr_t* jlgr, jlgr_input_t input) {
 	jl_menu_t* menu = jlgr_sprite_getcontext(jlgr->menubar.menubar);
 	menu->draw.cursor = menu->cursor;
 
-	if(jlgr->sg.changed || !jlgr->sg.on_time)
-		jlgr_sprite_redraw(jlgr, jlgr->menubar.menubar, &(menu->draw));
+	jlgr_sprite_redraw(jlgr, jlgr->menubar.menubar, &(menu->draw));
 }
 
 void jlgr_menu_resize_(jlgr_t* jlgr) {

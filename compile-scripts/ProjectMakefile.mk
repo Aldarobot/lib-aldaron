@@ -162,7 +162,7 @@ $(BUILD_DEPS)/%.o: %.c $(HEADERS_DEPS)
 -debug: -init-vars
 #	$(eval GL_VERSION=-lGL) ## OpenGL
 	$(eval GL_VERSION=-lGLESv2) ## OpenGL ES
-	$(eval JL_DEBUG=-g)
+	$(eval JL_DEBUG=-pg)
 	$(eval JL_OUT=build/test.out)
 	$(eval OBJS=$(OBJS_PRG))
 -publish: -init-vars

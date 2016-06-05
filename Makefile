@@ -66,7 +66,7 @@ build/jl.o: $(BUILD) $(OBJS)
 	ar csr build/jl.o build/obj/*.o build/deps/*.o
 
 -test: 
-	$(eval CFLAGS=-Wall -g $(HEADER) $(PLATFORM_CFLAGS))
+	$(eval CFLAGS=-Wall -pg $(HEADER) $(PLATFORM_CFLAGS))
 
 -release:
 	$(eval CFLAGS=-Wall -O3 $(HEADER) $(PLATFORM_CFLAGS))

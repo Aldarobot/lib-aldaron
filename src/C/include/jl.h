@@ -36,6 +36,8 @@ void jl_mem_copyto(const void* src, void* dst, u64_t size);
 str_t jl_mem_format(jl_t* jl, str_t format, ... );
 u32_t jl_mem_random_int(u32_t a);
 void *jl_mem_temp(jl_t* jl, void *mem);
+double jl_mem_addwrange(double v1, double v2);
+double jl_mem_difwrange(double v1, double v2);
 
 // "JLdata_t.c"
 void jl_data_clear(jl_t* jl, data_t* pa);
@@ -114,7 +116,7 @@ void jl_thread_comm_recv(jl_t* jl, jl_comm_t* comm, jl_data_fnct fn);
 void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm);
 
 // "JLsdl.c"
-double jl_sdl_timer(jl_t* jl, uint32_t* timer);
+double jl_sdl_timer(jl_t* jl, double* timer);
 
 #endif
 /*

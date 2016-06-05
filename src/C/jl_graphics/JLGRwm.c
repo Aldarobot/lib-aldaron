@@ -135,7 +135,7 @@ void jl_wm_loop__(jlgr_t* jlgr) {
 	// milliseconds / 1000 to get seconds
 	jlgr->psec = jl_sdl_timer(jlgr->jl, &jlgr->timer);
 
-//JL_PRINT("GR %f, N %f\n", 1./jlgr->psec, 1./jlgr->jl->time.psec);
+//	JL_PRINT("GR %f, N %f\n", 1./jlgr->psec, 1./jlgr->jl->time.psec);
 }
 
 void jl_wm_resz__(jlgr_t* jlgr, uint16_t w, uint16_t h) {

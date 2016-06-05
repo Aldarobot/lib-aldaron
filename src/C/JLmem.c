@@ -163,6 +163,28 @@ void *jl_mem_temp(jl_t* jl, void *mem) {
 	return rtn;
 }
 
+/**
+ * Add 2 Numbers, Keeping within a range of 0-1.
+**/
+double jl_mem_addwrange(double v1, double v2) {
+	double rtn = v1 + v2;
+	while(rtn < 0.) rtn += 1.;
+	while(rtn > 1.) rtn -= 1.;
+	return rtn;
+}
+
+/**
+ * Find the smallest difference within a range of 0-1.
+**/
+double jl_mem_difwrange(double v1, double v2) {
+	double rtn1 = fabs(jl_mem_addwrange(v1, -v2)); // Find 1 distance
+	double rtn2 = 1. - rtn1; // Find complimentary distance
+	if(rtn1 < rtn2)
+		return rtn1;
+	else
+		return rtn2;
+}
+
 jvct_t* jl_mem_init__(void) {
 	//Create a context for the currently loaded program
 	jvct_t* _jl = jl_memi(NULL, sizeof(jvct_t));

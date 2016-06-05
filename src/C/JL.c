@@ -52,14 +52,12 @@ static void jl_time_reset__(jl_t* jl, u8_t on_time) {
 
 //return how many seconds passed since last call
 static inline void jl_seconds_passed__(jl_t* jl) {
-	int diff = jl->time.timer;
+	uint16_t fps;
 
 	jl->time.psec = jl_sdl_timer(jl, &jl->time.timer);
-	diff = jl->time.timer - diff;
-	if(diff) jl->time.fps = round(1000./((double)diff));
-	else jl->time.fps = 25000;
+	fps = (uint16_t)(1. / jl->time.psec);
 	// Tell if fps is 60 fps or better
-	jl_time_reset__(jl, jl->time.fps >= JL_FPS);
+	jl_time_reset__(jl, fps >= JL_FPS);
 }
 
 static inline void main_loop__(jl_t* jl) {

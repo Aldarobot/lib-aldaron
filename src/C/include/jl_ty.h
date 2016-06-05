@@ -81,8 +81,7 @@ typedef struct{
 	}print;
 	struct{
 		double psec; // Seconds since last frame.
-		uint32_t timer; // Time 1 frame ago started
-		uint16_t fps; // Frames per second.
+		double timer; // Time 1 frame ago started
 	}time;
 	struct {
 		jl_mode_t *mdes; // Array Sizof Number Of Modes

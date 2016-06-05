@@ -656,18 +656,18 @@ void jlgr_notify(jlgr_t* jlgr, str_t notification) {
 void _jlgr_loopb(jlgr_t* jlgr) {
 	//Message Display
 	if(jlgr->gr.notification.timeTilVanish > 0.f) {
-		if(jlgr->gr.notification.timeTilVanish > 4.25) {
+		if(jlgr->gr.notification.timeTilVanish > .5) {
 			uint8_t color[] = { 255, 255, 255, 255 };
 			jlgr_draw_ctxt(jlgr, jlgr->gr.notification.message, 0,
 				color);
 		}else{
 			uint8_t color[] = { 255, 255, 255, (uint8_t)
 				(jlgr->gr.notification.timeTilVanish *
-					255. / 4.25)};
+					255. / .5)};
 			jlgr_draw_ctxt(jlgr, jlgr->gr.notification.message, 0,
 				color);
 		}
-		jlgr->gr.notification.timeTilVanish-=jlgr->jl->time.psec;
+		jlgr->gr.notification.timeTilVanish-=jlgr->psec;
 	}
 }
 

@@ -239,8 +239,6 @@ static void _jl_sg_loop_ds(jlgr_t* jlgr) {
 	// Draw upper screen - alternate screen
 	jlgr_sprite_redraw(jlgr, jlgr->sg.bg.up, NULL);
 	jlgr_sprite_draw(jlgr, jlgr->sg.bg.up);
-//		jlgr->draw.redraw.lower :
-//			 jlgr->draw.redraw.upper);
 	// Draw lower screen - default screen
 	jlgr_sprite_redraw(jlgr, jlgr->sg.bg.dn, NULL);
 	jlgr_sprite_draw(jlgr, jlgr->sg.bg.dn);

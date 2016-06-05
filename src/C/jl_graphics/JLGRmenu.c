@@ -69,7 +69,6 @@ static void jlgr_menubar_draw_(jl_t* jl, uint8_t resize, void* ctx_draw) {
 	jlgr_t* jlgr = jl->jlgr;
 	jl_menu_draw_t* menu_draw = ctx_draw;
 
-	jl_print(jl, "MENU %d", menu_draw->cursor);
 	// If needed, draw shadow.
 	if(menu_draw->cursor < 0) {
 		// Complete redraw of taskbar.
@@ -124,7 +123,6 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 		menu.inputfn[menu.draw.cursor] = NULL;
 		menu.draw.redrawfn[menu.draw.cursor] = NULL;
 	}
-	JL_PRINT("MENU_INIT\n");
 	menu.draw.cursor = -1;
 
 	// Make the menubar.
@@ -193,7 +191,6 @@ static void jlgr_menu_slow_draw__(jlgr_t* jlgr) {
 	jlgr_menu_draw_icon(jlgr, 0, JL_IMGI_ICON, jlgr->sg.on_time ?
 		JLGR_ID_GOOD_IMAGE : JLGR_ID_SLOW_IMAGE);
 	// Report the seconds that passed.
-	printf("DRAWING MENUBAR SLOW\n");
 	jlgr_menubar_text__(jlgr, color,
 		0., jl_mem_format(jl, "DrawFPS:%d", (int)(1. / jlgr->psec)));
 	jlgr_menubar_text__(jlgr, color,
@@ -251,7 +248,6 @@ void jlgr_menu_addicon(jlgr_t* jlgr, jlgr_input_fnct inputfn, jlgr_fnct rdr) {
 	jl_menu_t* menu = jlgr_sprite_getcontext(jlgr->menubar.menubar);
 	m_u8_t i;
 
-	JL_PRINT("MENU_ADDICON\n");
 	menu->draw.cursor = -1;
 	for(i = 0; i < 10; i++) if(!menu->inputfn[i]) break;
 	// Set functions for: draw, press, not press

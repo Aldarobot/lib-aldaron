@@ -29,7 +29,6 @@ static void jlgr_thread_event(jl_t* jl, void* data) {
 	jlgr_t* jlgr = jl->jlgr;
 	jlgr_thread_packet_t* packet = data;
 
-	JL_PRINT("THREAD_EVENT");
 	switch(packet->id) {
 		case JLGR_COMM_RESIZE: {
 			jl_wm_updatewh_(jlgr);
@@ -54,7 +53,7 @@ static void jlgr_thread_event(jl_t* jl, void* data) {
 			jlgr_comm_notify_t* packeta = data;
 			jl_mem_copyto(packeta->string,
 				jlgr->gr.notification.message, 255);
-			jlgr->gr.notification.timeTilVanish = 8.5;
+			jlgr->gr.notification.timeTilVanish = 3.5;
 			break;
 		} default: {
 			break;

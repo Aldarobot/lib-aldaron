@@ -24,18 +24,14 @@ u64_t jl_mem_tbiu(void) {
 }
 
 void jl_mem_leak_init(jl_t* jl) {
-	jvct_t * jl_ = jl->_jl;
-
-	jl_->me.usedmem = jl_mem_tbiu();
+	jl->info = jl_mem_tbiu();
 }
 
 /**
  * Exit if there's been a memory leak since the last call to jl_mem_leak_init().
 **/
 void jl_mem_leak_fail(jl_t* jl, str_t fn_name) {
-	jvct_t * jl_ = jl->_jl;
-
-	if(jl_mem_tbiu() != jl_->me.usedmem) {
+	if(jl_mem_tbiu() != jl->info) {
 		jl_print(jl, "%s: Memory Leak Fail", fn_name);
 		jl_sg_kill(jl);
 	}
@@ -185,27 +181,19 @@ double jl_mem_difwrange(double v1, double v2) {
 		return rtn2;
 }
 
-jvct_t* jl_mem_init__(void) {
-	//Create a context for the currently loaded program
-	jvct_t* _jl = jl_memi(NULL, sizeof(jvct_t));
-
-	//Set the current program ID to 0[RESERVED DEFAULT]
-	_jl->cprg = 0;
+jl_t* jl_mem_init_(void) {
+	jl_t* jl = jl_memi(NULL, sizeof(jl_t));
 	//Prepare user data structure
-	_jl->jl = jl_memi(NULL, sizeof(jl_t));
-	_jl->jl->_jl = _jl;
-	_jl->jl->errf = JL_ERR_NERR; // No error
+	jl->errf = JL_ERR_NERR; // No error
 	//Make sure that non-initialized things aren't used
-	_jl->has.graphics = 0;
-	_jl->has.fileviewer = 0;
-	_jl->has.filesys = 0;
-	_jl->has.input = 0;
-	_jl->fl.inloop = 1;
-	_jl->me.status = JL_STATUS_GOOD;
-	return _jl;
+	jl->has.graphics = 0;
+	jl->has.fileviewer = 0;
+	jl->has.filesys = 0;
+	jl->has.input = 0;
+	return jl;
 }
 
-void jl_mem_kill__(jvct_t* _jl) {
-	free(_jl);
+void jl_mem_kill_(jl_t* jl) {
+	free(jl);
 //	cl_list_destroy(g_vmap_list);
 }

@@ -34,7 +34,7 @@ char *GMessage[3] = {
 
 // Run when the menubar is clicked/pressed
 static void jlgr_menu_loop_press__(jlgr_t* jlgr, jlgr_input_t input) {
-	jl_menu_t *menu = jlgr_sprite_getcontext(jlgr->menubar.menubar);
+	jl_menu_t *menu = jlgr_sprite_getcontext(&jlgr->menubar.menubar);
 	// Figure out what's selected.
 	const uint8_t selected = (uint8_t)((1. - jlgr->main.ct.msx) / .1);
 
@@ -90,13 +90,13 @@ static void jlgr_menubar_draw_(jl_t* jl, uint8_t resize, void* ctx_draw) {
 // Runs every frame when menubar is visible.
 static void jlgr_menubar_loop_(jl_t* jl, jl_sprite_t* sprite) {
 	jlgr_t* jlgr = jl->jlgr;
-	jl_menu_t *menu = jlgr_sprite_getcontext(jlgr->menubar.menubar);
+	jl_menu_t *menu = jlgr_sprite_getcontext(&jlgr->menubar.menubar);
 
 	// Run the proper loops.
 	jlgr_input_do(jlgr, JL_CT_PRESS, jlgr_menu_loop_press__, NULL);
 	//
 	if(menu->draw.cursor == -1) {
-		jlgr_sprite_redraw(jlgr, jlgr->menubar.menubar, &menu->draw);
+		jlgr_sprite_redraw(jlgr, &jlgr->menubar.menubar, &menu->draw);
 		menu->draw.cursor = 0;
 	}
 }
@@ -126,17 +126,17 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 	menu.draw.cursor = -1;
 
 	// Make the menubar.
-	jlgr->menubar.menubar = jlgr_sprite_new(
-		jlgr, rc, jlgr_menubar_loop_, jlgr_menubar_draw_,
+	jlgr_sprite_init(jlgr, &jlgr->menubar.menubar, rc,
+		jlgr_menubar_loop_, jlgr_menubar_draw_,
 		&menu, sizeof(jl_menu_t),
 		&menu.draw, sizeof(jl_menu_draw_t));
 	// Redraw menubar.
 	// Set the loop.
-	jlgr->menubar.menubar->loop = jlgr_menubar_loop_;
+	jlgr->menubar.menubar.loop = jlgr_menubar_loop_;
 }
 
 static void jlgr_menubar_text__(jlgr_t* jlgr,uint8_t* color,float y,str_t text){
-	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(jlgr->menubar.menubar);
+	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(&jlgr->menubar.menubar);
 	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), y, 0. };
 
 	jlgr_draw_text(jlgr, text, tr,
@@ -167,7 +167,7 @@ static void jlgr_menu_name_draw2__(jlgr_t* jlgr) {
 }
 
 static void jlgr_menu_name_draw__(jlgr_t* jlgr) {
-	jl_menu_t* menu = jlgr_sprite_getcontext(jlgr->menubar.menubar);
+	jl_menu_t* menu = jlgr_sprite_getcontext(&jlgr->menubar.menubar);
 	f32_t text_size = jl_gl_ar(jlgr) * .5;
 
 	jlgr_menu_name_draw2__(jlgr);
@@ -198,17 +198,18 @@ static void jlgr_menu_slow_draw__(jlgr_t* jlgr) {
 }
 
 static void jlgr_menu_slow_loop__(jlgr_t* jlgr, jlgr_input_t input) {
-	jl_menu_t* menu = jlgr_sprite_getcontext(jlgr->menubar.menubar);
+	jl_menu_t* menu = jlgr_sprite_getcontext(&jlgr->menubar.menubar);
 	menu->draw.cursor = menu->cursor;
 
-	jlgr_sprite_redraw(jlgr, jlgr->menubar.menubar, &(menu->draw));
+	jlgr_sprite_redraw(jlgr, &jlgr->menubar.menubar, &(menu->draw));
 }
 
 void jlgr_menu_resize_(jlgr_t* jlgr) {
-	if(jlgr->menubar.menubar) {
-		jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(jlgr->menubar.menubar);
+	if(jlgr->menubar.menubar.mutex) {
+		jl_menu_draw_t* menu_draw =
+			jlgr_sprite_getdrawctx(&jlgr->menubar.menubar);
 		menu_draw->cursor = -1;
-		jlgr_sprite_resize(jlgr, jlgr->menubar.menubar, NULL);
+		jlgr_sprite_resize(jlgr, &jlgr->menubar.menubar, NULL);
 	}
 }
 
@@ -222,15 +223,15 @@ void jlgr_menu_resize_(jlgr_t* jlgr) {
  * @param jlgr: The library context
 **/
 void jlgr_menu_toggle(jlgr_t* jlgr) {
-	if(jlgr->menubar.menubar->loop == jlgr_sprite_dont)
-		jlgr->menubar.menubar->loop = jlgr_menubar_loop_;
+	if(jlgr->menubar.menubar.loop == jlgr_sprite_dont)
+		jlgr->menubar.menubar.loop = jlgr_menubar_loop_;
 	else
-		jlgr->menubar.menubar->loop = jlgr_sprite_dont;
+		jlgr->menubar.menubar.loop = jlgr_sprite_dont;
 }
 
 void jlgr_menu_draw_icon(jlgr_t* jlgr, u16_t g, u16_t i, u8_t c) {
 	jl_rect_t rc_icon = { 0., 0., .1, .1};
-	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(jlgr->menubar.menubar);
+	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(&jlgr->menubar.menubar);
 	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), 0., 0. };
 
 	jlgr_vos_image(jlgr, &(menu_draw->icon[1]), rc_icon, g, i, c, 255);
@@ -245,7 +246,7 @@ void jlgr_menu_draw_icon(jlgr_t* jlgr, u16_t g, u16_t i, u8_t c) {
  * @param rdr: the function to run when redraw is called.
 **/
 void jlgr_menu_addicon(jlgr_t* jlgr, jlgr_input_fnct inputfn, jlgr_fnct rdr) {
-	jl_menu_t* menu = jlgr_sprite_getcontext(jlgr->menubar.menubar);
+	jl_menu_t* menu = jlgr_sprite_getcontext(&jlgr->menubar.menubar);
 	m_u8_t i;
 
 	menu->draw.cursor = -1;

@@ -237,18 +237,18 @@ static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
 // Double screen loop
 static void _jl_sg_loop_ds(jlgr_t* jlgr) {
 	// Draw upper screen - alternate screen
-	jlgr_sprite_redraw(jlgr, jlgr->sg.bg.up, NULL);
-	jlgr_sprite_draw(jlgr, jlgr->sg.bg.up);
+	jlgr_sprite_redraw(jlgr, &jlgr->sg.bg.up, NULL);
+	jlgr_sprite_draw(jlgr, &jlgr->sg.bg.up);
 	// Draw lower screen - default screen
-	jlgr_sprite_redraw(jlgr, jlgr->sg.bg.dn, NULL);
-	jlgr_sprite_draw(jlgr, jlgr->sg.bg.dn);
+	jlgr_sprite_redraw(jlgr, &jlgr->sg.bg.dn, NULL);
+	jlgr_sprite_draw(jlgr, &jlgr->sg.bg.dn);
 }
 
 // Single screen loop
 static void _jl_sg_loop_ss(jlgr_t* jlgr) {
 	// Draw lower screen - default screen
-	jlgr_sprite_redraw(jlgr, jlgr->sg.bg.dn, NULL);
-	jlgr_sprite_draw(jlgr, jlgr->sg.bg.dn);
+	jlgr_sprite_redraw(jlgr, &jlgr->sg.bg.dn, NULL);
+	jlgr_sprite_draw(jlgr, &jlgr->sg.bg.dn);
 }
 
 // Run the current loop.
@@ -265,9 +265,9 @@ static void jl_sg_init_ds_(jl_t* jl) {
 		1., .5 * jlgr->wm.ar
 	};
 
-	jlgr_sprite_resize(jlgr, jlgr->sg.bg.up, &rcrd);
+	jlgr_sprite_resize(jlgr, &jlgr->sg.bg.up, &rcrd);
 	rcrd.y = .5 * jlgr->wm.ar;
-	jlgr_sprite_resize(jlgr, jlgr->sg.bg.dn, &rcrd);
+	jlgr_sprite_resize(jlgr, &jlgr->sg.bg.dn, &rcrd);
 	// Set double screen loop.
 	jlgr->sg.loop = _jl_sg_loop_ds;
 	if(jlgr->sg.cs == JL_SCR_SS) jlgr->sg.cs = JL_SCR_DN;
@@ -283,12 +283,12 @@ static void jl_sg_init_ss_(jl_t* jl) {
 		1., jlgr->wm.ar
 	};
 
-	jlgr_sprite_resize(jlgr, jlgr->sg.bg.dn, &rcrd);
+	jlgr_sprite_resize(jlgr, &jlgr->sg.bg.dn, &rcrd);
 	// Set single screen loop.
 	jlgr->sg.loop = _jl_sg_loop_ss;
 	jlgr->sg.cs = JL_SCR_SS;
 	//
-	jlgr->sg.bg.dn->pr.ar = jlgr->wm.ar;
+	jlgr->sg.bg.dn.pr.ar = jlgr->wm.ar;
 }
 
 void jl_sg_resz__(jl_t* jl) {
@@ -326,11 +326,11 @@ void jl_sg_inita__(jlgr_t* jlgr) {
 		(void*)jl_file_get_resloc(jlgr->jl, JL_MAIN_DIR, JL_MAIN_MEF),
 		0, 1);
 	// Create upper and lower screens
-	jlgr->sg.bg.up = jlgr_sprite_new(jlgr, rc,
+	jlgr_sprite_init(jlgr, &jlgr->sg.bg.up, rc,
 		jlgr_sprite_dont, jl_sg_draw_up, NULL, 0, NULL, 0);
-	jlgr->sg.bg.dn = jlgr_sprite_new(jlgr, rc,
+	jlgr_sprite_init(jlgr, &jlgr->sg.bg.dn, rc,
 		jlgr_sprite_dont, jl_sg_draw_dn, NULL, 0, NULL, 0);
 	// Flip upside-down
-	jlgr->sg.bg.up->pr.scl.y = -1.;
-	jlgr->sg.bg.dn->pr.scl.y = -1.;
+	jlgr->sg.bg.up.pr.scl.y = -1.;
+	jlgr->sg.bg.dn.pr.scl.y = -1.;
 }

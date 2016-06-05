@@ -28,8 +28,6 @@
 
 // This function converts linux filenames to native filnames
 str_t jl_file_convert__(jl_t* jl, str_t filename) {
-	jvct_t * _jl = jl->_jl;
-
 	data_t* src = jl_data_mkfrom_str(filename);
 	data_t* converted = jl_data_make(0);
 
@@ -37,14 +35,14 @@ str_t jl_file_convert__(jl_t* jl, str_t filename) {
 		src->curs++; // ignore
 	}else{
 		src->curs++; // ignore
-		jl_data_merg(_jl->jl, converted, _jl->fl.separator);
+		jl_data_merg(jl, converted, jl->fl.separator);
 	}
 	while(1) {
 		data_t* append = jl_data_read_upto(jl, src, '/', 300); 
 		if(append->data[0] == '\0') break;
-		jl_data_merg(_jl->jl, converted, append);
+		jl_data_merg(jl, converted, append);
 		if(jl_data_byte(src) == '/')
-			jl_data_merg(_jl->jl,converted,_jl->fl.separator);
+			jl_data_merg(jl, converted, jl->fl.separator);
 		src->curs++; // Skip '/'
 		jl_data_free(append);
 	}
@@ -101,37 +99,37 @@ static inline void jl_file_reset_cursor__(str_t file_name) {
 	close(fd);
 }
 
-static inline void jl_file_get_root__(jvct_t * _jl) {
+static inline void jl_file_get_root__(jl_t * jl) {
 	data_t* root_path;
 
 #if JL_PLAT == JL_PLAT_PHONE
 	data_t* root_dir;
 
-	JL_PRINT_DEBUG(_jl->jl, "Get external storage directory.");
+	JL_PRINT_DEBUG(jl, "Get external storage directory.");
 	root_path = jl_data_mkfrom_str(JL_FL_BASE);
-	JL_PRINT_DEBUG(_jl->jl, "Append JL_ROOT_DIR.");
+	JL_PRINT_DEBUG(jl, "Append JL_ROOT_DIR.");
 	root_dir = jl_data_mkfrom_str(JL_ROOT_DIR);
-	JL_PRINT_DEBUG(_jl->jl, "Merging root_path and root_dir.");
-	jl_data_merg(_jl->jl, root_path, root_dir);
-	JL_PRINT_DEBUG(_jl->jl, "Free root_dir.");
+	JL_PRINT_DEBUG(jl, "Merging root_path and root_dir.");
+	jl_data_merg(jl, root_path, root_dir);
+	JL_PRINT_DEBUG(jl, "Free root_dir.");
 	jl_data_free(root_dir);
 #elif JL_PLAT_RPI
 	data_t* root_dir;
 
-	JL_PRINT_DEBUG(_jl->jl, "Get external storage directory.");
+	JL_PRINT_DEBUG(jl, "Get external storage directory.");
 	root_path = jl_data_mkfrom_str("/home/pi/.local/share/");
-	JL_PRINT_DEBUG(_jl->jl, "Append JL_ROOT_DIR.");
+	JL_PRINT_DEBUG(jl, "Append JL_ROOT_DIR.");
 	root_dir = jl_data_mkfrom_str(JL_ROOT_DIR);
-	JL_PRINT_DEBUG(_jl->jl, "Merging root_path and root_dir.");
-	jl_data_merg(_jl->jl, root_path, root_dir);
-	JL_PRINT_DEBUG(_jl->jl, "Free root_dir.");
+	JL_PRINT_DEBUG(jl, "Merging root_path and root_dir.");
+	jl_data_merg(jl, root_path, root_dir);
+	JL_PRINT_DEBUG(jl, "Free root_dir.");
 	jl_data_free(root_dir);
 #else
 	// Get the operating systems prefered path
 	m_str_t pref_path = SDL_GetPrefPath(JL_ROOT_DIRNAME, "\0");
 
 	if(!pref_path) {
-		jl_print(_jl->jl, "This platform has no pref path!");
+		jl_print(jl, "This platform has no pref path!");
 		exit(-1);
 	}
 	// Erase extra non-needed '/'s
@@ -142,27 +140,27 @@ static inline void jl_file_get_root__(jvct_t * _jl) {
 	SDL_free(pref_path);
 #endif
 	// Make "-- JL_ROOT_DIR"
-	if(jl_file_mkdir(_jl->jl, (str_t) root_path->data) == 2) {
-		jl_print(_jl->jl, (str_t) root_path->data);
-		jl_print(_jl->jl, ": mkdir : Permission Denied");
+	if(jl_file_mkdir(jl, (str_t) root_path->data) == 2) {
+		jl_print(jl, (str_t) root_path->data);
+		jl_print(jl, ": mkdir : Permission Denied");
 		exit(-1);
 	}
 	// Set paths.root & free root_path
-	_jl->fl.paths.root = jl_data_tostring(_jl->jl, root_path);
-	JL_PRINT_DEBUG(_jl->jl, "Root Path=\"%s\"", _jl->fl.paths.root);
+	jl->fl.paths.root = jl_data_tostring(jl, root_path);
+	JL_PRINT_DEBUG(jl, "Root Path=\"%s\"", jl->fl.paths.root);
 }
 
-static inline void jl_file_get_errf__(jvct_t * _jl) {
+static inline void jl_file_get_errf__(jl_t * jl) {
 	data_t* fname = jl_data_mkfrom_str("errf.txt");
 	// Add the root path
-	data_t* errfs = jl_data_mkfrom_str(_jl->fl.paths.root);
+	data_t* errfs = jl_data_mkfrom_str(jl->fl.paths.root);
 
 	// Add the file name
-	jl_data_merg(_jl->jl, errfs, fname);
+	jl_data_merg(jl, errfs, fname);
 	// Free fname
 	jl_data_free(fname);
 	// Set paths.errf & free errfs
-	_jl->fl.paths.errf = jl_data_tostring(_jl->jl, errfs);
+	jl->fl.paths.errf = jl_data_tostring(jl, errfs);
 }
 
 // NON-STATIC Library Dependent Functions
@@ -176,11 +174,8 @@ static inline void jl_file_get_errf__(jvct_t * _jl) {
  * @param msg: The text to print.
 **/
 void jl_file_print(jl_t* jl, str_t fname, str_t msg) {
-	jvct_t * _jl = jl->_jl;
-
-	// Write to the errf file
-	if(_jl->has.filesys && fname)
-		jl_file_save_(_jl->jl, msg, fname, strlen(msg));
+	// Write to the errf logfile
+	if(jl->has.filesys && fname) jl_file_save_(jl, msg, fname, strlen(msg));
 }
 
 /**
@@ -334,7 +329,7 @@ char jl_file_pk_save(jl_t* jl, str_t packageFileName, str_t fileName,
 	return 0;
 }
 
-static void _jl_file_pk_load_quit(jl_t* jl) {
+static void jl_file_pk_load_quit__(jl_t* jl) {
 	jl_print_return(jl, "FL_PkLd"); //Close Block "FL_PkLd"
 }
 
@@ -383,7 +378,7 @@ data_t* jl_file_pk_load_fdata(jl_t* jl, data_t* data, str_t file_name) {
 		}else{
 			jl_print(jl, "\tunknown error");
 		}
-		_jl_file_pk_load_quit(jl);
+		jl_file_pk_load_quit__(jl);
 		exit(-1);
 	}
 	JL_PRINT_DEBUG(jl, "error check 4.");
@@ -398,18 +393,18 @@ data_t* jl_file_pk_load_fdata(jl_t* jl, data_t* data, str_t file_name) {
 			file_name);
 		jl_print(jl, "because: %s", (void *)zip_strerror(zipfile));
 		jl->errf = JL_ERR_NONE;
-		_jl_file_pk_load_quit(jl);
+		jl_file_pk_load_quit__(jl);
 		return NULL;
 	}
 	JL_PRINT_DEBUG(jl, "opened file in package / reading opened file....");
 	if((jl->info = zip_fread(file, fileToLoad, PKFMAX)) == -1) {
 		jl_print(jl, "file reading failed");
-		_jl_file_pk_load_quit(jl);
+		jl_file_pk_load_quit__(jl);
 		exit(-1);
 	}
 	if(jl->info == 0) {
 		JL_PRINT_DEBUG(jl, "empty file, returning NULL.");
-		_jl_file_pk_load_quit(jl);
+		jl_file_pk_load_quit__(jl);
 		return NULL;
 	}
 	JL_PRINT_DEBUG(jl, "jl_file_pk_load: read %d bytes", jl->info);
@@ -419,7 +414,7 @@ data_t* jl_file_pk_load_fdata(jl_t* jl, data_t* data, str_t file_name) {
 	rtn = jl->info ? jl_data_mkfrom_data(jl, jl->info, fileToLoad) : NULL;
 	JL_PRINT_DEBUG(jl, "done.");
 	jl->errf = JL_ERR_NERR;
-	_jl_file_pk_load_quit(jl);
+	jl_file_pk_load_quit__(jl);
 	return rtn;
 }
 
@@ -450,7 +445,7 @@ data_t* jl_file_pk_load(jl_t* jl, const char *packageFileName,
 	if(data == NULL) {
 		JL_PRINT_DEBUG(jl, "!Package File doesn't exist!");
 		jl->errf = JL_ERR_FIND;
-		_jl_file_pk_load_quit(jl);
+		jl_file_pk_load_quit__(jl);
 		return NULL;
 	}
 	return jl_file_pk_load_fdata(jl, data, filename);
@@ -560,11 +555,10 @@ data_t* jl_file_media(jl_t* jl, str_t Fname, str_t pzipfile, void *pdata,
  * @returns: The designated location for a resouce pack
 */
 str_t jl_file_get_resloc(jl_t* jl, str_t prg_folder, str_t fname) {
-	jvct_t * _jl = jl->_jl;
 	data_t* filesr = jl_data_mkfrom_str(JL_FILE_SEPARATOR);
 	data_t* pfstrt = jl_data_mkfrom_str(prg_folder);
 	data_t* fnstrt = jl_data_mkfrom_str(fname);
-	data_t* resloc = jl_data_mkfrom_str(_jl->fl.paths.root);
+	data_t* resloc = jl_data_mkfrom_str(jl->fl.paths.root);
 	str_t rtn = NULL;
 	
 	//Open Block "FLBS"
@@ -594,34 +588,26 @@ str_t jl_file_get_resloc(jl_t* jl, str_t prg_folder, str_t fname) {
 	return rtn;
 }
 
-void jl_file_kill__(jvct_t * _jl) {
-	if(_jl->has.fileviewer) {
-		JL_PRINT_DEBUG(_jl->jl, "killing fl....");
-		cl_list_destroy(_jl->fl.filelist);
-		JL_PRINT_DEBUG(_jl->jl, "killed fl!");
-	}
-}
-
-void jl_file_init__(jvct_t * _jl) {
-	jl_print_function(_jl->jl, "FL_Init");
+void jl_file_init_(jl_t * jl) {
+	jl_print_function(jl, "FL_Init");
 	// Find out the native file separator.
-	_jl->fl.separator = jl_data_mkfrom_str("/");
+	jl->fl.separator = jl_data_mkfrom_str("/");
 	// Get ( and if need be, make ) the directory for everything.
-	JL_PRINT_DEBUG(_jl->jl, "Get/Make directory for everything....");
-	jl_file_get_root__(_jl);
-	JL_PRINT_DEBUG(_jl->jl, "Complete!");
+	JL_PRINT_DEBUG(jl, "Get/Make directory for everything....");
+	jl_file_get_root__(jl);
+	JL_PRINT_DEBUG(jl, "Complete!");
 	// Get ( and if need be, make ) the error file.
-	JL_PRINT_DEBUG(_jl->jl, "Get/Make directory error logfile....");
-	jl_file_get_errf__(_jl);
-	JL_PRINT_DEBUG(_jl->jl, "Complete!");
+	JL_PRINT_DEBUG(jl, "Get/Make directory error logfile....");
+	jl_file_get_errf__(jl);
+	JL_PRINT_DEBUG(jl, "Complete!");
 	//
-	_jl->has.filesys = 1;
+	jl->has.filesys = 1;
 
-	str_t pkfl = jl_file_get_resloc(_jl->jl, JL_MAIN_DIR, JL_MAIN_MEF);
+	str_t pkfl = jl_file_get_resloc(jl, JL_MAIN_DIR, JL_MAIN_MEF);
 	remove(pkfl);
 
-	truncate(_jl->fl.paths.errf, 0);
-	JL_PRINT_DEBUG(_jl->jl, "Starting....");
-	JL_PRINT_DEBUG(_jl->jl, "finished file init");
-	jl_print_return(_jl->jl, "FL_Init");
+	truncate(jl->fl.paths.errf, 0);
+	JL_PRINT_DEBUG(jl, "Starting....");
+	JL_PRINT_DEBUG(jl, "finished file init");
+	jl_print_return(jl, "FL_Init");
 }

@@ -75,6 +75,13 @@ typedef struct{
 }jl_ctx_t;
 
 typedef struct{
+	struct {
+		uint8_t graphics; //graphics are enabled
+		uint8_t fileviewer; //Fileviewer is enabled
+		uint8_t filesys; // Filesystem is enabled.
+		uint8_t input; // Input is enabled.
+		uint8_t quickloop; // Quickloop is enabled
+	}has;
 	struct{
 		void* printfn; // Function for printing
 		SDL_mutex* mutex; // Mutex for printing to terminal
@@ -89,10 +96,18 @@ typedef struct{
 		uint16_t which;
 		uint16_t count;
 	}mode;
+	struct {
+		struct{
+			char* root; // The root directory "-- JL_Lib/"
+			char* cprg; // The current program "-- JL_Lib/program"
+			char* errf; // The error file "-- JL_Lib/errf.txt"
+		}paths; // Paths to different files.
+
+		data_t* separator;
+	}fl;
 	m_str_t name; // The name of the program.
 	uint32_t info; // @startup:# images loaded from media.zip.Set by others.
 	jl_err_t errf; // Set if error
-	void* _jl; // The library's context
 	//
 	m_u8_t mode_switch_skip;
 	//

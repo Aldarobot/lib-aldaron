@@ -41,6 +41,7 @@ jlgr_t* jlgr_init(jl_t* jl, u8_t fullscreen, jl_fnct fn_) {
 	jl->jlgr = jlgr;
 	jlgr->wm.fullscreen = fullscreen;
 	jlgr->jl = jl;
+	jlgr->fl.inloop = 1;
 	// Initialize Subsystem
 	JL_PRINT_DEBUG(jl, "Initializing Input....");
 	jl_ct_init__(jlgr); // Prepare to read input.
@@ -100,9 +101,9 @@ void jlgr_loop(jlgr_t* jlgr) {
 	// Update events.
 	jl_ct_loop__(jlgr);
 	// Run any selected menubar items.
-	jlgr_sprite_loop(jlgr, jlgr->menubar.menubar);
+	jlgr_sprite_loop(jlgr, &jlgr->menubar.menubar);
 	// Update mouse
-	if(jlgr->mouse) jlgr_sprite_loop(jlgr, jlgr->mouse);
+	if(jlgr->mouse.mutex) jlgr_sprite_loop(jlgr, &jlgr->mouse);
 }
 
 /**
@@ -124,6 +125,7 @@ void jlgr_kill(jlgr_t* jlgr) {
 	jl_thread_comm_send(jlgr->jl, jlgr->comm2draw, &packet);
 	jl_print(jlgr->jl, "Waiting on threads....");
 	jlgr_thread_kill(jlgr); // Shut down thread.
+	jlgr_file_kill_(jlgr); // Remove clump filelist for fileviewer.
 }
 
 // End of file.

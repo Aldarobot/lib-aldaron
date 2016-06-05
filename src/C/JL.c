@@ -10,17 +10,17 @@
 static inline jl_t* jl_init_essential__(void) {
 	JL_PRINT("Starting JL_Lib - Version "JL_VERSION"....");
 	// Memory
-	jvct_t* _jl = jl_mem_init__(); // Create The Library Context
+	jl_t* jl = jl_mem_init_(); // Create The Library Context
 	// Printing to terminal
-	jl_print_init__(_jl->jl);
-	return _jl->jl;
+	jl_print_init__(jl);
+	return jl;
 }
 
 static inline void jl_init_libs__(jl_t* jl) {
 	JL_PRINT_DEBUG(jl, "Initializing threads....");
 	jl_thread_init__(jl);
 	JL_PRINT_DEBUG(jl, "Initializing file system....");
-	jl_file_init__(jl->_jl);
+	jl_file_init_(jl);
 	JL_PRINT_DEBUG(jl, "Initializing modes....");
 	jl_mode_init__(jl);
 	JL_PRINT_DEBUG(jl, "Initializing time....");
@@ -70,22 +70,10 @@ static inline void main_loop__(jl_t* jl) {
 }
 
 static inline int jl_kill__(jl_t* jl, int rc) {
-	jvct_t* _jl = jl->_jl;
-
 	jl_print(jl, "Quitting...."); //Exited properly
-//	jlgr_draw_msge(jl, 0, 0, 0, "Quiting JL-Lib....");
-	if(_jl->me.status == JL_STATUS_EXIT) {
-		rc = JL_RTN_FAIL_IN_FAIL_EXIT;
-		JL_PRINT("\n!! double error!\n");
-		JL_PRINT("!! exiting with return value %d\n", rc);
-		exit(rc);
-	}
-	// Set status to Exiting
-	_jl->me.status = JL_STATUS_EXIT;
-	jl_file_kill__(_jl);
 	jl_print_kill__(jl);
 	JL_PRINT("PRINTG KILL'd\n");
-	jl_mem_kill__(_jl);
+	jl_mem_kill_(jl);
 	JL_PRINT("PRINTG KILL'd\n");
 	JL_PRINT("[\\JL_Lib] ");
 	if(!rc) JL_PRINT("| No errors ");

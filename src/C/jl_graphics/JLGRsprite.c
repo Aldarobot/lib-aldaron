@@ -129,6 +129,7 @@ void jlgr_sprite_loop(jlgr_t* jlgr, jl_sprite_t *spr) {
  * Create a new sprite.
  *
  * @param jlgr: The library context.
+ * @param sprite: The sprite to initialize.
  * @param rc: The rectangle bounding box & pre-renderer size.
  * @param loopfn: the loop function.
  * @param drawfn: the draw function.
@@ -136,44 +137,39 @@ void jlgr_sprite_loop(jlgr_t* jlgr, jl_sprite_t *spr) {
  * @param draw_ctx_size: how many bytes to allocate for the draw context.
  * @returns: the new sprite
 **/
-jl_sprite_t* jlgr_sprite_new(jlgr_t* jlgr, jl_rect_t rc,
+void jlgr_sprite_init(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	jlgr_sprite_loop_fnt loopfn, jlgr_sprite_draw_fnt drawfn,
 	void* main_ctx, uint32_t main_ctx_size,
 	void* draw_ctx, uint32_t draw_ctx_size)
 {
-	jl_sprite_t *spr = NULL;
-
-	spr = jl_memi(jlgr->jl, sizeof(jl_sprite_t));
 	// Set real dimensions
-	spr->rw = rc.w;
-	spr->rh = rc.h;
+	sprite->rw = rc.w;
+	sprite->rh = rc.h;
 	// Make pre-renderer
-	jl_gl_pr_new(jlgr, &spr->pr, rc.w, rc.h, jl_gl_w(jlgr) * spr->rw);
+	jl_gl_pr_new(jlgr, &sprite->pr, rc.w, rc.h, jl_gl_w(jlgr) * sprite->rw);
 	// Set collision box.
-	spr->pr.cb.pos.x = rc.x; spr->pr.cb.pos.y = rc.y;
-	spr->pr.cb.ofs.x = rc.w; spr->pr.cb.ofs.y = rc.h;
+	sprite->pr.cb.pos.x = rc.x; sprite->pr.cb.pos.y = rc.y;
+	sprite->pr.cb.ofs.x = rc.w; sprite->pr.cb.ofs.y = rc.h;
 	// Set draw function.
-	spr->draw = drawfn;
+	sprite->draw = drawfn;
 	// Set loop
-	spr->loop = loopfn;
+	sprite->loop = loopfn;
 	// Make mutex
-	spr->mutex = jl_thread_mutex_new(jlgr->jl);
+	sprite->mutex = jl_thread_mutex_new(jlgr->jl);
 	// Create main context.
 	if(main_ctx_size)
-		spr->ctx_main = jl_mem_copy(jlgr->jl, main_ctx, main_ctx_size);
+		sprite->ctx_main = jl_mem_copy(jlgr->jl, main_ctx, main_ctx_size);
 	// Create draw context
 	if(draw_ctx_size)
-		spr->ctx_draw = jl_mem_copy(jlgr->jl, draw_ctx, draw_ctx_size);
-	spr->ctx_draw_size = draw_ctx_size;
-	return spr;
+		sprite->ctx_draw = jl_mem_copy(jlgr->jl, draw_ctx, draw_ctx_size);
+	sprite->ctx_draw_size = draw_ctx_size;
 }
 
 /**
  * THREAD: Main thread only.
 **/
-void jlgr_sprite_old(jlgr_t* jlgr, jl_sprite_t* sprite) {
+void jlgr_sprite_free(jlgr_t* jlgr, jl_sprite_t* sprite) {
 	jl_thread_mutex_old(jlgr->jl, sprite->mutex);
-	jl_mem(jlgr->jl, sprite, 0);
 }
 
 /**

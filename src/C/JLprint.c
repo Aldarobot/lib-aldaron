@@ -89,13 +89,13 @@ static void jl_print_reset_print_descriptor_(jl_t* jl, u8_t thread_id) {
 }
 
 static void jl_print_toconsole__(jl_t* jl, str_t input) {
-	jvct_t *_jl = jl->_jl;
 	uint8_t thread_id = jl_thread_current(jl);
 	int i = 0;
+	char buffer[256];
 
-	jl_mem_copyto(input, _jl->me.buffer, strlen(input) + 1);
+	jl_mem_copyto(input, buffer, strlen(input) + 1);
 	while(i != -1) {
-		str_t text = _jl->me.buffer + (80 * i);
+		str_t text = buffer + (80 * i);
 		// If string is empty; quit
 		if((!text) || (!text[0])) break;
 		// Clear and reset the print buffer
@@ -113,7 +113,7 @@ static void jl_print_toconsole__(jl_t* jl, str_t input) {
 		sprintf(convert, "%%%ds\n", chr_cnt);
 
 		JL_PRINT(convert, text);
-		jl_file_print(jl, _jl->fl.paths.errf,
+		jl_file_print(jl, jl->fl.paths.errf,
 			jl_mem_format(jl, convert, text));
 	}
 }

@@ -4,8 +4,6 @@
 	#include <stdio.h>
 	#include <dirent.h>
 	#include <errno.h>
-// Variable Map
-	#include "jl_vm.h"
 
 #define MAXFILELEN 1000 * 100000 //100,000 kb
 
@@ -46,17 +44,16 @@ uint32_t jl_gem_size(void);
 	jl_ctx_t* jl_thread_get_safe__(jl_t* jl);
 
 	// LIB INITIALIZATION fn(Context)
-	void _jl_cm_init(jvct_t* _jl);
-	void jl_file_init__(jvct_t * _jl);
-	jvct_t* jl_mem_init__(void);
+	void jl_cm_init_(jl_t* jl);
+	void jl_file_init_(jl_t * jl);
+	jl_t* jl_mem_init_(void);
 	void jl_print_init__(jl_t* jl);
 	void jl_thread_init__(jl_t* jl);
 	void jl_mode_init__(jl_t* jl);
 	void jl_sdl_init__(jl_t* jl);
 
 	// LIB KILLS
-	void jl_mem_kill__(jvct_t* jprg);
-	void jl_file_kill__(jvct_t * _jl);
+	void jl_mem_kill_(jl_t* jl);
 	void jl_print_kill__(jl_t* jl);
 
 	// LIB THREAD INITS

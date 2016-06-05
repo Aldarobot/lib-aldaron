@@ -319,7 +319,7 @@ static void jlgr_gui_slider_touch(jlgr_t* jlgr, jlgr_input_t input) {
 	jl_sprite_t* spr = input.data;
 	jl_gui_slider_main* slider = jlgr_sprite_getcontext(spr);
 
-	if(jlgr_sprite_collide(jlgr, spr, jlgr->mouse) == 0 ||
+	if(jlgr_sprite_collide(jlgr, spr, &jlgr->mouse) == 0 ||
 	 input.h == 0)
 		return;
 	float x = jl_ct_gmousex(jlgr) - (jl_gl_ar(jlgr) * .05 * spr->pr.cb.ofs.x);
@@ -387,6 +387,7 @@ static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
  * Create a slider sprite.
  * THREAD: Drawing thread only.
  * @param jlgr: The library context.
+ * @param sprite: Uninitialized sprite to initialize.
  * @param rectange: Area to put the slider in.
  * @param isdouble: 1 to select range, 0 to select a specific value.
  * @param x1: Pointer to a permanent location for the slider value.
@@ -394,11 +395,10 @@ static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
 	value.  Ignored if #isdouble is 0.
  * @returns: The slider sprite.
 **/
-jl_sprite_t* jlgr_gui_slider(jlgr_t* jlgr, jl_rect_t rectangle,
+void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 	u8_t isdouble, m_f32_t* x1, m_f32_t* x2)
 {
 	jlgr_sprite_loop_fnt jlgr_gui_slider_loop;
-	jl_sprite_t* sprite;
 
 	if(isdouble) {
 		jlgr_gui_slider_loop = jlgr_gui_slider_doubleloop;
@@ -417,12 +417,10 @@ jl_sprite_t* jlgr_gui_slider(jlgr_t* jlgr, jl_rect_t rectangle,
 	slider.draw.vo = jl_gl_vo_make(jlgr, 3);
 	slider.isRange = isdouble;
 
-	sprite = jlgr_sprite_new(jlgr, rectangle,
+	jlgr_sprite_init(jlgr, sprite, rectangle,
 		jlgr_gui_slider_loop, jlgr_gui_slider_draw,
 		&slider, sizeof(jl_gui_slider_main),
 		&slider.draw, sizeof(jl_gui_slider_draw));
-
-	return sprite;
 }
 
 /**
@@ -556,7 +554,7 @@ void jlgr_slidebtn_loop(jlgr_t* jlgr, jl_sprite_t * spr, float defaultx,
 	float slidex, jlgr_input_fnct prun)
 {
 	spr->pr.cb.pos.x = defaultx;
-	if(jlgr_sprite_collide(jlgr, jlgr->mouse, spr)) {
+	if(jlgr_sprite_collide(jlgr, &jlgr->mouse, spr)) {
 		jlgr_input_do(jlgr, JL_CT_PRESS, prun, NULL);
 		spr->pr.cb.pos.x = defaultx + slidex;
 	}
@@ -575,7 +573,7 @@ void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 {
 //		jlgr_sprite_redraw(jlgr, spr);
 	jlgr_sprite_draw(jlgr, spr);
-	if(jlgr_sprite_collide(jlgr, jlgr->mouse, spr)) {
+	if(jlgr_sprite_collide(jlgr, &jlgr->mouse, spr)) {
 		jl_rect_t rc = { spr->pr.cb.pos.x, spr->pr.cb.pos.y,
 			spr->pr.cb.ofs.x, spr->pr.cb.ofs.y };
 		uint8_t glow_color[] = { 255, 255, 255, 64 };
@@ -672,17 +670,15 @@ void _jlgr_loopb(jlgr_t* jlgr) {
 }
 
 void _jlgr_loopa(jlgr_t* jlgr) {
-	jvct_t* _jl = jlgr->jl->_jl;
-
-	if(!jlgr->menubar.menubar) return;
+	if(!jlgr->menubar.menubar.mutex) return;
 	jl_print_function(jlgr->jl, "GR_LP");
 	// Draw the pre-rendered Menubar.
-	if(!_jl->fl.inloop) jlgr_sprite_draw(jlgr, jlgr->menubar.menubar);
+	if(!jlgr->fl.inloop) jlgr_sprite_draw(jlgr, &jlgr->menubar.menubar);
 	// Update messages.
 	_jlgr_loopb(jlgr);
 	jl_print_return(jlgr->jl, "GR_LP");
 	// Draw mouse
-	if(jlgr->mouse) jlgr_sprite_draw(jlgr, jlgr->mouse);
+	if(jlgr->mouse.mutex) jlgr_sprite_draw(jlgr, &jlgr->mouse);
 }
 
 void jlgr_init__(jlgr_t* jlgr) {

@@ -129,7 +129,7 @@ typedef struct{
 	// For Programer's Use
 	uint8_t fontcolor[4];
 	jl_font_t font;
-	jl_sprite_t* mouse; //jl_sprite_t: Sprite to represent mouse pointer
+	jl_sprite_t mouse; // Sprite to represent mouse pointer
 
 	uint8_t thread; // Graphical Thread ID.
 	SDL_mutex* mutex; // Mutex to lock wshare structure.
@@ -208,8 +208,8 @@ typedef struct{
 		
 		// Each screen is a sprite.
 		struct {
-			jl_sprite_t* up;
-			jl_sprite_t* dn;
+			jl_sprite_t up;
+			jl_sprite_t dn;
 		}bg;
 
 		void* loop; // ( jlgr_fnct ) For upper or lower screen.
@@ -281,7 +281,7 @@ typedef struct{
 	}gl;
 
 	struct {
-		jl_sprite_t *menubar;
+		jl_sprite_t menubar;
 	}menubar;
 
 	//Graphics
@@ -319,6 +319,23 @@ typedef struct{
 		double ar;
 	}wm;
 
+	// File Manager
+	struct {
+		struct cl_list *filelist; //List of all files in working dir.
+		int8_t cursor;
+		uint8_t cpage;
+		char *dirname;
+		char *selecteditem;
+		uint8_t returnit;
+		uint8_t drawupto;
+		uint8_t inloop;
+		jl_sprite_t btns[2];
+		void *newfiledata;
+		uint64_t newfilesize;
+		uint8_t prompt;
+		data_t* promptstring;
+	}fl;
+
 	double timer;
 	double psec;
 }jlgr_t;
@@ -339,11 +356,11 @@ void jlgr_sprite_redraw(jlgr_t* jlgr, jl_sprite_t *spr, void* ctx);
 void jlgr_sprite_resize(jlgr_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc);
 void jlgr_sprite_loop(jlgr_t* jlgr, jl_sprite_t *spr);
 void jlgr_sprite_draw(jlgr_t* jlgr, jl_sprite_t *spr);
-jl_sprite_t* jlgr_sprite_new(jlgr_t* jlgr, jl_rect_t rc,
+void jlgr_sprite_init(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	jlgr_sprite_loop_fnt loopfn, jlgr_sprite_draw_fnt drawfn,
 	void* main_ctx, uint32_t main_ctx_size,
 	void* draw_ctx, uint32_t draw_ctx_size);
-void jlgr_sprite_old(jlgr_t* jlgr, jl_sprite_t* sprite);
+void jlgr_sprite_free(jlgr_t* jlgr, jl_sprite_t* sprite);
 u8_t jlgr_sprite_collide(jlgr_t* jlgr,
 	jl_sprite_t *sprite1, jl_sprite_t *sprite2);
 void* jlgr_sprite_getcontext(jl_sprite_t *sprite);
@@ -392,8 +409,8 @@ void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 	char *txt, jlgr_input_fnct prun);
 uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
 	float h, data_t* *string);
-jl_sprite_t* jlgr_gui_slider(jlgr_t* jlgr, jl_rect_t rectangle,
-		u8_t isdouble, m_f32_t* x1, m_f32_t* x2);
+void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
+	u8_t isdouble, m_f32_t* x1, m_f32_t* x2);
 void jlgr_notify(jlgr_t* jlgr, str_t notification);
 
 // OpenGL

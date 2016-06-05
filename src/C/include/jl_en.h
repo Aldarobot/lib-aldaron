@@ -13,13 +13,6 @@ enum {
 	JL_RTN_FAIL_IN_FAIL_EXIT, // 5
 } JL_RTN;
 
-// Library Status
-typedef enum{
-	JL_STATUS_GOOD,
-	JL_STATUS_EXIT,
-	JL_STATUS_EVIL,
-}jl_status_t;
-
 //ERROR MESSAGES
 typedef enum{
 	JL_ERR_NERR, //NO ERROR

@@ -51,7 +51,6 @@ void jl_gl_vo_free(jlgr_t* jlgr, jl_vo_t *pv);
 uint32_t jl_gl_w(jlgr_t* jlgr);
 
 //DL
-void _jl_wm_loop(jvct_t* _jlc);
 void _jl_sg_loop(jlgr_t* jlgr);
 float jl_sg_seconds_past_(jl_t* jlc);
 data_t* jl_vi_make_jpeg_(jl_t* jlc,i32_t quality,m_u8_t* pxdata,u16_t w,u16_t h);
@@ -81,6 +80,7 @@ void _jlgr_loopa(jlgr_t* jlgr);
 // kill
 void jl_wm_kill__(jlgr_t* jlgr);
 void jlgr_thread_kill(jlgr_t* jlgr);
+void jlgr_file_kill_(jlgr_t* jlgr);
 //
 void jlgr_thread_send(jlgr_t* jlgr, u8_t id, u16_t x, u16_t y, jl_fnct fn);
 

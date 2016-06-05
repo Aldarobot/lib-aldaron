@@ -19,7 +19,7 @@ static void jlgr_thread_resize(jlgr_t* jlgr, u16_t w, u16_t h) {
 	// Taskbar resize.
 	jlgr_menu_resize_(jlgr);
 	// Mouse resize
-	if(jlgr->mouse) jlgr_sprite_resize(jlgr, jlgr->mouse, NULL);
+	if(jlgr->mouse.mutex) jlgr_sprite_resize(jlgr, &jlgr->mouse, NULL);
 	// Program's Resize
 	jl_fnct resize_ = jlgr->draw.redraw.resize;
 	resize_(jlgr->jl);
@@ -152,8 +152,8 @@ int jlgr_thread_draw(void* data) {
 		jl_wm_loop__(jlgr);
 	}
 	jl_wm_kill__(jlgr); // Kill window
-	jlgr_sprite_old(jlgr, jlgr->sg.bg.up);
-	jlgr_sprite_old(jlgr, jlgr->sg.bg.dn);
+	jlgr_sprite_free(jlgr, &jlgr->sg.bg.up);
+	jlgr_sprite_free(jlgr, &jlgr->sg.bg.dn);
 	return 0;
 }
 

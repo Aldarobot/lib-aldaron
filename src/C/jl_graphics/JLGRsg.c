@@ -218,7 +218,8 @@ static void jl_sg_draw_up(jl_t* jl, uint8_t resize, void* data) {
 	// Clear the screen.
 	jl_gl_clear(jl->jlgr, 0, 127, 170, 255);
 	// Run the screen's redraw function
-	((jl_fnct)jlgr->draw.redraw.upper)(jl);
+	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)jlgr->draw.redraw.lower)(jl) :
+		((jl_fnct)jlgr->draw.redraw.upper)(jl);
 }
 
 static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
@@ -227,7 +228,8 @@ static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
 	// Clear the screen.
 	jl_gl_clear(jlgr, 255, 127, 0, 255);
 	// Run the screen's redraw function
-	((jl_fnct)jlgr->draw.redraw.lower)(jl);
+	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)jlgr->draw.redraw.upper)(jl) :
+		((jl_fnct)jlgr->draw.redraw.lower)(jl);
 	// Draw Menu Bar & Mouse
 	_jlgr_loopa(jl->jlgr);
 }
@@ -237,7 +239,7 @@ static void _jl_sg_loop_ds(jlgr_t* jlgr) {
 	// Draw upper screen - alternate screen
 	jlgr_sprite_redraw(jlgr, jlgr->sg.bg.up, NULL);
 	jlgr_sprite_draw(jlgr, jlgr->sg.bg.up);
-//		(jlgr->sg.cs == JL_SCR_UP) ? jlgr->draw.redraw.lower :
+//		jlgr->draw.redraw.lower :
 //			 jlgr->draw.redraw.upper);
 	// Draw lower screen - default screen
 	jlgr_sprite_redraw(jlgr, jlgr->sg.bg.dn, NULL);
@@ -261,11 +263,12 @@ void _jl_sg_loop(jlgr_t* jlgr) {
 static void jl_sg_init_ds_(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 	jl_rect_t rcrd = {
-		0.f, 0.f,
+		0., 0.,
 		1., .5 * jlgr->wm.ar
 	};
 
 	jlgr_sprite_resize(jlgr, jlgr->sg.bg.up, &rcrd);
+	rcrd.y = .5 * jlgr->wm.ar;
 	jlgr_sprite_resize(jlgr, jlgr->sg.bg.dn, &rcrd);
 	// Set double screen loop.
 	jlgr->sg.loop = _jl_sg_loop_ds;

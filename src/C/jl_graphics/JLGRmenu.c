@@ -186,15 +186,16 @@ static void jlgr_menu_name_draw__(jlgr_t* jlgr) {
 static void jlgr_menu_slow_draw__(jlgr_t* jlgr) {
 	jl_t* jl = jlgr->jl;
 	m_u8_t color[] = { 127, 127, 255, 255 };
+	char formated[80];
 
 	// Draw the icon based on whether on time or not.
 	jlgr_menu_draw_icon(jlgr, 0, JL_IMGI_ICON, jlgr->sg.on_time ?
 		JLGR_ID_GOOD_IMAGE : JLGR_ID_SLOW_IMAGE);
 	// Report the seconds that passed.
-	jlgr_menubar_text__(jlgr, color,
-		0., jl_mem_format(jl, "DrawFPS:%d", (int)(1. / jlgr->psec)));
-	jlgr_menubar_text__(jlgr, color,
-		.05, jl_mem_format(jl, "MainFPS:%d", (int)(1. / jl->time.psec)));
+	jl_mem_format(formated, "DrawFPS:%d", (int)(1. / jlgr->psec));
+	jlgr_menubar_text__(jlgr, color, 0., formated);
+	jl_mem_format(formated, "MainFPS:%d", (int)(1. / jl->time.psec));
+	jlgr_menubar_text__(jlgr, color, .05, formated);
 }
 
 static void jlgr_menu_slow_loop__(jlgr_t* jlgr, jlgr_input_t input) {

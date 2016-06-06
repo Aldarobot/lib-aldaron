@@ -241,7 +241,7 @@ void jlgr_openfile_loop(jlgr_t* jlgr) {
 	}
 	if(jlgr->fl.prompt) {
 		if(jlgr_draw_textbox(jlgr, .02, jl_gl_ar(jlgr) - .06, .94, .02,
-			&jlgr->fl.promptstring))
+			jlgr->fl.promptstring))
 		{
 			char *name = jlgr_file_fullname__(jlgr,
 				jlgr->fl.dirname,

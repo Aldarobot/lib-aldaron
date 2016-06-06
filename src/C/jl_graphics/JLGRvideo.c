@@ -13,12 +13,16 @@ typedef long unsigned int jpeg_long_int_t;
 /**
  * Save a JPEG to data
  * @param jl: The library context.
+ * @param rtn: The jl_data_t to return.
+ * @param quality: The quality to save the data as.
  * @param pxdata: 3-byte item R,G,B pixel array
  * @param w: The width
  * @param h: THe height
  * @returns: The data.
 **/
-data_t* jl_vi_make_jpeg_(jl_t* jl,i32_t quality,m_u8_t* pxdata,u16_t w,u16_t h) {
+void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
+	uint16_t w, uint16_t h)
+{
 	uint8_t* data = NULL;
 	jpeg_long_int_t data_size = 0;
 
@@ -114,7 +118,7 @@ data_t* jl_vi_make_jpeg_(jl_t* jl,i32_t quality,m_u8_t* pxdata,u16_t w,u16_t h) 
 	jpeg_destroy_compress(&cinfo);
 
 	/* And we're done! */
-	return jl_data_mkfrom_data(jl, data_size, data);
+	jl_data_mkfrom_data(jl, rtn, data_size, data);
 }
 
 //void memtester(jl_t* jl, str_t name);
@@ -131,7 +135,7 @@ m_u8_t* jl_vi_load_(jl_t* jl, data_t* data, m_u16_t* w, m_u16_t* h) {
 	SDL_Surface *image; //  Free'd by SDL_free(image);
 	SDL_RWops *rw; // Free'd by SDL_RWFromMem
 	void* img_file; // Free'd by jl_mem
-	data_t* pixel_data; // Free'd by jl_mem_string_fstrt
+	data_t pixel_data; // Free'd by jl_mem_string_fstrt
 	void* rtn_pixels; // Returned so not free'd.
 	uint32_t color = 0;
 	u32_t FSIZE = data->size;
@@ -151,16 +155,16 @@ m_u8_t* jl_vi_load_(jl_t* jl, data_t* data, m_u16_t* w, m_u16_t* h) {
 	}
 //	memtester(jl, "LoadImg/Start4");
 	// Covert SDL_Surface.
-	pixel_data = jl_data_make(image->w * image->h * rgba);
+	jl_data_init(jl, &pixel_data, image->w * image->h * rgba);
 	for(i = 0; i < image->h; i++) {
 		for(j = 0; j < image->w; j++) {
 			color = _jl_sg_gpix(image, j, i);
-			jl_data_saveto(pixel_data, rgba, &color);
+			jl_data_saveto(&pixel_data, rgba, &color);
 		}
 	}
 //	memtester(jl, "LoadImg/Start5");
 	//Set Return values
-	rtn_pixels = jl_data_tostring(jl, pixel_data);
+	rtn_pixels = jl_data_tostring(jl, &pixel_data);
 //	memtester(jl, "LoadImg/End6");
 	*w = image->w;
 	*h = image->h;

@@ -178,13 +178,14 @@ static inline void _jlau_init_sounds(jlau_t* jlau, uint8_t *data) {
 */
 void jlau_add_audio(jlau_t* jlau, str_t pzipfile, uint16_t pigid) {
 	JLAU_DEBUG_CHECK(jlau);
-	data_t* aud = jl_file_media(jlau->jl, "jlex/2/_aud", pzipfile,
+	data_t aud;
+	jl_file_media(jlau->jl, &aud, "jlex/2/_aud", pzipfile,
 		jl_gem(), jl_gem_size());
 	jl_print_function(jlau->jl, "AU_Load");
 	jl_print(jlau->jl, "Audio Size: %d", jlau->jl->info);
 	jl_print(jlau->jl, "Loading audiostuffs....");
-	if((aud != NULL) || (jlau->jl->info > 4)) {
-		_jlau_init_sounds(jlau, aud->data);
+	if(jlau->jl->info > 4) {
+		_jlau_init_sounds(jlau, aud.data);
 	}
 	jl_print(jlau->jl, "Loaded audiostuffs!");
 	jl_print_return(jlau->jl, "AU_Load");

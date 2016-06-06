@@ -31,17 +31,15 @@ void jl_data_clear(jl_t* jl, data_t* pa) {
 
 /**
  * Allocates a "strt" of size "size" and returns it.
+ * @param jl: The library context.
+ * @param a: The jl_data_t to initialize.
  * @param size: How many bytes/characters to allocate.
- * @param type: whether automatic freeing should be allowed or not.
  * @returns: A new initialized "strt".
 */
-data_t* jl_data_make(u32_t size) {
-	data_t* a = malloc(sizeof(data_t));
-	a->data = malloc(size+1);
+void jl_data_init(jl_t* jl, data_t* a, uint32_t size) {
+	a->data = jl_memi(jl, size+1);
 	a->size = size;
 	a->curs = 0;
-	jl_mem_clr(a->data, a->size + 1);
-	return a;
 }
 
 /**
@@ -50,17 +48,15 @@ data_t* jl_data_make(u32_t size) {
 */
 void jl_data_free(data_t* pstr) {
 	free(pstr->data);
-	free(pstr);
 }
 
 /**
  *
 */
-data_t* jl_data_mkfrom_data(jl_t* jl, u32_t size, const void *data) {
-	data_t* a = jl_data_make(size);
+void jl_data_mkfrom_data(jl_t* jl, data_t* a, u32_t size, const void *data) {
+	jl_data_init(jl, a, size);
 	jl_mem_copyto(data, a->data, size);
 	a->data[size] = '\0'; // Null terminalte
-	return a;
 }
 
 /**
@@ -68,8 +64,8 @@ data_t* jl_data_mkfrom_data(jl_t* jl, u32_t size, const void *data) {
  * @param string: String to convert
  * @returns: new "strt" with same contents as "string".
 */
-data_t* jl_data_mkfrom_str(str_t string) {
-	return jl_data_mkfrom_data(NULL, strlen(string), string);
+void jl_data_mkfrom_str(data_t* a, str_t string) {
+	return jl_data_mkfrom_data(NULL, a, strlen(string), string);
 }
 
 /**
@@ -169,19 +165,13 @@ void jl_data_insert_byte(jl_t *jl, data_t* pstr, uint8_t pvalue) {
 	}
 }
 
-void jl_data_insert_data(jl_t *jl, data_t* pstr, void* data, u32_t size) {
-//	int i;
-//	uint8_t* data2 = data;
-
+void jl_data_insert_data(jl_t *jl, data_t* pstr, const void* data, u32_t size) {
 	// Add size
 	jl_data_resize(jl, pstr, pstr->size + size);
 	// Copy data.
 	jl_mem_copyto(data, pstr->data + pstr->curs, size);
 	// Increase cursor
 	pstr->curs+=size;
-//	for(i = 0; i < size; i++) {
-//		jl_data_insert_byte(jl, pstr, data2[i]);
-//	}
 }
 
 /**
@@ -248,7 +238,6 @@ void jl_data_trunc(jl_t *jl, data_t* a, uint32_t size) {
 */
 char* jl_data_tostring(jl_t* jl, data_t* a) {
 	char *rtn = (void*)a->data;
-	free(a);
 	return rtn;
 }
 
@@ -278,8 +267,10 @@ u8_t jl_data_test_next(data_t* script, str_t particle) {
  * @param psize: maximum size of truncated "script" to return.
  * @returns: a "strt" that is a truncated array script.
 */
-data_t* jl_data_read_upto(jl_t* jl, data_t* script, u8_t end, u32_t psize) {
-	data_t* compiled = jl_data_make(psize);
+void jl_data_read_upto(jl_t* jl, data_t* compiled, data_t* script, uint8_t end,
+	uint32_t psize)
+{
+	jl_data_init(jl, compiled, psize);
 	compiled->curs = 0;
 	while((jl_data_byte(script) != end) && (jl_data_byte(script) != 0)) {
 		strncat((void*)compiled->data,
@@ -288,5 +279,4 @@ data_t* jl_data_read_upto(jl_t* jl, data_t* script, u8_t end, u32_t psize) {
 		compiled->curs++;
 	}
 	jl_data_trunc(jl, compiled, compiled->curs);
-	return compiled;
 }

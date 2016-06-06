@@ -33,7 +33,7 @@ void jl_mem_leak_init(jl_t* jl);
 void jl_mem_leak_fail(jl_t* jl, str_t fn_name);
 void jl_mem_clr(void* mem, u64_t size);
 void jl_mem_copyto(const void* src, void* dst, u64_t size);
-str_t jl_mem_format(jl_t* jl, str_t format, ... );
+void jl_mem_format(char* rtn, str_t format, ... );
 u32_t jl_mem_random_int(u32_t a);
 void *jl_mem_temp(jl_t* jl, void *mem);
 double jl_mem_addwrange(double v1, double v2);
@@ -41,10 +41,10 @@ double jl_mem_difwrange(double v1, double v2);
 
 // "JLdata_t.c"
 void jl_data_clear(jl_t* jl, data_t* pa);
-data_t* jl_data_make(u32_t size);
+void jl_data_init(jl_t* jl, data_t* a, uint32_t size);
 void jl_data_free(data_t* pstr);
-data_t* jl_data_mkfrom_str(str_t string);
-data_t* jl_data_mkfrom_data(jl_t* jl, u32_t size, const void *data);
+void jl_data_mkfrom_str(data_t* a, str_t string);
+void jl_data_mkfrom_data(jl_t* jl, data_t* a, u32_t size, const void *data);
 void jl_data_data(jl_t *jl, data_t* a, const data_t* b, uint64_t bytes);
 void jl_data_merg(jl_t *jl, data_t* a, const data_t* b);
 void jl_data_trunc(jl_t *jl, data_t* a, uint32_t size);
@@ -55,13 +55,15 @@ void jl_data_add_byte(data_t* pstr, u8_t pvalue);
 void jl_data_delete_byte(jl_t *jl, data_t* pstr);
 void jl_data_resize(jl_t *jl, data_t* pstr, u32_t newsize);
 void jl_data_insert_byte(jl_t *jl, data_t* pstr, uint8_t pvalue);
-void jl_data_insert_data(jl_t *jl, data_t* pstr, void* data, u32_t size);
+void jl_data_insert_data(jl_t *jl, data_t* pstr, const void* data, u32_t size);
 char* jl_data_tostring(jl_t* jl, data_t* a);
 u8_t jl_data_test_next(data_t* script, str_t particle);
-data_t* jl_data_read_upto(jl_t* jl, data_t* script, u8_t end, u32_t psize);
+void jl_data_read_upto(jl_t* jl, data_t* compiled, data_t* script, uint8_t end,
+	uint32_t psize);
 
 // "cl.c"
 void jl_cl_list_alphabetize(struct cl_list *list);
+void jl_clump_list_iterate(jl_t* jl, struct cl_list *list, jl_data_fnct fn);
 
 // "JLmode.c"
 void jl_mode_set(jl_t* jl, u16_t mode, jl_mode_t loops);
@@ -73,6 +75,7 @@ void jl_mode_exit(jl_t* jl);
 // "JLprint.c"
 void jl_print_set(jl_t* jl, jl_print_fnt fn_);
 void jl_print(jl_t* jl, str_t format, ... );
+void jl_print_rewrite(jl_t* jl, const char* format, ... );
 void jl_print_function(jl_t* jl, str_t fn_name);
 void jl_print_return(jl_t* jl, str_t fn_name);
 void jl_print_stacktrace(jl_t* jl);
@@ -88,15 +91,17 @@ u8_t jl_file_exist(jl_t* jl, str_t path);
 void jl_file_rm(jl_t* jl, str_t filename);
 void jl_file_save(jl_t* jl, const void *file, const char *name,
 	uint32_t bytes);
-data_t* jl_file_load(jl_t* jl, str_t file_name);
+void jl_file_load(jl_t* jl, data_t* load, str_t file_name);
 char jl_file_pk_save(jl_t* jl, str_t packageFileName, str_t fileName,
 	void *data, uint64_t dataSize);
-data_t* jl_file_pk_load_fdata(jl_t* jl, data_t* data, str_t file_name);
-data_t* jl_file_pk_load(jl_t* jl, const char *packageFileName,
+char* jl_file_pk_compress(jl_t* jl, const char* folderName);
+void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data, str_t file_name);
+void jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
 	const char *filename);
-data_t* jl_file_media(jl_t* jl, str_t Fname, str_t pzipfile,
+void jl_file_media(jl_t* jl, data_t* rtn, str_t Fname, str_t pzipfile,
 	void *pdata, uint64_t psize);
-u8_t jl_file_mkdir(jl_t* jl, str_t path);
+uint8_t jl_file_dir_mk(jl_t* jl, const char* path);
+struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive);
 str_t jl_file_get_resloc(jl_t* jl, str_t prg_folder, str_t fname);
 
 // "JLthread.c"

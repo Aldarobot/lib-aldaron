@@ -66,3 +66,18 @@ void jl_cl_list_alphabetize(struct cl_list *list) {
 	}
 	cl_list_destroy(alphabetized);
 }
+
+/**
+ * Iterate through a clump list.
+ * @param jl: The library context.
+ * @param list: The clump list.
+ * @param fn: The function that reads the data.
+**/
+void jl_clump_list_iterate(jl_t* jl, struct cl_list *list, jl_data_fnct fn) {
+	int i;
+	struct cl_list_iterator *iterator = cl_list_iterator_create(list);
+
+	for(i = 0; i < cl_list_count(list); i++)
+		fn(jl, cl_list_iterator_next(iterator));
+	cl_list_iterator_destroy(iterator);
+}

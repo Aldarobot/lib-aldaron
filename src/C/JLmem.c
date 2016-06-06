@@ -121,18 +121,18 @@ void *jl_mem_copy(jl_t* jl, const void *src, u64_t size) {
 
 /**
  * Format a string.
+ * @param rtn: Variable to put formated string ( size is 80 bytes )
+ * @param format: The format string, can include %s, %f, %d, etc.
 **/
-str_t jl_mem_format(jl_t* jl, str_t format, ... ) {
+void jl_mem_format(char* rtn, str_t format, ... ) {
+	rtn[0] = '\0';
 	if(format) {
 		va_list arglist;
-		void* temp = jl->jl_ctx[jl_thread_current(jl)].temp;
 
 		va_start( arglist, format );
-		vsprintf( temp, format, arglist );
+		vsnprintf( rtn, 80, format, arglist );
 		va_end( arglist );
-		return temp;
-	}else{
-		return NULL;
+		//printf("done %s\n", (char*)rtn);
 	}
 }
 

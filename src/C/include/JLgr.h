@@ -408,7 +408,7 @@ void jlgr_slidebtn_loop(jlgr_t* jlgr, jl_sprite_t * spr, float defaultx,
 void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 	char *txt, jlgr_input_fnct prun);
 uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
-	float h, data_t* *string);
+	float h, data_t* string);
 void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 	u8_t isdouble, m_f32_t* x1, m_f32_t* x2);
 void jlgr_notify(jlgr_t* jlgr, str_t notification);
@@ -430,7 +430,8 @@ void jl_gl_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, jl_vec3_t* scl);
 void jl_gl_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
 
 // video
-data_t* jl_vi_make_jpeg(jl_t* jl,i32_t quality,m_u8_t* pxdata,u16_t w,u16_t h);
+void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
+	uint16_t w, uint16_t h);
 m_u8_t* jlgr_load_image(jl_t* jl, data_t* data, m_u16_t* w, m_u16_t* h);
 
 // SG

@@ -55,7 +55,7 @@ VPATH = \
 LIB = $(shell echo $(JLL_HOME))/build/jl.o
 COMPILE = printf "[COMP/PROJ] Compiling $<....\n";$(CC) # -to- $@.
 # target: init
-FOLDERS = build/ libs/ media/ src/
+FOLDERS = build/ libs/ src/
 
 ################################################################################
 
@@ -162,7 +162,7 @@ $(BUILD_DEPS)/%.o: %.c $(HEADERS_DEPS)
 -debug: -init-vars
 #	$(eval GL_VERSION=-lGL) ## OpenGL
 	$(eval GL_VERSION=-lGLESv2) ## OpenGL ES
-	$(eval JL_DEBUG=-pg)
+	$(eval JL_DEBUG=-pg -g)
 	$(eval JL_OUT=build/test.out)
 	$(eval OBJS=$(OBJS_PRG))
 -publish: -init-vars
@@ -187,10 +187,6 @@ build/:
 	mkdir -p build/test/ # Unoptimized version of build/objs/
 libs/:
 	mkdir -p libs/ # Where the dependencies for your project are stored (.c*)
-media/:
-	mkdir -p media/aud/
-	mkdir -p media/gen/
-	mkdir -p media/img/
 src/:
 	# Where your program's code files are stored (.c*)
 	mkdir -p src/include/ # Where your program's header files are stored.

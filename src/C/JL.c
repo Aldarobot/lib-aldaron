@@ -8,7 +8,6 @@
 
 //Initialize The Libraries Needed At Very Beginning: The Base Of It All
 static inline jl_t* jl_init_essential__(void) {
-	JL_PRINT("Starting JL_Lib - Version "JL_VERSION"....");
 	// Memory
 	jl_t* jl = jl_mem_init_(); // Create The Library Context
 	// Printing to terminal
@@ -30,7 +29,7 @@ static inline void jl_init_libs__(jl_t* jl) {
 }
 
 static inline void jl_init__(jl_t* jl,jl_fnct _fnc_init_,str_t nm,u64_t ctx1s) {
-	jl_print(jl, "Initializing subsystems....");
+	JL_PRINT_DEBUG(jl, "Initializing subsystems....");
 	// Run the library's init function.
 	jl_init_libs__(jl);
 	// Allocate the program's context.

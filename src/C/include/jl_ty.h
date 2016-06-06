@@ -84,6 +84,7 @@ typedef struct{
 	}has;
 	struct{
 		void* printfn; // Function for printing
+		uint8_t bkspc; // Backspace.
 		SDL_mutex* mutex; // Mutex for printing to terminal
 	}print;
 	struct{
@@ -103,7 +104,7 @@ typedef struct{
 			char* errf; // The error file "-- JL_Lib/errf.txt"
 		}paths; // Paths to different files.
 
-		data_t* separator;
+		data_t separator;
 	}fl;
 	m_str_t name; // The name of the program.
 	uint32_t info; // @startup:# images loaded from media.zip.Set by others.

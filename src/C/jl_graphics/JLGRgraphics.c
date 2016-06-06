@@ -599,23 +599,22 @@ void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
  * @return 0 if not.
 */
 uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
-	float h, data_t* *string)
+	float h, data_t* string)
 {
 	uint8_t bytetoinsert = 0;
 
-	if(*string == NULL) *string = jl_data_make(1);
-	jlgr->gr.textbox_string = *string;
+	jlgr->gr.textbox_string = string;
 	if((bytetoinsert = jl_ct_typing_get(jlgr))) {
 		if(bytetoinsert == '\b') {
-			if((*string)->curs == 0) return 0;
-			(*string)->curs--;
-			jl_data_delete_byte(jlgr->jl, *string);
+			if(string->curs == 0) return 0;
+			string->curs--;
+			jl_data_delete_byte(jlgr->jl, string);
 		}else if(bytetoinsert == '\02') {
-			jl_data_delete_byte(jlgr->jl, *string);
+			jl_data_delete_byte(jlgr->jl, string);
 		}else if(bytetoinsert == '\n') {
 			return 1;
 		}else{
-			jl_data_insert_byte(jlgr->jl, *string,
+			jl_data_insert_byte(jlgr->jl, string,
 				 bytetoinsert);
 		}
 //			JL_PRINT("inserting %1s\n", &bytetoinsert);
@@ -623,11 +622,11 @@ uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
 	jlgr_input_do(jlgr, JL_CT_MAINLT, _jlgr_textbox_lt, NULL);
 	jlgr_input_do(jlgr, JL_CT_MAINRT, _jlgr_textbox_rt, NULL);
 //		jlgr_draw_image(jl, 0, 0, x, y, w, h, ' ', 255);
-	jlgr_draw_text(jlgr, (char*)((*string)->data),
+	jlgr_draw_text(jlgr, (char*)(string->data),
 		(jl_vec3_t) {x, y, 0.},
 		(jl_font_t) {0,JL_IMGI_ICON,0,jlgr->fontcolor,h});
 //		jlgr_draw_image(jl, 0, 0,
-//			x + (h*((float)(*string)->curs-.5)), y, h, h, 252, 255);
+//			x + (h*((float)string->curs-.5)), y, h, h, 252, 255);
 	return 0;
 }
 
@@ -710,10 +709,6 @@ void jlgr_init__(jlgr_t* jlgr) {
 
 /**      @endcond      **/
 /***   #End of File   ***/
-
-data_t* jl_vi_make_jpeg(jl_t* jl,i32_t quality,m_u8_t* pxdata,u16_t w,u16_t h) {
-	return jl_vi_make_jpeg_(jl, quality, pxdata, w, h);
-}
 
 m_u8_t* jlgr_load_image(jl_t* jl, data_t* data, m_u16_t* w, m_u16_t* h) {
 	return jl_vi_load_(jl, data, w, h);

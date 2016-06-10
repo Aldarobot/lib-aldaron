@@ -95,11 +95,9 @@ void jl_file_load(jl_t* jl, data_t* load, str_t file_name);
 char jl_file_pk_save(jl_t* jl, str_t packageFileName, str_t fileName,
 	void *data, uint64_t dataSize);
 char* jl_file_pk_compress(jl_t* jl, const char* folderName);
-void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data, str_t file_name);
+void jl_file_pk_load_fdata(jl_t* jl,data_t* rtn,data_t* data,str_t file_name);
 void jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
 	const char *filename);
-void jl_file_media(jl_t* jl, data_t* rtn, str_t Fname, str_t pzipfile,
-	void *pdata, uint64_t psize);
 uint8_t jl_file_dir_mk(jl_t* jl, const char* path);
 struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive);
 str_t jl_file_get_resloc(jl_t* jl, str_t prg_folder, str_t fname);

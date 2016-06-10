@@ -51,124 +51,61 @@ uint32_t _jl_sg_gpix(/*in */ SDL_Surface* surface, int32_t x, int32_t y) {
 }
 
 void _jl_sg_load_jlpx(jlgr_t* jlgr,data_t* data,void **pixels,int *w,int *h) {
-	if(data == NULL) {
-		jl_print(jlgr->jl, "NULL DATA!");
-		jl_sg_kill(jlgr->jl);
-	}else if(data->data[jlgr->sg.init_image_location] == 0) {
-		return;
-	}
+	SDL_Surface *image;
+	SDL_RWops *rw;
+	uint32_t color = 0;
+	data_t pixel_data;
+	int i, j;
 
-	jl_print_function(jlgr->jl, "SG_Jlpx"); // {
-	
-	//Check If File Is Of Correct Format
-	char *testing = malloc(strlen(JL_IMG_HEADER)+1);
-	int32_t i, j;
-
-	jl_mem_copyto(data->data + jlgr->sg.init_image_location, testing,
-		strlen(JL_IMG_HEADER));
-	testing[strlen(JL_IMG_HEADER)] = '\0';
-	JL_PRINT_DEBUG(jlgr->jl, "header=\"%s\" @%d", testing,
-		jlgr->sg.init_image_location);
-
-	if(strcmp(testing, JL_IMG_HEADER) != 0) {
-		jl_print(jlgr->jl, "error: bad file type:");
-		jl_print(jlgr->jl, ":%s", testing);
-		jl_print(jlgr->jl, "!=");
-		jl_print(jlgr->jl, ":%s", JL_IMG_HEADER);
-		jl_print(jlgr->jl, "couldn't load image #%d",
-			jlgr->sg.image_id);
+	if(data->data[0] == 0) {
+		jl_print(jlgr->jl, "NO DATA!");
 		jl_sg_kill(jlgr->jl);
 	}
-	uint8_t tester = data->data[jlgr->sg.init_image_location+strlen(JL_IMG_HEADER)];
-	uint32_t FSIZE;
-	if(tester == JL_IMG_FORMAT_FLS) {
-		SDL_Surface *image;
-		SDL_RWops *rw;
-		void* img_file = NULL;
-		uint32_t color = 0;
-		data_t pixel_data;
 
-		JL_PRINT_DEBUG(jlgr->jl, "png/gif/jpeg etc.");
-		data->curs = jlgr->sg.init_image_location+strlen(JL_IMG_HEADER)+1;
-		jl_data_loadto(data, 4, &FSIZE);
-		JL_PRINT_DEBUG(jlgr->jl, "File Size = %d", FSIZE);
-		img_file = jl_memi(jlgr->jl, FSIZE);
-		jl_data_loadto(data, FSIZE, img_file);
-		rw = SDL_RWFromMem(img_file, FSIZE);
-		if ((image = IMG_Load_RW(rw, 1)) == NULL) {
-			jl_print(jlgr->jl, "Couldn't load image: %s",
-				IMG_GetError());
-			jl_sg_kill(jlgr->jl);
+	jl_print_function(jlgr->jl, "SG_Jlpx");
+
+	JL_PRINT_DEBUG(jlgr->jl, "File Size = %d", data->size);
+	rw = SDL_RWFromMem(data->data + data->curs, data->size);
+	if ((image = IMG_Load_RW(rw, 1)) == NULL) {
+		jl_print(jlgr->jl, "Couldn't load image: %s",
+			IMG_GetError());
+		jl_sg_kill(jlgr->jl);
+	}
+	// Covert SDL_Surface.
+	jl_data_init(jlgr->jl, &pixel_data, image->w * image->h * 4);
+	for(i = 0; i < image->h; i++) {
+		for(j = 0; j < image->w; j++) {
+			color = _jl_sg_gpix(image, j, i);
+			jl_data_saveto(&pixel_data, 4, &color);
 		}
-		// Covert SDL_Surface.
-		jl_data_init(jlgr->jl, &pixel_data, image->w * image->h * 4);
-		for(i = 0; i < image->h; i++) {
-			for(j = 0; j < image->w; j++) {
-				color = _jl_sg_gpix(image, j, i);
-				jl_data_saveto(&pixel_data, 4, &color);
-			}
-		}
-		jlgr->sg.init_image_location += FSIZE + 6;
-		//Set Return values
-		*pixels = jl_data_tostring(jlgr->jl, &pixel_data);
-		*w = image->w;
-		*h = image->h;
-		// Clean-up
-		SDL_free(image);
-	}else{
-		jl_print(jlgr->jl, "bad file type(must be 4) is: %d", tester);
-		jl_sg_kill(jlgr->jl);
 	}
+	//Set Return values
+	*pixels = jl_data_tostring(jlgr->jl, &pixel_data);
+	*w = image->w;
+	*h = image->h;
+	// Clean-up
+	SDL_free(image);
+
 	jl_print_return(jlgr->jl, "SG_Jlpx");
 }
 
-//loads next image in the currently loaded file.
-static inline uint8_t _jl_sg_load_next_img(jlgr_t* jlgr) {
+//Load the images in the image file
+static inline uint32_t jl_sg_add_image__(jlgr_t* jlgr, data_t* data) {
 	void *fpixels = NULL;
 	int fw;
 	int fh;
-	jl_print_function(jlgr->jl, "SG_Imgs");
-	_jl_sg_load_jlpx(jlgr, jlgr->sg.image_data, &fpixels, &fw, &fh);
-	if(fpixels == NULL) {
-		JL_PRINT_DEBUG(jlgr->jl, "loaded %d", jlgr->sg.image_id);
-		jlgr->jl->info = jlgr->sg.image_id;
-		jl_print(jlgr->jl, "IL");
-		jl_print_return(jlgr->jl, "SG_Imgs");
-		return 0;
-	}else{
-		JL_PRINT_DEBUG(jlgr->jl, "creating image #%d....", jlgr->sg.igid);
-		jl_gl_maketexture(jlgr, jlgr->sg.igid,
-			jlgr->sg.image_id, fpixels, fw, fh, 0);
-		JL_PRINT_DEBUG(jlgr->jl, "created image #%d:%d!", jlgr->sg.igid,
-			jlgr->sg.image_id);
-//		#endif
-		jlgr->sg.image_id++;
-		jl_print_return(jlgr->jl, "SG_Imgs");
-		return 1;
-	}
-}
-
-void jl_sg_add_some_imgs_(jlgr_t* jlgr, u16_t x) {
-	m_u16_t i;
-	for(i = 0; i < x; i++) {
-		if(!_jl_sg_load_next_img(jlgr)) break;
-	}
-}
-
-//Load the images in the image file
-static inline void _jl_sg_init_images(jlgr_t* jlgr,data_t* data,u16_t gi,u16_t x){
-	jlgr->sg.init_image_location = 0;
-	jlgr->sg.image_id= 0; //Reset Image Id
-	jlgr->sg.igid = gi;
-	jlgr->sg.image_data = data;
+	uint32_t rtn;
 
 	jl_print_function(jlgr->jl, "SG_InitImgs");
-	JL_PRINT_DEBUG(jlgr->jl, "loading images....");
-	JL_PRINT_DEBUG(jlgr->jl, "stringlength = %d", data->size);
+	JL_PRINT_DEBUG(jlgr->jl, "size = %d", data->size);
 //load textures
-	if(x) jl_sg_add_some_imgs_(jlgr, x);
-	else while(_jl_sg_load_next_img(jlgr));
+	_jl_sg_load_jlpx(jlgr, data, &fpixels, &fw, &fh);
+	JL_PRINT_DEBUG(jlgr->jl, "creating image....", jlgr->sg.igid);
+	rtn = jl_gl_maketexture(jlgr, fpixels, fw, fh, 0);
+	JL_PRINT_DEBUG(jlgr->jl, "created image!", jlgr->sg.igid,
+		jlgr->sg.image_id);
 	jl_print_return(jlgr->jl, "SG_InitImgs");
+	return rtn;
 }
 
 /**
@@ -186,27 +123,26 @@ void jl_sg_kill(jl_t* jl) {
 	// Program is stopped at this point.
 }
 
-static void jl_sg_add_image__(jl_t* jl, str_t pzipfile, u16_t pigid, u8_t x) {
-	jl_print_function(jl, "SG_LImg");
-	//Load Graphics
-	data_t img;
-	jl_file_media(jl, &img, "jlex/2/_img", pzipfile, jl_gem(),jl_gem_size());
-
-	JL_PRINT_DEBUG(jl, "Loading Images....");
-	_jl_sg_init_images(jl->jlgr, &img, pigid, x);
-	JL_PRINT_DEBUG(jl, "Loaded Images!");
-	jl_print_return(jl, "SG_LImg"); // }
-}
-
 /**
- * Load all images from a zipfile and give them ID's.
- * info: info is set to number of images loaded.
- * @param jl: library context
- * @param pzipfile: full file name of a zip file.
- * @param pigid: which image group to load the images into.
+ * Load an image from a zipfile.
+ * @param jlgr: The library context
+ * @param zipdata: data for a zip file.
+ * @param filename: Name of the image file in the package.
+ * @returns: Texture object.
 */
-void jl_sg_add_image(jl_t* jl, str_t pzipfile, u16_t pigid) {
-	jl_sg_add_image__(jl, pzipfile, pigid, 0);
+uint32_t jl_sg_add_image(jlgr_t* jlgr, data_t* zipdata, const char* filename) {
+	jl_print_function(jlgr->jl, "SG_LImg");
+	data_t img;
+
+	// Load image into "img"
+	jl_file_pk_load_fdata(jlgr->jl, &img, zipdata, filename);
+	if(jlgr->jl->errf) exit(-1);
+
+	JL_PRINT_DEBUG(jlgr->jl, "Loading Image....");
+	uint32_t rtn = jl_sg_add_image__(jlgr, &img);
+	JL_PRINT_DEBUG(jlgr->jl, "Loaded Image!");
+	jl_print_return(jlgr->jl, "SG_LImg");
+	return rtn;
 }
 
 static void jl_sg_draw_up(jl_t* jl, uint8_t resize, void* data) {
@@ -308,20 +244,21 @@ void jl_sg_initb__(jlgr_t* jlgr) {
 void jl_sg_inita__(jlgr_t* jlgr) {
 	jlgr_redraw_t redraw = { jl_dont, jl_dont, jl_dont, jl_dont };
 	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
+	data_t packagedata;
 
-	//Set Up Variables
-	jlgr->gl.textures = NULL;
-	jlgr->gl.tex.uniforms.textures = NULL;
-	jlgr->sg.image_id = 0; //Reset Image Id
-	jlgr->sg.igid = 0; //Reset Image Group Id
+	jl_data_mkfrom_data(jlgr->jl, &packagedata, jl_gem_size(), jl_gem());
+
 	// Initialize redraw routines to do nothing.
 	jl_mem_copyto(&redraw, &(jlgr->draw.redraw), sizeof(jlgr_redraw_t));
 	// Load Graphics
-	jlgr->gl.allocatedg = 0;
-	jlgr->gl.allocatedi = 0;
-	jl_sg_add_image__(jlgr->jl,
-		(void*)jl_file_get_resloc(jlgr->jl, JL_MAIN_DIR, JL_MAIN_MEF),
-		0, 1);
+	jlgr->textures.font = jl_sg_add_image(jlgr, &packagedata,
+		"/images/jlf8.png");
+	jlgr->textures.logo = jl_sg_add_image(jlgr, &packagedata,
+		"/images/JL_Lib.png");
+	jlgr->textures.icon = jl_sg_add_image(jlgr, &packagedata,
+		"/images/taskbar_items.png");
+	jlgr->textures.game = jl_sg_add_image(jlgr, &packagedata,
+		"/images/landscape.png");
 	// Create upper and lower screens
 	jlgr_sprite_init(jlgr, &jlgr->sg.bg.up, rc,
 		jlgr_sprite_dont, jl_sg_draw_up, NULL, 0, NULL, 0);

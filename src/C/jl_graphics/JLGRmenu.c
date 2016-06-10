@@ -114,7 +114,7 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 	// Make the shadow vertex object.
 	jlgr_vos_rec(jlgr, &icon[0], rc_shadow, shadow_color, 0);
 	// Make the icon vertex object.
-	jlgr_vos_image(jlgr, &icon[1], rc_icon, 0, 1,
+	jlgr_vos_image(jlgr, &icon[1], rc_icon, jlgr->textures.icon,
 		JLGR_ID_UNKNOWN, 255);
 	// Clear the menubar & make pre-renderer.
 	for( menu.draw.cursor = 0; menu.draw.cursor < 10;
@@ -140,12 +140,12 @@ static void jlgr_menubar_text__(jlgr_t* jlgr,uint8_t* color,float y,str_t text){
 	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), y, 0. };
 
 	jlgr_draw_text(jlgr, text, tr,
-		(jl_font_t) { 0, JL_IMGI_ICON, 0, color, 
+		(jl_font_t) { jlgr->textures.icon, 0, color, 
 			.1 / strlen(text)});
 }
 
 static void jlgr_menu_flip_draw__(jlgr_t* jlgr) {
-	jlgr_menu_draw_icon(jlgr, 0, JL_IMGI_ICON, JLGR_ID_FLIP_IMAGE);
+	jlgr_menu_draw_icon(jlgr, jlgr->textures.icon, JLGR_ID_FLIP_IMAGE);
 }
 
 static void jlgr_menu_flip_press__(jlgr_t* jlgr, jlgr_input_t input) {
@@ -163,7 +163,7 @@ static void jlgr_menu_flip_press__(jlgr_t* jlgr, jlgr_input_t input) {
 }
 
 static void jlgr_menu_name_draw2__(jlgr_t* jlgr) {
-	jlgr_menu_draw_icon(jlgr, 0, JL_IMGI_ICON, JLGR_ID_UNKNOWN);
+	jlgr_menu_draw_icon(jlgr, jlgr->textures.icon, JLGR_ID_UNKNOWN);
 }
 
 static void jlgr_menu_name_draw__(jlgr_t* jlgr) {
@@ -174,12 +174,12 @@ static void jlgr_menu_name_draw__(jlgr_t* jlgr) {
 	jlgr_draw_text(jlgr, jlgr->wm.windowTitle[0],
 		(jl_vec3_t) { 1. - (jl_gl_ar(jlgr) * (menu->draw.cursor+1.)),
 			0., 0. },
-		(jl_font_t) { 0, JL_IMGI_ICON, 0, jlgr->fontcolor, 
+		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, 
 			text_size});
 	jlgr_draw_text(jlgr, jlgr->wm.windowTitle[1],
 		(jl_vec3_t) { 1. - (jl_gl_ar(jlgr) * (menu->draw.cursor+1.)),
 			text_size, 0. },
-		(jl_font_t) { 0, JL_IMGI_ICON, 0, jlgr->fontcolor, 
+		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, 
 			text_size});
 }
 
@@ -189,7 +189,7 @@ static void jlgr_menu_slow_draw__(jlgr_t* jlgr) {
 	char formated[80];
 
 	// Draw the icon based on whether on time or not.
-	jlgr_menu_draw_icon(jlgr, 0, JL_IMGI_ICON, jlgr->sg.on_time ?
+	jlgr_menu_draw_icon(jlgr, jlgr->textures.icon, jlgr->sg.on_time ?
 		JLGR_ID_GOOD_IMAGE : JLGR_ID_SLOW_IMAGE);
 	// Report the seconds that passed.
 	jl_mem_format(formated, "DrawFPS:%d", (int)(1. / jlgr->psec));
@@ -230,12 +230,12 @@ void jlgr_menu_toggle(jlgr_t* jlgr) {
 		jlgr->menubar.menubar.loop = jlgr_sprite_dont;
 }
 
-void jlgr_menu_draw_icon(jlgr_t* jlgr, u16_t g, u16_t i, u8_t c) {
+void jlgr_menu_draw_icon(jlgr_t* jlgr, uint32_t tex, u8_t c) {
 	jl_rect_t rc_icon = { 0., 0., .1, .1};
 	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(&jlgr->menubar.menubar);
 	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), 0., 0. };
 
-	jlgr_vos_image(jlgr, &(menu_draw->icon[1]), rc_icon, g, i, c, 255);
+	jlgr_vos_image(jlgr, &(menu_draw->icon[1]), rc_icon, tex, c, 255);
 	jlgr_draw_vo(jlgr, &(menu_draw->icon[1]), &tr);
 }
 

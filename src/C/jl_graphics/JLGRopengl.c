@@ -345,8 +345,8 @@ static void jl_gl_texture_off__(jlgr_t* jlgr) {
 }
 
 // Make & Bind a new texture.
-static void jl_gl_texture_new__(jlgr_t* jlgr, m_u32_t *tex, u8_t* px,
-	u16_t w, u16_t h, u8_t bytepp)
+static void jl_gl_texture_new__(jlgr_t* jlgr, uint32_t *tex, uint8_t* px,
+	uint16_t w, uint16_t h, uint8_t bytepp)
 {
 	jl_print_function(jlgr->jl, "jl_gl_texture_new__");
 	// Make the texture
@@ -372,40 +372,21 @@ static void jl_gl_depthbuffer_new__(jlgr_t* jlgr,m_u32_t*db ,u16_t w,u16_t h) {
 }
 */
 // Make a texture - doesn't free "pixels"
-void jl_gl_maketexture(jlgr_t* jlgr, uint16_t gid, uint16_t id,
-	void* pixels, int width, int height, u8_t bytepp)
+uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels, int width, int height,
+	u8_t bytepp)
 {
+	uint32_t texture;
+
 	jl_print_function(jlgr->jl, "GL_MkTex");
 	if (!pixels) {
 		jl_print(jlgr->jl, "null pixels");
 		jl_sg_kill(jlgr->jl);
 	}
-	if (jlgr->gl.allocatedg < gid + 1) {
-		jlgr->gl.textures =
-			realloc(jlgr->gl.textures,
-				sizeof(uint32_t *) * (gid+1));
-		jlgr->gl.tex.uniforms.textures =
-			realloc(jlgr->gl.tex.uniforms.textures,
-				sizeof(GLint *) * (gid+1));
-		jlgr->gl.allocatedg = gid + 1;
-		jlgr->gl.allocatedi = 0;
-		jlgr->gl.textures[gid] = NULL;
-		jlgr->gl.tex.uniforms.textures[gid] = NULL;
-	}
-	if (jlgr->gl.allocatedi < id + 1) {
-		jlgr->gl.textures[gid] =
-			realloc(jlgr->gl.textures[gid],
-				sizeof(uint32_t) * (id+1));
-		jlgr->gl.tex.uniforms.textures[gid] =
-			realloc(jlgr->gl.tex.uniforms.textures[gid],
-				sizeof(GLint) * (id+1));
-		jlgr->gl.allocatedi = id + 1;
-	}
 	JL_PRINT_DEBUG(jlgr->jl, "generating texture (%d,%d)",width,height);
 	// Make the texture.
-	jl_gl_texture_new__(jlgr, &jlgr->gl.textures[gid][id], pixels, width,
-		height, bytepp);
+	jl_gl_texture_new__(jlgr, &texture, pixels, width, height, bytepp);
 	jl_print_return(jlgr->jl, "GL_MkTex");
+	return texture;
 }
 
 //Lower Level Stuff
@@ -893,11 +874,11 @@ void jl_gl_clrs(jlgr_t* jlgr, jl_vo_t* pv, u8_t *rgba) {
 }
 
 // Set texturing to a bitmap
-void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,u8_t map,u8_t a,u16_t pgid,u16_t pi){
+void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,u8_t map,u8_t a, uint32_t tx) {
 	_jl_gl_txtr(jlgr, &pv, a, 0);
-	pv->tx = jlgr->gl.textures[pgid][pi];
+	pv->tx = tx;
 	if(!pv->tx) {
-		jl_print(jlgr->jl, "Error: No Texture @%d/%d", pgid, pi);
+		jl_print(jlgr->jl, "Error: Texture=0!");
 		jl_print_stacktrace(jlgr->jl);
 		exit(-1);
 	}
@@ -1090,14 +1071,10 @@ static inline void _jl_gl_init_shaders(jlgr_t* jlgr) {
 	JL_PRINT_DEBUG(jlgr->jl, "made programs.");
 
 	JL_PRINT_DEBUG(jlgr->jl, "setting up shaders....");
-	if(jlgr->gl.tex.uniforms.textures == NULL) {
-		jl_print(jlgr->jl, "Couldn't create uniforms");
-		jl_sg_kill(jlgr->jl);
-	}
 	// Texture
 	jlgr->gl.prm.uniforms.textures =
 		_jl_gl_getu(jlgr, jlgr->gl.prgs[JL_GL_SLPR_PRM], "texture");
-	jlgr->gl.tex.uniforms.textures[0][0] =
+	jlgr->gl.tex.uniforms.textures =
 		_jl_gl_getu(jlgr, jlgr->gl.prgs[JL_GL_SLPR_TEX], "texture");
 	jlgr->gl.chr.uniforms.textures =
 		_jl_gl_getu(jlgr, jlgr->gl.prgs[JL_GL_SLPR_CHR], "texture");

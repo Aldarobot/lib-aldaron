@@ -382,10 +382,11 @@ static void jl_file_pk_load_quit__(jl_t* jl) {
 /**
  * Load a zip package from memory.
  * @param jl: The library context.
+ * @param rtn: An empty data_t structure to return to.  Needs to be freed.
  * @param data: The data that contains the zip file.
  * @param file_name: The name of the file to load.
 **/
-void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data, str_t file_name) {
+void jl_file_pk_load_fdata(jl_t* jl,data_t* rtn,data_t* data,str_t file_name) {
 	zip_error_t ze; ze.zip_err = ZIP_ER_OK;
 	zip_source_t *file_data;
 	int zerror = 0;
@@ -407,8 +408,8 @@ void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data, str_t file_name)
 		zip_error_init_with_code(&ze, ze.zip_err);
 		jl_print(jl, "couldn't load pckg file");
 		jl_print(jl, "because: \"%s\"", zip_error_strerror(&ze));
-		char name[3]; name[0] = data->data[0]; name[1] = '\0';
-		jl_print(jl, "First character = %1s", name);
+//		char name[3]; name[0] = data->data[0]; name[1] = '\0';
+//		jl_print(jl, "First character = %s %d", data->data, data->data[0]);
 		exit(-1);
 	}
 
@@ -423,7 +424,6 @@ void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data, str_t file_name)
 		}else{
 			jl_print(jl, "\tunknown error");
 		}
-		jl_file_pk_load_quit__(jl);
 		exit(-1);
 	}
 	JL_PRINT_DEBUG(jl, "error check 4.");
@@ -437,19 +437,17 @@ void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data, str_t file_name)
 		jl_print(jl, "couldn't open up file: \"%s\" in package:",
 			file_name);
 		jl_print(jl, "because: %s", (void *)zip_strerror(zipfile));
+		jl_print(jl, zip_get_name(zipfile, 0, ZIP_FL_UNCHANGED));
 		jl->errf = JL_ERR_NONE;
-		jl_file_pk_load_quit__(jl);
 		return;
 	}
 	JL_PRINT_DEBUG(jl, "opened file in package / reading opened file....");
 	if((jl->info = zip_fread(file, fileToLoad, PKFMAX)) == -1) {
 		jl_print(jl, "file reading failed");
-		jl_file_pk_load_quit__(jl);
 		exit(-1);
 	}
 	if(jl->info == 0) {
 		JL_PRINT_DEBUG(jl, "empty file, returning NULL.");
-		jl_file_pk_load_quit__(jl);
 		return;
 	}
 	JL_PRINT_DEBUG(jl, "jl_file_pk_load: read %d bytes", jl->info);
@@ -459,7 +457,6 @@ void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data, str_t file_name)
 	if(jl->info) jl_data_mkfrom_data(jl, rtn, jl->info, fileToLoad);
 	JL_PRINT_DEBUG(jl, "done.");
 	jl->errf = JL_ERR_NERR;
-	jl_file_pk_load_quit__(jl);
 }
 
 /**
@@ -493,6 +490,9 @@ void jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
 		return;
 	}
 	jl_file_pk_load_fdata(jl, rtn, &data, filename);
+	if(jl->errf) exit(-1);
+	jl_file_pk_load_quit__(jl);
+	return;
 }
 
 /**
@@ -631,30 +631,6 @@ void jl_file_mkfile(jl_t* jl, data_t* dc, str_t pzipfile, str_t pfilebase,
 	//Close Block "MKFL"
 	jl_print_return(jl, "FL_MkFl");
 }
-
-/**
- * Load media package, create it if it doesn't exist.
- * @param jl: Library Context
- * @param rtn: The variable to put read data.
- * @param Fname: File in Media Package to load.
- * @param pzipfile: Where to make the package.
- * @param pdata: Media Package Data to save if it doesn't exist.
- * @param psize: Size of "pdata" 
-*/
-void jl_file_media(jl_t* jl, data_t* rtn, str_t Fname, str_t pzipfile,
-	void *pdata, uint64_t psize)
-{
-	// Try to load package	
-	jl_file_pk_load(jl, rtn, pzipfile, Fname);
-	JL_PRINT_DEBUG(jl, "JL_FL_MEDIA Returning");
-	//If Package doesn't exist!! - create
-	if(jl->errf == JL_ERR_FIND)
-		return jl_file_mkfile(jl, rtn, pzipfile, Fname, pdata, psize);
-}
-
-/**
- * Load 
-**/
 
 /**
  * Get the designated location for a resource file. Resloc = Resource Location

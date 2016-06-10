@@ -18,13 +18,14 @@
 
 // Run when mouse needs to be redrawn.
 void jlgr_mouse_draw_(jl_t* jl, uint8_t resize, void* ctx) {
-	// Draw mouse, if using a computer.
+	// Draw mouse, if using appropriate.
 #if JL_PLAT == JL_PLAT_COMPUTER //if computer
+	jlgr_t* jlgr = jl->jlgr;
 	jl_vo_t* mouse_vo = ctx;
 	jl_rect_t rc = { 0.f, 0.f, 1.f, 1.f };
 
-	jlgr_vos_image(jl->jlgr, mouse_vo, rc, 0, JL_IMGI_FONT, 255, 255);
-	jlgr_draw_vo(jl->jlgr, mouse_vo, NULL);
+	jlgr_vos_image(jlgr, mouse_vo, rc, jlgr->textures.font, 255, 255);
+	jlgr_draw_vo(jlgr, mouse_vo, NULL);
 #endif
 }
 

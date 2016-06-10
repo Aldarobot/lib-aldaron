@@ -24,38 +24,30 @@ void jlau_checkthread__(jlau_t* jlau) {
 }
 
 /**
- * load music from data pointed to by "data" of length "dataSize" into slot
- * "IDinStack", set volume of music to "p_vol"
+ * load music from data pointed to by "data" of length "dataSize" into "music",
+ * set volume of music to "p_vol"
  */
-void jlau_load(jlau_t* jlau, u32_t IDinStack, const void *data, u32_t dataSize,
-	u8_t volumeChange)
+void jlau_load(jlau_t* jlau, jlau_music_t* music, uint8_t volumeChange,
+	const void *data, uint32_t dataSize)
 {
-	JLAU_DEBUG_CHECK(jlau);
-	jl_print(jlau->jl, "m %p", jlau->jmus);
 	SDL_RWops *rw;
-	Mix_Music* music;
 
-	//Open Block "AUDI/LOAD"
+	JLAU_DEBUG_CHECK(jlau);
 	jl_print_function(jlau->jl, "AU_Load");
-
-	jl_print(jlau->jl,"loading music %d....",IDinStack);
 	jl_print(jlau->jl, "ausize: %d", dataSize);
 	jl_print(jlau->jl, "audata: \"%4s\"", data);
 	rw = SDL_RWFromConstMem(data, dataSize);
 	jl_print(jlau->jl, "Read step 2:");
-	music = Mix_LoadMUS_RW(rw, 1);
-	jl_print(jlau->jl, "Read step 4: %p", jlau->jmus);
-	jlau->jmus[IDinStack]._MUS = music;
+	music->_MUS = Mix_LoadMUS_RW(rw, 1);
 	jl_print(jlau->jl, "Read step 3:");
-	jlau->jmus[IDinStack]._VOL = volumeChange;
-	if(jlau->jmus[IDinStack]._MUS == NULL) {
+	music->_VOL = volumeChange;
+	if(music->_MUS == NULL) {
 		jl_print(jlau->jl, ":Couldn't load music because: %s",
 			(char *)SDL_GetError());
-		jl_sg_kill(jlau->jl);
-	}else{
-		jl_print(jlau->jl, "loaded music #%d!", IDinStack);
+		exit(-1);
 	}
-	
+	SDL_RWclose(rw);
+	jl_print(jlau->jl, "Loaded music!");
 	jl_print_return(jlau->jl, "AU_Load");
 }
 
@@ -95,8 +87,8 @@ void jlau_panning_default(void) {
 
 /** @cond **/
 void _jlau_play(jlau_t* jlau) {
-	Mix_VolumeMusic(jlau->jmus[jlau->idis]._VOL);
-	Mix_FadeInMusic(jlau->jmus[jlau->idis]._MUS, 1, jlau->sofi * 1000);
+	Mix_VolumeMusic(jlau->next._VOL);
+	Mix_FadeInMusic(jlau->next._MUS, 1, (int)(jlau->fade * 1000.));
 }
 
 /** @endcond **/
@@ -104,10 +96,10 @@ void _jlau_play(jlau_t* jlau) {
 /**
  * fade out any previously playing music (if there is any) for
  * "p_secondsOfFadeOut" seconds
- * @param p_secondsOfFadeOut: How many seconds to fade music.
+ * @param out: How many seconds to fade music.
 */
-void jlau_mus_halt(u8_t p_secondsOfFadeOut) {
-	Mix_FadeOutMusic(p_secondsOfFadeOut * 1000);
+void jlau_mus_halt(float out) {
+	Mix_FadeOutMusic((int)(out * 1000.));
 }
 
 /** 
@@ -115,17 +107,16 @@ void jlau_mus_halt(u8_t p_secondsOfFadeOut) {
  * "p_secondsOfFadeOut" seconds, then fade in music with ID "IDinStack"
  * for "p_secondsOfFadeIn" seconds
  * @param jlau: The jlau library context.
- * @param 
+ * @param music: The music to play.
+ * @param out: Seconds of fade-out.
+ * @param in: Seconds of fade-in.
 */
-void jlau_mus_play(jlau_t* jlau, u32_t IDinStack, u8_t secondsOfFadeOut,
-	u8_t secondsOfFadeIn)
-{
+void jlau_play_music(jlau_t* jlau, jlau_music_t* music, float out, float in) {
 	JLAU_DEBUG_CHECK(jlau);
-	jlau->idis = IDinStack;
-	jlau->sofi = secondsOfFadeIn;
-	jlau->sofo = secondsOfFadeOut;
+	jlau->next = *music;
+	jlau->fade = in;
 	//If music playing already, then halt
-	if(Mix_PlayingMusic()) jlau_mus_halt(jlau->sofo);
+	if(Mix_PlayingMusic()) jlau_mus_halt(out);
 	//If music not playing, then start.
 	else _jlau_play(jlau);
 }
@@ -141,54 +132,23 @@ void jlau_loop(jlau_t* jlau) {
 }
 /** @endcond **/
 
-static inline void _jlau_init_sounds(jlau_t* jlau, uint8_t *data) {
-	uint32_t fil = 0;
-	uint32_t fid = 0;
-
-	jl_print_function(jlau->jl, "AU_Load");
-
-//	uint32_t cursor = 0;
-
-	jl_print(jlau->jl, "meanwhile....");
-	jl_print(jlau->jl, "m %p", jlau->jmus);
-	while(1) {
-		uint32_t *bytes = (void *)(data + fil);
-		uint32_t size = *bytes;
-
-		if(size == 0) break; // If Size Is 0 signal to stop.
-		jl_print(jlau->jl,"getting data of size %d....\n", size);
-		fil += sizeof(uint32_t); //move init next location
-		jl_print(jlau->jl,"jlau_load() we are at [data+%d]",fil);
-		jlau_load(jlau,fid,data + fil,size,255);
-		fil += size; //move init next location
-		fid++; //increase to the next music id
-	}
-	jlau->jl->info = fid;
-	jl_print(jlau->jl, "loaded music!");
-	
-	jl_print_return(jlau->jl, "AU_Load");
-}
-
 /**
  * Load all audiotracks from a zipfile and give them ID's.
  * info: info is set to number of images loaded.
- * @param jl: library context
- * @param pzipfile: full file name of a zip file.
- * @param pigid: which audio group to load the soundtracks into.
+ * @param jlau: The library context
+ * @param zipdata: data for a zip file.
+ * @param filename: Name of the audio file in the package.
 */
-void jlau_add_audio(jlau_t* jlau, str_t pzipfile, uint16_t pigid) {
-	JLAU_DEBUG_CHECK(jlau);
+void jlau_add_audio(jlau_t* jlau, data_t* zipdata, const char* filename) {
 	data_t aud;
-	jl_file_media(jlau->jl, &aud, "jlex/2/_aud", pzipfile,
-		jl_gem(), jl_gem_size());
-	jl_print_function(jlau->jl, "AU_Load");
-	jl_print(jlau->jl, "Audio Size: %d", jlau->jl->info);
+
+	JLAU_DEBUG_CHECK(jlau);
+	jl_file_pk_load_fdata(jlau->jl, &aud, zipdata, filename);
+	jl_print_function(jlau->jl, "jlau_add_audio");
 	jl_print(jlau->jl, "Loading audiostuffs....");
-	if(jlau->jl->info > 4) {
-		_jlau_init_sounds(jlau, aud.data);
-	}
+
 	jl_print(jlau->jl, "Loaded audiostuffs!");
-	jl_print_return(jlau->jl, "AU_Load");
+	jl_print_return(jlau->jl, "jlau_add_audio");
 }
 
 /** @cond **/
@@ -206,12 +166,8 @@ jlau_t* jlau_init(jl_t* jl) {
 	jlau->jl = jl;
 	jl->jlau = jlau;
 	JLAU_DEBUG_CHECK(jlau);
-	//audio by default is disabled
-	jlau->jmus = jl_memi(jlau->jl, 10 * sizeof(jlau_jmus_t__));
-	jlau->total = 10;
-	jl_print(jlau->jl, "m %p", jlau->jmus);
 
-	jlau->idis = UINT32_MAX; 
+	jlau->next._MUS = NULL; 
 	//Open Block AUDI
 	_jlau_print_openblock(jl);
 	// Open the audio device
@@ -225,9 +181,6 @@ jlau_t* jlau_init(jl_t* jl) {
 	}else{
 		jl_print(jl, "audio has been set.");
 	}
-	//Load Sound Effects & Music
-//	jlau_add_audio(jl,jl_file_get_resloc(jl, JL_MAIN_DIR, JL_MAIN_MEF), 0);
-//	jl_gr_draw_msge(jl, 0, 0, 0, "LOADED AUDIOSTUFFS!");
 	//Close Block AUDI
 	_jlau_print_closeblock(jl);
 	// Return the context.
@@ -240,13 +193,7 @@ void jlau_kill(jlau_t* jlau) {
 	_jlau_print_openblock(jlau->jl);
 	jl_print(jlau->jl, "Quiting....");
 	//Free Everything
-	Mix_CloseAudio();
-	m_u32_t i;
-	for(i = 0; i < jlau->total; i++) {
-		Mix_FreeMusic(jlau->jmus[i]._MUS);
-	}
-	free(jlau->jmus);
-	
+	Mix_CloseAudio();	
 	jl_print(jlau->jl, "Quit Successfully!");
 	//Close Block AUDI
 	_jlau_print_closeblock(jlau->jl);

@@ -66,7 +66,7 @@ void jlgr_dont(jlgr_t* jlgr) { }
  *	solid and 0 is totally invisble.
 **/
 void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t c, uint8_t a) {
-	jl_rect_t rc = { 0., 0., 2., jl_gl_ar(jlgr) };
+	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
 
 	jlgr_vos_image(jlgr, &jlgr->gr.vos.whole_screen, rc, tex, c, a);
 }
@@ -447,8 +447,9 @@ void jlgr_draw_msge__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
 	jl_print_function(jlgr->jl, "JLGR_MSGE2");
-	jlgr_draw_bg(jlgr, jlgr->gr.msge.t,
-		jlgr->gr.msge.c);
+	printf("MESSAGE DRAW\n");
+	jlgr_draw_bg(jlgr, jlgr->gr.msge.t, jlgr->gr.msge.c);
+	printf("MESSAGE IS %s\n", jlgr->gr.msge.message);
 	if(jlgr->gr.msge.message)
 		jlgr_draw_ctxt(jlgr, jlgr->gr.msge.message, 9./32.,
 			jlgr->fontcolor);
@@ -465,39 +466,33 @@ void jlgr_draw_msge__(jl_t* jl) {
 void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, u8_t c, m_str_t format, ...) {
 	jl_t* jl = jlgr->jl;
 	va_list arglist;
-	char message[256];
 
 	// Print on screen.
 	va_start(arglist, format);
-	vsprintf(message, format, arglist);
+	vsprintf(jlgr->gr.msge.message, format, arglist);
 	va_end(arglist);
 
 	jl_print_function(jl, "JLGR_MSGE");
-
-	jlgr->gr.msge.message = message;
+	jl_print(jl, "JLGR_MSGE %s", jlgr->gr.msge.message);
 	jlgr->gr.msge.t = tex;
 	jlgr->gr.msge.c = c;
 	// Get old values
-	jl_fnct upscreen = jlgr->draw.redraw.upper;
-	jl_fnct downscreen  = jlgr->draw.redraw.lower;
-	jl_fnct onescreen = jlgr->draw.redraw.single;
-	jl_fnct resize = jlgr->draw.redraw.resize;
+	jlgr_redraw_t old_redrawfns = jlgr->draw.redraw;
 	u8_t inloop = jlgr->fl.inloop;
 	// Set Graphical loops.
-	jlgr_loop_set(jlgr, jlgr_draw_msge__, jl_dont,
-		jlgr_draw_msge__, jl_dont);
+	jlgr->draw.redraw = (jlgr_redraw_t) {
+		jlgr_draw_msge__, jl_dont,
+		jlgr_draw_msge__, jl_dont };
 	jlgr->fl.inloop = 1;
 	// Set mode to EXIT.
 	// Update events ( minimal )
 	jl_ct_quickloop_(jlgr);
-	// Deselect any pre-renderer.
-	jlgr->gl.cp = NULL;
 	// Redraw screen.
 	_jl_sg_loop(jlgr);
 	// Update Screen.
 	jl_wm_loop__(jlgr);
 	//
-	jlgr_loop_set(jlgr, onescreen, upscreen, downscreen, resize);
+	jlgr->draw.redraw = old_redrawfns;
 	jlgr->fl.inloop = inloop;
 	jl_print_return(jl, "JLGR_MSGE");
 }
@@ -673,9 +668,17 @@ void _jlgr_loopa(jlgr_t* jlgr) {
 }
 
 void jlgr_init__(jlgr_t* jlgr) {
+	data_t packagedata;
+
+	jl_data_mkfrom_data(jlgr->jl, &packagedata, jl_gem_size(), jl_gem());
 	_jlgr_init_vos(jlgr);
+	jlgr->textures.logo = jl_sg_add_image(jlgr, &packagedata,
+		"/images/JL_Lib.png");
 	JL_PRINT_DEBUG(jlgr->jl, "Draw Loading Screen");
-	jlgr_draw_msge(jlgr, 0, 0, 0, 0);
+	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, 0);
+	// Load Graphics
+	jlgr->textures.font = jl_sg_add_image(jlgr, &packagedata,
+		"/images/jlf8.png");
 	// Create Font
 	jlgr->fontcolor[0] = 0;
 	jlgr->fontcolor[1] = 0;
@@ -684,9 +687,14 @@ void jlgr_init__(jlgr_t* jlgr) {
 	jlgr->font = (jl_font_t)
 		{ jlgr->textures.font, 0, jlgr->fontcolor, .04 };
 	// Draw message on the screen
-	jlgr_draw_msge(jlgr, 0, 0, 0, "LOADING JLLIB....");
+	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "LOADING JL_LIB....");
 	// Set other variables
 	jlgr->gr.notification.timeTilVanish = 0.f;
+	// Load other images....
+	jlgr->textures.icon = jl_sg_add_image(jlgr, &packagedata,
+		"/images/taskbar_items.png");
+	jlgr->textures.game = jl_sg_add_image(jlgr, &packagedata,
+		"/images/landscape.png");
 }
 
 /**      @endcond      **/

@@ -293,7 +293,7 @@ typedef struct{
 			jl_vo_t whole_screen;
 		}vos;
 		struct {
-			m_str_t message;
+			char message[256];
 			m_u16_t t;
 			m_u8_t c;
 		}msge;

@@ -235,21 +235,9 @@ void jl_sg_resz__(jl_t* jl) {
 
 void jl_sg_init__(jlgr_t* jlgr) {
 	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
-	data_t packagedata;
-
-	jl_data_mkfrom_data(jlgr->jl, &packagedata, jl_gem_size(), jl_gem());
 
 	// Initialize redraw routines to do nothing.
 	jlgr->draw.redraw = (jlgr_redraw_t){jl_dont, jl_dont, jl_dont, jl_dont};
-	// Load Graphics
-	jlgr->textures.font = jl_sg_add_image(jlgr, &packagedata,
-		"/images/jlf8.png");
-	jlgr->textures.logo = jl_sg_add_image(jlgr, &packagedata,
-		"/images/JL_Lib.png");
-	jlgr->textures.icon = jl_sg_add_image(jlgr, &packagedata,
-		"/images/taskbar_items.png");
-	jlgr->textures.game = jl_sg_add_image(jlgr, &packagedata,
-		"/images/landscape.png");
 	// Create upper and lower screens
 	jlgr_sprite_init(jlgr, &jlgr->sg.bg.up, rc,
 		jlgr_sprite_dont, jl_sg_draw_up, NULL, 0, NULL, 0);
@@ -260,6 +248,7 @@ void jl_sg_init__(jlgr_t* jlgr) {
 	jlgr->sg.bg.dn.pr.scl.y = -1.;
 	// Resize for 2 screen Default - so they initialize.
 	jlgr->sg.cs = JL_SCR_DN;
-	jl_sg_init_ds_(jlgr->jl);
+	jl_sg_resz__(jlgr->jl);
 	jlgr->sg.cs = JL_SCR_SS;
+	jl_sg_resz__(jlgr->jl);
 }

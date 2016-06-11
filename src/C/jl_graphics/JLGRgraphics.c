@@ -446,14 +446,10 @@ void jlgr_draw_loadingbar(jlgr_t* jlgr, f64_t loaded) {
 void jlgr_draw_msge__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
-	jl_print_function(jlgr->jl, "JLGR_MSGE2");
-	printf("MESSAGE DRAW\n");
 	jlgr_draw_bg(jlgr, jlgr->gr.msge.t, jlgr->gr.msge.c);
-	printf("MESSAGE IS %s\n", jlgr->gr.msge.message);
 	if(jlgr->gr.msge.message)
 		jlgr_draw_ctxt(jlgr, jlgr->gr.msge.message, 9./32.,
 			jlgr->fontcolor);
-	jl_print_return(jlgr->jl, "JLGR_MSGE2");
 }
 
 /**
@@ -473,7 +469,6 @@ void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, u8_t c, m_str_t format, ...) {
 	va_end(arglist);
 
 	jl_print_function(jl, "JLGR_MSGE");
-	jl_print(jl, "JLGR_MSGE %s", jlgr->gr.msge.message);
 	jlgr->gr.msge.t = tex;
 	jlgr->gr.msge.c = c;
 	// Get old values

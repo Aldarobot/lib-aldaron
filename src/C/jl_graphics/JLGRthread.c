@@ -9,7 +9,7 @@
 #include "JLGRinternal.h"
 
 static void jlgr_thread_resize(jlgr_t* jlgr, u16_t w, u16_t h) {
-	jl_print(jlgr->jl, "Resizing to %dx%d....", w, h);
+	JL_PRINT_DEBUG(jlgr->jl, "Resizing to %dx%d....", w, h);
 	// Reset aspect ratio stuff.
 	jl_wm_resz__(jlgr, w, h);
 	// Update the actual window.
@@ -37,7 +37,7 @@ static void jlgr_thread_event(jl_t* jl, void* data) {
 			jlgr_thread_resize(jlgr, packet->x, packet->y);
 			break;
 		} case JLGR_COMM_KILL: {
-			jl_print(jl, "Thread exiting....");
+			JL_PRINT_DEBUG(jl, "Thread exiting....");
 			jlgr->draw.rtn = 1;
 			break;
 		} case JLGR_COMM_SEND: {
@@ -69,7 +69,7 @@ static void jlgr_thread_resize_event(jl_t* jl, void* data) {
 		case JLGR_COMM_RESIZE: {
 			uint16_t w = packet->x;
 			uint16_t h = packet->y;
-			jl_print(jlgr->jl, "Resizing to %dx%d....", w, h);
+			JL_PRINT_DEBUG(jlgr->jl, "Resizing to %dx%d....", w, h);
 			// Reset aspect ratio stuff.
 			jl_wm_resz__(jlgr, w, h);
 			// Update the actual window.

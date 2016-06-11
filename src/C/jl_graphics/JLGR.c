@@ -15,7 +15,7 @@ static void jlgr_init_event(jl_t* jl, void* data) {
 
 	switch(packet->id) {
 		case JLGR_COMM_DRAWFIN:
-			jl_print(jl, "Main thread done");
+			JL_PRINT_DEBUG(jl, "Main thread done");
 			jlgr->main.rtn = 1;
 		default:
 			break;
@@ -60,11 +60,11 @@ jlgr_t* jlgr_init(jl_t* jl, u8_t fullscreen, jl_fnct fn_) {
 	// Send graphical Init function
 	jl_thread_comm_send(jl, jlgr->comm2draw, &packet);
 	// Wait for drawing thread to initialize.
-	jl_print(jl, "Main thread wait....");
+	JL_PRINT_DEBUG(jl, "Main thread wait....");
 	jlgr->main.rtn = 0;
 	while(!jlgr->main.rtn)
 		jl_thread_comm_recv(jl,jlgr->comm2main,jlgr_init_event);
-	jl_print(jl, "Main thread done did wait....");
+	JL_PRINT_DEBUG(jl, "Main thread done did wait....");
 	return jlgr;
 }
 
@@ -121,9 +121,9 @@ void jlgr_resz(jlgr_t* jlgr, u16_t w, u16_t h) {
 void jlgr_kill(jlgr_t* jlgr) {
 	jlgr_thread_packet_t packet = { JLGR_COMM_KILL, 0, 0, NULL };
 
-	jl_print(jlgr->jl, "Sending Kill to threads....");
+	JL_PRINT_DEBUG(jlgr->jl, "Sending Kill to threads....");
 	jl_thread_comm_send(jlgr->jl, jlgr->comm2draw, &packet);
-	jl_print(jlgr->jl, "Waiting on threads....");
+	JL_PRINT_DEBUG(jlgr->jl, "Waiting on threads....");
 	jlgr_thread_kill(jlgr); // Shut down thread.
 	jlgr_file_kill_(jlgr); // Remove clump filelist for fileviewer.
 }

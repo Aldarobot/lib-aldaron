@@ -37,7 +37,7 @@ static inline void jl_init__(jl_t* jl,jl_fnct _fnc_init_,str_t nm,u64_t ctx1s) {
 	jl->name = jl_mem_copy(jl, nm, strlen(nm));
 	// Run the program's init function.
 	_fnc_init_(jl);
-	jl_print(jl, "Started JL_Lib!");
+	JL_PRINT_DEBUG(jl, "Started JL_Lib!");
 }
 
 static void jl_time_reset__(jl_t* jl, u8_t on_time) {
@@ -69,11 +69,14 @@ static inline void main_loop__(jl_t* jl) {
 }
 
 static inline int jl_kill__(jl_t* jl, int rc) {
-	jl_print(jl, "Quitting...."); //Exited properly
 	jl_print_kill__(jl);
+	#ifdef JL_DEBUG_LIB
 	JL_PRINT("PRINTG KILL'd\n");
+	#endif
 	jl_mem_kill_(jl);
+	#ifdef JL_DEBUG_LIB
 	JL_PRINT("PRINTG KILL'd\n");
+	#endif
 	JL_PRINT("[\\JL_Lib] ");
 	if(!rc) JL_PRINT("| No errors ");
 	JL_PRINT("| Exiting with return value %d |\n", rc);

@@ -280,8 +280,8 @@ void jl_print_init__(jl_t* jl) {
 }
 
 void jl_print_kill__(jl_t * jl) {
-	jl_print(jl, "Killing printing....");
+	JL_PRINT_DEBUG(jl, "Killing printing....");
 	jl_print_return(jl, "JL_Lib");
-	jl_print(jl, "Killed Printing!");
+	JL_PRINT_DEBUG(jl, "Killed Printing!");
 	jl_thread_mutex_old(jl, jl->print.mutex);
 }

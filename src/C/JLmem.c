@@ -47,7 +47,7 @@ void jl_mem_leak_fail(jl_t* jl, str_t fn_name) {
  * @param a: Pointer to the memory to resize/free, or NULL if allocating memory.
  * @param size: # of bytes to resize to/allocate, or 0 to free.
 **/
-void *jl_mem(jl_t* jl, void *a, u64_t size) {
+void *jl_mem(jl_t* jl, void *a, uint32_t size) {
 	if(size == 0) { // Free
 		if(a == NULL) {
 			jl_print(jl, "Double Free or free on NULL pointer");
@@ -56,6 +56,8 @@ void *jl_mem(jl_t* jl, void *a, u64_t size) {
 			free(a);
 		}
 		return NULL;
+	}else if(a == NULL) {
+		return malloc(size);
 	}else{ // Allocate or Resize
 		if((a = realloc(a, size)) == NULL) {
 			jl_print(jl, "realloc() failed! Out of memory?");
@@ -71,7 +73,7 @@ void *jl_mem(jl_t* jl, void *a, u64_t size) {
  * @param jl: The library context.
  * @param size: # of bytes to allocate.
 **/
-void *jl_memi(jl_t* jl, u64_t size) {
+void *jl_memi(jl_t* jl, uint32_t size) {
 	// Make sure size is non-zero.
 	if(!size) {
 		if(jl) jl_print(jl, "jl_memi(): size must be more than 0");

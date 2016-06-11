@@ -100,10 +100,9 @@ static inline uint32_t jl_sg_add_image__(jlgr_t* jlgr, data_t* data) {
 	JL_PRINT_DEBUG(jlgr->jl, "size = %d", data->size);
 //load textures
 	_jl_sg_load_jlpx(jlgr, data, &fpixels, &fw, &fh);
-	JL_PRINT_DEBUG(jlgr->jl, "creating image....", jlgr->sg.igid);
+	JL_PRINT_DEBUG(jlgr->jl, "creating image....");
 	rtn = jl_gl_maketexture(jlgr, fpixels, fw, fh, 0);
-	JL_PRINT_DEBUG(jlgr->jl, "created image!", jlgr->sg.igid,
-		jlgr->sg.image_id);
+	JL_PRINT_DEBUG(jlgr->jl, "created image!");
 	jl_print_return(jlgr->jl, "SG_InitImgs");
 	return rtn;
 }
@@ -234,22 +233,14 @@ void jl_sg_resz__(jl_t* jl) {
 		jl_sg_init_ds_(jl);
 }
 
-void jl_sg_initb__(jlgr_t* jlgr) {
-	// Resize for 2 screen Default - so they initialize.
-	jlgr->sg.cs = JL_SCR_DN;
-	jl_sg_init_ds_(jlgr->jl);
-	jlgr->sg.cs = JL_SCR_SS;
-}
-
-void jl_sg_inita__(jlgr_t* jlgr) {
-	jlgr_redraw_t redraw = { jl_dont, jl_dont, jl_dont, jl_dont };
+void jl_sg_init__(jlgr_t* jlgr) {
 	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
 	data_t packagedata;
 
 	jl_data_mkfrom_data(jlgr->jl, &packagedata, jl_gem_size(), jl_gem());
 
 	// Initialize redraw routines to do nothing.
-	jl_mem_copyto(&redraw, &(jlgr->draw.redraw), sizeof(jlgr_redraw_t));
+	jlgr->draw.redraw = (jlgr_redraw_t){jl_dont, jl_dont, jl_dont, jl_dont};
 	// Load Graphics
 	jlgr->textures.font = jl_sg_add_image(jlgr, &packagedata,
 		"/images/jlf8.png");
@@ -267,4 +258,8 @@ void jl_sg_inita__(jlgr_t* jlgr) {
 	// Flip upside-down
 	jlgr->sg.bg.up.pr.scl.y = -1.;
 	jlgr->sg.bg.dn.pr.scl.y = -1.;
+	// Resize for 2 screen Default - so they initialize.
+	jlgr->sg.cs = JL_SCR_DN;
+	jl_sg_init_ds_(jlgr->jl);
+	jlgr->sg.cs = JL_SCR_SS;
 }

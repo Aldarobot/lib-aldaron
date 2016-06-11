@@ -57,8 +57,6 @@ typedef struct {
 
 //Vertex Object
 typedef struct{
-	// Other vo's
-	m_u32_t nc;	// How many more vo's are following this vo in the array
 	// Basic:
 	uint8_t rs;	// Rendering Style 0=GL_TRIANGLE_FAN 1=GL_TRIANGLES
 	uint32_t gl;	// GL Vertex Buffer Object [ 0 = Not Enabled ]
@@ -213,8 +211,12 @@ typedef struct{
 	
 	//Opengl Data
 	struct {
-		uint8_t whichprg;
-		m_u32_t prgs[JL_GL_SLPR_MAX];
+		struct {
+			uint32_t texture;
+			uint32_t preblend;
+			uint32_t color;
+			uint32_t character;
+		}prgs;
 		//PRG: TEX
 		struct {
 			struct {
@@ -265,7 +267,7 @@ typedef struct{
 				m_i32_t transform;
 			} uniforms;
 		} clr;
-		jl_vo_t *temp_vo;
+		jl_vo_t temp_vo;
 		// Default texture coordinates.
 		uint32_t default_tc;
 		
@@ -288,7 +290,7 @@ typedef struct{
 			jl_popup_button_t* btns;
 		}popup;
 		struct {
-			jl_vo_t *whole_screen;
+			jl_vo_t whole_screen;
 		}vos;
 		struct {
 			m_str_t message;
@@ -415,7 +417,7 @@ void jl_gl_pbo_new(jlgr_t* jlgr, jl_tex_t* texture, u8_t* pixels,
 	u16_t w, u16_t h, u8_t bpp);
 void jl_gl_pbo_set(jlgr_t* jlgr, jl_tex_t* texture, u8_t* pixels,
 	u16_t w, u16_t h, u8_t bpp);
-jl_vo_t *jl_gl_vo_make(jlgr_t* jlgr, u32_t count);
+void jl_gl_vo_init(jlgr_t* jlgr, jl_vo_t* vo);
 void jl_gl_vo_txmap(jlgr_t* jlgr, jl_vo_t* pv, u8_t map);
 uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels, int width, int height,
 	u8_t bytepp);

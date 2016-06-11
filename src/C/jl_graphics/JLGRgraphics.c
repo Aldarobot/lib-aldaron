@@ -11,7 +11,7 @@
 
 typedef struct {
 	jl_vec3_t where[2];
-	jl_vo_t* vo; // Vertex object [ Full, Slider 1, Slider 2 ].
+	jl_vo_t vo[3]; // Vertex object [ Full, Slider 1, Slider 2 ].
 }jl_gui_slider_draw;
 
 typedef struct {
@@ -27,7 +27,7 @@ typedef struct {
 /************************/
 
 static inline void _jlgr_init_vos(jlgr_t* jlgr) {
-	jlgr->gr.vos.whole_screen = jl_gl_vo_make(jlgr, 1);
+	jl_gl_vo_init(jlgr, &jlgr->gr.vos.whole_screen);
 }
 
 static void _jlgr_popup_loop(jl_t *jl) {
@@ -68,7 +68,7 @@ void jlgr_dont(jlgr_t* jlgr) { }
 void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t c, uint8_t a) {
 	jl_rect_t rc = { 0., 0., 2., jl_gl_ar(jlgr) };
 
-	jlgr_vos_image(jlgr, jlgr->gr.vos.whole_screen, rc, tex, c, a);
+	jlgr_vos_image(jlgr, &jlgr->gr.vos.whole_screen, rc, tex, c, a);
 }
 
 /**
@@ -76,7 +76,7 @@ void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t c, uint8_t a) {
  * @param jl: The library context.
 **/
 void jlgr_fill_image_draw(jlgr_t* jlgr) {
-	jlgr_draw_vo(jlgr, jlgr->gr.vos.whole_screen, NULL);
+	jlgr_draw_vo(jlgr, &jlgr->gr.vos.whole_screen, NULL);
 }
 
 /**
@@ -226,13 +226,13 @@ void jlgr_draw_text(jlgr_t* jlgr, str_t str, jl_vec3_t loc, jl_font_t f) {
 	uint32_t i;
 	jl_rect_t rc = { loc.x, loc.y, f.size, f.size };
 	jl_vec3_t tr = { 0., 0., 0. };
-	jl_vo_t* vo = jlgr->gl.temp_vo;
+	jl_vo_t* vo = &jlgr->gl.temp_vo;
 
 	if(str == NULL) return;
 	for(i = 0; i < strlen(str); i++) {
 		//Font 0:0
 		jlgr_vos_image(jlgr, vo, rc, jlgr->textures.font, STr[i], 255);
-		jl_gl_transform_chr_(jlgr, vo, tr.x, tr.y, tr.z,
+		jl_gl_transform_chr_(jlgr, tr.x, tr.y, tr.z,
 			1., 1., 1.);
 		jl_gl_draw_chr(jlgr, vo,((double)f.colors[0])/255.,
 			((double)f.colors[1])/255.,
@@ -415,7 +415,9 @@ void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 	slider.x1 = x1, slider.x2 = x2;
 	(*slider.x1) = 0.;
 	(*slider.x2) = 1.;
-	slider.draw.vo = jl_gl_vo_make(jlgr, 3);
+	jl_gl_vo_init(jlgr, &slider.draw.vo[0]);
+	jl_gl_vo_init(jlgr, &slider.draw.vo[1]);
+	jl_gl_vo_init(jlgr, &slider.draw.vo[2]);
 	slider.isRange = isdouble;
 
 	jlgr_sprite_init(jlgr, sprite, rectangle,
@@ -455,44 +457,37 @@ void jlgr_draw_msge__(jl_t* jl) {
 
 /**
  * Print message on the screen.
- * @param 'jl': library context.
- * @param 'g':
- * @param 'i':
- * @param 'c':
- * @param 'format': the message
+ * @param jlgr: The library context.
+ * @param tex: The background texture.
+ * @param c: The character map setting.
+ * @param format: The message
  */
 void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, u8_t c, m_str_t format, ...) {
-//		jl_mem_format(jlgr->jl, __VA_ARGS__);
-/*		jl_print_function(jlgr->jl, "JLGR_MSGE");
-	JL_PRINT_DEBUG(jlgr->jl, "Printing %p", message);
+	jl_t* jl = jlgr->jl;
+	va_list arglist;
+	char message[256];
 
-	jvct_t* _jl = jlgr->jl->_jl;
-	if(_jl->has.quickloop) {
-		if(jl_sdl_seconds_past__(jlgr->jl) <
-			(1.f/(float)JL_FPS))
-		{
-			jl_print_return(jlgr->jl, "JLGR_MSGE");
-			return;
-		}else{
-			jlgr->jl->time.prev_tick =
-				jlgr->jl->time.this_tick;
-		}
-	}
+	// Print on screen.
+	va_start(arglist, format);
+	vsprintf(message, format, arglist);
+	va_end(arglist);
+
+	jl_print_function(jl, "JLGR_MSGE");
+
 	jlgr->gr.msge.message = message;
-	jlgr->gr.msge.g = g;
-	jlgr->gr.msge.i = i;
+	jlgr->gr.msge.t = tex;
 	jlgr->gr.msge.c = c;
 	// Get old values
-	jl_fnct upscreen = jlgr->sg.redraw.upper;
-	jl_fnct downscreen  = jlgr->sg.redraw.lower;
-	jl_fnct onescreen = jlgr->sg.redraw.single;
-	u8_t inloop = _jl->fl.inloop;
+	jl_fnct upscreen = jlgr->draw.redraw.upper;
+	jl_fnct downscreen  = jlgr->draw.redraw.lower;
+	jl_fnct onescreen = jlgr->draw.redraw.single;
+	jl_fnct resize = jlgr->draw.redraw.resize;
+	u8_t inloop = jlgr->fl.inloop;
 	// Set Graphical loops.
 	jlgr_loop_set(jlgr, jlgr_draw_msge__, jl_dont,
-		jlgr_draw_msge__);
-	_jl->fl.inloop = 1;
+		jlgr_draw_msge__, jl_dont);
+	jlgr->fl.inloop = 1;
 	// Set mode to EXIT.
-	JL_PRINT_DEBUG(jlgr->jl, "Run Minimal Graphical Loop.");
 	// Update events ( minimal )
 	jl_ct_quickloop_(jlgr);
 	// Deselect any pre-renderer.
@@ -500,12 +495,11 @@ void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, u8_t c, m_str_t format, ...) {
 	// Redraw screen.
 	_jl_sg_loop(jlgr);
 	// Update Screen.
-	jl_dl_loop__(jlgr);
+	jl_wm_loop__(jlgr);
 	//
-	JL_PRINT_DEBUG(jlgr->jl, "Set old values");
-	jlgr_loop_set(jlgr, onescreen, upscreen, downscreen);
-	_jl->fl.inloop = inloop;
-	jl_print_return(jlgr->jl, "JLGR_MSGE");*/
+	jlgr_loop_set(jlgr, onescreen, upscreen, downscreen, resize);
+	jlgr->fl.inloop = inloop;
+	jl_print_return(jl, "JLGR_MSGE");
 }
 
 /**
@@ -578,9 +572,8 @@ void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 		uint8_t glow_color[] = { 255, 255, 255, 64 };
 
 		// Draw glow
-		jlgr_vos_rec(jlgr,
-			jlgr->gl.temp_vo, rc, glow_color, 0);
-		jlgr_draw_vo(jlgr, jlgr->gl.temp_vo, NULL);
+		jlgr_vos_rec(jlgr, &jlgr->gl.temp_vo, rc, glow_color, 0);
+		jlgr_draw_vo(jlgr, &jlgr->gl.temp_vo, NULL);
 		// Description
 		jlgr_draw_text(jlgr, txt,
 			(jl_vec3_t)

@@ -182,16 +182,16 @@ void jl_thread_mutex_old(jl_t* jl, SDL_mutex* mutex) {
  * @returns: The thread communicator.
 **/
 jl_comm_t* jl_thread_comm_make(jl_t* jl, u32_t size) {
-	jl_comm_t* rtn = jl_memi(jl, sizeof(jl_comm_t));
+	jl_comm_t* comm = jl_memi(jl, sizeof(jl_comm_t));
 	m_u8_t i;
 
-	rtn->lock = SDL_CreateMutex();
-	rtn->size = size;
-	rtn->pnum = 0;
-	for(i = 0; i < 16; i++) {
-		rtn->data[i] = jl_memi(jl, size);
+	comm->lock = SDL_CreateMutex();
+	comm->size = size;
+	comm->pnum = 0;
+	for(i = 0; i < 32; i++) {
+		comm->data[i] = jl_memi(jl, size);
 	}
-	return rtn;
+	return comm;
 }
 
 /**
@@ -247,7 +247,7 @@ void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm) {
 	// Free the lock.
 	SDL_DestroyMutex(comm->lock);
 	// Free 16 packets.
-	for(i = 0; i < 16; i++) jl_mem(jl, comm->data[i], 0);
+	for(i = 0; i < 32; i++) jl_mem(jl, comm->data[i], 0);
 	// Free main data structure.
 	jl_mem(jl, comm, 0);
 }

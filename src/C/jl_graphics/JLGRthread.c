@@ -100,21 +100,18 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	// Initialize subsystems
 	JL_PRINT_DEBUG(jl, "Creating the window....");
 	jl_wm_init__(jlgr);
-	JL_PRINT_DEBUG(jl, "Resize Adjust");
-	jlgr->draw.rtn = 0;
 	JL_PRINT_DEBUG(jl, "Loading default graphics from package....");
-	jl_sg_inita__(jlgr);
+	jl_sg_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "Setting up OpenGL....");
 	jl_gl_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "Load graphics....");
 	jlgr_init__(jlgr);
-	JL_PRINT_DEBUG(jl, "Set up screens....");
-	jl_sg_initb__(jlgr);
 	JL_PRINT_DEBUG(jl, "Creating Taskbar sprite....");
 	jlgr_menubar_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "Creating Mouse sprite....");
 	jlgr_mouse_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "User's Init....");
+	jlgr->draw.rtn = 0;
 	while(jlgr->draw.rtn != 2) {
 		jl_thread_comm_recv(jl, jlgr->comm2draw,
 			jlgr_thread_resize_event);

@@ -40,10 +40,10 @@ void jlgr_mouse_loop_(jl_t* jl, jl_sprite_t* sprite) {
 
 void jlgr_mouse_init__(jlgr_t* jlgr) {
 	jl_rect_t rc = { 0.f, 0.f, .075f, .075f };
-	jl_vo_t *mouse_vo;
+	jl_vo_t mouse_vo;
 	uint32_t mouse_vo_size;
 	#if JL_PLAT == JL_PLAT_COMPUTER //if computer - show mouse
-		mouse_vo = jl_gl_vo_make(jlgr, 1);
+		jl_gl_vo_init(jlgr, &mouse_vo);
 		mouse_vo_size = sizeof(jl_vo_t);
 	#elif JL_PLAT == JL_PLAT_PHONE // if phone - don't show mouse
 		mouse_vo = NULL;
@@ -53,8 +53,7 @@ void jlgr_mouse_init__(jlgr_t* jlgr) {
 	// Make sprite.
 	jlgr_sprite_init(jlgr, &jlgr->mouse, rc,
 		jlgr_mouse_loop_, jlgr_mouse_draw_,
-		NULL, 0, mouse_vo, mouse_vo_size);
-	jl_print(jlgr->jl, "MOUSE VO: %p", mouse_vo);
+		NULL, 0, &mouse_vo, mouse_vo_size);
 	// Resize sprite.
 	jlgr_sprite_resize(jlgr, &jlgr->mouse, NULL);
 	// Set the mouse's collision width and height to 0

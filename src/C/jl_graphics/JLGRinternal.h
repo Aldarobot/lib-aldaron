@@ -40,7 +40,7 @@ void jl_gl_transform_pr_(jlgr_t* jlgr, jl_pr_t* pr, float x, float y, float z,
 	float xm, float ym, float zm);
 void jl_gl_transform_vo_(jlgr_t* jlgr, jl_vo_t* vo, float x, float y, float z,
 	float xm, float ym, float zm);
-void jl_gl_transform_chr_(jlgr_t* jlgr, jl_vo_t* vo, float x, float y, float z,
+void jl_gl_transform_chr_(jlgr_t* jlgr, float x, float y, float z,
 	float xm, float ym, float zm);
 void jl_gl_draw(jlgr_t* jlgr, jl_vo_t* pv);
 void jl_gl_draw_chr(jlgr_t* jlgr, jl_vo_t* pv,
@@ -62,8 +62,7 @@ void jlgr_resz(jlgr_t* jlgr, u16_t x, u16_t y);
 void jlgr_menu_resize_(jlgr_t* jlgr);
 // init functions.
 void jl_wm_init__(jlgr_t* jlgr);
-void jl_sg_inita__(jlgr_t* jlgr);
-void jl_sg_initb__(jlgr_t* jlgr);
+void jl_sg_init__(jlgr_t* jlgr);
 void jl_gl_init__(jlgr_t* jlgr);
 void jlgr_init__(jlgr_t* jlgr);
 void jl_ct_init__(jlgr_t* jlgr);

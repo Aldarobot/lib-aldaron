@@ -25,8 +25,8 @@ void* jl_get_context(jl_t* jl);
 int jl_start(jl_fnct fnc_init_, jl_fnct fnc_kill_, str_t name, u64_t ctx_size);
 
 // "JLmem.c"
-void *jl_mem(jl_t* jl, void *a, u64_t size);
-void *jl_memi(jl_t* jl, u64_t size);
+void *jl_mem(jl_t* jl, void *a, uint32_t size);
+void *jl_memi(jl_t* jl, uint32_t size);
 void *jl_mem_copy(jl_t* jl, const void *src, u64_t size);
 u64_t jl_mem_tbiu(void);
 void jl_mem_leak_init(jl_t* jl);

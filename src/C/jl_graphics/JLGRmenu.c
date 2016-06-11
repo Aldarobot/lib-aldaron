@@ -10,7 +10,8 @@
 
 typedef struct{
 	// Used for all icons on the menubar.
-	jl_vo_t* icon;
+	jl_vo_t icon;
+	jl_vo_t shadow;
 	// Redraw Functions for 10 icons.
 	jlgr_fnct redrawfn[10];
 	// Draw thread Cursor
@@ -58,7 +59,7 @@ static inline void jlgr_menubar_shadow__(jlgr_t* jlgr,jl_menu_draw_t* menu_draw)
 
 		if(_draw_icon_ == NULL) break;
 		// Draw shadow
-		jlgr_draw_vo(jlgr, &(menu_draw->icon[0]), &tr);
+		jlgr_draw_vo(jlgr, &menu_draw->shadow, &tr);
 		// Draw Icon
 		_draw_icon_(jlgr);
 	}
@@ -107,14 +108,14 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 	jl_rect_t rc_shadow = {-.01, .01, .1, .1 };
 	uint8_t shadow_color[] = { 0, 0, 0, 64 };
 	jl_menu_t menu;
-	jl_vo_t *icon = jl_gl_vo_make(jlgr, 2);
 
-	// Set the icon & Shadow vertex objects
-	menu.draw.icon = icon;
+	jl_gl_vo_init(jlgr, &menu.draw.icon);
+	jl_gl_vo_init(jlgr, &menu.draw.shadow);
+
 	// Make the shadow vertex object.
-	jlgr_vos_rec(jlgr, &icon[0], rc_shadow, shadow_color, 0);
+	jlgr_vos_rec(jlgr, &menu.draw.shadow, rc_shadow, shadow_color, 0);
 	// Make the icon vertex object.
-	jlgr_vos_image(jlgr, &icon[1], rc_icon, jlgr->textures.icon,
+	jlgr_vos_image(jlgr, &menu.draw.icon, rc_icon, jlgr->textures.icon,
 		JLGR_ID_UNKNOWN, 255);
 	// Clear the menubar & make pre-renderer.
 	for( menu.draw.cursor = 0; menu.draw.cursor < 10;
@@ -202,7 +203,7 @@ static void jlgr_menu_slow_loop__(jlgr_t* jlgr, jlgr_input_t input) {
 	jl_menu_t* menu = jlgr_sprite_getcontext(&jlgr->menubar.menubar);
 	menu->draw.cursor = menu->cursor;
 
-	jlgr_sprite_redraw(jlgr, &jlgr->menubar.menubar, &(menu->draw));
+	jlgr_sprite_redraw(jlgr, &jlgr->menubar.menubar, &menu->draw);
 }
 
 void jlgr_menu_resize_(jlgr_t* jlgr) {
@@ -235,8 +236,8 @@ void jlgr_menu_draw_icon(jlgr_t* jlgr, uint32_t tex, u8_t c) {
 	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(&jlgr->menubar.menubar);
 	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), 0., 0. };
 
-	jlgr_vos_image(jlgr, &(menu_draw->icon[1]), rc_icon, tex, c, 255);
-	jlgr_draw_vo(jlgr, &(menu_draw->icon[1]), &tr);
+	jlgr_vos_image(jlgr, &menu_draw->icon, rc_icon, tex, c, 255);
+	jlgr_draw_vo(jlgr, &menu_draw->icon, &tr);
 }
 
 /**

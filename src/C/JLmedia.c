@@ -3,7 +3,7 @@
 #include "gen/JLmedia.h"
 
 // Get Embeded Media
-char *jl_gem(void) {
+void *jl_gem(void) {
 	return JLmedia;
 }
 

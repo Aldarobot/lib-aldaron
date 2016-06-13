@@ -36,7 +36,7 @@
 #define JL_FPS 60
 
 // Media To Include
-char *jl_gem(void);
+void *jl_gem(void);
 uint32_t jl_gem_size(void);
 
 // Main - Prototypes

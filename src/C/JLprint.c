@@ -165,6 +165,7 @@ static void jl_print_function__(jl_t* jl, str_t fn_name, u8_t thread_id) {
  * @param format: what to print.
 */
 void jl_print(jl_t* jl, str_t format, ... ) {
+	char temp[256];
 	jl_thread_mutex_lock(jl, jl->print.mutex);
 
 	u8_t thread_id = jl_thread_current(jl);
@@ -173,18 +174,21 @@ void jl_print(jl_t* jl, str_t format, ... ) {
 
 	// Store the format in jl->temp.
 	va_start( arglist, format );
-	vsprintf( jl->jl_ctx[jl_thread_current(jl)].temp, format, arglist );
+	vsprintf( temp, format, arglist );
 	va_end( arglist );
 	// Check to see if too many blocks are open.
 	jl_print_test_overreach(jl, thread_id);
 	// Print out.
-	if(jl->print.bkspc) JL_PRINT("\n");
-	print_out_(jl, jl->jl_ctx[jl_thread_current(jl)].temp);
+	if(jl->print.bkspc) JL_PRINT("\r                                       "
+		"                                         \r");
+	print_out_(jl, temp);
 	jl->print.bkspc = 0;
 	jl_thread_mutex_unlock(jl, jl->print.mutex);
 }
 
 void jl_print_rewrite(jl_t* jl, const char* format, ... ) {
+	char temp[256];
+	char print[80];
 	jl_thread_mutex_lock(jl, jl->print.mutex);
 
 	u8_t thread_id = jl_thread_current(jl);
@@ -192,15 +196,17 @@ void jl_print_rewrite(jl_t* jl, const char* format, ... ) {
 
 	// Store the format in jl->temp.
 	va_start( arglist, format );
-	vsprintf( jl->jl_ctx[jl_thread_current(jl)].temp, format, arglist );
+	vsprintf( temp, format, arglist );
 	va_end( arglist );
 	// Check to see if too many blocks are open.
 	jl_print_test_overreach(jl, thread_id);
 	// Print out.
 	if(jl->print.bkspc) JL_PRINT("\r");
 	jl_print_reset_print_descriptor_(jl, thread_id);
-	JL_PRINT("%s", jl->jl_ctx[jl_thread_current(jl)].temp);
-	jl->print.bkspc = 1;
+	memset(print, ' ', 79);
+	print[79] = '\0';
+	JL_PRINT("%s", temp);
+	jl->print.bkspc = strlen(temp);
 	jl_thread_mutex_unlock(jl, jl->print.mutex);
 }
 

@@ -71,7 +71,6 @@ typedef struct{
 	}print;
 
 	void* temp_ptr;
-	char temp[256];
 }jl_ctx_t;
 
 typedef struct{

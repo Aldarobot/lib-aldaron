@@ -53,7 +53,9 @@ static void jl_wm_killedit(jl_t* jl, char *str) {
 	exit(-1);
 }
 
-static inline SDL_Window* jl_wm_mkwindow(jlgr_t* jlgr, u32_t width, u32_t height) {
+static inline SDL_Window* jl_wm_mkwindow(jlgr_t* jlgr, uint32_t width,
+	uint32_t height)
+{
 	int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 	if(jlgr->wm.fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
 	SDL_Window* rtn = SDL_CreateWindow(
@@ -97,7 +99,7 @@ void jl_wm_updatewh_(jlgr_t* jlgr) {
 }
 
 //This is the code that actually creates the window by accessing SDL
-static inline void jlgr_wm_create__(jlgr_t* jlgr, u32_t w, u32_t h) {
+static inline void jlgr_wm_create__(jlgr_t* jlgr, uint32_t w, uint32_t h) {
 	// Allocate space for "displayWindow"
 	jlgr->wm.displayWindow = jl_memi(jlgr->jl, sizeof(jl_window_t));
 	//

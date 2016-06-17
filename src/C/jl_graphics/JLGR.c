@@ -20,7 +20,7 @@
  * @param fn_: Graphic initialization function run on graphical thread.
  * @returns The jlgr library context.
 **/
-jlgr_t* jlgr_init(jl_t* jl, u8_t fullscreen, jl_fnct fn_) {
+jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 	jlgr_t* jlgr = jl_memi(jl, sizeof(jlgr_t));
 	jlgr_thread_packet_t packet = { JLGR_COMM_INIT, 0, 0, fn_ };
 
@@ -94,7 +94,7 @@ void jlgr_loop(jlgr_t* jlgr) {
  * Resize the window.
  * @param jlgr: The library context.
 **/
-void jlgr_resz(jlgr_t* jlgr, u16_t w, u16_t h) {
+void jlgr_resz(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	jlgr_thread_send(jlgr, JLGR_COMM_RESIZE, w, h, NULL);
 }
 

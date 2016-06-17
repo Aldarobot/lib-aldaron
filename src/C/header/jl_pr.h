@@ -57,4 +57,4 @@ uint32_t jl_gem_size(void);
 	void jl_print_kill__(jl_t* jl);
 
 	// LIB THREAD INITS
-	void jl_print_init_thread__(jl_t* jl, u8_t thread_id);
+	void jl_print_init_thread__(jl_t* jl, uint8_t thread_id);

@@ -13,7 +13,7 @@ static void jlgr_thread_programsresize(jlgr_t* jlgr) {
 	resize_(jlgr->jl);
 }
 
-static void jlgr_thread_resize(jlgr_t* jlgr, u16_t w, u16_t h) {
+static void jlgr_thread_resize(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	JL_PRINT_DEBUG(jlgr->jl, "Resizing to %dx%d....", w, h);
 	// Reset aspect ratio stuff.
 	jl_wm_resz__(jlgr, w, h);
@@ -88,7 +88,7 @@ static void jlgr_thread_resize_event(jl_t* jl, void* data) {
 	}
 }
 
-static u8_t jlgr_thread_draw_event__(jl_t* jl) {
+static uint8_t jlgr_thread_draw_event__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 	jlgr->draw.rtn = 0;
 
@@ -126,7 +126,7 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	jl_thread_wait_stop(jl, &jlgr->wait);
 }
 
-void jlgr_thread_send(jlgr_t* jlgr, u8_t id, u16_t x, u16_t y, jl_fnct fn) {
+void jlgr_thread_send(jlgr_t* jlgr,uint8_t id,uint16_t x,uint16_t y,jl_fnct fn){
 	jlgr_thread_packet_t packet = { id, x, y, fn };
 
 	// Send resize packet.

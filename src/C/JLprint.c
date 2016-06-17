@@ -10,7 +10,7 @@
 
 #include "jl_pr.h"
 
-static void _jl_print_current(jl_t *jl, u8_t thread_id) {
+static void _jl_print_current(jl_t *jl, uint8_t thread_id) {
 	int i;
 
 	JL_PRINT(" <");
@@ -21,17 +21,17 @@ static void _jl_print_current(jl_t *jl, u8_t thread_id) {
 	JL_PRINT("\b>\n");
 }
 
-static void jl_print_indent__(jl_t *jl, i8_t o, u8_t thread_id) {
+static void jl_print_indent__(jl_t *jl, int8_t o, uint8_t thread_id) {
 	int i;
 	// Print enough spaces for the open blocks.
 	for(i = 0; i < jl->jl_ctx[thread_id].print.level + o; i++)
 		JL_PRINT(" ");
 }
 
-static inline void _jl_print_new_block(jl_t *jl, u8_t thread_id) {
+static inline void _jl_print_new_block(jl_t *jl, uint8_t thread_id) {
 	int i;
-	i8_t ofs2 = jl->jl_ctx[thread_id].print.ofs2;
-	u8_t level = jl->jl_ctx[thread_id].print.level;
+	uint8_t ofs2 = jl->jl_ctx[thread_id].print.ofs2;
+	uint8_t level = jl->jl_ctx[thread_id].print.level;
 
 	jl->jl_ctx[thread_id].print.ofs2 = 0;
 	JL_PRINT("[");
@@ -43,10 +43,10 @@ static inline void _jl_print_new_block(jl_t *jl, u8_t thread_id) {
 	_jl_print_current(jl, thread_id);
 }
 
-static inline void _jl_print_old_block(jl_t *jl, u8_t thread_id) {
+static inline void _jl_print_old_block(jl_t *jl, uint8_t thread_id) {
 	int i;
-	i8_t ofs2 = jl->jl_ctx[thread_id].print.ofs2;
-	u8_t level = jl->jl_ctx[thread_id].print.level;
+	uint8_t ofs2 = jl->jl_ctx[thread_id].print.ofs2;
+	uint8_t level = jl->jl_ctx[thread_id].print.level;
 
 	jl->jl_ctx[thread_id].print.ofs2 = 0;
 	JL_PRINT("[\\");
@@ -58,7 +58,7 @@ static inline void _jl_print_old_block(jl_t *jl, u8_t thread_id) {
 	_jl_print_current(jl, thread_id);
 }
 
-static inline void jl_print_descriptor_(jl_t* jl, u8_t thread_id) {
+static inline void jl_print_descriptor_(jl_t* jl, uint8_t thread_id) {
 	if(jl->jl_ctx[thread_id].print.ofs2 > 0) {
 		jl_print_indent__(jl, -1, thread_id);
 		_jl_print_new_block(jl, thread_id);
@@ -71,8 +71,8 @@ static inline void jl_print_descriptor_(jl_t* jl, u8_t thread_id) {
 		[jl->jl_ctx[thread_id].print.level]);
 }
 
-static void jl_print_test_overreach(jl_t* jl, u8_t thread_id) {
-	u8_t level = jl->jl_ctx[thread_id].print.level;
+static void jl_print_test_overreach(jl_t* jl, uint8_t thread_id) {
+	uint8_t level = jl->jl_ctx[thread_id].print.level;
 	
 	if(level > 49) {
 		JL_PRINT("Overreached block count %d!!!\n", level);
@@ -81,7 +81,7 @@ static void jl_print_test_overreach(jl_t* jl, u8_t thread_id) {
 	}
 }
 
-static void jl_print_reset_print_descriptor_(jl_t* jl, u8_t thread_id) {
+static void jl_print_reset_print_descriptor_(jl_t* jl, uint8_t thread_id) {
 	// Check to see if too many blocks are open.
 	jl_print_test_overreach(jl, thread_id);
 	// Print the print descriptor.
@@ -137,7 +137,7 @@ void jl_print_set(jl_t* jl, jl_print_fnt fn_) {
 		jl->print.printfn = jl_print_toconsole__;
 }
 
-static void jl_print_function__(jl_t* jl, str_t fn_name, u8_t thread_id) {
+static void jl_print_function__(jl_t* jl, str_t fn_name, uint8_t thread_id) {
 //	uint8_t thread_id = jl_thread_current(jl);
 	int size = strlen(fn_name);
 
@@ -168,7 +168,7 @@ void jl_print(jl_t* jl, str_t format, ... ) {
 	char temp[256];
 	jl_thread_mutex_lock(jl, jl->print.mutex);
 
-	u8_t thread_id = jl_thread_current(jl);
+	uint8_t thread_id = jl_thread_current(jl);
 	jl_print_fnt print_out_ = jl->print.printfn;
 	va_list arglist;
 
@@ -191,7 +191,7 @@ void jl_print_rewrite(jl_t* jl, const char* format, ... ) {
 	char print[80];
 	jl_thread_mutex_lock(jl, jl->print.mutex);
 
-	u8_t thread_id = jl_thread_current(jl);
+	uint8_t thread_id = jl_thread_current(jl);
 	va_list arglist;
 
 	// Store the format in jl->temp.
@@ -268,7 +268,7 @@ void jl_print_stacktrace(jl_t* jl) {
 	jl_thread_mutex_unlock(jl, jl->print.mutex);
 }
 
-void jl_print_init_thread__(jl_t* jl, u8_t thread_id) {
+void jl_print_init_thread__(jl_t* jl, uint8_t thread_id) {
 	uint8_t i;
 
 	for(i = 0; i < 50; i++) {

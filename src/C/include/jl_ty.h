@@ -7,32 +7,6 @@
 
 typedef float jl_ccolor_t;
 
-//Rust-like Variable Types
-typedef const uint8_t u8_t;	//8-bit Unsigned Constant
-typedef const int8_t i8_t;	//8-bit Signed Constant
-typedef uint8_t m_u8_t;		//8-bit Unsigned Modifiable
-typedef int8_t m_i8_t;		//8-bit Signed Modifiable
-
-typedef const uint16_t u16_t;	//16-bit Short int
-typedef const int16_t i16_t;	//16-bit Short int
-typedef uint16_t m_u16_t;	//16-bit Short int
-typedef int16_t m_i16_t;	//16-bit Short int
-
-typedef const uint32_t u32_t;	//32-bit Normal int
-typedef const int32_t i32_t;	//32-bit Normal int
-typedef uint32_t m_u32_t;	//32-bit Normal int
-typedef int32_t m_i32_t;	//32-bit Normal int
-
-typedef const uint64_t u64_t;	//64-bit Large int
-typedef const int64_t i64_t;	//64-bit Large int
-typedef uint64_t m_u64_t;	//64-bit Large int
-typedef int64_t m_i64_t;	//64-bit Large int
-
-typedef const double f64_t;	//floating point decimal
-typedef const float f32_t;	//floating point decimal
-typedef double m_f64_t;		//floating point decimal
-typedef float m_f32_t;		//floating point decimal
-
 typedef const char chr_t;	// Character Constant
 typedef const char* str_t;	// String Constant
 typedef char m_chr_t;		// Character Modifiable
@@ -47,8 +21,8 @@ typedef struct{
 
 typedef struct{
 	SDL_mutex *lock;	/** The mutex lock on the "data" */
-	m_u8_t pnum;		/** Number of packets in structure (upto 16 ) */
-	m_u32_t size;		/** Size of "data" */
+	uint8_t pnum;		/** Number of packets in structure (upto 16 ) */
+	uint32_t size;		/** Size of "data" */
 	void* data[32];		/** The data attached to the mutex */
 }jl_comm_t;
 
@@ -122,7 +96,7 @@ typedef struct{
 	uint32_t info; // @startup:# images loaded from media.zip.Set by others.
 	jl_err_t errf; // Set if error
 	//
-	m_u8_t mode_switch_skip;
+	uint8_t mode_switch_skip;
 	//
 	jl_ctx_t jl_ctx[16];
 	// Program's context.

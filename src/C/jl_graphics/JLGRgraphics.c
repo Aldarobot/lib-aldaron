@@ -145,7 +145,7 @@ void jlgr_vos_vec(jlgr_t* jlgr, jl_vo_t *pv, uint16_t tricount,
  * @param multicolor: If 0: Then 1 color is used.
  *	If 1: Then 1 color per each vertex is used.
 **/
-void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, u8_t* colors,
+void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, uint8_t* colors,
 	uint8_t multicolor)
 {
 	float rectangle_coords[] = {
@@ -190,7 +190,7 @@ void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
 }
 
 void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
-	jl_tex_t* tex, u8_t c, u8_t a)
+	jl_tex_t* tex, uint8_t c, uint8_t a)
 {
 	//From bottom left & clockwise
 	float Oone[] = {
@@ -249,7 +249,7 @@ void jlgr_draw_text(jlgr_t* jlgr, str_t str, jl_vec3_t loc, jl_font_t f) {
  * @param 'loc': the position to draw it at
  * @param 'f': the font to use.
  */
-void jlgr_draw_int(jlgr_t* jlgr, i64_t num, jl_vec3_t loc, jl_font_t f) {
+void jlgr_draw_int(jlgr_t* jlgr, int64_t num, jl_vec3_t loc, jl_font_t f) {
 	char display[10];
 	sprintf(display, "%ld", (long int) num);
 	jlgr_draw_text(jlgr, display, loc, f);
@@ -263,7 +263,7 @@ void jlgr_draw_int(jlgr_t* jlgr, i64_t num, jl_vec3_t loc, jl_font_t f) {
  * @param 'loc': the position to draw it at
  * @param 'f': the font to use.
  */
-void jlgr_draw_float(jlgr_t* jlgr, f64_t num, u8_t dec, jl_vec3_t loc,
+void jlgr_draw_dec(jlgr_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
 	jl_font_t f)
 {
 	char display[10];
@@ -397,7 +397,7 @@ static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
  * @returns: The slider sprite.
 **/
 void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
-	u8_t isdouble, m_f32_t* x1, m_f32_t* x2)
+	uint8_t isdouble, float* x1, float* x2)
 {
 	jlgr_sprite_loop_fnt jlgr_gui_slider_loop;
 
@@ -429,15 +429,15 @@ void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 /**
  * Draw a background on the screen
 **/
-void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, u8_t c) {
+void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, uint8_t c) {
 	jlgr_fill_image_set(jlgr, tex, c, 255);
 	jlgr_fill_image_draw(jlgr);
 }
 
-void jlgr_draw_loadingbar(jlgr_t* jlgr, f64_t loaded) {
+void jlgr_draw_loadingbar(jlgr_t* jlgr, double loaded) {
 	jl_rect_t bar = { .05, jl_gl_ar(jlgr)*.4,
 		.95,jl_gl_ar(jlgr)*.45};
-	u8_t colors[] = { 0, 255, 0, 255};
+	uint8_t colors[] = { 0, 255, 0, 255};
 
 	jlgr_vos_rec(jlgr, NULL, bar, colors, 0);
 }
@@ -486,7 +486,7 @@ void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine) {
  * @param c: The character map setting.
  * @param format: The message
  */
-void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, u8_t c, char* format, ...) {
+void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, uint8_t c, char* format, ...) {
 	JL_PRINT_DEBUG(jlgr->jl, "jlgr_draw_msge");
 	if(format) {
 		va_list arglist;
@@ -712,6 +712,6 @@ void jlgr_init__(jlgr_t* jlgr) {
 /**      @endcond      **/
 /***   #End of File   ***/
 
-m_u8_t* jlgr_load_image(jl_t* jl, data_t* data, m_u16_t* w, m_u16_t* h) {
+uint8_t* jlgr_load_image(jl_t* jl, data_t* data, uint16_t* w, uint16_t* h) {
 	return jl_vi_load_(jl, data, w, h);
 }

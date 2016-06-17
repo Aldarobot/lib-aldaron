@@ -10,7 +10,7 @@ static void jl_data_truncate_curs__(data_t* pstr) {
 	}
 }
 
-static void jl_data_increment(data_t* pstr, u8_t incrementation) {
+static void jl_data_increment(data_t* pstr, uint8_t incrementation) {
 	pstr->curs += incrementation;
 	jl_data_truncate_curs__(pstr);
 }
@@ -53,7 +53,7 @@ void jl_data_free(data_t* pstr) {
 /**
  *
 */
-void jl_data_mkfrom_data(jl_t* jl, data_t* a, u32_t size, const void *data) {
+void jl_data_mkfrom_data(jl_t* jl, data_t* a, uint32_t size, const void *data) {
 	jl_data_init(jl, a, size);
 	jl_mem_copyto(data, a->data, size);
 	a->data[size] = '\0'; // Null terminalte
@@ -73,7 +73,7 @@ void jl_data_mkfrom_str(data_t* a, str_t string) {
  * @param pstr: the string to read.
  * @returns: byte at the cursor of "pstr"
 */
-u8_t jl_data_byte(data_t* pstr) {
+uint8_t jl_data_byte(data_t* pstr) {
 	jl_data_truncate_curs__(pstr);
 	return pstr->data[pstr->curs];
 }
@@ -81,7 +81,7 @@ u8_t jl_data_byte(data_t* pstr) {
 /**
  * Get the byte at the cursor of "strt", and increment the cursor value
 **/
-u8_t jl_data_get_byte(data_t* pstr) {
+uint8_t jl_data_get_byte(data_t* pstr) {
 	uint8_t* area = ((void*)pstr->data) + pstr->curs;
 	jl_data_increment(pstr, 1);
 	return *area;
@@ -93,7 +93,7 @@ u8_t jl_data_get_byte(data_t* pstr) {
  * @param varsize: the size of variable pointed to by "var" in bytes (1,2,4,8).
  * @param var: the variable to save the data to.
 **/
-void jl_data_loadto(data_t* pstr, u32_t varsize, void* var) {
+void jl_data_loadto(data_t* pstr, uint32_t varsize, void* var) {
 	void* area = ((void*)pstr->data) + pstr->curs;
 
 	jl_mem_copyto(area, var, varsize);
@@ -105,7 +105,7 @@ void jl_data_loadto(data_t* pstr, u32_t varsize, void* var) {
  * @param pstr: the string to read.
  * @param: pval: the integer to add to "pstr"
 */
-void jl_data_saveto(data_t* pstr, u32_t varsize, const void* var) {
+void jl_data_saveto(data_t* pstr, uint32_t varsize, const void* var) {
 	void* area = ((void*)pstr->data) + pstr->curs;
 
 	jl_mem_copyto(var, area, varsize);
@@ -118,7 +118,7 @@ void jl_data_saveto(data_t* pstr, u32_t varsize, const void* var) {
  * @param pstr: The string to add a byte to.
  * @param pvalue: the byte to add to "pstr".
 */
-void jl_data_add_byte(data_t* pstr, u8_t pvalue) {
+void jl_data_add_byte(data_t* pstr, uint8_t pvalue) {
 	jl_data_truncate_curs__(pstr);
 	pstr->data[pstr->curs] = pvalue;
 	jl_data_increment(pstr, 1);
@@ -139,7 +139,7 @@ void jl_data_delete_byte(jl_t *jl, data_t* pstr) {
 	jl_data_truncate_curs__(pstr);
 }
 
-void jl_data_resize(jl_t *jl, data_t* pstr, u32_t newsize) {
+void jl_data_resize(jl_t *jl, data_t* pstr, uint32_t newsize) {
 	pstr->size = newsize;
 	pstr->data = jl_mem(jl, pstr->data, pstr->size);
 }
@@ -165,7 +165,7 @@ void jl_data_insert_byte(jl_t *jl, data_t* pstr, uint8_t pvalue) {
 	}
 }
 
-void jl_data_insert_data(jl_t *jl, data_t* pstr, const void* data, u32_t size) {
+void jl_data_insert_data(jl_t *jl, data_t* pstr, const void* data, uint32_t size) {
 	// Add size
 	jl_data_resize(jl, pstr, pstr->size + size);
 	// Copy data.
@@ -248,7 +248,7 @@ char* jl_data_tostring(jl_t* jl, data_t* a) {
  * @return 1: If particle is at the cursor.
  * @return 0: If particle is not at the cursor.
 */
-u8_t jl_data_test_next(data_t* script, str_t particle) {
+uint8_t jl_data_test_next(data_t* script, str_t particle) {
 	char * point = (void*)script->data + script->curs; //the cursor
 	char * place = strstr(point, particle); //search for partical
 	if(place == point) {//if partical at begining return true otherwise false

@@ -188,7 +188,7 @@ void jl_file_print(jl_t* jl, str_t fname, str_t msg) {
  * @returns 3: If the file exists and the user doesn't have permissions to open.
  * @returns 255: This should never happen.
 **/
-u8_t jl_file_exist(jl_t* jl, str_t path) {
+uint8_t jl_file_exist(jl_t* jl, str_t path) {
 	DIR *dir;
 	if ((dir = opendir (path)) == NULL) {
 		//Couldn't open Directory

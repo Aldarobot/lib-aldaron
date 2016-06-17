@@ -27,8 +27,8 @@ void jl_gl_draw_prendered(jlgr_t* jlgr, jl_vo_t* pv);
 
 //Get a pixels RGBA values from a surface and xy
 uint32_t _jl_sg_gpix(/*in */ SDL_Surface* surface, int32_t x, int32_t y) {
-	i32_t bpp = surface->format->BytesPerPixel;
-	u8_t *p = (uint8_t *)surface->pixels + (y * surface->pitch) + (x * bpp);
+	int32_t bpp = surface->format->BytesPerPixel;
+	uint8_t *p = (uint8_t *)surface->pixels + (y * surface->pitch) + (x * bpp);
 	uint32_t color_orig;
 	uint32_t color;
 	uint8_t* out_color = (void*)&color;
@@ -36,14 +36,14 @@ uint32_t _jl_sg_gpix(/*in */ SDL_Surface* surface, int32_t x, int32_t y) {
 	if(bpp == 1) {
 		color_orig = *p;
 	}else if(bpp == 2) {
-		color_orig = *(u16_t *)p;
+		color_orig = *(uint16_t *)p;
 	}else if(bpp == 3) {
 		if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
 			color_orig = p[0] << 16 | p[1] << 8 | p[2];
 		else
 			color_orig = p[0] | p[1] << 8 | p[2] << 16;
 	}else{ // 4
-		color_orig = *(u32_t *)p;
+		color_orig = *(uint32_t *)p;
 	}
 	SDL_GetRGBA(color_orig, surface->format, &(out_color[0]),
 		&(out_color[1]), &(out_color[2]), &(out_color[3]));

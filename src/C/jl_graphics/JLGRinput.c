@@ -33,7 +33,7 @@ static void jl_ct_state__(uint8_t *preval, const uint8_t read) {
 		*preval = JLGR_INPUT_PRESS_HELD;
 }
 
-static void jlgr_input_press__(jlgr_t* jlgr, u8_t countit) {
+static void jlgr_input_press__(jlgr_t* jlgr, uint8_t countit) {
 	jl_ct_state__(&jlgr->main.ct.states[jlgr->main.ct.current_event], countit);
 	//hrxypk
 	jlgr->input.input.h = jlgr->main.ct.states[jlgr->main.ct.current_event];

@@ -34,9 +34,9 @@ typedef struct {
 }jl_window_t;
 
 typedef struct {
-	m_u32_t gl_texture;
-	m_u32_t gl_buffer;
-	m_u16_t w, h;
+	uint32_t gl_texture;
+	uint32_t gl_buffer;
+	uint16_t w, h;
 	void* pixels;
 }jl_tex_t;
 
@@ -71,10 +71,10 @@ typedef struct{
 }jl_vo_t;
 
 typedef struct {
-	m_i32_t tex; // Group ID, Image ID
-	m_u8_t multicolor; // Allow Multiple Colors
-	m_u8_t* colors; // The Colors
-	m_f32_t size; // The Size
+	int32_t tex; // Group ID, Image ID
+	uint8_t multicolor; // Allow Multiple Colors
+	uint8_t* colors; // The Colors
+	float size; // The Size
 }jl_font_t;
 
 typedef struct{
@@ -183,7 +183,7 @@ typedef struct{
 	} main;
 
 	struct {
-		m_u8_t rtn;
+		uint8_t rtn;
 		jl_fnct fn;
 		jlgr_redraw_t redraw;
 	} draw;
@@ -204,7 +204,7 @@ typedef struct{
 		}bg;
 
 		void* loop; // ( jlgr_fnct ) For upper or lower screen.
-		m_u8_t cs; // The current screen "jlgr_which_screen_t"
+		uint8_t cs; // The current screen "jlgr_which_screen_t"
 	}sg;
 	
 	//Opengl Data
@@ -218,51 +218,51 @@ typedef struct{
 		//PRG: TEX
 		struct {
 			struct {
-				m_i32_t position;
-				m_i32_t texpos;
+				int32_t position;
+				int32_t texpos;
 			} attr;
 			struct {
-				m_i32_t textures;
-				m_i32_t multiply_alpha;
-				m_i32_t translate;
-				m_i32_t transform;
+				int32_t textures;
+				int32_t multiply_alpha;
+				int32_t translate;
+				int32_t transform;
 			} uniforms;
 		} tex;
 		//PRG: PRM
 		struct {
 			struct {
-				m_i32_t position;
-				m_i32_t texpos;
+				int32_t position;
+				int32_t texpos;
 			} attr;
 			struct {
-				m_i32_t textures;
-				m_i32_t translate;
-				m_i32_t transform;
+				int32_t textures;
+				int32_t translate;
+				int32_t transform;
 			} uniforms;
 		} prm;
 		//PRG: CHR
 		struct {
 			struct {
-				m_i32_t position;
-				m_i32_t texpos;
+				int32_t position;
+				int32_t texpos;
 			} attr;
 			struct {
-				m_i32_t textures;
-				m_i32_t multiply_alpha;
-				m_i32_t new_color;
-				m_i32_t translate;
-				m_i32_t transform;
+				int32_t textures;
+				int32_t multiply_alpha;
+				int32_t new_color;
+				int32_t translate;
+				int32_t transform;
 			} uniforms;
 		} chr;
 		//PRG: CLR
 		struct {
 			struct {
-				m_i32_t position;
-				m_i32_t acolor;
+				int32_t position;
+				int32_t acolor;
 			} attr;
 			struct {
-				m_i32_t translate;
-				m_i32_t transform;
+				int32_t translate;
+				int32_t transform;
 			} uniforms;
 		} clr;
 		jl_vo_t temp_vo;
@@ -292,8 +292,8 @@ typedef struct{
 		}vos;
 		struct {
 			char message[256];
-			m_u16_t t;
-			m_u8_t c;
+			uint16_t t;
+			uint8_t c;
 		}msge;
 		data_t* textbox_string;
 	}gr;
@@ -342,7 +342,7 @@ typedef void(*jlgr_fnct)(jlgr_t* jlgr);
 typedef void(*jlgr_input_fnct)(jlgr_t* jlgr, jlgr_input_t input);
 
 // JLGR.c:
-jlgr_t* jlgr_init(jl_t* jl, u8_t fullscreen, jl_fnct fn_);
+jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_);
 void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 	jl_fnct downscreen, jl_fnct resize);
 void jlgr_loop(jlgr_t* jlgr);
@@ -359,14 +359,13 @@ void jlgr_sprite_init(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	void* main_ctx, uint32_t main_ctx_size,
 	void* draw_ctx, uint32_t draw_ctx_size);
 void jlgr_sprite_free(jlgr_t* jlgr, jl_sprite_t* sprite);
-u8_t jlgr_sprite_collide(jlgr_t* jlgr,
-	jl_sprite_t *sprite1, jl_sprite_t *sprite2);
+uint8_t jlgr_sprite_collide(jlgr_t* jlgr, jl_sprite_t *spr1, jl_sprite_t *spr2);
 void* jlgr_sprite_getcontext(jl_sprite_t *sprite);
 void* jlgr_sprite_getdrawctx(jl_sprite_t *sprite);
 
 // JLGRmenu.c
 void jlgr_menu_toggle(jlgr_t* jlgr);
-void jlgr_menu_draw_icon(jlgr_t* jlgr, uint32_t tex, u8_t c);
+void jlgr_menu_draw_icon(jlgr_t* jlgr, uint32_t tex, uint8_t c);
 void jlgr_menu_addicon(jlgr_t* jlgr, jlgr_input_fnct inputfn, jlgr_fnct rdr);
 void jlgr_menu_addicon_flip(jlgr_t* jlgr);
 void jlgr_menu_addicon_slow(jlgr_t* jlgr);
@@ -376,29 +375,29 @@ void jlgr_menu_addicon_name(jlgr_t* jlgr);
 void jlgr_dont(jlgr_t* jlgr);
 void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t c, uint8_t a);
 void jlgr_fill_image_draw(jlgr_t* jlgr);
-void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, u8_t c);
+void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, uint8_t c);
 jl_ccolor_t* jlgr_convert_color(jlgr_t* jlgr, uint8_t *rgba, uint32_t vc,
 	uint8_t gradient);
 void jlgr_vo_color(jlgr_t* jlgr, jl_vo_t* pv, jl_ccolor_t* cc);
 void jlgr_draw_vo(jlgr_t* jlgr, jl_vo_t* pv, jl_vec3_t* vec);
 void jlgr_vos_vec(jlgr_t* jlgr, jl_vo_t *pv, uint16_t tricount,
 	float* triangles, uint8_t* colors, uint8_t multicolor);
-void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, u8_t* colors,
+void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, uint8_t* colors,
 	uint8_t multicolor);
 void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
 	uint32_t tex, uint8_t c, uint8_t a);
 void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
-	jl_tex_t* tex, u8_t c, u8_t a);
+	jl_tex_t* tex, uint8_t c, uint8_t a);
 void jlgr_vo_old(jlgr_t* jlgr, jl_vo_t* pv);
 void jlgr_draw_text(jlgr_t* jlgr, str_t str, jl_vec3_t xyz, jl_font_t f);
-void jlgr_draw_int(jlgr_t* jlgr, i64_t num, jl_vec3_t loc, jl_font_t f);
-void jlgr_draw_float(jlgr_t* jlgr, f64_t num, u8_t dec, jl_vec3_t loc,
+void jlgr_draw_int(jlgr_t* jlgr, int64_t num, jl_vec3_t loc, jl_font_t f);
+void jlgr_draw_dec(jlgr_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
 	jl_font_t f);
 void jlgr_draw_text_area(jlgr_t* jlgr, jl_sprite_t * spr, str_t txt);
 void jlgr_draw_text_sprite(jlgr_t* jlgr,jl_sprite_t * spr, str_t txt);
 void jlgr_draw_ctxt(jlgr_t* jlgr, char *str, float yy, uint8_t* color);
 void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine);
-void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, u8_t c, m_str_t format, ...);
+void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, uint8_t c, char* format, ...);
 void jlgr_term_msge(jlgr_t* jlgr, char* message);
 void jlgr_slidebtn_rsz(jlgr_t* jlgr, jl_sprite_t * spr, str_t txt);
 void jlgr_slidebtn_loop(jlgr_t* jlgr, jl_sprite_t * spr, float defaultx,
@@ -408,29 +407,29 @@ void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
 	float h, data_t* string);
 void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
-	u8_t isdouble, m_f32_t* x1, m_f32_t* x2);
+	uint8_t isdouble, float* x1, float* x2);
 void jlgr_notify(jlgr_t* jlgr, str_t notification);
 
 // OpenGL
-void jl_gl_pbo_new(jlgr_t* jlgr, jl_tex_t* texture, u8_t* pixels,
-	u16_t w, u16_t h, u8_t bpp);
-void jl_gl_pbo_set(jlgr_t* jlgr, jl_tex_t* texture, u8_t* pixels,
-	u16_t w, u16_t h, u8_t bpp);
+void jl_gl_pbo_new(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
+	uint16_t w, uint16_t h, uint8_t bpp);
+void jl_gl_pbo_set(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
+	uint16_t w, uint16_t h, uint8_t bpp);
 void jl_gl_vo_init(jlgr_t* jlgr, jl_vo_t* vo);
-void jl_gl_vo_txmap(jlgr_t* jlgr, jl_vo_t* pv, u8_t map);
-uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels, int width, int height,
-	u8_t bytepp);
+void jl_gl_vo_txmap(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map);
+uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
+	uint32_t width, uint32_t height, uint8_t bytepp);
 double jl_gl_ar(jlgr_t* jlgr);
 void jl_gl_clear(jlgr_t* jlgr, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
-void jl_gl_pr_rsz(jlgr_t* jlgr, jl_pr_t *pr, f32_t w, f32_t h, u16_t w_px);
-void jl_gl_pr_new(jlgr_t* jlgr, jl_pr_t * pr, float w, float h, uint16_t w_px);
+void jl_gl_pr_rsz(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
+void jl_gl_pr_new(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
 void jl_gl_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, jl_vec3_t* scl);
 void jl_gl_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
 
 // video
 void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
 	uint16_t w, uint16_t h);
-m_u8_t* jlgr_load_image(jl_t* jl, data_t* data, m_u16_t* w, m_u16_t* h);
+uint8_t* jlgr_load_image(jl_t* jl, data_t* data, uint16_t* w, uint16_t* h);
 
 // SG
 void jl_sg_kill(jl_t* jl);

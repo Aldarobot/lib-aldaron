@@ -13,7 +13,7 @@
  * Return Amount Of Total Memory Being Used
  * @returns The total amount of memory being used in bytes.
 **/
-u64_t jl_mem_tbiu(void) {
+uint64_t jl_mem_tbiu(void) {
 	struct mallinfo mi;
 
 #if JL_PLAT != JL_PLAT_PHONE
@@ -94,7 +94,7 @@ void *jl_memi(jl_t* jl, uint32_t size) {
  * @param pmem: memory to clear
  * @param size: size of "mem"
 **/
-void jl_mem_clr(void* mem, u64_t size) {
+void jl_mem_clr(void* mem, uint64_t size) {
 	memset(mem, 0, size);
 }
 
@@ -104,7 +104,7 @@ void jl_mem_clr(void* mem, u64_t size) {
  * @param dst: The place to copy memory to
  * @param size: The size of src & dst in bytes.
 **/
-void jl_mem_copyto(const void* src, void* dst, u64_t size) {
+void jl_mem_copyto(const void* src, void* dst, uint64_t size) {
 	memcpy(dst, src, size);
 }
 
@@ -115,7 +115,7 @@ void jl_mem_copyto(const void* src, void* dst, u64_t size) {
  * @param size: # of bytes of "src" to copy to "dst"
  * @returns: a new pointer to 
 */
-void *jl_mem_copy(jl_t* jl, const void *src, u64_t size) {
+void *jl_mem_copy(jl_t* jl, const void *src, uint64_t size) {
 	void *dest = jl_memi(jl, size);
 	jl_mem_copyto(src, dest, size);
 	return dest;
@@ -143,7 +143,7 @@ void jl_mem_format(char* rtn, str_t format, ... ) {
  * @param a: 1 more than the maximum # to return
  * @returns: a random integer from 0 to "a"
 */
-u32_t jl_mem_random_int(u32_t a) {
+uint32_t jl_mem_random_int(uint32_t a) {
 	return rand()%a;
 }
 

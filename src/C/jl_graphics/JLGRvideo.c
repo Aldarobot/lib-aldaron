@@ -131,16 +131,16 @@ void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
  * @param h: Pointer to the height variable.
  * @returns: Raw pixel data.
 **/
-m_u8_t* jl_vi_load_(jl_t* jl, data_t* data, m_u16_t* w, m_u16_t* h) {
+uint8_t* jl_vi_load_(jl_t* jl, data_t* data, uint16_t* w, uint16_t* h) {
 	SDL_Surface *image; //  Free'd by SDL_free(image);
 	SDL_RWops *rw; // Free'd by SDL_RWFromMem
 	void* img_file; // Free'd by jl_mem
 	data_t pixel_data; // Free'd by jl_mem_string_fstrt
 	void* rtn_pixels; // Returned so not free'd.
 	uint32_t color = 0;
-	u32_t FSIZE = data->size;
+	uint32_t FSIZE = data->size;
 	int i, j;
-	u32_t rgba = 3;
+	uint32_t rgba = 3;
 
 //	memtester(jl, "LoadImg/Start0");
 	img_file = jl_memi(jl, FSIZE);

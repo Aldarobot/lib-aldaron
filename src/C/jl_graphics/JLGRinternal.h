@@ -29,12 +29,12 @@ void jl_gl_viewport_screen(jlgr_t* jlgr);
 void jl_gl_poly(jlgr_t* jlgr, jl_vo_t* pv, uint8_t vertices, const float *xyzw);
 void jl_gl_vect(jlgr_t* jlgr, jl_vo_t* pv, uint8_t vertices, const float *xyzw);
 void jl_gl_clrc(jlgr_t* jlgr, jl_vo_t* pv, jl_ccolor_t* cc);
-jl_ccolor_t* jl_gl_clrcs(jlgr_t* jlgr, u8_t *rgba, uint32_t vc);
-jl_ccolor_t* jl_gl_clrcg(jlgr_t* jlgr, u8_t *rgba, uint32_t vc);
-void jl_gl_clrg(jlgr_t* jlgr, jl_vo_t* pv, u8_t *rgba);
-void jl_gl_clrs(jlgr_t* jlgr, jl_vo_t* pv, u8_t *rgba);
-void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,u8_t map,u8_t a, uint32_t tx);
-void jl_gl_txtr_(jlgr_t* _jlc, jl_vo_t* pv, u8_t map, u8_t a, u32_t tx);
+jl_ccolor_t* jl_gl_clrcs(jlgr_t* jlgr, uint8_t *rgba, uint32_t vc);
+jl_ccolor_t* jl_gl_clrcg(jlgr_t* jlgr, uint8_t *rgba, uint32_t vc);
+void jl_gl_clrg(jlgr_t* jlgr, jl_vo_t* pv, uint8_t *rgba);
+void jl_gl_clrs(jlgr_t* jlgr, jl_vo_t* pv, uint8_t *rgba);
+void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,uint8_t map,uint8_t a, uint32_t tx);
+void jl_gl_txtr_(jlgr_t* _jlc, jl_vo_t* pv, uint8_t map, uint8_t a, uint32_t tx);
 void jl_gl_transform_pr_(jlgr_t* jlgr, jl_pr_t* pr, float x, float y, float z,
 	float xm, float ym, float zm);
 void jl_gl_transform_vo_(jlgr_t* jlgr, jl_vo_t* vo, float x, float y, float z,
@@ -43,7 +43,7 @@ void jl_gl_transform_chr_(jlgr_t* jlgr, float x, float y, float z,
 	float xm, float ym, float zm);
 void jl_gl_draw(jlgr_t* jlgr, jl_vo_t* pv);
 void jl_gl_draw_chr(jlgr_t* jlgr, jl_vo_t* pv,
-	m_f32_t r, m_f32_t g, m_f32_t b, m_f32_t a);
+	float r, float g, float b, float a);
 void jl_gl_draw_pr_(jl_t* jlc, jl_pr_t* pr);
 void jl_gl_vo_free(jlgr_t* jlgr, jl_vo_t *pv);
 uint32_t jl_gl_w(jlgr_t* jlgr);
@@ -51,13 +51,13 @@ uint32_t jl_gl_w(jlgr_t* jlgr);
 //DL
 void _jl_sg_loop(jlgr_t* jlgr);
 float jl_sg_seconds_past_(jl_t* jlc);
-m_u8_t* jl_vi_load_(jl_t* jlc, data_t* data, m_u16_t* w, m_u16_t* h);
+uint8_t* jl_vi_load_(jl_t* jlc, data_t* data, uint16_t* w, uint16_t* h);
 
 // Resize function
 void jl_wm_resz__(jlgr_t* jlgr, uint16_t x, uint16_t y);
 void jl_gl_resz__(jlgr_t* jlgr);
 void jl_sg_resz__(jl_t* jlc);
-void jlgr_resz(jlgr_t* jlgr, u16_t x, u16_t y);
+void jlgr_resz(jlgr_t* jlgr, uint16_t x, uint16_t y);
 void jlgr_menu_resize_(jlgr_t* jlgr);
 // init functions.
 void jl_wm_init__(jlgr_t* jlgr);
@@ -78,7 +78,7 @@ void jl_wm_kill__(jlgr_t* jlgr);
 void jlgr_thread_kill(jlgr_t* jlgr);
 void jlgr_file_kill_(jlgr_t* jlgr);
 //
-void jlgr_thread_send(jlgr_t* jlgr, u8_t id, u16_t x, u16_t y, jl_fnct fn);
+void jlgr_thread_send(jlgr_t* jlgr,uint8_t id,uint16_t x,uint16_t y,jl_fnct fn);
 
 //
 void jl_wm_updatewh_(jlgr_t* jlgr);

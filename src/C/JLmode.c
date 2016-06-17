@@ -45,7 +45,7 @@ static void _jl_mode_add(jl_t* jl) {
  *	JL_MODE_LOOP: Called repeatedly.
  * @param loop: What to change the loop to.
 */
-void jl_mode_set(jl_t* jl, u16_t mode, jl_mode_t loops) {
+void jl_mode_set(jl_t* jl, uint16_t mode, jl_mode_t loops) {
 	while(mode >= jl->mode.count) _jl_mode_add(jl);
 	jl->mode.mdes[mode] = loops;
 }
@@ -72,7 +72,7 @@ void jl_mode_reset(jl_t* jl) {
  * @param jl: The library context.
  * @param mode: The mode to switch to.
  */
-void jl_mode_switch(jl_t* jl, u16_t mode) {
+void jl_mode_switch(jl_t* jl, uint16_t mode) {
 	if(jl->mode_switch_skip) return;
 
 	jl_fnct kill_ = jl->mode.mode.kill;
@@ -98,7 +98,7 @@ void jl_mode_switch(jl_t* jl, u16_t mode) {
  * @param jl: The library context.
  */
 void jl_mode_exit(jl_t* jl) {
-	u16_t which = jl->mode.which;
+	uint16_t which = jl->mode.which;
 	jl_fnct kill_ = jl->mode.mode.kill;
 
 	// Run exit routine.

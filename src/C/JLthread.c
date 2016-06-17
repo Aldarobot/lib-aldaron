@@ -13,7 +13,7 @@
 //
 
 // Initialize a new thread.
-static void jl_thread_init_new(jl_t* jl, u8_t thread_id) {
+static void jl_thread_init_new(jl_t* jl, uint8_t thread_id) {
 	jl_print_init_thread__(jl, thread_id);
 }
 
@@ -85,7 +85,7 @@ uint8_t jl_thread_current(jl_t *jl) {
  * @param threadnum: The thread id returned from jl_thread_new().
  * @returns: Value returned from the thread.
 **/
-int32_t jl_thread_old(jl_t *jl, u8_t threadnum) {
+int32_t jl_thread_old(jl_t *jl, uint8_t threadnum) {
 	int32_t threadReturnValue = 0;
 
 	SDL_WaitThread(jl->jl_ctx[threadnum].thread, &threadReturnValue);
@@ -153,7 +153,7 @@ void jl_thread_mutex_use(jl_t *jl, SDL_mutex* mutex, jl_fnct fn_) {
  *	same)
 **/
 void jl_thread_mutex_cpy(jl_t *jl, SDL_mutex* mutex, void* src, void* dst,
-	u32_t size)
+	uint32_t size)
 {
 	if (SDL_LockMutex(mutex) == 0) {
 		// Copy data.
@@ -181,9 +181,9 @@ void jl_thread_mutex_old(jl_t* jl, SDL_mutex* mutex) {
  * @param size: The size of the data.
  * @returns: The thread communicator.
 **/
-jl_comm_t* jl_thread_comm_make(jl_t* jl, u32_t size) {
+jl_comm_t* jl_thread_comm_make(jl_t* jl, uint32_t size) {
 	jl_comm_t* comm = jl_memi(jl, sizeof(jl_comm_t));
-	m_u8_t i;
+	uint8_t i;
 
 	comm->lock = SDL_CreateMutex();
 	comm->size = size;
@@ -242,7 +242,7 @@ void jl_thread_comm_recv(jl_t* jl, jl_comm_t* comm, jl_data_fnct fn) {
  * @param comm: The thread communicator.
 **/
 void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm) {
-	m_u8_t i;
+	uint8_t i;
 
 	// Free the lock.
 	SDL_DestroyMutex(comm->lock);

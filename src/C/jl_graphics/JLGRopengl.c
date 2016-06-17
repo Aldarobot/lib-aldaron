@@ -101,12 +101,12 @@ static const float DEFAULT_TC[] = {
 
 // Prototypes:
 
-//static void jl_gl_depthbuffer_set__(jlgr_t* jlgr, u16_t w, u16_t h);
+//static void jl_gl_depthbuffer_set__(jlgr_t* jlgr, uint16_t w, uint16_t h);
 //static void _jl_gl_depthbuffer_bind(jlgr_t* jlgr, uint32_t db);
 //static void _jl_gl_depthbuffer_make(jlgr_t* jlgr, uint32_t *db);
 //static void jl_gl_depthbuffer_off__(jlgr_t* jlgr);
-static void jl_gl_framebuffer_addtx__(jlgr_t* jlgr, u32_t tx);
-static void jl_gl_framebuffer_adddb__(jlgr_t* jlgr, u32_t db);
+static void jl_gl_framebuffer_addtx__(jlgr_t* jlgr, uint32_t tx);
+static void jl_gl_framebuffer_adddb__(jlgr_t* jlgr, uint32_t db);
 static void jl_gl_framebuffer_status__(jlgr_t* jlgr);
 static void jl_gl_framebuffer_use__(jlgr_t* jlgr, jl_pr_t* pr);
 
@@ -176,7 +176,7 @@ static void jl_gl_buffer_use__(jlgr_t* jlgr, GLuint *buffer) {
 
 // Set the Data for VBO "buffer" to "buffer_data" with "buffer_size"
 static void jl_gl_buffer_set__(jlgr_t* jlgr, GLuint *buffer,
-	const void *buffer_data, u16_t buffer_size)
+	const void *buffer_data, uint16_t buffer_size)
 {
 	//Bind Buffer "buffer"
 	jl_gl_buffer_use__(jlgr, buffer);
@@ -301,8 +301,8 @@ static void jl_gl_texture_make__(jlgr_t* jlgr, uint32_t *tex) {
 }
 
 // Set the bound texture.  pm is the pixels 0 - blank texture.
-static void jl_gl_texture_set__(jlgr_t* jlgr, u8_t* pm, u16_t w, u16_t h,
-	u8_t bytepp)
+static void jl_gl_texture_set__(jlgr_t* jlgr, uint8_t* pm, uint16_t w, uint16_t h,
+	uint8_t bytepp)
 {
 	GLenum format = bytepp == 3 ? GL_RGB : GL_RGBA;
 	glTexImage2D(
@@ -367,7 +367,7 @@ static void jl_gl_texture_new__(jlgr_t* jlgr, uint32_t *tex, uint8_t* px,
 
 /*
 // Make & Bind a new depth buffer.
-static void jl_gl_depthbuffer_new__(jlgr_t* jlgr,m_u32_t*db ,u16_t w,u16_t h) {
+static void jl_gl_depthbuffer_new__(jlgr_t* jlgr,uint32_t*db ,uint16_t w,uint16_t h) {
 	// Make the depth buffer.
 	_jl_gl_depthbuffer_make(jlgr, db);
 	// Bind the depth buffer
@@ -377,8 +377,8 @@ static void jl_gl_depthbuffer_new__(jlgr_t* jlgr,m_u32_t*db ,u16_t w,u16_t h) {
 }
 */
 // Make a texture - doesn't free "pixels"
-uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels, int width, int height,
-	u8_t bytepp)
+uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
+	uint32_t width, uint32_t height, uint8_t bytepp)
 {
 	uint32_t texture;
 
@@ -473,7 +473,7 @@ static inline void _jl_gl_init_enable_alpha(jlgr_t* jlgr) {
 static void jl_gl_vertices__(jlgr_t* jlgr, const float *xyzw, uint8_t vertices,
 	float* cv, uint32_t* gl)
 {
-	u16_t items = (vertices*3);
+	uint16_t items = (vertices*3);
 
 	// Copy Vertices
 	jl_mem_copyto(xyzw, cv, items * sizeof(float));
@@ -511,8 +511,8 @@ static void _jl_gl_col_begin(jlgr_t* jlgr, jl_vo_t* pv) {
 }
 
 // TODO: MOVE
-void jl_gl_pbo_new(jlgr_t* jlgr, jl_tex_t* texture, u8_t* pixels,
-	u16_t w, u16_t h, u8_t bpp)
+void jl_gl_pbo_new(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
+	uint16_t w, uint16_t h, uint8_t bpp)
 {
 	jl_print_function(jlgr->jl, "GL_PBO_NEW");
 	jl_gl_texture_make__(jlgr, &(texture->gl_texture));
@@ -526,8 +526,8 @@ void jl_gl_pbo_new(jlgr_t* jlgr, jl_tex_t* texture, u8_t* pixels,
 	jl_print_return(jlgr->jl, "GL_PBO_NEW");
 }
 // TODO: MOVE
-void jl_gl_pbo_set(jlgr_t* jlgr, jl_tex_t* texture, u8_t* pixels,
-	u16_t w, u16_t h, u8_t bpp)
+void jl_gl_pbo_set(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
+	uint16_t w, uint16_t h, uint8_t bpp)
 {
 	GLenum format = GL_RGBA;
 
@@ -552,18 +552,18 @@ void jl_gl_pbo_set(jlgr_t* jlgr, jl_tex_t* texture, u8_t* pixels,
 	JL_GL_ERROR(jlgr, 0, "jl_gl_pbo_set__: glTexSubImage2D");
 }
 
-static inline void jl_gl_viewport__(jlgr_t* jlgr, u16_t w, u16_t h) {
+static inline void jl_gl_viewport__(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	glViewport(0, 0, w, h);
 	JL_GL_ERROR(jlgr, w * h, "glViewport");
 }
 
-static void jl_gl_framebuffer_free__(jlgr_t* jlgr, m_u32_t *fb) {
+static void jl_gl_framebuffer_free__(jlgr_t* jlgr, uint32_t *fb) {
 	glDeleteFramebuffers(1, fb);
 	JL_GL_ERROR(jlgr, *fb, "glDeleteFramebuffers");
 	*fb = 0;
 }
 
-static void jl_gl_framebuffer_make__(jlgr_t* jlgr, m_u32_t *fb) {
+static void jl_gl_framebuffer_make__(jlgr_t* jlgr, uint32_t *fb) {
 	glGenFramebuffers(1, fb);
 	if(!(*fb)) {
 		jl_print(jlgr->jl, "jl_gl_framebuffer_make__: GL FB = 0");
@@ -647,7 +647,7 @@ static void jl_gl_framebuffer_use__(jlgr_t* jlgr, jl_pr_t* pr) {
 }
 
 // add a texture to a framebuffer object.
-static void jl_gl_framebuffer_addtx__(jlgr_t* jlgr, u32_t tx) {
+static void jl_gl_framebuffer_addtx__(jlgr_t* jlgr, uint32_t tx) {
 	// Set "*tex" as color attachment #0.
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 		GL_TEXTURE_2D, tx, 0);
@@ -655,7 +655,7 @@ static void jl_gl_framebuffer_addtx__(jlgr_t* jlgr, u32_t tx) {
 }
 
 // add a depthbuffer to a framebuffer object.
-static void jl_gl_framebuffer_adddb__(jlgr_t* jlgr, u32_t db) {
+static void jl_gl_framebuffer_adddb__(jlgr_t* jlgr, uint32_t db) {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
 		GL_RENDERBUFFER, db);
 	JL_GL_ERROR(jlgr, db,"make pr: glFramebufferRenderbuffer");
@@ -691,7 +691,7 @@ static void _jl_gl_depthbuffer_make(jlgr_t* jlgr, uint32_t *db) {
 	JL_GL_ERROR(jlgr,*db,"make pr: glGenRenderbuffers");
 }
 
-static void jl_gl_depthbuffer_set__(jlgr_t* jlgr, u16_t w, u16_t h) {
+static void jl_gl_depthbuffer_set__(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	if(!w) {
 		jl_print(jlgr->jl, "jl_gl_depthbuffer_set: w = 0");
 		jl_sg_kill(jlgr->jl);
@@ -741,7 +741,7 @@ static inline void _jl_gl_draw_colr(jlgr_t* jlgr, jl_vo_t* pv) {
 }
 
 // Prepare to draw a texture with texture coordinates "tc". 
-static void _jl_gl_draw_txtr(jlgr_t* jlgr, f32_t a, u32_t tx, uint32_t* tc) {
+static void _jl_gl_draw_txtr(jlgr_t* jlgr, float a, uint32_t tx, uint32_t* tc) {
 	jl_print_function(jlgr->jl, "OPENGL/Draw Texture");
 	// Bind Texture Coordinates to shader
 	_jl_gl_setv(jlgr, tc, jlgr->gl.tex.attr.texpos, 2);
@@ -752,16 +752,16 @@ static void _jl_gl_draw_txtr(jlgr_t* jlgr, f32_t a, u32_t tx, uint32_t* tc) {
 	jl_print_return(jlgr->jl, "OPENGL/Draw Texture");
 }
 
-static void jl_gl_draw_vertices(jlgr_t* jlgr, uint32_t* gl, i32_t attr) {
+static void jl_gl_draw_vertices(jlgr_t* jlgr, uint32_t* gl, int32_t attr) {
 	_jl_gl_setv(jlgr, gl, attr, 3);
 }
 
-static void jl_gl_draw_final__(jlgr_t* jlgr, u8_t rs, u32_t vc) {
+static void jl_gl_draw_final__(jlgr_t* jlgr, uint8_t rs, uint32_t vc) {
 	_jl_gl_draw_arrays(jlgr, rs ? GL_TRIANGLES : GL_TRIANGLE_FAN, vc);
 }
 
 static void _jl_gl_draw_onts(jlgr_t* jlgr, uint32_t* gl, uint8_t isTextured,
-	u8_t rs, u32_t vc)
+	uint8_t rs, uint32_t vc)
 {
 	// Update the position variable in shader.
 	jl_gl_draw_vertices(jlgr, gl, isTextured ?
@@ -830,7 +830,7 @@ void jl_gl_clrc(jlgr_t* jlgr, jl_vo_t* pv, jl_ccolor_t* cc) {
 }
 
 //Convert color to solid
-jl_ccolor_t* jl_gl_clrcs(jlgr_t* jlgr, u8_t *rgba, uint32_t vc) {
+jl_ccolor_t* jl_gl_clrcs(jlgr_t* jlgr, uint8_t *rgba, uint32_t vc) {
 	int i;
 	//Allocate memory
 	jl_ccolor_t* cc = jl_memi(jlgr->jl, vc * sizeof(float) * 4);
@@ -846,7 +846,7 @@ jl_ccolor_t* jl_gl_clrcs(jlgr_t* jlgr, u8_t *rgba, uint32_t vc) {
 }
 
 //Convert Color To Gradient
-jl_ccolor_t* jl_gl_clrcg(jlgr_t* jlgr, u8_t *rgba, uint32_t vc) {
+jl_ccolor_t* jl_gl_clrcg(jlgr_t* jlgr, uint8_t *rgba, uint32_t vc) {
 	int i;
 	//Allocate memory
 	jl_ccolor_t* cc = jl_memi(jlgr->jl, vc * sizeof(float) * 4);
@@ -862,21 +862,21 @@ jl_ccolor_t* jl_gl_clrcg(jlgr_t* jlgr, u8_t *rgba, uint32_t vc) {
 }
 
 // Set Texturing to Gradient Color "rgba" { (4 * vertex count) values }
-void jl_gl_clrg(jlgr_t* jlgr, jl_vo_t* pv, u8_t *rgba) {
+void jl_gl_clrg(jlgr_t* jlgr, jl_vo_t* pv, uint8_t *rgba) {
 	if(pv == NULL) pv = &jlgr->gl.temp_vo;
 	_jl_gl_col_begin(jlgr, pv);
 	jl_gl_clrc(jlgr, pv, jl_gl_clrcg(jlgr, rgba, pv->vc));
 }
 
 // Set Texturing to Solid Color "rgba" { 4 values }
-void jl_gl_clrs(jlgr_t* jlgr, jl_vo_t* pv, u8_t *rgba) {
+void jl_gl_clrs(jlgr_t* jlgr, jl_vo_t* pv, uint8_t *rgba) {
 	if(pv == NULL) pv = &jlgr->gl.temp_vo;
 	_jl_gl_col_begin(jlgr, pv);
 	jl_gl_clrc(jlgr, pv, jl_gl_clrcs(jlgr, rgba, pv->vc));
 }
 
 // Set texturing to a bitmap
-void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,u8_t map,u8_t a, uint32_t tx) {
+void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,uint8_t map,uint8_t a, uint32_t tx) {
 	_jl_gl_txtr(jlgr, &pv, a, 0);
 	pv->tx = tx;
 	if(!pv->tx) {
@@ -888,7 +888,7 @@ void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,u8_t map,u8_t a, uint32_t tx) {
 }
 
 // Set texturing to a bitmap
-void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* pv, u8_t map, u8_t a, u32_t tx) {
+void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map, uint8_t a, uint32_t tx) {
 	_jl_gl_txtr(jlgr, &pv, a, 0);
 	pv->tx = tx;
 	jl_gl_vo_txmap(jlgr, pv, map);
@@ -899,7 +899,7 @@ void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* pv, u8_t map, u8_t a, u32_t tx) {
 // X,Y,Z are all [0. -> 1.]
 // X,Y are turned into [-.5 -> .5] - center around zero.
 static void jl_gl_translate__(jlgr_t* jlgr, int32_t shader, uint32_t which,
-	float x, float y, float z, f64_t ar)
+	float x, float y, float z, double ar)
 {
 	// Determine which shader to use
 	_jl_gl_usep(jlgr, which);
@@ -910,7 +910,7 @@ static void jl_gl_translate__(jlgr_t* jlgr, int32_t shader, uint32_t which,
 
 //TODO:MOVE
 static void jl_gl_transform__(jlgr_t* jlgr, int32_t shader, uint32_t which,
-	float x, float y, float z, f64_t ar)
+	float x, float y, float z, double ar)
 {
 	_jl_gl_usep(jlgr, which);
 	glUniform4f(shader, 2. * x, 2. * (y / ar), 2. * z, 1.f);
@@ -921,7 +921,7 @@ void jl_gl_transform_pr_(jlgr_t* jlgr, jl_pr_t* pr, float x, float y, float z,
 	float xm, float ym, float zm)
 {
 	jl_print_function(jlgr->jl, "OPENGL TRANSFORM!");
-	f64_t ar = jl_gl_ar(jlgr);
+	double ar = jl_gl_ar(jlgr);
 
 	jl_gl_translate__(jlgr, jlgr->gl.prm.uniforms.translate,
 		jlgr->gl.prgs.preblend, x, y, z, ar);
@@ -933,7 +933,7 @@ void jl_gl_transform_pr_(jlgr_t* jlgr, jl_pr_t* pr, float x, float y, float z,
 void jl_gl_transform_vo_(jlgr_t* jlgr, jl_vo_t* vo, float x, float y, float z,
 	float xm, float ym, float zm)
 {
-	f64_t ar = jl_gl_ar(jlgr);
+	double ar = jl_gl_ar(jlgr);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 
 	jl_gl_translate__(jlgr, (vo->cc == NULL) ?
@@ -949,7 +949,7 @@ void jl_gl_transform_vo_(jlgr_t* jlgr, jl_vo_t* vo, float x, float y, float z,
 void jl_gl_transform_chr_(jlgr_t* jlgr, float x, float y, float z,
 	float xm, float ym, float zm)
 {
-	f64_t ar = jl_gl_ar(jlgr);
+	double ar = jl_gl_ar(jlgr);
 
 	jl_gl_translate__(jlgr, jlgr->gl.chr.uniforms.translate,
 		jlgr->gl.prgs.character, x, y, z, ar);
@@ -983,7 +983,7 @@ void jl_gl_draw(jlgr_t* jlgr, jl_vo_t* pv) {
  * Else render vertex object "pv" on the screen.
 */
 void jl_gl_draw_chr(jlgr_t* jlgr, jl_vo_t* pv,
-	m_f32_t r, m_f32_t g, m_f32_t b, m_f32_t a)
+	float r, float g, float b, float a)
 {
 	// Use Temporary Vertex Object If no vertex object.
 	if(pv == NULL) pv = &jlgr->gl.temp_vo;
@@ -1035,7 +1035,7 @@ int32_t _jl_gl_getu(jlgr_t* jlgr, GLuint prg, char *var) {
 	return a;
 }
 
-void _jl_gl_geta(jlgr_t* jlgr, GLuint prg, m_i32_t *attrib, const char *title) {
+void _jl_gl_geta(jlgr_t* jlgr, GLuint prg, int32_t *attrib, const char *title) {
 	if((*attrib = glGetAttribLocation(prg, title)) == -1) {
 		jl_print(jlgr->jl, 
 			"attribute name is either reserved or non-existant");
@@ -1148,7 +1148,7 @@ static inline void _jl_gl_make_res(jlgr_t* jlgr) {
 	jl_print_return(jlgr->jl, "GL_Init");
 }
 
-static void jl_gl_pr_set__(jl_pr_t *pr, f32_t w, f32_t h, u16_t w_px) {
+static void jl_gl_pr_set__(jl_pr_t *pr, float w, float h, uint16_t w_px) {
 	const float ar = h / w; // Aspect Ratio.
 	const float h_px = w_px * ar; // Height in pixels.
 
@@ -1192,7 +1192,7 @@ void jl_gl_vo_init(jlgr_t* jlgr, jl_vo_t* vo) {
  * @param pv: The vertext object to change.
  * @param map: The character value to map.
 **/
-void jl_gl_vo_txmap(jlgr_t* jlgr, jl_vo_t* pv, u8_t map) {
+void jl_gl_vo_txmap(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map) {
 	if(map) {
 		int32_t cX = map%16;
 		int32_t cY = map/16;
@@ -1258,7 +1258,7 @@ void jl_gl_clear(jlgr_t* jlgr, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
  * @param h: The display height. [ 0. - 1. ]
  * @param w_px: The resolution in pixels along the x axis [ 1- ]
 **/
-void jl_gl_pr_rsz(jlgr_t* jlgr, jl_pr_t *pr, f32_t w, f32_t h, u16_t w_px) {
+void jl_gl_pr_rsz(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px) {
 	const float xyzw[] = {
 		0.f,	h,	0.f,
 		0.f,	0.f,	0.f,
@@ -1287,7 +1287,7 @@ void jl_gl_pr_rsz(jlgr_t* jlgr, jl_pr_t *pr, f32_t w, f32_t h, u16_t w_px) {
  * @param h: The display height. [ 0. - 1. ]
  * @param w_px: The resolution in pixels along the x axis [ 1- ]
 **/
-void jl_gl_pr_new(jlgr_t* jlgr, jl_pr_t * pr, float w, float h, uint16_t w_px) {
+void jl_gl_pr_new(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px) {
 	jl_print_function(jlgr->jl, "GL_PR_NEW");
 	// Set the initial pr structure values - Nothings made yet.
 	pr->tx = 0;

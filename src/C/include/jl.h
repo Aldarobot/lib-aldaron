@@ -47,19 +47,19 @@ typedef enum{
 
 void jl_dont(jl_t* jl);
 void* jl_get_context(jl_t* jl);
-int jl_start(jl_fnct fnc_init_, jl_fnct fnc_kill_, str_t name, u64_t ctx_size);
+int jl_start(jl_fnct fnc_init_,jl_fnct fnc_kill_,str_t name,uint64_t ctx_size);
 
 // "JLmem.c"
 void *jl_mem(jl_t* jl, void *a, uint32_t size);
 void *jl_memi(jl_t* jl, uint32_t size);
-void *jl_mem_copy(jl_t* jl, const void *src, u64_t size);
-u64_t jl_mem_tbiu(void);
+void *jl_mem_copy(jl_t* jl, const void *src, uint64_t size);
+uint64_t jl_mem_tbiu(void);
 void jl_mem_leak_init(jl_t* jl);
 void jl_mem_leak_fail(jl_t* jl, str_t fn_name);
-void jl_mem_clr(void* mem, u64_t size);
-void jl_mem_copyto(const void* src, void* dst, u64_t size);
+void jl_mem_clr(void* mem, uint64_t size);
+void jl_mem_copyto(const void* src, void* dst, uint64_t size);
 void jl_mem_format(char* rtn, str_t format, ... );
-u32_t jl_mem_random_int(u32_t a);
+uint32_t jl_mem_random_int(uint32_t a);
 void *jl_mem_temp(jl_t* jl, void *mem);
 double jl_mem_addwrange(double v1, double v2);
 double jl_mem_difwrange(double v1, double v2);
@@ -69,20 +69,20 @@ void jl_data_clear(jl_t* jl, data_t* pa);
 void jl_data_init(jl_t* jl, data_t* a, uint32_t size);
 void jl_data_free(data_t* pstr);
 void jl_data_mkfrom_str(data_t* a, str_t string);
-void jl_data_mkfrom_data(jl_t* jl, data_t* a, u32_t size, const void *data);
+void jl_data_mkfrom_data(jl_t* jl, data_t* a, uint32_t size, const void *data);
 void jl_data_data(jl_t *jl, data_t* a, const data_t* b, uint64_t bytes);
 void jl_data_merg(jl_t *jl, data_t* a, const data_t* b);
 void jl_data_trunc(jl_t *jl, data_t* a, uint32_t size);
-u8_t jl_data_byte(data_t* pstr);
-void jl_data_loadto(data_t* pstr, u32_t varsize, void* var);
-void jl_data_saveto(data_t* pstr, u32_t varsize, const void* var);
-void jl_data_add_byte(data_t* pstr, u8_t pvalue);
+uint8_t jl_data_byte(data_t* pstr);
+void jl_data_loadto(data_t* pstr, uint32_t varsize, void* var);
+void jl_data_saveto(data_t* pstr, uint32_t varsize, const void* var);
+void jl_data_add_byte(data_t* pstr, uint8_t pvalue);
 void jl_data_delete_byte(jl_t *jl, data_t* pstr);
-void jl_data_resize(jl_t *jl, data_t* pstr, u32_t newsize);
+void jl_data_resize(jl_t *jl, data_t* pstr, uint32_t newsize);
 void jl_data_insert_byte(jl_t *jl, data_t* pstr, uint8_t pvalue);
-void jl_data_insert_data(jl_t *jl, data_t* pstr, const void* data, u32_t size);
+void jl_data_insert_data(jl_t *jl, data_t* pstr, const void* data, uint32_t size);
 char* jl_data_tostring(jl_t* jl, data_t* a);
-u8_t jl_data_test_next(data_t* script, str_t particle);
+uint8_t jl_data_test_next(data_t* script, str_t particle);
 void jl_data_read_upto(jl_t* jl, data_t* compiled, data_t* script, uint8_t end,
 	uint32_t psize);
 
@@ -91,10 +91,10 @@ void jl_cl_list_alphabetize(struct cl_list *list);
 void jl_clump_list_iterate(jl_t* jl, struct cl_list *list, jl_data_fnct fn);
 
 // "JLmode.c"
-void jl_mode_set(jl_t* jl, u16_t mode, jl_mode_t loops);
+void jl_mode_set(jl_t* jl, uint16_t mode, jl_mode_t loops);
 void jl_mode_override(jl_t* jl, jl_mode_t loops);
 void jl_mode_reset(jl_t* jl);
-void jl_mode_switch(jl_t* jl, u16_t mode);
+void jl_mode_switch(jl_t* jl, uint16_t mode);
 void jl_mode_exit(jl_t* jl);
 
 // "JLprint.c"
@@ -112,7 +112,7 @@ void jl_print_stacktrace(jl_t* jl);
 
 // "JLfile.c"
 void jl_file_print(jl_t* jl, str_t fname, str_t msg);
-u8_t jl_file_exist(jl_t* jl, str_t path);
+uint8_t jl_file_exist(jl_t* jl, str_t path);
 void jl_file_rm(jl_t* jl, str_t filename);
 void jl_file_save(jl_t* jl, const void *file, const char *name,
 	uint32_t bytes);
@@ -130,15 +130,15 @@ str_t jl_file_get_resloc(jl_t* jl, str_t prg_folder, str_t fname);
 // "JLthread.c"
 uint8_t jl_thread_new(jl_t *jl, str_t name, SDL_ThreadFunction fn);
 uint8_t jl_thread_current(jl_t *jl);
-int32_t jl_thread_old(jl_t *jl, u8_t threadnum);
+int32_t jl_thread_old(jl_t *jl, uint8_t threadnum);
 SDL_mutex* jl_thread_mutex_new(jl_t *jl);
 void jl_thread_mutex_lock(jl_t *jl, SDL_mutex* mutex);
 void jl_thread_mutex_unlock(jl_t *jl, SDL_mutex* mutex);
 void jl_thread_mutex_use(jl_t *jl, SDL_mutex* mutex, jl_fnct fn_);
 void jl_thread_mutex_cpy(jl_t *jl, SDL_mutex* mutex, void* src,
-	void* dst, u32_t size);
+	void* dst, uint32_t size);
 void jl_thread_mutex_old(jl_t *jl, SDL_mutex* mutex);
-jl_comm_t* jl_thread_comm_make(jl_t* jl, u32_t size);
+jl_comm_t* jl_thread_comm_make(jl_t* jl, uint32_t size);
 void jl_thread_comm_send(jl_t* jl, jl_comm_t* comm, const void* src);
 void jl_thread_comm_recv(jl_t* jl, jl_comm_t* comm, jl_data_fnct fn);
 void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm);

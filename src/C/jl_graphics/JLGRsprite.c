@@ -182,7 +182,7 @@ void jlgr_sprite_free(jlgr_t* jlgr, jl_sprite_t* sprite) {
  * @return 0: if the sprites don't collide in their bounding boxes.
  * @return 1: if the sprites do collide in their bounding boxes.
 **/
-u8_t jlgr_sprite_collide(jlgr_t* jlgr, jl_sprite_t *spr1, jl_sprite_t *spr2) {
+uint8_t jlgr_sprite_collide(jlgr_t* jlgr, jl_sprite_t *spr1, jl_sprite_t *spr2){
 	if (
 		(spr1->pr.cb.pos.y >= (spr2->pr.cb.pos.y+spr2->pr.cb.ofs.y)) ||
 		(spr1->pr.cb.pos.x >= (spr2->pr.cb.pos.x+spr2->pr.cb.ofs.x)) ||

@@ -28,7 +28,7 @@ static inline void jl_init_libs__(jl_t* jl) {
 //	jlgr_draw_msge(_jl->jl, 0, 0, 0, "INITIALIZATION COMPLETE!");
 }
 
-static inline void jl_init__(jl_t* jl,jl_fnct _fnc_init_,str_t nm,u64_t ctx1s) {
+static inline void jl_init__(jl_t* jl,jl_fnct _fnc_init_,str_t nm,uint64_t ctx1s) {
 	JL_PRINT_DEBUG(jl, "Initializing subsystems....");
 	// Run the library's init function.
 	jl_init_libs__(jl);
@@ -40,7 +40,7 @@ static inline void jl_init__(jl_t* jl,jl_fnct _fnc_init_,str_t nm,u64_t ctx1s) {
 	JL_PRINT_DEBUG(jl, "Started JL_Lib!");
 }
 
-static void jl_time_reset__(jl_t* jl, u8_t on_time) {
+static void jl_time_reset__(jl_t* jl, uint8_t on_time) {
 	if(jl->jlgr) {
 		jlgr_t* jlgr = jl->jlgr;
 
@@ -106,7 +106,7 @@ void* jl_get_context(jl_t* jl) {
  * @param name: The name of the program, used for storage / window name etc.
  * @param ctx_size: The size of the program context.
 **/
-int jl_start(jl_fnct fnc_init_, jl_fnct fnc_kill_, str_t name, u64_t ctx_size) {
+int jl_start(jl_fnct fnc_init_,jl_fnct fnc_kill_,str_t name,uint64_t ctx_size) {
 	//Set Up Memory And Logging
 	jl_t* jl = jl_init_essential__();
 

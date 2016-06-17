@@ -169,7 +169,7 @@ static void jlgr_menu_name_draw2__(jlgr_t* jlgr) {
 
 static void jlgr_menu_name_draw__(jlgr_t* jlgr) {
 	jl_menu_t* menu = jlgr_sprite_getcontext(&jlgr->menubar.menubar);
-	f32_t text_size = jl_gl_ar(jlgr) * .5;
+	float text_size = jl_gl_ar(jlgr) * .5;
 
 	jlgr_menu_name_draw2__(jlgr);
 	jlgr_draw_text(jlgr, jlgr->wm.windowTitle[0],
@@ -186,7 +186,7 @@ static void jlgr_menu_name_draw__(jlgr_t* jlgr) {
 
 static void jlgr_menu_slow_draw__(jlgr_t* jlgr) {
 	jl_t* jl = jlgr->jl;
-	m_u8_t color[] = { 127, 127, 255, 255 };
+	uint8_t color[] = { 127, 127, 255, 255 };
 	char formated[80];
 
 	// Draw the icon based on whether on time or not.
@@ -231,7 +231,7 @@ void jlgr_menu_toggle(jlgr_t* jlgr) {
 		jlgr->menubar.menubar.loop = jlgr_sprite_dont;
 }
 
-void jlgr_menu_draw_icon(jlgr_t* jlgr, uint32_t tex, u8_t c) {
+void jlgr_menu_draw_icon(jlgr_t* jlgr, uint32_t tex, uint8_t c) {
 	jl_rect_t rc_icon = { 0., 0., .1, .1};
 	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(&jlgr->menubar.menubar);
 	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), 0., 0. };
@@ -249,7 +249,7 @@ void jlgr_menu_draw_icon(jlgr_t* jlgr, uint32_t tex, u8_t c) {
 **/
 void jlgr_menu_addicon(jlgr_t* jlgr, jlgr_input_fnct inputfn, jlgr_fnct rdr) {
 	jl_menu_t* menu = jlgr_sprite_getcontext(&jlgr->menubar.menubar);
-	m_u8_t i;
+	uint8_t i;
 
 	menu->draw.cursor = -1;
 	for(i = 0; i < 10; i++) if(!menu->inputfn[i]) break;

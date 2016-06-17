@@ -114,7 +114,7 @@ static void jl_print_toconsole__(jl_t* jl, str_t input) {
 		sprintf(convert, "%%%ds\n", chr_cnt);
 
 		jl_mem_format(buffer2, convert, text);
-		JL_PRINT(buffer2);
+		JL_PRINT("%s", buffer2);
 
 
 		jl_file_print(jl, jl->fl.paths.errf, buffer2);

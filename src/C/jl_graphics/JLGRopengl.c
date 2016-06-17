@@ -1170,7 +1170,6 @@ static void jl_gl_pr_set__(jl_pr_t *pr, f32_t w, f32_t h, u16_t w_px) {
  * @param vo: A uninitialized vertex object - to initailize with 0 vertices.
 **/
 void jl_gl_vo_init(jlgr_t* jlgr, jl_vo_t* vo) {
-	jl_print_function(jlgr->jl, "GL_VO_MAKE");
 	// GL VBO
 	vo->gl = 0;
 	// GL Texture Coordinate Buffer
@@ -1185,7 +1184,6 @@ void jl_gl_vo_init(jlgr_t* jlgr, jl_vo_t* vo) {
 	vo->rs = 0;
 	// Texture
 	vo->tx = 0;
-	jl_print_return(jlgr->jl, "GL_VO_MAKE");
 }
 
 /**

@@ -46,7 +46,6 @@ void jlgr_mouse_init__(jlgr_t* jlgr) {
 		jl_gl_vo_init(jlgr, &mouse_vo);
 		mouse_vo_size = sizeof(jl_vo_t);
 	#elif JL_PLAT == JL_PLAT_PHONE // if phone - don't show mouse
-		mouse_vo = NULL;
 		mouse_vo_size = 0;
 	#endif
 

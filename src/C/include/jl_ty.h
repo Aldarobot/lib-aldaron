@@ -52,6 +52,14 @@ typedef struct{
 	void* data[32];		/** The data attached to the mutex */
 }jl_comm_t;
 
+// Thread-Protected Variable
+typedef struct{
+	SDL_mutex *lock;	/** The mutex lock on the "data" */
+	void* data;		/** The data attached to the mutex */
+	uint64_t size;		/** Size of "data" */
+	uint8_t acceptable;	/** Accepts push 0/1 **/
+}jl_pvar_t;
+
 //Standard Mode Class
 typedef struct {
 	void* init;

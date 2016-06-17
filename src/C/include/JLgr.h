@@ -399,6 +399,7 @@ void jlgr_draw_float(jlgr_t* jlgr, f64_t num, u8_t dec, jl_vec3_t loc,
 void jlgr_draw_text_area(jlgr_t* jlgr, jl_sprite_t * spr, str_t txt);
 void jlgr_draw_text_sprite(jlgr_t* jlgr,jl_sprite_t * spr, str_t txt);
 void jlgr_draw_ctxt(jlgr_t* jlgr, char *str, float yy, uint8_t* color);
+void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine);
 void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, u8_t c, m_str_t format, ...);
 void jlgr_term_msge(jlgr_t* jlgr, char* message);
 void jlgr_slidebtn_rsz(jlgr_t* jlgr, jl_sprite_t * spr, str_t txt);

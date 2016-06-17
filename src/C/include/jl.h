@@ -8,7 +8,32 @@
 
 #include <stdint.h>
 #include "jl_me.h" // Simple CPU info
-#include "jl_en.h" // Enumerations
+
+// Return Values
+enum {
+	JL_RTN_SUCCESS, // 0
+	JL_RTN_FAIL, // 1
+	JL_RTN_IMPOSSIBLE, // 2
+	JL_RTN_SUPER_IMPOSSIBLE, // 3
+	JL_RTN_COMPLETE_IMPOSSIBLE, // 4
+	JL_RTN_FAIL_IN_FAIL_EXIT, // 5
+} JL_RTN;
+
+//ERROR MESSAGES
+typedef enum{
+	JL_ERR_NERR, //NO ERROR
+	JL_ERR_NONE, //Something requested is Non-existant
+	JL_ERR_FIND, //Can not find the thing requested
+	JL_ERR_NULL, //Something requested is empty/null
+}jl_err_t;
+
+typedef enum{
+	JL_THREAD_PP_AA, // Push if acceptable
+	JL_THREAD_PP_UA, // Push if acceptable, & make unacceptable until pull. 
+	JL_THREAD_PP_FF, // Push forcefully.
+	JL_THREAD_PP_UF, // Push forcefully, and make unacceptable until pull
+}jl_thread_pp_t;
+
 #include "jl_ty.h" // Variable Types
 #include "jl_ct.h" // Input Types
 #include "clump.h" // LibClump
@@ -117,6 +142,11 @@ jl_comm_t* jl_thread_comm_make(jl_t* jl, u32_t size);
 void jl_thread_comm_send(jl_t* jl, jl_comm_t* comm, const void* src);
 void jl_thread_comm_recv(jl_t* jl, jl_comm_t* comm, jl_data_fnct fn);
 void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm);
+void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, uint64_t size);
+void jl_thread_pvar_push(jl_pvar_t* pvar, void* data, jl_thread_pp_t b);
+void jl_thread_pvar_pull(jl_pvar_t* pvar, void* data);
+void jl_thread_pvar_free(jl_t* jl, jl_pvar_t* pvar);
+
 
 // "JLsdl.c"
 double jl_sdl_timer(jl_t* jl, double* timer);

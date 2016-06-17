@@ -252,6 +252,60 @@ void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm) {
 	jl_mem(jl, comm, 0);
 }
 
+/**
+ * Create a thread-protected variable.
+ * @param jl: The library context.
+ * @param pvar: The protected variable to initialize.
+ * @param size: Size to allocate for pvar's data
+**/
+void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, uint64_t size) {
+	pvar->lock = SDL_CreateMutex();
+	pvar->data = jl_memi(jl, size);
+	pvar->size = size;
+}
+
+/**
+ * @param jl * @param jl: The library context.
+ * @param pvar: The protected variable to initialize.
+ * @param data: Data to push to protected variable.
+ * @param b: Behavior
+ *	JL_THREAD_PP_AA // Push if acceptable
+ *	JL_THREAD_PP_UA // Push if acceptable, & make unacceptable until pull. 
+ *	JL_THREAD_PP_FF // Push forcefully.
+ *	JL_THREAD_PP_UF // Push forcefully, and make unacceptable until pull
+**/
+void jl_thread_pvar_push(jl_pvar_t* pvar, void* data, jl_thread_pp_t b) {
+	SDL_LockMutex(pvar->lock);
+	// If forced or acceptable, push
+	if(b == JL_THREAD_PP_FF || b == JL_THREAD_PP_UF || (pvar->acceptable))
+		jl_mem_copyto(data, pvar->data, pvar->size);
+	// Make unacceptable or not
+	if(b == JL_THREAD_PP_UA || b == JL_THREAD_PP_UF)
+		pvar->acceptable = 0;
+	else
+		pvar->acceptable = 1;
+        SDL_UnlockMutex(pvar->lock);
+}
+
+/**
+ * 
+ * @param jl * @param jl: The library context.
+ * @param pvar: The protected variable to initialize.
+ * @param data: Data is copied from protected variable to here.
+**/
+void jl_thread_pvar_pull(jl_pvar_t* pvar, void* data) {
+	SDL_LockMutex(pvar->lock);
+	jl_mem_copyto(pvar->data, data, pvar->size);
+	pvar->acceptable = 1;
+        SDL_UnlockMutex(pvar->lock);
+}
+
+void jl_thread_pvar_free(jl_t* jl, jl_pvar_t* pvar) {
+	SDL_DestroyMutex(pvar->lock);
+	pvar->data = jl_mem(jl, pvar->data, 0);
+	pvar->size = 0;
+}
+
 //
 // Internal functions
 //

@@ -447,39 +447,26 @@ void jlgr_draw_msge__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
 	jlgr_draw_bg(jlgr, jlgr->gr.msge.t, jlgr->gr.msge.c);
-	if(jlgr->gr.msge.message)
+	if(jlgr->gr.msge.message[0])
 		jlgr_draw_ctxt(jlgr, jlgr->gr.msge.message, 9./32.,
 			jlgr->fontcolor);
 }
 
 /**
- * Print message on the screen.
+ * Display on the screen.
  * @param jlgr: The library context.
- * @param tex: The background texture.
- * @param c: The character map setting.
- * @param format: The message
- */
-void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, u8_t c, m_str_t format, ...) {
-	jl_t* jl = jlgr->jl;
-	va_list arglist;
-
-	// Print on screen.
-	va_start(arglist, format);
-	vsprintf(jlgr->gr.msge.message, format, arglist);
-	va_end(arglist);
-
-	jl_print_function(jl, "JLGR_MSGE");
-	jlgr->gr.msge.t = tex;
-	jlgr->gr.msge.c = c;
-	// Get old values
+ * @param draw_routine: Function that draws on screen.
+**/
+void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine) {
 	jlgr_redraw_t old_redrawfns = jlgr->draw.redraw;
-	u8_t inloop = jlgr->fl.inloop;
+	uint8_t inloop = jlgr->fl.inloop;
+
+	JL_PRINT_DEBUG(jlgr->jl, "DRAW LOADSCREEN2");
 	// Set Graphical loops.
 	jlgr->draw.redraw = (jlgr_redraw_t) {
-		jlgr_draw_msge__, jl_dont,
-		jlgr_draw_msge__, jl_dont };
+		draw_routine, draw_routine,
+		draw_routine, jl_dont };
 	jlgr->fl.inloop = 1;
-	// Set mode to EXIT.
 	// Update events ( minimal )
 	jl_ct_quickloop_(jlgr);
 	// Redraw screen.
@@ -489,7 +476,36 @@ void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, u8_t c, m_str_t format, ...) {
 	//
 	jlgr->draw.redraw = old_redrawfns;
 	jlgr->fl.inloop = inloop;
-	jl_print_return(jl, "JLGR_MSGE");
+	JL_PRINT_DEBUG(jlgr->jl, "DREW LOADSCREEN2");
+}
+
+/**
+ * Print message on the screen.
+ * @param jlgr: The library context.
+ * @param tex: The background texture.
+ * @param c: The character map setting.
+ * @param format: The message
+ */
+void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, u8_t c, char* format, ...) {
+	JL_PRINT_DEBUG(jlgr->jl, "jlgr_draw_msge");
+	if(format) {
+		va_list arglist;
+
+		// Print on screen.
+		va_start(arglist, format);
+		vsprintf(jlgr->gr.msge.message, format, arglist);
+		va_end(arglist);
+	}else{
+		jlgr->gr.msge.message[0] = '\0';
+	}
+	jl_print_function(jlgr->jl, "JLGR_MSGE");
+	jlgr->gr.msge.t = tex;
+	jlgr->gr.msge.c = c;
+	JL_PRINT_DEBUG(jlgr->jl, "DRAW LOADSCREEN");
+	
+	jlgr_draw_loadscreen(jlgr, jlgr_draw_msge__);
+	JL_PRINT_DEBUG(jlgr->jl, "DREW LOADSCREEN");
+	jl_print_return(jlgr->jl, "JLGR_MSGE");
 }
 
 /**
@@ -671,6 +687,7 @@ void jlgr_init__(jlgr_t* jlgr) {
 		"/images/JL_Lib.png");
 	JL_PRINT_DEBUG(jlgr->jl, "Draw Loading Screen");
 	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, 0);
+	JL_PRINT_DEBUG(jlgr->jl, "Drew Loading Screen");
 	// Load Graphics
 	jlgr->textures.font = jl_sg_add_image(jlgr, &packagedata,
 		"/images/jlf8.png");

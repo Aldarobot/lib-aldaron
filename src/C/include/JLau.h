@@ -25,7 +25,8 @@ void jlau_mus_halt(float out);
 uint8_t jlau_mus_playing(void);
 void jlau_panning(uint8_t left, uint8_t toCenter);
 void jlau_panning_default(void);
-void jlau_add_audio(jlau_t* jlau, data_t* zipdata, const char* filename);
+void jlau_add_audio(jlau_t* jlau, jlau_music_t* music, data_t* zipdata,
+	const char* filename);
 jlau_t* jlau_init(jl_t* jl);
 void jlau_kill(jlau_t* jlau);
 

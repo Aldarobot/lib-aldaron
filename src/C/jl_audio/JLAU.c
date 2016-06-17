@@ -39,14 +39,14 @@ void jlau_load(jlau_t* jlau, jlau_music_t* music, uint8_t volumeChange,
 	rw = SDL_RWFromConstMem(data, dataSize);
 	jl_print(jlau->jl, "Read step 2:");
 	music->_MUS = Mix_LoadMUS_RW(rw, 1);
-	jl_print(jlau->jl, "Read step 3:");
-	music->_VOL = volumeChange;
 	if(music->_MUS == NULL) {
 		jl_print(jlau->jl, ":Couldn't load music because: %s",
 			(char *)SDL_GetError());
 		exit(-1);
 	}
-	SDL_RWclose(rw);
+	jl_print(jlau->jl, "Read step 3:");
+	music->_VOL = volumeChange;
+//	SDL_RWclose(rw);
 	jl_print(jlau->jl, "Loaded music!");
 	jl_print_return(jlau->jl, "AU_Load");
 }
@@ -133,31 +133,34 @@ void jlau_loop(jlau_t* jlau) {
 /** @endcond **/
 
 /**
- * Load all audiotracks from a zipfile and give them ID's.
- * info: info is set to number of images loaded.
+ * Load an audiotrack from a zipfile.
+ * info: info is set to number of audiotracks loaded.
  * @param jlau: The library context
+ * @param music: Unintialized music object.
  * @param zipdata: data for a zip file.
  * @param filename: Name of the audio file in the package.
 */
-void jlau_add_audio(jlau_t* jlau, data_t* zipdata, const char* filename) {
+void jlau_add_audio(jlau_t* jlau, jlau_music_t* music, data_t* zipdata,
+	const char* filename)
+{
 	data_t aud;
 
 	JLAU_DEBUG_CHECK(jlau);
 	jl_file_pk_load_fdata(jlau->jl, &aud, zipdata, filename);
 	jl_print_function(jlau->jl, "jlau_add_audio");
 	jl_print(jlau->jl, "Loading audiostuffs....");
-
+	jlau_load(jlau, music, 255, aud.data, aud.size);
 	jl_print(jlau->jl, "Loaded audiostuffs!");
 	jl_print_return(jlau->jl, "jlau_add_audio");
 }
 
 /** @cond **/
 static inline void _jlau_print_openblock(jl_t* jl) {
-	jl_print_function(jl, "AU");
+	jl_print_function(jl, "JLaudio");
 }
 
 static inline void _jlau_print_closeblock(jl_t* jl) {
-	jl_print_return(jl, "AU");
+	jl_print_return(jl, "JLaudio");
 }
 
 jlau_t* jlau_init(jl_t* jl) {

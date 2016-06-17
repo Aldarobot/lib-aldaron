@@ -8,6 +8,11 @@
 **/
 #include "JLGRinternal.h"
 
+static void jlgr_thread_programsresize(jlgr_t* jlgr) {
+	jl_fnct resize_ = jlgr->draw.redraw.resize;
+	resize_(jlgr->jl);
+}
+
 static void jlgr_thread_resize(jlgr_t* jlgr, u16_t w, u16_t h) {
 	JL_PRINT_DEBUG(jlgr->jl, "Resizing to %dx%d....", w, h);
 	// Reset aspect ratio stuff.
@@ -20,9 +25,6 @@ static void jlgr_thread_resize(jlgr_t* jlgr, u16_t w, u16_t h) {
 	jlgr_menu_resize_(jlgr);
 	// Mouse resize
 	if(jlgr->mouse.mutex) jlgr_sprite_resize(jlgr, &jlgr->mouse, NULL);
-	// Program's Resize
-	jl_fnct resize_ = jlgr->draw.redraw.resize;
-	resize_(jlgr->jl);
 }
 
 static void jlgr_thread_event(jl_t* jl, void* data) {
@@ -35,6 +37,7 @@ static void jlgr_thread_event(jl_t* jl, void* data) {
 			if(packet->x == 0) packet->x = jlgr_wm_getw(jlgr);
 			if(packet->y == 0) packet->y = jlgr_wm_geth(jlgr);
 			jlgr_thread_resize(jlgr, packet->x, packet->y);
+			jlgr_thread_programsresize(jlgr);
 			break;
 		} case JLGR_COMM_KILL: {
 			JL_PRINT_DEBUG(jl, "Thread exiting....");

@@ -46,10 +46,6 @@ jlgr_t* jlgr_init(jl_t* jl, u8_t fullscreen, jl_fnct fn_) {
 	jlgr_thread_init(jlgr);
 	// Send graphical Init function
 	jl_thread_comm_send(jl, jlgr->comm2draw, &packet);
-	// Wait for drawing thread to initialize.
-	JL_PRINT_DEBUG(jl, "Main thread wait....");
-	jl_thread_wait(jl, &jlgr->wait);
-	JL_PRINT_DEBUG(jl, "Main thread done did wait....");
 	return jlgr;
 }
 
@@ -65,6 +61,9 @@ jlgr_t* jlgr_init(jl_t* jl, u8_t fullscreen, jl_fnct fn_) {
 void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 	jl_fnct downscreen, jl_fnct resize)
 {
+	// Wait for drawing thread to initialize, if not initialized already.
+	jl_thread_wait(jlgr->jl, &jlgr->wait);
+	//
 	jl_fnct redraw[4] = { onescreen, upscreen, downscreen, resize };
 	jlgr_thread_packet_t packet;
 	int i;

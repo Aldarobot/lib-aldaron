@@ -95,7 +95,6 @@ static u8_t jlgr_thread_draw_event__(jl_t* jl) {
 
 static void jlgr_thread_draw_init__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
-	jlgr_thread_packet_t packet = { JLGR_COMM_DRAWFIN, 0, 0 };
 
 	// Initialize subsystems
 	JL_PRINT_DEBUG(jl, "Creating the window....");
@@ -121,7 +120,7 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	jlgr_wm_setwindowname(jlgr, jl->name);
 	JL_PRINT_DEBUG(jl, "Sending finish packet....");
 	// Tell main thread to stop waiting.
-	jl_thread_comm_send(jl, jlgr->comm2main, &packet);
+	jl_thread_wait_stop(jl, &jlgr->wait);
 }
 
 void jlgr_thread_send(jlgr_t* jlgr, u8_t id, u16_t x, u16_t y, jl_fnct fn) {

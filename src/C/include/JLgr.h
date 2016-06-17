@@ -132,7 +132,7 @@ typedef struct{
 	uint8_t thread; // Graphical Thread ID.
 	SDL_mutex* mutex; // Mutex to lock wshare structure.
 	jl_comm_t* comm2draw; // thread communication variable.
-	jl_comm_t* comm2main; // commition variable for thread communication.
+	jl_wait_t wait;
 	struct {
 		SDL_mutex *usr_ctx;
 	}mutexs;
@@ -180,8 +180,6 @@ typedef struct{
 
 			uint8_t current_event;
 		}ct;
-
-		m_u8_t rtn;
 	} main;
 
 	struct {

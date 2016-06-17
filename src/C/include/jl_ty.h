@@ -60,6 +60,11 @@ typedef struct{
 	uint8_t acceptable;	/** Accepts push 0/1 **/
 }jl_pvar_t;
 
+// Thread-Wait Variable
+typedef struct{
+	SDL_atomic_t wait;
+}jl_wait_t;
+
 //Standard Mode Class
 typedef struct {
 	void* init;

@@ -306,6 +306,18 @@ void jl_thread_pvar_free(jl_t* jl, jl_pvar_t* pvar) {
 	pvar->size = 0;
 }
 
+void jl_thread_wait(jl_t* jl, jl_wait_t* wait) {
+	while(SDL_AtomicGet(&wait->wait));
+}
+
+void jl_thread_wait_init(jl_t* jl, jl_wait_t* wait) {
+	SDL_AtomicSet(&wait->wait, 1);
+}
+
+void jl_thread_wait_stop(jl_t* jl, jl_wait_t* wait) {
+	SDL_AtomicSet(&wait->wait, 0);
+}
+
 //
 // Internal functions
 //

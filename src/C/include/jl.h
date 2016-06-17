@@ -146,7 +146,9 @@ void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, uint64_t size);
 void jl_thread_pvar_push(jl_pvar_t* pvar, void* data, jl_thread_pp_t b);
 void jl_thread_pvar_pull(jl_pvar_t* pvar, void* data);
 void jl_thread_pvar_free(jl_t* jl, jl_pvar_t* pvar);
-
+void jl_thread_wait(jl_t* jl, jl_wait_t* wait);
+void jl_thread_wait_init(jl_t* jl, jl_wait_t* wait);
+void jl_thread_wait_stop(jl_t* jl, jl_wait_t* wait);
 
 // "JLsdl.c"
 double jl_sdl_timer(jl_t* jl, double* timer);

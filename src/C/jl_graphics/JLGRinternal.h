@@ -14,7 +14,6 @@ typedef enum{
 	JLGR_COMM_NONE,		/** Does nothing */
 	JLGR_COMM_RESIZE,	/** main --> draw: Resize the drawing screen */
 	JLGR_COMM_KILL,		/** main --> draw: Close the window*/
-	JLGR_COMM_DRAWFIN,	/** main <-- draw: Stop waiting, fool! */
 	JLGR_COMM_INIT,		/** main --> draw: Send program's init func. */
 	JLGR_COMM_SEND,		/** main --> draw: Send redraw func.'s */
 	JLGR_COMM_NOTIFY,	/** main --> draw: Draw a notification */

@@ -9,19 +9,6 @@
  */
 #include "JLGRinternal.h"
 
-static void jlgr_init_event(jl_t* jl, void* data) {
-	jlgr_t* jlgr = jl->jlgr;
-	jlgr_thread_packet_t* packet = data;
-
-	switch(packet->id) {
-		case JLGR_COMM_DRAWFIN:
-			JL_PRINT_DEBUG(jl, "Main thread done");
-			jlgr->main.rtn = 1;
-		default:
-			break;
-	}
-}
-
 //
 // Global Functions
 //
@@ -54,16 +41,14 @@ jlgr_t* jlgr_init(jl_t* jl, u8_t fullscreen, jl_fnct fn_) {
 	jlgr->mutexs.usr_ctx = jl_thread_mutex_new(jl);
 	// Create communicators for multi-threading
 	jlgr->comm2draw = jl_thread_comm_make(jl,sizeof(jlgr_thread_packet_t));
-	jlgr->comm2main = jl_thread_comm_make(jl,sizeof(jlgr_thread_packet_t));
+	jl_thread_wait_init(jl, &jlgr->wait);
 	// Start Drawing thread.
 	jlgr_thread_init(jlgr);
 	// Send graphical Init function
 	jl_thread_comm_send(jl, jlgr->comm2draw, &packet);
 	// Wait for drawing thread to initialize.
 	JL_PRINT_DEBUG(jl, "Main thread wait....");
-	jlgr->main.rtn = 0;
-	while(!jlgr->main.rtn)
-		jl_thread_comm_recv(jl,jlgr->comm2main,jlgr_init_event);
+	jl_thread_wait(jl, &jlgr->wait);
 	JL_PRINT_DEBUG(jl, "Main thread done did wait....");
 	return jlgr;
 }

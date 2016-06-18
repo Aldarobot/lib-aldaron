@@ -78,7 +78,6 @@ void jl_mode_switch(jl_t* jl, uint16_t mode) {
 	jl_fnct kill_ = jl->mode.mode.kill;
 	jl_fnct init_;
 
-	JL_PRINT_DEBUG(jl, "jl_mode_switch = %d", mode);
 	// Run the previous mode's kill function
 	jl->mode_switch_skip = 1;
 	kill_(jl);

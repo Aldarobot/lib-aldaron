@@ -94,7 +94,7 @@ static void jlgr_menubar_loop_(jl_t* jl, jl_sprite_t* sprite) {
 	jl_menu_t *menu = jlgr_sprite_getcontext(&jlgr->menubar.menubar);
 
 	// Run the proper loops.
-	jlgr_input_do(jlgr, JL_CT_PRESS, jlgr_menu_loop_press__, NULL);
+	jlgr_input_do(jlgr, JL_INPUT_PRESS, jlgr_menu_loop_press__, NULL);
 	//
 	if(menu->draw.cursor == -1) {
 		jlgr_sprite_redraw(jlgr, &jlgr->menubar.menubar, &menu->draw);

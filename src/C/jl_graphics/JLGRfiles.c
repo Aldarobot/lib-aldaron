@@ -115,33 +115,35 @@ uint8_t jlgr_openfile_init(jlgr_t* jlgr, str_t program_name, void *newfiledata,
 	}
 }
 
-static void jl_fl_user_select_up__(jlgr_t* jlgr, jlgr_input_t input) {
-	if(input.h == JLGR_INPUT_PRESS_JUST) {
-		if((jlgr->fl.cursor > 0) || jlgr->fl.cpage) jlgr->fl.cursor--;
+static void jl_fl_user_select_up__(jlgr_t* jlgr) {
+	if((jlgr->fl.cursor > 0) || jlgr->fl.cpage) jlgr->fl.cursor--;
+}
+
+static void jl_fl_user_select_dn__(jlgr_t* jlgr) {
+	if(jlgr->fl.cursor + (jlgr->fl.cpage * (jlgr->fl.drawupto+1)) <
+		cl_list_count(jlgr->fl.filelist) - 1)
+	{
+		jlgr->fl.cursor++;
 	}
 }
 
-static void jl_fl_user_select_dn__(jlgr_t* jlgr, jlgr_input_t input) {
-	if(input.h == JLGR_INPUT_PRESS_JUST) {
-		if(jlgr->fl.cursor + (jlgr->fl.cpage * (jlgr->fl.drawupto+1)) <
-			cl_list_count(jlgr->fl.filelist) - 1)
-		{
-			jlgr->fl.cursor++;
-		}
-	}
-}
-
-static void jl_fl_user_select_rt__(jlgr_t* jlgr, jlgr_input_t input) {
+static void jl_fl_user_select_rt__(jlgr_t* jlgr) {
 	int i;
-	for(i = 0; i < 5; i++) {
-		jl_fl_user_select_dn__(jlgr, input);
-	}
+	for(i = 0; i < 5; i++) jl_fl_user_select_dn__(jlgr);
 }
 
-static void jl_fl_user_select_lt__(jlgr_t* jlgr, jlgr_input_t input) {
+static void jl_fl_user_select_lt__(jlgr_t* jlgr) {
 	int i;
-	for(i = 0; i < 5; i++) {
-		jl_fl_user_select_up__(jlgr, input);
+	for(i = 0; i < 5; i++) jl_fl_user_select_up__(jlgr);
+}
+
+static void jl_fl_user_select_dir__(jlgr_t* jlgr, jlgr_input_t input) {
+	if(input.h == JLGR_INPUT_PRESS_JUST) {
+		// TODO: Fix Input
+		jl_fl_user_select_lt__(jlgr);
+		jl_fl_user_select_rt__(jlgr);
+		jl_fl_user_select_up__(jlgr);
+		jl_fl_user_select_dn__(jlgr);
 	}
 }
 
@@ -205,10 +207,7 @@ void jlgr_openfile_loop(jlgr_t* jlgr) {
 	jlgr_draw_text(jlgr, "Select File", (jl_vec3_t) { .02, .02, 0. },
 		jlgr->font);
 
-	jlgr_input_do(jlgr, JL_CT_MAINUP, jl_fl_user_select_up__, NULL);
-	jlgr_input_do(jlgr, JL_CT_MAINDN, jl_fl_user_select_dn__, NULL);
-	jlgr_input_do(jlgr, JL_CT_MAINRT, jl_fl_user_select_rt__, NULL);
-	jlgr_input_do(jlgr, JL_CT_MAINLT, jl_fl_user_select_lt__, NULL);
+	jlgr_input_do(jlgr, JL_INPUT_JOYC, jl_fl_user_select_dir__, NULL);
 	//Draw files
 	for(i = 0; i < cl_list_count(jlgr->fl.filelist); i++) {
 		stringtoprint = cl_list_iterator_next(iterator);
@@ -260,7 +259,7 @@ void jlgr_openfile_loop(jlgr_t* jlgr) {
 			(jl_vec3_t) { .02, jl_gl_ar(jlgr) - .02, 0. },
 			(jl_font_t) { jlgr->textures.icon, 0,
 				jlgr->fontcolor, .02});
-		jlgr_input_do(jlgr, JL_CT_SELECT, jl_fl_user_select_do__, NULL);
+		jlgr_input_do(jlgr, JL_INPUT_SELECT, jl_fl_user_select_do__, NULL);
 	}
 	jlgr_sprite_loop(jlgr, &jlgr->fl.btns[0]);
 	jlgr_sprite_loop(jlgr, &jlgr->fl.btns[1]);

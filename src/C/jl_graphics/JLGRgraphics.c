@@ -35,13 +35,13 @@ static void _jlgr_popup_loop(jl_t *jl) {
 //		jlgr_draw_rect(jl, .1, .3, .8, .8, 64, 127, 127, 255);
 }
 
-static void _jlgr_textbox_lt(jlgr_t* jlgr, jlgr_input_t input) {
+static void _jlgr_textbox_cm(jlgr_t* jlgr, jlgr_input_t input) {
+	// TODO: Make Cursor Move
+	// Left
 	jl_ct_typing_disable();
 	if(jlgr->gr.textbox_string->curs)
 		jlgr->gr.textbox_string->curs--;
-}
-
-static void _jlgr_textbox_rt(jlgr_t* jlgr, jlgr_input_t input) {
+	// Right
 	jl_ct_typing_disable();
 	if(jlgr->gr.textbox_string->curs < jlgr->gr.textbox_string->size)
 		jlgr->gr.textbox_string->curs++;
@@ -350,11 +350,11 @@ static void jlgr_gui_slider_touch(jlgr_t* jlgr, jlgr_input_t input) {
 }
 
 static void jlgr_gui_slider_singleloop(jl_t* jl, jl_sprite_t* spr) {
-	jlgr_input_do(jl->jlgr, JL_CT_PRESS, jlgr_gui_slider_touch, spr);
+	jlgr_input_do(jl->jlgr, JL_INPUT_PRESS, jlgr_gui_slider_touch, spr);
 }
 
 static void jlgr_gui_slider_doubleloop(jl_t* jl, jl_sprite_t* spr) {
-	jlgr_input_do(jl->jlgr, JL_CT_PRESS, jlgr_gui_slider_touch, spr);
+	jlgr_input_do(jl->jlgr, JL_INPUT_PRESS, jlgr_gui_slider_touch, spr);
 }
 
 static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
@@ -554,7 +554,7 @@ void jlgr_slidebtn_loop(jlgr_t* jlgr, jl_sprite_t * spr, float defaultx,
 {
 	spr->pr.cb.pos.x = defaultx;
 	if(jlgr_sprite_collide(jlgr, &jlgr->mouse, spr)) {
-		jlgr_input_do(jlgr, JL_CT_PRESS, prun, NULL);
+		jlgr_input_do(jlgr, JL_INPUT_PRESS, prun, NULL);
 		spr->pr.cb.pos.x = defaultx + slidex;
 	}
 	jlgr_sprite_draw(jlgr, spr);
@@ -587,7 +587,7 @@ void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 			(jl_font_t) { jlgr->textures.icon, 0,
 				jlgr->fontcolor, .05 });
 		// Run if press
-		jlgr_input_do(jlgr, JL_CT_PRESS, prun, NULL);
+		jlgr_input_do(jlgr, JL_INPUT_PRESS, prun, NULL);
 	}
 }
 
@@ -617,8 +617,7 @@ uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
 		}
 //			JL_PRINT("inserting %1s\n", &bytetoinsert);
 	}
-	jlgr_input_do(jlgr, JL_CT_MAINLT, _jlgr_textbox_lt, NULL);
-	jlgr_input_do(jlgr, JL_CT_MAINRT, _jlgr_textbox_rt, NULL);
+	jlgr_input_do(jlgr, JL_INPUT_JOYC, _jlgr_textbox_cm, NULL);
 //		jlgr_draw_image(jl, 0, 0, x, y, w, h, ' ', 255);
 	jlgr_draw_text(jlgr, (char*)(string->data),
 		(jl_vec3_t) {x, y, 0.},

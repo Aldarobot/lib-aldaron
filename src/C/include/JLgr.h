@@ -112,12 +112,12 @@ typedef struct{
 }jlgr_thread_packet_t;
 
 typedef struct{
-	uint16_t x; // X Location
-	uint16_t y; // Y Location
+	float x; // X Location
+	float y; // Y Location
 	float r; // Rotational Value in "pi radians" 2=full circle
 	float p; // Pressure 0-1
-	uint8_t h; // How long held down.
-	uint8_t k; // Which key [ a-z , left/right click ]
+	int8_t h; // How long held down.
+	uint8_t k; // Which key [ a-z, 0-9 , left/right click ]
 	void* data; // Parameter
 }jlgr_input_t;
 
@@ -139,14 +139,14 @@ typedef struct{
 
 	struct{
 		jlgr_input_t input;
+		int8_t states[JLGR_INPUT_NONE];
+		uint8_t used[JLGR_INPUT_NONE];
 	}input;
 
 	struct {
 		//Input Information
 		struct {
-			void* getEvents[JL_CT_MAXX];
-			uint8_t states[JL_CT_MAXX];
-			uint8_t checked[JL_CT_MAXX];
+			void* getEvents[JLGR_INPUT_NONE];
 
 			float msx, msy;
 			int msxi, msyi;
@@ -171,7 +171,7 @@ typedef struct{
 			}input;
 
 			uint8_t back; //Back Key, Escape Key, Start Button
-			uint8_t keyDown[255];
+			int8_t keyDown[255];
 			uint32_t sd; //NYI: stylus delete
 		
 			uint8_t sc;
@@ -436,7 +436,8 @@ void jl_sg_kill(jl_t* jl);
 uint32_t jl_sg_add_image(jlgr_t* jlgr, data_t* zipdata, const char* filename);
 
 // JLGRinput.c
-void jlgr_input_do(jlgr_t *jlgr, uint8_t event, jlgr_input_fnct fn, void* data);
+int8_t jlgr_input_do(jlgr_t *jlgr, jlgr_control_t events, jlgr_input_fnct fn,
+	void* data);
 void jlgr_input_dont(jlgr_t* jlgr, jlgr_input_t input);
 void jl_ct_quickloop_(jlgr_t* jlgr);
 float jl_ct_gmousex(jlgr_t* jlgr);

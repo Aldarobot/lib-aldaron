@@ -461,7 +461,6 @@ void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine) {
 	jlgr_redraw_t old_redrawfns = jlgr->draw.redraw;
 	uint8_t inloop = jlgr->fl.inloop;
 
-	JL_PRINT_DEBUG(jlgr->jl, "DRAW LOADSCREEN2");
 	// Set Graphical loops.
 	jlgr->draw.redraw = (jlgr_redraw_t) {
 		draw_routine, draw_routine,
@@ -476,7 +475,6 @@ void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine) {
 	//
 	jlgr->draw.redraw = old_redrawfns;
 	jlgr->fl.inloop = inloop;
-	JL_PRINT_DEBUG(jlgr->jl, "DREW LOADSCREEN2");
 }
 
 /**

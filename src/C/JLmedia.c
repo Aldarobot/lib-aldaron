@@ -8,5 +8,5 @@ void *jl_gem(void) {
 }
 
 uint32_t jl_gem_size(void) {
-	return sizeof(JLmedia);
+	return JLmedia_size;
 }

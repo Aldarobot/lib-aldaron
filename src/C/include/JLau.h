@@ -28,6 +28,7 @@ void jlau_panning_default(void);
 void jlau_add_audio(jlau_t* jlau, jlau_music_t* music, data_t* zipdata,
 	const char* filename);
 jlau_t* jlau_init(jl_t* jl);
+void jlau_loop(jlau_t* jlau);
 void jlau_kill(jlau_t* jlau);
 
 #endif

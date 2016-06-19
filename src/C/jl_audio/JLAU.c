@@ -34,20 +34,18 @@ void jlau_load(jlau_t* jlau, jlau_music_t* music, uint8_t volumeChange,
 
 	JLAU_DEBUG_CHECK(jlau);
 	jl_print_function(jlau->jl, "AU_Load");
-	jl_print(jlau->jl, "ausize: %d", dataSize);
-	jl_print(jlau->jl, "audata: \"%4s\"", data);
+	JL_PRINT_DEBUG(jlau->jl, "ausize: %d", dataSize);
+	JL_PRINT_DEBUG(jlau->jl, "audata: \"%4s\"", data);
 	rw = SDL_RWFromConstMem(data, dataSize);
-	jl_print(jlau->jl, "Read step 2:");
 	music->_MUS = Mix_LoadMUS_RW(rw, 1);
 	if(music->_MUS == NULL) {
 		jl_print(jlau->jl, ":Couldn't load music because: %s",
 			(char *)SDL_GetError());
 		exit(-1);
 	}
-	jl_print(jlau->jl, "Read step 3:");
 	music->_VOL = volumeChange;
 //	SDL_RWclose(rw);
-	jl_print(jlau->jl, "Loaded music!");
+	JL_PRINT_DEBUG(jlau->jl, "Loaded music!");
 	jl_print_return(jlau->jl, "AU_Load");
 }
 
@@ -126,9 +124,9 @@ void jlau_play_music(jlau_t* jlau, jlau_music_t* music, float out, float in) {
 void jlau_loop(jlau_t* jlau) {
 	JLAU_DEBUG_CHECK(jlau);
 	//If Music Isn't playing AND Music isn't disabled: play music
-/*	if ( !Mix_PlayingMusic() && (_jl->au.idis!=UINT32_MAX)) {
-		_jlau_play(_jl);
-	}*/
+	if(!Mix_PlayingMusic()) {
+		_jlau_play(jlau);
+	}
 }
 /** @endcond **/
 
@@ -148,9 +146,9 @@ void jlau_add_audio(jlau_t* jlau, jlau_music_t* music, data_t* zipdata,
 	JLAU_DEBUG_CHECK(jlau);
 	jl_file_pk_load_fdata(jlau->jl, &aud, zipdata, filename);
 	jl_print_function(jlau->jl, "jlau_add_audio");
-	jl_print(jlau->jl, "Loading audiostuffs....");
+	JL_PRINT_DEBUG(jlau->jl, "Loading audiostuffs....");
 	jlau_load(jlau, music, 255, aud.data, aud.size);
-	jl_print(jlau->jl, "Loaded audiostuffs!");
+	JL_PRINT_DEBUG(jlau->jl, "Loaded audiostuffs!");
 	jl_print_return(jlau->jl, "jlau_add_audio");
 }
 
@@ -174,7 +172,7 @@ jlau_t* jlau_init(jl_t* jl) {
 	//Open Block AUDI
 	_jlau_print_openblock(jl);
 	// Open the audio device
-	jl_print(jl, "initializing audio....");
+	JL_PRINT_DEBUG(jl, "initializing audio....");
 	if ( Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 1024) < 0 ) {
 		jl_print(jl,
 			":Couldn't set 11025 Hz 16-bit audio because: %s",
@@ -182,7 +180,7 @@ jlau_t* jlau_init(jl_t* jl) {
 		_jlau_print_closeblock(jl);
 		jl_sg_kill(jl);
 	}else{
-		jl_print(jl, "audio has been set.");
+		JL_PRINT_DEBUG(jl, "audio has been set.");
 	}
 	//Close Block AUDI
 	_jlau_print_closeblock(jl);
@@ -194,10 +192,10 @@ void jlau_kill(jlau_t* jlau) {
 	JLAU_DEBUG_CHECK(jlau);
 	//Open Block AUDI
 	_jlau_print_openblock(jlau->jl);
-	jl_print(jlau->jl, "Quiting....");
+	JL_PRINT_DEBUG(jlau->jl, "Quiting....");
 	//Free Everything
 	Mix_CloseAudio();	
-	jl_print(jlau->jl, "Quit Successfully!");
+	JL_PRINT_DEBUG(jlau->jl, "Quit Successfully!");
 	//Close Block AUDI
 	_jlau_print_closeblock(jlau->jl);
 }

@@ -51,7 +51,7 @@ static void jlgr_menu_loop_press__(jlgr_t* jlgr, jlgr_input_t input) {
 static inline void jlgr_menubar_shadow__(jlgr_t* jlgr,jl_menu_draw_t* menu_draw)
 {
 	// Clear Texture.
-	jl_gl_clear(jlgr, 0, 0, 0, 0);
+	jl_gl_clear(jlgr, 0., 0., 0., 0.);
 	// Draw Shadows.
 	for(menu_draw->cursor = 0; menu_draw->cursor < 10; menu_draw->cursor++){
 		jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), 0., 0. };
@@ -106,7 +106,7 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 	jl_rect_t rc = { 0.f, 0.f, 1.f, .11f };
 	jl_rect_t rc_icon = { 0., 0., .1, .1};
 	jl_rect_t rc_shadow = {-.01, .01, .1, .1 };
-	uint8_t shadow_color[] = { 0, 0, 0, 64 };
+	float shadow_color[] = { 0.f, 0.f, 0.f, .3f };
 	jl_menu_t menu;
 
 	jl_gl_vo_init(jlgr, &menu.draw.icon);
@@ -116,7 +116,7 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 	jlgr_vos_rec(jlgr, &menu.draw.shadow, rc_shadow, shadow_color, 0);
 	// Make the icon vertex object.
 	jlgr_vos_image(jlgr, &menu.draw.icon, rc_icon, jlgr->textures.icon,
-		JLGR_ID_UNKNOWN, 255);
+		JLGR_ID_UNKNOWN, 1.);
 	// Clear the menubar & make pre-renderer.
 	for( menu.draw.cursor = 0; menu.draw.cursor < 10;
 		menu.draw.cursor++)
@@ -125,7 +125,6 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 		menu.draw.redrawfn[menu.draw.cursor] = NULL;
 	}
 	menu.draw.cursor = -1;
-
 	// Make the menubar.
 	jlgr_sprite_init(jlgr, &jlgr->menubar.menubar, rc,
 		jlgr_menubar_loop_, jlgr_menubar_draw_,
@@ -136,7 +135,7 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 	jlgr->menubar.menubar.loop = jlgr_menubar_loop_;
 }
 
-static void jlgr_menubar_text__(jlgr_t* jlgr,uint8_t* color,float y,str_t text){
+static void jlgr_menubar_text__(jlgr_t* jlgr,float* color,float y,str_t text) {
 	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(&jlgr->menubar.menubar);
 	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), y, 0. };
 
@@ -186,7 +185,7 @@ static void jlgr_menu_name_draw__(jlgr_t* jlgr) {
 
 static void jlgr_menu_slow_draw__(jlgr_t* jlgr) {
 	jl_t* jl = jlgr->jl;
-	uint8_t color[] = { 127, 127, 255, 255 };
+	float color[] = { .5, .5, 1., 1. };
 	char formated[80];
 
 	// Draw the icon based on whether on time or not.
@@ -236,7 +235,7 @@ void jlgr_menu_draw_icon(jlgr_t* jlgr, uint32_t tex, uint8_t c) {
 	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(&jlgr->menubar.menubar);
 	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), 0., 0. };
 
-	jlgr_vos_image(jlgr, &menu_draw->icon, rc_icon, tex, c, 255);
+	jlgr_vos_image(jlgr, &menu_draw->icon, rc_icon, tex, c, 1.);
 	jlgr_draw_vo(jlgr, &menu_draw->icon, &tr);
 }
 

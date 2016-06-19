@@ -24,7 +24,7 @@ void jlgr_mouse_draw_(jl_t* jl, uint8_t resize, void* ctx) {
 	jl_vo_t* mouse_vo = ctx;
 	jl_rect_t rc = { 0.f, 0.f, 1.f, 1.f };
 
-	jlgr_vos_image(jlgr, mouse_vo, rc, jlgr->textures.font, 255, 255);
+	jlgr_vos_image(jlgr, mouse_vo, rc, jlgr->textures.font, 255, 1.);
 	jlgr_draw_vo(jlgr, mouse_vo, NULL);
 #endif
 }

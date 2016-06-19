@@ -117,7 +117,7 @@ static inline void jlgr_wm_create__(jlgr_t* jlgr, uint32_t w, uint32_t h) {
 //	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 0);
 	jlgr->wm.displayWindow->c = jl_wm_gl_context(jlgr);
 	// Clear and update
-	jl_gl_clear(jlgr, 2, 255, 5, 255);
+	jl_gl_clear(jlgr, .01, 1., .02, 1.);
 	jl_wm_loop__(jlgr);
 }
 
@@ -130,7 +130,7 @@ void jl_wm_loop__(jlgr_t* jlgr) {
 	//Update Screen
 	SDL_GL_SwapWindow(jlgr->wm.displayWindow->w); //end current draw
 	// Clear the screen of anything wierd.
-	jl_gl_clear(jlgr, 2, 5, 255, 255);
+	jl_gl_clear(jlgr, .01, .02, 1., 1.);
 //
 	oldtick = newtick;
 	newtick = SDL_GetTicks();

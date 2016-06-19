@@ -64,16 +64,16 @@ typedef struct{
 	float* cv;	// Converted Vertices
 	uint32_t bt;	// Buffer for Texture coordinates or Color Vertices.
 	// Coloring:
-	jl_ccolor_t* cc;// Converted Colors [ NULL = Texturing Instead ]
+	float* cc;	// Colors
 	// Texturing:
-	uint32_t tx;	// ID to texture.
+	uint32_t tx;	// ID to texture. [ 0 = Colors Instead ]
 	float a;	// Converted Alpha.
 }jl_vo_t;
 
 typedef struct {
 	int32_t tex; // Group ID, Image ID
 	uint8_t multicolor; // Allow Multiple Colors
-	uint8_t* colors; // The Colors
+	float* colors; // The Colors
 	float size; // The Size
 }jl_font_t;
 
@@ -125,7 +125,7 @@ typedef struct{
 	jl_t* jl;
 
 	// For Programer's Use
-	uint8_t fontcolor[4];
+	float fontcolor[4];
 	jl_font_t font;
 	jl_sprite_t mouse; // Sprite to represent mouse pointer
 
@@ -373,21 +373,19 @@ void jlgr_menu_addicon_name(jlgr_t* jlgr);
 
 // JLGRgraphics.c:
 void jlgr_dont(jlgr_t* jlgr);
-void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t c, uint8_t a);
+void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t c, float a);
 void jlgr_fill_image_draw(jlgr_t* jlgr);
 void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, uint8_t c);
-jl_ccolor_t* jlgr_convert_color(jlgr_t* jlgr, uint8_t *rgba, uint32_t vc,
-	uint8_t gradient);
-void jlgr_vo_color(jlgr_t* jlgr, jl_vo_t* pv, jl_ccolor_t* cc);
+void jlgr_vo_color(jlgr_t* jlgr, jl_vo_t* pv, float* cc);
 void jlgr_draw_vo(jlgr_t* jlgr, jl_vo_t* pv, jl_vec3_t* vec);
 void jlgr_vos_vec(jlgr_t* jlgr, jl_vo_t *pv, uint16_t tricount,
-	float* triangles, uint8_t* colors, uint8_t multicolor);
-void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, uint8_t* colors,
+	float* triangles, float* colors, uint8_t multicolor);
+void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, float* colors,
 	uint8_t multicolor);
 void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
-	uint32_t tex, uint8_t c, uint8_t a);
+	uint32_t tex, uint8_t c, float a);
 void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
-	jl_tex_t* tex, uint8_t c, uint8_t a);
+	jl_tex_t* tex, uint8_t c, float a);
 void jlgr_vo_old(jlgr_t* jlgr, jl_vo_t* pv);
 void jlgr_draw_text(jlgr_t* jlgr, str_t str, jl_vec3_t xyz, jl_font_t f);
 void jlgr_draw_int(jlgr_t* jlgr, int64_t num, jl_vec3_t loc, jl_font_t f);
@@ -395,7 +393,7 @@ void jlgr_draw_dec(jlgr_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
 	jl_font_t f);
 void jlgr_draw_text_area(jlgr_t* jlgr, jl_sprite_t * spr, str_t txt);
 void jlgr_draw_text_sprite(jlgr_t* jlgr,jl_sprite_t * spr, str_t txt);
-void jlgr_draw_ctxt(jlgr_t* jlgr, char *str, float yy, uint8_t* color);
+void jlgr_draw_ctxt(jlgr_t* jlgr, char *str, float yy, float* color);
 void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine);
 void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, uint8_t c, char* format, ...);
 void jlgr_term_msge(jlgr_t* jlgr, char* message);
@@ -420,7 +418,7 @@ void jl_gl_vo_txmap(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map);
 uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 	uint32_t width, uint32_t height, uint8_t bytepp);
 double jl_gl_ar(jlgr_t* jlgr);
-void jl_gl_clear(jlgr_t* jlgr, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void jl_gl_clear(jlgr_t* jlgr, float r, float g, float b, float a);
 void jl_gl_pr_rsz(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
 void jl_gl_pr_new(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
 void jl_gl_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, jl_vec3_t* scl);

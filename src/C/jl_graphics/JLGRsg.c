@@ -148,7 +148,7 @@ static void jl_sg_draw_up(jl_t* jl, uint8_t resize, void* data) {
 	jlgr_t* jlgr = jl->jlgr;
 	
 	// Clear the screen.
-	jl_gl_clear(jl->jlgr, 0, 127, 170, 255);
+	jl_gl_clear(jl->jlgr, 0., .5, .66, 1.);
 	// Run the screen's redraw function
 	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)jlgr->draw.redraw.lower)(jl) :
 		((jl_fnct)jlgr->draw.redraw.upper)(jl);
@@ -158,7 +158,7 @@ static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
 	jlgr_t* jlgr = jl->jlgr;
 
 	// Clear the screen.
-	jl_gl_clear(jlgr, 255, 127, 0, 255);
+	jl_gl_clear(jlgr, 1., .5, 0., 1.);
 	// Run the screen's redraw function
 	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)jlgr->draw.redraw.upper)(jl) :
 		((jl_fnct)jlgr->draw.redraw.lower)(jl);

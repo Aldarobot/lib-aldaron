@@ -26,15 +26,13 @@ typedef struct{
 
 uint32_t _jl_sg_gpix(/*in */ SDL_Surface* surface, int32_t x, int32_t y);
 void jl_gl_viewport_screen(jlgr_t* jlgr);
-void jl_gl_poly(jlgr_t* jlgr, jl_vo_t* pv, uint8_t vertices, const float *xyzw);
-void jl_gl_vect(jlgr_t* jlgr, jl_vo_t* pv, uint8_t vertices, const float *xyzw);
-void jl_gl_clrc(jlgr_t* jlgr, jl_vo_t* pv, jl_ccolor_t* cc);
-jl_ccolor_t* jl_gl_clrcs(jlgr_t* jlgr, uint8_t *rgba, uint32_t vc);
-jl_ccolor_t* jl_gl_clrcg(jlgr_t* jlgr, uint8_t *rgba, uint32_t vc);
-void jl_gl_clrg(jlgr_t* jlgr, jl_vo_t* pv, uint8_t *rgba);
-void jl_gl_clrs(jlgr_t* jlgr, jl_vo_t* pv, uint8_t *rgba);
-void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,uint8_t map,uint8_t a, uint32_t tx);
-void jl_gl_txtr_(jlgr_t* _jlc, jl_vo_t* pv, uint8_t map, uint8_t a, uint32_t tx);
+void jl_gl_poly(jlgr_t* jlgr, jl_vo_t* pv, uint32_t vertices, const float *xyzw);
+void jl_gl_vect(jlgr_t* jlgr, jl_vo_t* pv, uint32_t vertices, const float *xyzw);
+void jl_gl_clrc(jlgr_t* jlgr, jl_vo_t* pv, float* cc);
+void jl_gl_clrg(jlgr_t* jlgr, jl_vo_t* pv, float* rgba);
+void jl_gl_clrs(jlgr_t* jlgr, jl_vo_t* pv, float* rgba);
+void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,uint8_t map,float a, uint32_t tx);
+void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map, float a, uint32_t tx);
 void jl_gl_transform_pr_(jlgr_t* jlgr, jl_pr_t* pr, float x, float y, float z,
 	float xm, float ym, float zm);
 void jl_gl_transform_vo_(jlgr_t* jlgr, jl_vo_t* vo, float x, float y, float z,

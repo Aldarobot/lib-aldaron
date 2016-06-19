@@ -5,8 +5,6 @@
 
 #include "jl_sdl.h"
 
-typedef float jl_ccolor_t;
-
 typedef const char chr_t;	// Character Constant
 typedef const char* str_t;	// String Constant
 typedef char m_chr_t;		// Character Modifiable

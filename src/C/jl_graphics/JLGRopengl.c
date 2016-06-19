@@ -9,15 +9,15 @@
 	#define GLSL_HEAD "#version 100\n"
 #endif
 
-static char *source_frag_clr = 
+const char *source_frag_clr = 
 	GLSL_HEAD
 	"varying vec4 vcolor;\n"
 	"\n"
 	"void main() {\n"
 	"	gl_FragColor = vec4(vcolor.rgb * vcolor.a, vcolor.a);\n"
-	"}\n\0";
+	"}";
 	
-static char *source_vert_clr = 
+const char *source_vert_clr = 
 	GLSL_HEAD
 	"uniform vec3 translate;\n"
 	"uniform vec4 transform;\n"
@@ -30,9 +30,9 @@ static char *source_vert_clr =
 	"void main() {\n"
 	"	gl_Position = transform * vec4(position + translate, 1.0);\n"
 	"	vcolor = acolor;\n"
-	"}\n\0";
+	"}";
 
-static char *source_frag_tex_premult = 
+const char *source_frag_tex_premult = 
 	GLSL_HEAD
 	"uniform sampler2D texture;\n"
 	"uniform float multiply_alpha;\n"
@@ -44,9 +44,9 @@ static char *source_frag_tex_premult =
 	"	vec4 vcolor = texture2D(texture, texcoord);\n"
 	"	vcolor.a *= multiply_alpha;\n"
 	"	gl_FragColor = vec4(vcolor.rgb * vcolor.a, vcolor.a);\n"
-	"}\n\0";
+	"}";
 
-static char *source_frag_tex_charmap = 
+const char *source_frag_tex_charmap = 
 	GLSL_HEAD
 	"uniform sampler2D texture;\n"
 	"uniform float multiply_alpha;\n"
@@ -62,9 +62,9 @@ static char *source_frag_tex_charmap =
 	"		vcolor = new_color;\n"
 	"	vcolor.a *= multiply_alpha;\n"
 	"	gl_FragColor = vec4(vcolor.rgb * vcolor.a, vcolor.a);\n"
-	"}\n\0";
+	"}";
 
-static char *source_frag_tex = 
+const char *source_frag_tex = 
 	GLSL_HEAD
 	"uniform sampler2D texture;\n"
 	"\n"
@@ -73,9 +73,9 @@ static char *source_frag_tex =
 	"void main()\n"
 	"{\n"
 	"	gl_FragColor = texture2D(texture, texcoord);\n"
-	"}\n\0";
+	"}";
 
-static char *source_vert_tex = 
+const char *source_vert_tex = 
 	GLSL_HEAD
 	"uniform vec3 translate;\n"
 	"uniform vec4 transform;\n"
@@ -89,10 +89,10 @@ static char *source_vert_tex =
 	"{\n"
 	"	texcoord = texpos;\n"
 	"	gl_Position = transform * vec4(position + translate, 1.0);\n"
-	"}\n\0";
+	"}";
 	
 // Full texture
-static const float DEFAULT_TC[] = {
+const float DEFAULT_TC[] = {
 	0., 1.,
 	0., 0.,
 	1., 0.,
@@ -151,7 +151,7 @@ static void jl_gl_framebuffer_use__(jlgr_t* jlgr, jl_pr_t* pr);
 			fstrerr = "opengl: unknown error!\n";
 		}
 		jl_print(jlgr->jl, "error: %s:%s (%d)",fname,fstrerr,width);
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 #endif
 
@@ -301,16 +301,16 @@ static void jl_gl_texture_make__(jlgr_t* jlgr, uint32_t *tex) {
 }
 
 // Set the bound texture.  pm is the pixels 0 - blank texture.
-static void jl_gl_texture_set__(jlgr_t* jlgr, uint8_t* pm, uint16_t w, uint16_t h,
+static void jl_gl_texture_set__(jlgr_t* jlgr, uint8_t* px, uint16_t w, uint16_t h,
 	uint8_t bytepp)
 {
-	GLenum format = bytepp == 3 ? GL_RGB : GL_RGBA;
+	GLenum format = (bytepp == 3) ? GL_RGB : GL_RGBA;
 	glTexImage2D(
 		GL_TEXTURE_2D, 0,		/* target, level */
 		format,				/* internal format */
 		w, h, 0,			/* width, height, border */
 		format, GL_UNSIGNED_BYTE,	/* external format, type */
-		pm				/* pixels */
+		px				/* pixels */
 	);
 	JL_GL_ERROR(jlgr, w, "texture image 2D");
 }
@@ -481,11 +481,13 @@ static void jl_gl_vertices__(jlgr_t* jlgr, const float *xyzw, uint8_t vertices,
 	jl_gl_buffer_set__(jlgr, gl, cv, items);
 }
 
-void jl_gl_vo_vertices(jlgr_t* jlgr, jl_vo_t* pv, const float *xyzw,
-	uint8_t vertices)
+static void jl_gl_vo_vertices(jlgr_t* jlgr, jl_vo_t* pv, const float *xyzw,
+	uint32_t vertices)
 {
 	pv->vc = vertices;
 	if(vertices) {
+		// Re-Allocate pv->cc
+		pv->cc = jl_mem(jlgr->jl, pv->cc, vertices * sizeof(float) * 4);
 		// Re-Allocate pv->cv
 		pv->cv = jl_mem(jlgr->jl, pv->cv, vertices * sizeof(float) * 3);
 		// Set pv->cv & pv->gl
@@ -503,11 +505,6 @@ void jl_gl_vo_free(jlgr_t* jlgr, jl_vo_t *pv) {
 	if(pv->cc) pv->cc = jl_mem(jlgr->jl, pv->cc, 0);
 	// Free main structure
 	pv = jl_mem(jlgr->jl, (void**)&pv, 0);
-}
-
-static void _jl_gl_col_begin(jlgr_t* jlgr, jl_vo_t* pv) {
-	//Free anything old
-	if(pv->cc != NULL) pv->cc = jl_mem(jlgr->jl, pv->cc, 0);
 }
 
 // TODO: MOVE
@@ -613,7 +610,7 @@ static void jl_gl_framebuffer_init__(jlgr_t* jlgr, jl_pr_t* pr) {
 		// Set Viewport to image and clear.
 		jl_gl_viewport__(jlgr, pr->w, pr->h);
 		// Clear the pre-renderer.
-		jl_gl_clear(jlgr, 0, 0, 0, 0);
+		jl_gl_clear(jlgr, 0.f, 0.f, 0.f, 0.f);
 	}
 }
 
@@ -719,17 +716,16 @@ static void jl_gl_depthbuffer_off__(jlgr_t* jlgr) {
 }
 */
 
-static void _jl_gl_txtr(jlgr_t* jlgr, jl_vo_t** pv, uint8_t a, uint8_t is_rt) {
+static void _jl_gl_txtr(jlgr_t* jlgr, jl_vo_t** pv, float a, uint8_t is_rt) {
 	if((*pv) == NULL) (*pv) = &jlgr->gl.temp_vo;
 	// Set Simple Variabes
-	(*pv)->a = ((float)a) / 255.f;
+	(*pv)->a = a;
 	// Make sure non-textured colors aren't attempted
-	if((!is_rt) && ((*pv)->cc != NULL))
-		(*pv)->cc = jl_mem(jlgr->jl, (*pv)->cc, 0);
+	(*pv)->tx = 0;
 }
 
 static inline uint8_t _jl_gl_set_shader(jlgr_t* jlgr, jl_vo_t* pv) {
-	uint8_t isTextured = pv->cc == NULL;
+	uint8_t isTextured = (!!pv->tx);
 	_jl_gl_usep(jlgr, isTextured ? jlgr->gl.prgs.texture : jlgr->gl.prgs.color);
 	return isTextured;
 }
@@ -796,7 +792,7 @@ void jl_gl_pr_off(jlgr_t* jlgr) {
 }
 
 // Set vertices for a polygon.
-void jl_gl_poly(jlgr_t* jlgr, jl_vo_t* pv, uint8_t vertices, const float *xyzw) {
+void jl_gl_poly(jlgr_t* jlgr, jl_vo_t* pv, uint32_t vertices, const float *xyzw) {
 	const float FS_RECT[] = {
 		0.,jl_gl_ar(jlgr),0.,
 		0.,0.,0.,
@@ -813,7 +809,7 @@ void jl_gl_poly(jlgr_t* jlgr, jl_vo_t* pv, uint8_t vertices, const float *xyzw) 
 }
 
 // Set vertices for vector triangles.
-void jl_gl_vect(jlgr_t* jlgr, jl_vo_t* pv, uint8_t vertices, const float *xyzw) {
+void jl_gl_vect(jlgr_t* jlgr, jl_vo_t* pv, uint32_t vertices, const float *xyzw) {
 	if(pv == NULL) pv = &jlgr->gl.temp_vo;
 	// Rendering Style = triangles
 	pv->rs = 1;
@@ -821,62 +817,36 @@ void jl_gl_vect(jlgr_t* jlgr, jl_vo_t* pv, uint8_t vertices, const float *xyzw) 
 	jl_gl_vo_vertices(jlgr, pv, xyzw, vertices);
 }
 
-// Set colors to "cc" in vertex oject "pv" - cc will be freed when done
-void jl_gl_clrc(jlgr_t* jlgr, jl_vo_t* pv, jl_ccolor_t* cc) {
-	_jl_gl_col_begin(jlgr, pv); // Free "pv->cc" if non-null
-	pv->cc = cc;
+// Set colors to "cc" in vertex oject "pv"
+void jl_gl_clrc(jlgr_t* jlgr, jl_vo_t* pv, float* cc) {
+	//
+	pv->tx = 0;
+	// 
+	jl_mem_copyto(cc, pv->cc, pv->vc * 4 * sizeof(float));
 	// Set Color Buffer "pv->bt" to "pv->cc"
 	jl_gl_buffer_set__(jlgr, &pv->bt, pv->cc, pv->vc * 4);
 }
 
-//Convert color to solid
-jl_ccolor_t* jl_gl_clrcs(jlgr_t* jlgr, uint8_t *rgba, uint32_t vc) {
-	int i;
-	//Allocate memory
-	jl_ccolor_t* cc = jl_memi(jlgr->jl, vc * sizeof(float) * 4);
-
-	//Set RGBA for each vertex
-	for(i = 0; i < vc; i++) { 
-		cc[(i * 4) + 0] = ((double) rgba[0]) / 255.;
-		cc[(i * 4) + 1] = ((double) rgba[1]) / 255.;
-		cc[(i * 4) + 2] = ((double) rgba[2]) / 255.;
-		cc[(i * 4) + 3] = ((double) rgba[3]) / 255.;
-	}
-	return cc;
-}
-
-//Convert Color To Gradient
-jl_ccolor_t* jl_gl_clrcg(jlgr_t* jlgr, uint8_t *rgba, uint32_t vc) {
-	int i;
-	//Allocate memory
-	jl_ccolor_t* cc = jl_memi(jlgr->jl, vc * sizeof(float) * 4);
-
-	//Set RGBA for each vertex
-	for(i = 0; i < vc; i++) { 
-		cc[(i * 4) + 0] = ((double) rgba[(i * 4) + 0]) / 255.;
-		cc[(i * 4) + 1] = ((double) rgba[(i * 4) + 1]) / 255.;
-		cc[(i * 4) + 2] = ((double) rgba[(i * 4) + 2]) / 255.;
-		cc[(i * 4) + 3] = ((double) rgba[(i * 4) + 3]) / 255.;
-	}
-	return cc;
-}
-
 // Set Texturing to Gradient Color "rgba" { (4 * vertex count) values }
-void jl_gl_clrg(jlgr_t* jlgr, jl_vo_t* pv, uint8_t *rgba) {
+void jl_gl_clrg(jlgr_t* jlgr, jl_vo_t* pv, float* rgba) {
 	if(pv == NULL) pv = &jlgr->gl.temp_vo;
-	_jl_gl_col_begin(jlgr, pv);
-	jl_gl_clrc(jlgr, pv, jl_gl_clrcg(jlgr, rgba, pv->vc));
+	jl_gl_clrc(jlgr, pv, rgba);
 }
 
 // Set Texturing to Solid Color "rgba" { 4 values }
-void jl_gl_clrs(jlgr_t* jlgr, jl_vo_t* pv, uint8_t *rgba) {
+void jl_gl_clrs(jlgr_t* jlgr, jl_vo_t* pv, float* rgba) {
 	if(pv == NULL) pv = &jlgr->gl.temp_vo;
-	_jl_gl_col_begin(jlgr, pv);
-	jl_gl_clrc(jlgr, pv, jl_gl_clrcs(jlgr, rgba, pv->vc));
+	float rgbav[4 * pv->vc];
+	uint32_t i;
+
+	for(i = 0; i < pv->vc; i++) {
+		jl_mem_copyto(rgba, &(rgbav[i * 4]), 4 * sizeof(float));
+	}
+	jl_gl_clrc(jlgr, pv, rgbav);
 }
 
 // Set texturing to a bitmap
-void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,uint8_t map,uint8_t a, uint32_t tx) {
+void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,uint8_t map,float a, uint32_t tx) {
 	_jl_gl_txtr(jlgr, &pv, a, 0);
 	pv->tx = tx;
 	if(!pv->tx) {
@@ -888,7 +858,7 @@ void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,uint8_t map,uint8_t a, uint32_t tx) {
 }
 
 // Set texturing to a bitmap
-void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map, uint8_t a, uint32_t tx) {
+void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map, float a, uint32_t tx) {
 	_jl_gl_txtr(jlgr, &pv, a, 0);
 	pv->tx = tx;
 	jl_gl_vo_txmap(jlgr, pv, map);
@@ -936,13 +906,13 @@ void jl_gl_transform_vo_(jlgr_t* jlgr, jl_vo_t* vo, float x, float y, float z,
 	double ar = jl_gl_ar(jlgr);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 
-	jl_gl_translate__(jlgr, (vo->cc == NULL) ?
+	jl_gl_translate__(jlgr, vo->tx ?
 		jlgr->gl.tex.uniforms.translate:jlgr->gl.clr.uniforms.translate,
-		(vo->cc == NULL) ? jlgr->gl.prgs.texture : jlgr->gl.prgs.color,
+		vo->tx ? jlgr->gl.prgs.texture : jlgr->gl.prgs.color,
 		x, y, z, ar);
-	jl_gl_transform__(jlgr, (vo->cc == NULL) ?
+	jl_gl_transform__(jlgr, vo->tx ?
 		jlgr->gl.tex.uniforms.transform:jlgr->gl.clr.uniforms.transform,
-		(vo->cc == NULL) ? jlgr->gl.prgs.texture : jlgr->gl.prgs.color,
+		vo->tx ? jlgr->gl.prgs.texture : jlgr->gl.prgs.color,
 		xm, ym, zm, ar);
 }
 
@@ -971,8 +941,8 @@ void jl_gl_draw(jlgr_t* jlgr, jl_vo_t* pv) {
 	// Determine which shader to use: texturing or coloring?
 	uint8_t isTextured = _jl_gl_set_shader(jlgr, pv);
 	// Set texture and transparency if texturing.  If colors: bind colors
-	if(pv->cc) _jl_gl_draw_colr(jlgr, pv);
-	else _jl_gl_draw_txtr(jlgr, pv->a, pv->tx, &pv->bt);
+	if(pv->tx) _jl_gl_draw_txtr(jlgr, pv->a, pv->tx, &pv->bt);
+	else _jl_gl_draw_colr(jlgr, pv);
 	// Draw onto the screen.
 	_jl_gl_draw_onts(jlgr, &pv->gl, isTextured, pv->rs, pv->vc);
 	jl_print_return(jlgr->jl, "OPENGL/Draw");
@@ -1236,14 +1206,13 @@ uint32_t jl_gl_w(jlgr_t* jlgr) {
 /**
  * Clear the screen with a color
  * @param jl: The library context.
- * @param r: The amount of red [ 0 - 255 ]
- * @param g: The amount of green [ 0 - 255 ]
- * @param b: The amount of blue [ 0 - 255 ]
- * @param a: The translucency [ 0 - 255 ]
+ * @param r: The amount of red [ 0.f - 1.f ]
+ * @param g: The amount of green [ 0.f - 1.f ]
+ * @param b: The amount of blue [ 0.f - 1.f ]
+ * @param a: The translucency [ 0.f - 1.f ]
 **/
-void jl_gl_clear(jlgr_t* jlgr, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-	glClearColor(((double)r)/255., ((double)g)/255.,
-		((double)b)/255., ((double)a)/255.);
+void jl_gl_clear(jlgr_t* jlgr, float r, float g, float b, float a) {
+	glClearColor(r, g, b, a);
 	JL_GL_ERROR(jlgr, a, "jl_gl_clear(): glClearColor");
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	JL_GL_ERROR(jlgr, a, "jl_gl_clear(): glClear");

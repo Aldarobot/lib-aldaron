@@ -31,8 +31,6 @@ static inline void _jlgr_init_vos(jlgr_t* jlgr) {
 }
 
 static void _jlgr_popup_loop(jl_t *jl) {
-//		jlgr_draw_rect(jl, .1, .1, .8, .2, 127, 127, 255, 255);
-//		jlgr_draw_rect(jl, .1, .3, .8, .8, 64, 127, 127, 255);
 }
 
 static void _jlgr_textbox_cm(jlgr_t* jlgr, jlgr_input_t input) {
@@ -62,10 +60,10 @@ void jlgr_dont(jlgr_t* jlgr) { }
  * @param i:  the ID of the image.
  * @param c: is 0 unless you want to use the image as
  * 	a charecter map, then it will zoom into charecter 'chr'.
- * @param a: the transparency each pixel is multiplied by; 255 is
- *	solid and 0 is totally invisble.
+ * @param a: the transparency each pixel is multiplied by; 1. is
+ *	solid and 0. is totally invisble.
 **/
-void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t c, uint8_t a) {
+void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t c, float a) {
 	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
 
 	jlgr_vos_image(jlgr, &jlgr->gr.vos.whole_screen, rc, tex, c, a);
@@ -80,28 +78,13 @@ void jlgr_fill_image_draw(jlgr_t* jlgr) {
 }
 
 /**
- * Convert a color.
- * @param jl: The library context.
- * @param rgba: The color to convert ( Not freed - Reusable ).
- * @param vc: How many vertices to acount for.
- * @param gradient: 1 if "rgba" is a gradient array, 0 if solid color.
- * @returns: The converted color
-**/
-jl_ccolor_t* jlgr_convert_color(jlgr_t* jlgr, uint8_t *rgba, uint32_t vc,
-	uint8_t gradient)
-{
-	if(gradient) return jl_gl_clrcg(jlgr, rgba, vc);
-	else return jl_gl_clrcs(jlgr, rgba, vc);
-}
-
-/**
  * Change the coloring scheme for a vertex object.
  * @param jl: The library context.
  * @param pv: The Vertex Object
  * @param cc: The Converted Color Object to use on the Vertex Object.
  *	The library takes care of freeing this variable.
 **/
-void jlgr_vo_color(jlgr_t* jlgr, jl_vo_t* pv, jl_ccolor_t* cc) {
+void jlgr_vo_color(jlgr_t* jlgr, jl_vo_t* pv, float* cc) {
 	jl_gl_clrc(jlgr, pv, cc);
 }
 
@@ -127,7 +110,7 @@ void jlgr_draw_vo(jlgr_t* jlgr, jl_vo_t* pv, jl_vec3_t* vec) {
  * 
 **/
 void jlgr_vos_vec(jlgr_t* jlgr, jl_vo_t *pv, uint16_t tricount,
-	float* triangles, uint8_t* colors, uint8_t multicolor)
+	float* triangles, float* colors, uint8_t multicolor)
 {
 	// Overwrite the vertex object
 	jl_gl_vect(jlgr, pv, tricount * 3, triangles);
@@ -145,7 +128,7 @@ void jlgr_vos_vec(jlgr_t* jlgr, jl_vo_t *pv, uint16_t tricount,
  * @param multicolor: If 0: Then 1 color is used.
  *	If 1: Then 1 color per each vertex is used.
 **/
-void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, uint8_t* colors,
+void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, float* colors,
 	uint8_t multicolor)
 {
 	float rectangle_coords[] = {
@@ -171,11 +154,11 @@ void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, uint8_t* colors,
  * @param i:  the ID of the image.
  * @param c: is 0 unless you want to use the image as
  * 	a charecter map, then it will zoom into charecter 'chr'.
- * @param a: the transparency each pixel is multiplied by; 255 is
- *	solid and 0 is totally invisble.
+ * @param a: the transparency each pixel is multiplied by; 1. is
+ *	solid and 0. is totally invisble.
 **/
 void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
-	uint32_t tex, uint8_t c, uint8_t a)
+	uint32_t tex, uint8_t c, float a)
 {
 	//From bottom left & clockwise
 	float Oone[] = {
@@ -190,7 +173,7 @@ void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
 }
 
 void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
-	jl_tex_t* tex, uint8_t c, uint8_t a)
+	jl_tex_t* tex, uint8_t c, float a)
 {
 	//From bottom left & clockwise
 	float Oone[] = {
@@ -231,13 +214,11 @@ void jlgr_draw_text(jlgr_t* jlgr, str_t str, jl_vec3_t loc, jl_font_t f) {
 	if(str == NULL) return;
 	for(i = 0; i < strlen(str); i++) {
 		//Font 0:0
-		jlgr_vos_image(jlgr, vo, rc, jlgr->textures.font, STr[i], 255);
+		jlgr_vos_image(jlgr, vo, rc, jlgr->textures.font, STr[i], 1.);
 		jl_gl_transform_chr_(jlgr, tr.x, tr.y, tr.z,
 			1., 1., 1.);
-		jl_gl_draw_chr(jlgr, vo,((double)f.colors[0])/255.,
-			((double)f.colors[1])/255.,
-			((double)f.colors[2])/255.,
-			((double)f.colors[3])/255.);
+		jl_gl_draw_chr(jlgr, vo, f.colors[0], f.colors[1], f.colors[2],
+			f.colors[3]);
 		tr.x += f.size;
 	}
 }
@@ -295,7 +276,7 @@ void jlgr_draw_text_area(jlgr_t* jlgr, jl_sprite_t * spr, str_t txt){
  * @param 'txt': the text to draw
 **/
 void jlgr_draw_text_sprite(jlgr_t* jlgr,jl_sprite_t * spr, str_t txt) {
-	jlgr_fill_image_set(jlgr, jlgr->textures.icon, 1, 255);
+	jlgr_fill_image_set(jlgr, jlgr->textures.icon, 1, 1.);
 	jlgr_fill_image_draw(jlgr);
 	jlgr_draw_text_area(jlgr, spr, txt);
 }
@@ -305,9 +286,9 @@ void jlgr_draw_text_sprite(jlgr_t* jlgr,jl_sprite_t * spr, str_t txt) {
  * @param 'jl': library context.
  * @param 'str': the text to draw
  * @param 'yy': y coordinate to draw it at
- * @param 'color': 255 = opaque, 0 = invisible
+ * @param 'color': 1.f = opaque, 0.f = invisible
  */
-void jlgr_draw_ctxt(jlgr_t* jlgr, char *str, float yy, uint8_t* color) {
+void jlgr_draw_ctxt(jlgr_t* jlgr, char *str, float yy, float* color) {
 	jlgr_draw_text(jlgr, str,
 		(jl_vec3_t) { 0., yy, 0. },
 		(jl_font_t) { jlgr->textures.icon, 0, color, 
@@ -366,13 +347,13 @@ static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
 		jl_gl_ar(jlgr) - .0024};
 	jl_rect_t rc2 = { 0.005, 0.005, (jl_gl_ar(jlgr) * .5) -.001,
 		jl_gl_ar(jlgr) - .01};
-	uint8_t colors[] = { 15, 10, 0, 255 };
+	float colors[] = { .06f, .04f, 0.f, 1.f };
 
-	jl_gl_clear(jlgr, 25, 20, 0, 255);
+	jl_gl_clear(jlgr, .01, .08, 0., 1.);
 	jlgr_vos_image(jlgr, &(slider->vo[0]), rc, jlgr->textures.font,
-		235, 255);
+		235, 1.);
 	jlgr_vos_image(jlgr, &(slider->vo[1]), rc2, jlgr->textures.game,
-		16, 255);
+		16, 1.);
 	jlgr_vos_rec(jlgr, &(slider->vo[2]), rc1, colors, 0);
 	// Draw Sliders
 	jlgr_draw_vo(jlgr, &(slider->vo[0]), NULL);
@@ -430,14 +411,14 @@ void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
  * Draw a background on the screen
 **/
 void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, uint8_t c) {
-	jlgr_fill_image_set(jlgr, tex, c, 255);
+	jlgr_fill_image_set(jlgr, tex, c, 1.);
 	jlgr_fill_image_draw(jlgr);
 }
 
 void jlgr_draw_loadingbar(jlgr_t* jlgr, double loaded) {
 	jl_rect_t bar = { .05, jl_gl_ar(jlgr)*.4,
 		.95,jl_gl_ar(jlgr)*.45};
-	uint8_t colors[] = { 0, 255, 0, 255};
+	float colors[] = { 0., 1., 0., 1. };
 
 	jlgr_vos_rec(jlgr, NULL, bar, colors, 0);
 }
@@ -573,7 +554,7 @@ void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 	if(jlgr_sprite_collide(jlgr, &jlgr->mouse, spr)) {
 		jl_rect_t rc = { spr->pr.cb.pos.x, spr->pr.cb.pos.y,
 			spr->pr.cb.ofs.x, spr->pr.cb.ofs.y };
-		uint8_t glow_color[] = { 255, 255, 255, 64 };
+		float glow_color[] = { 1., 1., 1., .25 };
 
 		// Draw glow
 		jlgr_vos_rec(jlgr, &jlgr->gl.temp_vo, rc, glow_color, 0);
@@ -616,12 +597,12 @@ uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
 //			JL_PRINT("inserting %1s\n", &bytetoinsert);
 	}
 	jlgr_input_do(jlgr, JL_INPUT_JOYC, _jlgr_textbox_cm, NULL);
-//		jlgr_draw_image(jl, 0, 0, x, y, w, h, ' ', 255);
+//		jlgr_draw_image(jl, 0, 0, x, y, w, h, ' ', 1.);
 	jlgr_draw_text(jlgr, (char*)(string->data),
 		(jl_vec3_t) {x, y, 0.},
 		(jl_font_t) {jlgr->textures.icon,0,jlgr->fontcolor,h});
 //		jlgr_draw_image(jl, 0, 0,
-//			x + (h*((float)string->curs-.5)), y, h, h, 252, 255);
+//			x + (h*((float)string->curs-.5)), y, h, h, 252, 1.);
 	return 0;
 }
 
@@ -649,13 +630,12 @@ void _jlgr_loopb(jlgr_t* jlgr) {
 	//Message Display
 	if(jlgr->gr.notification.timeTilVanish > 0.f) {
 		if(jlgr->gr.notification.timeTilVanish > .5) {
-			uint8_t color[] = { 255, 255, 255, 255 };
+			float color[] = { 1., 1., 1., 1. };
 			jlgr_draw_ctxt(jlgr, jlgr->gr.notification.message, 0,
 				color);
 		}else{
-			uint8_t color[] = { 255, 255, 255, (uint8_t)
-				(jlgr->gr.notification.timeTilVanish *
-					255. / .5)};
+			float color[] = { 1., 1., 1.,
+				(jlgr->gr.notification.timeTilVanish / .5)};
 			jlgr_draw_ctxt(jlgr, jlgr->gr.notification.message, 0,
 				color);
 		}
@@ -689,10 +669,10 @@ void jlgr_init__(jlgr_t* jlgr) {
 	jlgr->textures.font = jl_sg_add_image(jlgr, &packagedata,
 		"/images/jlf8.png");
 	// Create Font
-	jlgr->fontcolor[0] = 0;
-	jlgr->fontcolor[1] = 0;
-	jlgr->fontcolor[2] = 0;
-	jlgr->fontcolor[3] = 255;
+	jlgr->fontcolor[0] = 0.;
+	jlgr->fontcolor[1] = 0.;
+	jlgr->fontcolor[2] = 0.;
+	jlgr->fontcolor[3] = 1.;
 	jlgr->font = (jl_font_t)
 		{ jlgr->textures.font, 0, jlgr->fontcolor, .04 };
 	// Draw message on the screen

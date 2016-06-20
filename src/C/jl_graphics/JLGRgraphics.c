@@ -78,17 +78,6 @@ void jlgr_fill_image_draw(jlgr_t* jlgr) {
 }
 
 /**
- * Change the coloring scheme for a vertex object.
- * @param jl: The library context.
- * @param pv: The Vertex Object
- * @param cc: The Converted Color Object to use on the Vertex Object.
- *	The library takes care of freeing this variable.
-**/
-void jlgr_vo_color(jlgr_t* jlgr, jl_vo_t* pv, float* cc) {
-	jl_gl_clrc(jlgr, pv, cc);
-}
-
-/**
  * Draw a vertex object with offset by translation.
  * @param jl: The library context.
  * @param pv: The vertex object to draw.
@@ -115,8 +104,8 @@ void jlgr_vos_vec(jlgr_t* jlgr, jl_vo_t *pv, uint16_t tricount,
 	// Overwrite the vertex object
 	jl_gl_vect(jlgr, pv, tricount * 3, triangles);
 	// Texture the vertex object
-	if(multicolor) jl_gl_clrg(jlgr, pv, colors);
-	else jl_gl_clrs(jlgr, pv, colors);
+	if(multicolor) jlgr_vo_color_gradient(jlgr, pv, colors);
+	else jlgr_vo_color_solid(jlgr, pv, colors);
 }
 
 /**
@@ -140,8 +129,8 @@ void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, float* colors,
 	// Overwrite the vertex object
 	jl_gl_poly(jlgr, pv, 4, rectangle_coords);
 	// Texture the vertex object
-	if(multicolor) jl_gl_clrg(jlgr, pv, colors);
-	else jl_gl_clrs(jlgr, pv, colors);
+	if(multicolor) jlgr_vo_color_gradient(jlgr, pv, colors);
+	else jlgr_vo_color_solid(jlgr, pv, colors);
 }
 
 /**

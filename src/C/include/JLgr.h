@@ -376,7 +376,8 @@ void jlgr_dont(jlgr_t* jlgr);
 void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t c, float a);
 void jlgr_fill_image_draw(jlgr_t* jlgr);
 void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, uint8_t c);
-void jlgr_vo_color(jlgr_t* jlgr, jl_vo_t* pv, float* cc);
+void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
+void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
 void jlgr_draw_vo(jlgr_t* jlgr, jl_vo_t* pv, jl_vec3_t* vec);
 void jlgr_vos_vec(jlgr_t* jlgr, jl_vo_t *pv, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor);

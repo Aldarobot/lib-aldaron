@@ -818,7 +818,7 @@ void jl_gl_vect(jlgr_t* jlgr, jl_vo_t* pv, uint32_t vertices, const float *xyzw)
 }
 
 // Set colors to "cc" in vertex oject "pv"
-void jl_gl_clrc(jlgr_t* jlgr, jl_vo_t* pv, float* cc) {
+static void jl_gl_clrc(jlgr_t* jlgr, jl_vo_t* pv, float* cc) {
 	//
 	pv->tx = 0;
 	// 
@@ -827,22 +827,32 @@ void jl_gl_clrc(jlgr_t* jlgr, jl_vo_t* pv, float* cc) {
 	jl_gl_buffer_set__(jlgr, &pv->bt, pv->cc, pv->vc * 4);
 }
 
-// Set Texturing to Gradient Color "rgba" { (4 * vertex count) values }
-void jl_gl_clrg(jlgr_t* jlgr, jl_vo_t* pv, float* rgba) {
-	if(pv == NULL) pv = &jlgr->gl.temp_vo;
-	jl_gl_clrc(jlgr, pv, rgba);
+/**
+ * Change the coloring scheme for a vertex object to a gradient.
+ * @param jl: The library context.
+ * @param vo: The Vertex Object
+ * @param rgba: { (4 * vertex count) values }
+**/
+void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
+	if(vo == NULL) vo = &jlgr->gl.temp_vo;
+	jl_gl_clrc(jlgr, vo, rgba);
 }
 
-// Set Texturing to Solid Color "rgba" { 4 values }
-void jl_gl_clrs(jlgr_t* jlgr, jl_vo_t* pv, float* rgba) {
-	if(pv == NULL) pv = &jlgr->gl.temp_vo;
-	float rgbav[4 * pv->vc];
+/**
+ * Change the coloring scheme for a vertex object to a solid.
+ * @param jl: The library context.
+ * @param vo: The Vertex Object
+ * @param rgba: { 4 values }
+**/
+void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
+	if(vo == NULL) vo = &jlgr->gl.temp_vo;
+	float rgbav[4 * vo->vc];
 	uint32_t i;
 
-	for(i = 0; i < pv->vc; i++) {
+	for(i = 0; i < vo->vc; i++) {
 		jl_mem_copyto(rgba, &(rgbav[i * 4]), 4 * sizeof(float));
 	}
-	jl_gl_clrc(jlgr, pv, rgbav);
+	jl_gl_clrc(jlgr, vo, rgbav);
 }
 
 // Set texturing to a bitmap

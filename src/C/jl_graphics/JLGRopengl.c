@@ -856,44 +856,33 @@ void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
 }
 
 // Set texturing to a bitmap
-void jl_gl_txtr(jlgr_t* jlgr,jl_vo_t* pv,uint8_t map,float a, uint32_t tx) {
+void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map, float a, uint32_t tx) {
 	_jl_gl_txtr(jlgr, &pv, a, 0);
 	pv->tx = tx;
+#ifdef JL_DEBUG_LIB
 	if(!pv->tx) {
 		jl_print(jlgr->jl, "Error: Texture=0!");
 		jl_print_stacktrace(jlgr->jl);
 		exit(-1);
 	}
-	jl_gl_vo_txmap(jlgr, pv, map);
-}
-
-// Set texturing to a bitmap
-void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map, float a, uint32_t tx) {
-	_jl_gl_txtr(jlgr, &pv, a, 0);
-	pv->tx = tx;
-	jl_gl_vo_txmap(jlgr, pv, map);
+#endif
+	jl_gl_vo_txmap(jlgr, pv, 16, 16, map);
 }
 
 //TODO:MOVE
 // Shader true if texturing, false if coloring
 // X,Y,Z are all [0. -> 1.]
 // X,Y are turned into [-.5 -> .5] - center around zero.
-static void jl_gl_translate__(jlgr_t* jlgr, int32_t shader, uint32_t which,
-	float x, float y, float z, double ar)
+static void jl_gl_translate_transform__(jlgr_t* jlgr, int32_t translate,
+	int32_t transform, uint32_t which, float xe, float ye, float ze,
+	float xm, float ym, float zm, float ar)
 {
 	// Determine which shader to use
 	_jl_gl_usep(jlgr, which);
 	// Set the uniforms
-	glUniform3f(shader, x - (1./2.), y - (ar/2.), z);
-	JL_GL_ERROR(jlgr, 0,"glUniform3f - translate");	
-}
-
-//TODO:MOVE
-static void jl_gl_transform__(jlgr_t* jlgr, int32_t shader, uint32_t which,
-	float x, float y, float z, double ar)
-{
-	_jl_gl_usep(jlgr, which);
-	glUniform4f(shader, 2. * x, 2. * (y / ar), 2. * z, 1.f);
+	glUniform3f(translate, xe - (1./2.), ye - (ar/2.), ze);
+	JL_GL_ERROR(jlgr, 0,"glUniform3f - translate");
+	glUniform4f(transform, 2. * xm, 2. * (ym / ar), 2. * zm, 1.f);
 	JL_GL_ERROR(jlgr, 0,"glUniform3f - transform");
 }
 
@@ -901,40 +890,36 @@ void jl_gl_transform_pr_(jlgr_t* jlgr, jl_pr_t* pr, float x, float y, float z,
 	float xm, float ym, float zm)
 {
 	jl_print_function(jlgr->jl, "OPENGL TRANSFORM!");
-	double ar = jl_gl_ar(jlgr);
+	float ar = jl_gl_ar(jlgr);
 
-	jl_gl_translate__(jlgr, jlgr->gl.prm.uniforms.translate,
-		jlgr->gl.prgs.preblend, x, y, z, ar);
-	jl_gl_transform__(jlgr, jlgr->gl.prm.uniforms.transform,
-		jlgr->gl.prgs.preblend, xm, ym, zm, ar);
+	jl_gl_translate_transform__(jlgr, jlgr->gl.prm.uniforms.translate,
+		jlgr->gl.prm.uniforms.transform, jlgr->gl.prgs.preblend,
+		x, y, z, xm, ym, zm, ar);
 	jl_print_return(jlgr->jl, "OPENGL TRANSFORM!");
 }
 
 void jl_gl_transform_vo_(jlgr_t* jlgr, jl_vo_t* vo, float x, float y, float z,
 	float xm, float ym, float zm)
 {
-	double ar = jl_gl_ar(jlgr);
+	float ar = jl_gl_ar(jlgr);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 
-	jl_gl_translate__(jlgr, vo->tx ?
+	jl_gl_translate_transform__(jlgr, vo->tx ?
 		jlgr->gl.tex.uniforms.translate:jlgr->gl.clr.uniforms.translate,
-		vo->tx ? jlgr->gl.prgs.texture : jlgr->gl.prgs.color,
-		x, y, z, ar);
-	jl_gl_transform__(jlgr, vo->tx ?
+		vo->tx ?
 		jlgr->gl.tex.uniforms.transform:jlgr->gl.clr.uniforms.transform,
 		vo->tx ? jlgr->gl.prgs.texture : jlgr->gl.prgs.color,
-		xm, ym, zm, ar);
+		x, y, z, xm, ym, zm, ar);
 }
 
 void jl_gl_transform_chr_(jlgr_t* jlgr, float x, float y, float z,
 	float xm, float ym, float zm)
 {
-	double ar = jl_gl_ar(jlgr);
+	float ar = jl_gl_ar(jlgr);
 
-	jl_gl_translate__(jlgr, jlgr->gl.chr.uniforms.translate,
-		jlgr->gl.prgs.character, x, y, z, ar);
-	jl_gl_transform__(jlgr, jlgr->gl.chr.uniforms.transform,
-		jlgr->gl.prgs.character, xm, ym, zm, ar);
+	jl_gl_translate_transform__(jlgr, jlgr->gl.chr.uniforms.translate,
+		jlgr->gl.chr.uniforms.transform, 
+		jlgr->gl.prgs.character, x, y, z, xm, ym, zm, ar);
 }
 
 //Draw object with "vertices" vertices.  The vertex data is in "x","y" and "z".
@@ -1049,9 +1034,7 @@ static inline void _jl_gl_init_shaders(jlgr_t* jlgr) {
 		source_vert_tex, source_frag_tex_charmap);
 	jlgr->gl.prgs.color = jl_gl_glsl_prg_create(jlgr,
 		source_vert_clr, source_frag_clr);
-	JL_PRINT_DEBUG(jlgr->jl, "made programs.");
-
-	JL_PRINT_DEBUG(jlgr->jl, "setting up shaders....");
+	JL_PRINT_DEBUG(jlgr->jl, "made programs / setting up shaders....");
 	// Texture
 	jlgr->gl.prm.uniforms.textures =
 		_jl_gl_getu(jlgr, jlgr->gl.prgs.preblend, "texture");
@@ -1169,24 +1152,26 @@ void jl_gl_vo_init(jlgr_t* jlgr, jl_vo_t* vo) {
 /**
  * Change the character map for a texture.
  * @param jl: The library context.
- * @param pv: The vertext object to change.
+ * @param vo: The vertext object to change.
+ * @param w: How many characters wide the texture is.
+ * @param h: How many characters high the texture is.
  * @param map: The character value to map.
 **/
-void jl_gl_vo_txmap(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map) {
+void jl_gl_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,uint8_t map) {
 	if(map) {
-		int32_t cX = map%16;
-		int32_t cY = map/16;
-		double CX = ((double)cX)/16.;
-		double CY = ((double)cY)/16.;
+		float ww = (float)w;
+		float hh = (float)h;
+		float CX = ((float)(map%h))/ww;
+		float CY = ((float)(map/h))/hh;
 		float tex1[] = {
-			(DEFAULT_TC[0]/16.) + CX, (DEFAULT_TC[1]/16.) + CY,
-			(DEFAULT_TC[2]/16.) + CX, (DEFAULT_TC[3]/16.) + CY,
-			(DEFAULT_TC[4]/16.) + CX, (DEFAULT_TC[5]/16.) + CY,
-			(DEFAULT_TC[6]/16.) + CX, (DEFAULT_TC[7]/16.) + CY
+			(DEFAULT_TC[0]/ww) + CX, (DEFAULT_TC[1]/hh) + CY,
+			(DEFAULT_TC[2]/ww) + CX, (DEFAULT_TC[3]/hh) + CY,
+			(DEFAULT_TC[4]/ww) + CX, (DEFAULT_TC[5]/hh) + CY,
+			(DEFAULT_TC[6]/ww) + CX, (DEFAULT_TC[7]/hh) + CY
 		};
-		jl_gl_buffer_set__(jlgr, &pv->bt, tex1, 8);
+		jl_gl_buffer_set__(jlgr, &vo->bt, tex1, 8);
 	}else{
-		jl_gl_buffer_set__(jlgr, &pv->bt, DEFAULT_TC, 8);
+		jl_gl_buffer_set__(jlgr, &vo->bt, DEFAULT_TC, 8);
 	}
 }
 
@@ -1194,7 +1179,7 @@ void jl_gl_vo_txmap(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map) {
  * Get the Aspect Ratio of the pre-renderer in use.
  * @param jl: The library context.
 **/
-double jl_gl_ar(jlgr_t* jlgr) {
+float jl_gl_ar(jlgr_t* jlgr) {
 	uint8_t thread = jl_thread_current(jlgr->jl);
 
 	if(thread)
@@ -1330,7 +1315,7 @@ void jl_gl_init__(jlgr_t* jlgr) {
 #ifdef JL_GLTYPE_HAS_GLEW
 	if(glewInit()!=GLEW_OK) {
 		jl_print(jlgr->jl, "glew fail!(no sticky)");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 #endif
 	jlgr->gl.cp = NULL;

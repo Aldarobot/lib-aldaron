@@ -20,7 +20,7 @@
 #define JL_FL_PERMISSIONS ( S_IRWXU | S_IRWXG | S_IRWXO )
 
 #if JL_PLAT == JL_PLAT_PHONE
-	extern char* JL_FL_BASE;
+	extern const char* JL_FL_BASE;
 #endif
 
 /** @cond **/

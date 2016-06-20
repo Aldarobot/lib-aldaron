@@ -3,7 +3,7 @@
 #if JL_PLAT == JL_PLAT_PHONE
 	#include <jni.h>
 
-	char* JL_FL_BASE = NULL;
+	const char* JL_FL_BASE;
 #endif
 
 //Initialize The Libraries Needed At Very Beginning: The Base Of It All
@@ -68,19 +68,13 @@ static inline void main_loop__(jl_t* jl) {
 	loop_(jl);
 }
 
-static inline int jl_kill__(jl_t* jl, int rc) {
+static inline void jl_kill__(jl_t* jl, int32_t rc) {
 	jl_print_kill__(jl);
-	#ifdef JL_DEBUG_LIB
-	JL_PRINT("PRINTG KILL'd\n");
-	#endif
 	jl_mem_kill_(jl);
-	#ifdef JL_DEBUG_LIB
-	JL_PRINT("PRINTG KILL'd\n");
-	#endif
 	JL_PRINT("[\\JL_Lib] ");
 	if(!rc) JL_PRINT("| No errors ");
 	JL_PRINT("| Exiting with return value %d |\n", rc);
-	return rc;
+	exit(rc);
 }
 
 // EXPORT FUNCTIONS
@@ -106,7 +100,7 @@ void* jl_get_context(jl_t* jl) {
  * @param name: The name of the program, used for storage / window name etc.
  * @param ctx_size: The size of the program context.
 **/
-int jl_start(jl_fnct fnc_init_,jl_fnct fnc_kill_,str_t name,uint64_t ctx_size) {
+void jl_start(jl_fnct fnc_init_,jl_fnct fnc_kill_,str_t name,uint64_t ctx_size) {
 	//Set Up Memory And Logging
 	jl_t* jl = jl_init_essential__();
 
@@ -117,7 +111,7 @@ int jl_start(jl_fnct fnc_init_,jl_fnct fnc_kill_,str_t name,uint64_t ctx_size) {
 	// Run Program's Kill Routine
 	fnc_kill_(jl);
 	// Kill the program
-	return jl_kill__(jl, JL_RTN_SUCCESS);
+	jl_kill__(jl, JL_RTN_SUCCESS);
 }
 
 #if JL_PLAT == JL_PLAT_PHONE

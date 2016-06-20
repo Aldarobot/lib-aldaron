@@ -40,9 +40,6 @@ public class SDLActivity extends Activity {
     public static boolean mIsPaused, mIsSurfaceReady, mHasFocus;
     public static boolean mExitCalledFromJava;
 
-    /** If shared libraries (e.g. SDL or the native application) could not be loaded. */
-    public static boolean mBrokenLibraries;
-
     // If we want to separate mouse and touch events.
     //  This is only toggled in native code when a hint is set!
     public static boolean mSeparateMouseAndTouch;
@@ -59,32 +56,6 @@ public class SDLActivity extends Activity {
 
     // Audio
     protected static AudioTrack mAudioTrack;
-
-    /**
-     * This method is called by SDL before loading the native shared libraries.
-     * It can be overridden to provide names of shared libraries to be loaded.
-     * The default implementation returns the defaults. It never returns null.
-     * An array returned by a new implementation must at least contain "SDL2".
-     * Also keep in mind that the order the libraries are loaded may matter.
-     * @return names of shared libraries to be loaded (e.g. "SDL2", "main").
-     */
-    protected String[] getLibraries() {
-        return new String[] {
-            "SDL2",
-            // "SDL2_image",
-            // "SDL2_mixer",
-            // "SDL2_net",
-            // "SDL2_ttf",
-            "main"
-        };
-    }
-
-    // Load the .so
-    public void loadLibraries() {
-       for (String lib : getLibraries()) {
-          System.loadLibrary(lib);
-       }
-    }
 
     /**
      * This method is called by SDL before starting the native application thread.
@@ -107,7 +78,6 @@ public class SDLActivity extends Activity {
         mSDLThread = null;
         mAudioTrack = null;
         mExitCalledFromJava = false;
-        mBrokenLibraries = false;
         mIsPaused = false;
         mIsSurfaceReady = false;
         mHasFocus = true;
@@ -124,42 +94,6 @@ public class SDLActivity extends Activity {
         SDLActivity.initialize();
         // So we can call stuff from static callbacks
         mSingleton = this;
-
-        // Load shared libraries
-        String errorMsgBrokenLib = "";
-        try {
-            loadLibraries();
-        } catch(UnsatisfiedLinkError e) {
-            System.err.println(e.getMessage());
-            mBrokenLibraries = true;
-            errorMsgBrokenLib = e.getMessage();
-        } catch(Exception e) {
-            System.err.println(e.getMessage());
-            mBrokenLibraries = true;
-            errorMsgBrokenLib = e.getMessage();
-        }
-
-        if (mBrokenLibraries)
-        {
-            AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
-            dlgAlert.setMessage("An error occurred while trying to start the application. Please try again and/or reinstall."
-                  + System.getProperty("line.separator")
-                  + System.getProperty("line.separator")
-                  + "Error: " + errorMsgBrokenLib);
-            dlgAlert.setTitle("SDL Error");
-            dlgAlert.setPositiveButton("Exit",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog,int id) {
-                        // if this button is clicked, close current activity
-                        SDLActivity.mSingleton.finish();
-                    }
-                });
-           dlgAlert.setCancelable(false);
-           dlgAlert.create().show();
-
-           return;
-        }
 
         // Set up the surface
         mSurface = new SDLSurface(getApplication());
@@ -193,11 +127,6 @@ public class SDLActivity extends Activity {
     protected void onPause() {
         Log.v(TAG, "onPause()");
         super.onPause();
-
-        if (SDLActivity.mBrokenLibraries) {
-           return;
-        }
-
         SDLActivity.handlePause();
     }
 
@@ -205,11 +134,6 @@ public class SDLActivity extends Activity {
     protected void onResume() {
         Log.v(TAG, "onResume()");
         super.onResume();
-
-        if (SDLActivity.mBrokenLibraries) {
-           return;
-        }
-
         SDLActivity.handleResume();
     }
 
@@ -218,11 +142,6 @@ public class SDLActivity extends Activity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         Log.v(TAG, "onWindowFocusChanged(): " + hasFocus);
-
-        if (SDLActivity.mBrokenLibraries) {
-           return;
-        }
-
         SDLActivity.mHasFocus = hasFocus;
         if (hasFocus) {
             SDLActivity.handleResume();
@@ -233,25 +152,12 @@ public class SDLActivity extends Activity {
     public void onLowMemory() {
         Log.v(TAG, "onLowMemory()");
         super.onLowMemory();
-
-        if (SDLActivity.mBrokenLibraries) {
-           return;
-        }
-
         SDLActivity.nativeLowMemory();
     }
 
     @Override
     protected void onDestroy() {
         Log.v(TAG, "onDestroy()");
-
-        if (SDLActivity.mBrokenLibraries) {
-           super.onDestroy();
-           // Reset everything in case the user re opens the app
-           SDLActivity.initialize();
-           return;
-        }
-
         // Send a quit message to the application
         SDLActivity.mExitCalledFromJava = true;
         SDLActivity.nativeQuit();
@@ -275,11 +181,6 @@ public class SDLActivity extends Activity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-
-        if (SDLActivity.mBrokenLibraries) {
-           return false;
-        }
-
         int keyCode = event.getKeyCode();
         // Ignore certain special keys so they're handled by Android
         if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||

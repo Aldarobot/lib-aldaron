@@ -215,7 +215,7 @@ float jl_ct_gmousey(jlgr_t* jlgr) {
 	return y;
 }
 
-static inline void jlgr_input_handle_events___platform_dependant(jlgr_t* jlgr) {
+static inline void jlgr_input_handle_events_platform_dependant__(jlgr_t* jlgr) {
 #if JL_PLAT == JL_PLAT_PHONE
 	if( jlgr->main.ct.event.type==SDL_FINGERDOWN ) {
 		jlgr->main.ct.msx = jlgr->main.ct.event.tfinger.x;
@@ -289,7 +289,7 @@ static inline void jlgr_input_handle_events__(jlgr_t* jlgr) {
 	}else{
 		jl_ct_handle_resize__(jlgr);
 	}
-	jlgr_input_handle_events___platform_dependant(jlgr);
+	jlgr_input_handle_events_platform_dependant__(jlgr);
 }
 
 static void jl_ct_testquit__(jlgr_t* jlgr) {

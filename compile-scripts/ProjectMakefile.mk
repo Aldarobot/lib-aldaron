@@ -82,24 +82,7 @@ install: -release
 	cp -u --recursive -t $$JLL_PATH/ build/bin/*; \
 	printf "Done!\n"
 
-android:
-	# Apply SDL mods.
-	cp -u $(shell echo $(JLL_HOME))/android-build-mods/androidbuild.sh\
-	 $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/build-scripts/androidbuild.sh
-	cp -u $(shell echo $(JLL_HOME))/android-build-mods/Android.mk\
-	 $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/android-project/jni/src/
-	cp -u $(shell echo $(JLL_HOME))/android-build-mods/Android_static.mk\
-	 $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/android-project/jni/src/
-	# Run Install Script
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-ndk-r11c && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/tools && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/platform-tools && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/build-tools/23.0.3 && \
-	sh $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/build-scripts/androidbuild.sh\
-		jlw.$(USERNAME).$(PACKNAME)\
-		$(shell echo $(JLL_HOME))/src/C/ $(CURDIR)/$(SRC)/
-
-android-init:
+-android-sdl-mods:
 	# Apply SDL mods.
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/androidbuild.sh\
 	 $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/build-scripts/androidbuild.sh
@@ -115,6 +98,18 @@ android-init:
 	 $(shell echo $(JLL_HOME))/deps/libzip-1.1.2/lib/Android.mk
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/SDLActivity.java\
 	 $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/android-project/src/org/libsdl/app/SDLActivity.java
+
+android: -android-sdl-mods
+	# Run Install Script
+	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-ndk-r11c && \
+	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/tools && \
+	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/platform-tools && \
+	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/build-tools/23.0.3 && \
+	sh $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/build-scripts/androidbuild.sh\
+		jlw.$(USERNAME).$(PACKNAME)\
+		$(shell echo $(JLL_HOME))/src/C/ $(CURDIR)/$(SRC)/
+
+android-init: -android-sdl-mods
 	# Run Build Script.
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-ndk-r11c && \
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/tools && \

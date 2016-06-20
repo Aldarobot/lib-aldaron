@@ -26,7 +26,9 @@ jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 
 	jl_print_function(jl, "JL/GR/INIT");
 	jl->jlgr = jlgr;
+#if JL_PLAT == JL_PLAT_COMPUTER
 	jlgr->wm.fullscreen = fullscreen;
+#endif
 	jlgr->jl = jl;
 	jlgr->fl.inloop = 1;
 	// Initialize Subsystem

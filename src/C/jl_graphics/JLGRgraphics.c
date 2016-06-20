@@ -158,7 +158,7 @@ void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
 	// Overwrite the vertex object
 	jl_gl_poly(jlgr, pv, 4, Oone);
 	// Texture the vertex object
-	jl_gl_txtr(jlgr, pv, c, a, tex);
+	jl_gl_txtr_(jlgr, pv, c, a, tex);
 }
 
 void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,

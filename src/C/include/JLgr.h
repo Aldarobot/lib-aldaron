@@ -300,14 +300,16 @@ typedef struct{
 
 	// Window Management
 	struct {
+	#if JL_PLAT == JL_PLAT_COMPUTER
 		uint8_t fullscreen;
+	#endif
 
 		char windowTitle[2][16];
 		jl_window_t* displayWindow;
 		// The full width and height of the window.
 		int32_t w, h;
 		// Aspect Ratio of the window
-		double ar;
+		float ar;
 	}wm;
 
 	// File Manager
@@ -415,10 +417,10 @@ void jl_gl_pbo_new(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
 void jl_gl_pbo_set(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
 	uint16_t w, uint16_t h, uint8_t bpp);
 void jl_gl_vo_init(jlgr_t* jlgr, jl_vo_t* vo);
-void jl_gl_vo_txmap(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map);
+void jl_gl_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,uint8_t map);
 uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 	uint32_t width, uint32_t height, uint8_t bytepp);
-double jl_gl_ar(jlgr_t* jlgr);
+float jl_gl_ar(jlgr_t* jlgr);
 void jl_gl_clear(jlgr_t* jlgr, float r, float g, float b, float a);
 void jl_gl_pr_rsz(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
 void jl_gl_pr_new(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);

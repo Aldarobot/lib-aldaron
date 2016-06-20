@@ -39,7 +39,7 @@ void jlgr_mouse_loop_(jl_t* jl, jl_sprite_t* sprite) {
 }
 
 void jlgr_mouse_init__(jlgr_t* jlgr) {
-	jl_rect_t rc = { 0.f, 0.f, .075f, .075f };
+	jl_rect_t rc = { 0.f, 0.f, .05f, .05f };
 	jl_vo_t mouse_vo;
 	uint32_t mouse_vo_size;
 	#if JL_PLAT == JL_PLAT_COMPUTER //if computer - show mouse

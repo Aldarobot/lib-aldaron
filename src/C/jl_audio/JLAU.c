@@ -177,8 +177,7 @@ jlau_t* jlau_init(jl_t* jl) {
 		jl_print(jl,
 			":Couldn't set 11025 Hz 16-bit audio because: %s",
 			(char *)SDL_GetError());
-		_jlau_print_closeblock(jl);
-		jl_sg_kill(jl);
+		exit(-1);
 	}else{
 		JL_PRINT_DEBUG(jl, "audio has been set.");
 	}

@@ -433,7 +433,6 @@ void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
 uint8_t* jlgr_load_image(jl_t* jl, data_t* data, uint16_t* w, uint16_t* h);
 
 // SG
-void jl_sg_kill(jl_t* jl);
 uint32_t jl_sg_add_image(jlgr_t* jlgr, data_t* zipdata, const char* filename);
 
 // JLGRinput.c

@@ -74,11 +74,11 @@ static uint8_t jl_fl_user_select_open_dir__(jlgr_t* jlgr, char *dirname) {
 		{
 			jl_print(jlgr->jl, "FileViewer Can't Open Directory:"
 				"Not Enough Memory!");
-			jl_sg_kill(jlgr->jl);
+			exit(-1);
 		}else{ //Unknown error
 			jl_print(jlgr->jl, "FileViewer Can't Open Directory:"
 				"Unknown Error!");
-			jl_sg_kill(jlgr->jl);
+			exit(-1);
 		}
 	}
 	return 1;

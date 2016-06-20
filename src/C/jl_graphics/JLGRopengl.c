@@ -216,8 +216,7 @@ GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
 					glGetShaderInfoLog(shader, infoLen, NULL, buf);
 					jl_print(jlgr->jl,
 						"Could not compile shader:%s",buf);
-					free(buf);
-					jl_sg_kill(jlgr->jl);
+					exit(-1);
 				}
 				glDeleteShader(shader);
 				shader = 0;
@@ -233,13 +232,13 @@ GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 	GLuint vertexShader = jl_gl_load_shader(jlgr, GL_VERTEX_SHADER, pVertexSource);
 	if (!vertexShader) {
 		jl_print(jlgr->jl, "couldn't load vertex shader");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 
 	GLuint pixelShader = jl_gl_load_shader(jlgr, GL_FRAGMENT_SHADER, pFragmentSource);
 	if (!pixelShader) {
 		jl_print(jlgr->jl, "couldn't load fragment shader");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 
 	GLuint program = glCreateProgram();
@@ -269,16 +268,15 @@ GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 					glGetProgramInfoLog(program, bufLength, NULL, buf);
 					jl_print(jlgr->jl,
 						"Could not link program:%s",buf);
-					free(buf);
-					jl_sg_kill(jlgr->jl);
+					exit(-1);
 				}else{
 					jl_print(jlgr->jl, "failed malloc");
-					jl_sg_kill(jlgr->jl);
+					exit(-1);
 				}
 			}else{
 				glDeleteProgram(program);
 				jl_print(jlgr->jl, "no info log");
-				jl_sg_kill(jlgr->jl);
+				exit(-1);
 			}
 		}
 	}else{
@@ -336,7 +334,7 @@ static void jl_gl_texture__bind__(jlgr_t* jlgr, uint32_t tex) {
 static void jl_gl_texture_bind__(jlgr_t* jlgr, uint32_t tex) {
 	if(tex == 0) {
 		jl_print(jlgr->jl, "jl_gl_texture_bind__: GL tex = 0");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 	jl_gl_texture__bind__(jlgr, tex);
 }
@@ -385,7 +383,7 @@ uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 	jl_print_function(jlgr->jl, "GL_MkTex");
 	if (!pixels) {
 		jl_print(jlgr->jl, "null pixels");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 	JL_PRINT_DEBUG(jlgr->jl, "generating texture (%d,%d)",width,height);
 	// Make the texture.
@@ -564,7 +562,7 @@ static void jl_gl_framebuffer_make__(jlgr_t* jlgr, uint32_t *fb) {
 	glGenFramebuffers(1, fb);
 	if(!(*fb)) {
 		jl_print(jlgr->jl, "jl_gl_framebuffer_make__: GL FB = 0");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 	JL_GL_ERROR(jlgr, *fb,"glGenFramebuffers");
 }
@@ -620,16 +618,16 @@ static void jl_gl_framebuffer_use__(jlgr_t* jlgr, jl_pr_t* pr) {
 	if(pr->w == 0) {
 		jl_print(jlgr->jl,
 		 "jl_gl_framebuffer_use__ failed: 'w' must be more than 0");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}else if(pr->h == 0) {
 		jl_print(jlgr->jl,
 		 "jl_gl_framebuffer_use__ failed: 'h' must be more than 0");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}else if((pr->w > GL_MAX_TEXTURE_SIZE)||(pr->h > GL_MAX_TEXTURE_SIZE)) {
 		jl_print(jlgr->jl, "_jl_gl_pr_obj_make() failed:");
 		jl_print(jlgr->jl, "w = %d,h = %d", pr->w, pr->h);
 		jl_print(jlgr->jl, "texture is too big for graphics card.");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 	// Bind the texture.
 	jl_gl_texture_bind__(jlgr, pr->tx);
@@ -662,7 +660,7 @@ static void jl_gl_framebuffer_status__(jlgr_t* jlgr) {
 	// Check to see if framebuffer was made properly.
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
 		jl_print(jlgr->jl, "Frame buffer not complete!");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 }
 
@@ -683,7 +681,7 @@ static void _jl_gl_depthbuffer_make(jlgr_t* jlgr, uint32_t *db) {
 	glGenRenderbuffers(1, db);
 	if(!(*db)) {
 		jl_print(jlgr->jl, "_jl_gl_depthbuffer_make: GL buff=0");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 	JL_GL_ERROR(jlgr,*db,"make pr: glGenRenderbuffers");
 }
@@ -691,11 +689,11 @@ static void _jl_gl_depthbuffer_make(jlgr_t* jlgr, uint32_t *db) {
 static void jl_gl_depthbuffer_set__(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	if(!w) {
 		jl_print(jlgr->jl, "jl_gl_depthbuffer_set: w = 0");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 	if(!h) {
 		jl_print(jlgr->jl, "jl_gl_depthbuffer_set: h = 0");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h);
 	JL_GL_ERROR(jlgr, w, "make pr: glRenderbufferStorage");
@@ -704,7 +702,7 @@ static void jl_gl_depthbuffer_set__(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 static void _jl_gl_depthbuffer_bind(jlgr_t* jlgr, uint32_t db) {
 	if(db == 0) {
 		jl_print(jlgr->jl, "_jl_gl_depthbuffer_bind: GL db = 0");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 	glBindRenderbuffer(GL_RENDERBUFFER, db);
 	JL_GL_ERROR(jlgr, db,"_jl_gl_depthbuffer_bind: glBindRenderbuffer");
@@ -994,7 +992,7 @@ int32_t _jl_gl_getu(jlgr_t* jlgr, GLuint prg, char *var) {
 	int32_t a = 0;
 	if((a = glGetUniformLocation(prg, var)) == -1) {
 		jl_print(jlgr->jl, ":opengl: bad name; is: %s", var);
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 	JL_GL_ERROR(jlgr, a,"glGetUniformLocation");
 	return a;
@@ -1004,7 +1002,7 @@ void _jl_gl_geta(jlgr_t* jlgr, GLuint prg, int32_t *attrib, const char *title) {
 	if((*attrib = glGetAttribLocation(prg, title)) == -1) {
 		jl_print(jlgr->jl, 
 			"attribute name is either reserved or non-existant");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 }
 
@@ -1293,7 +1291,7 @@ void jl_gl_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw) {
 
 	if(!pr) {
 		jl_print(jlgr->jl, "Drawing on lost pre-renderer.");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 	// Use the vo's pr
 	jl_gl_pr_use_(jlgr, pr);

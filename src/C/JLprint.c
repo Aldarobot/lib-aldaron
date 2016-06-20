@@ -240,7 +240,7 @@ void jl_print_return(jl_t* jl, str_t fn_name) {
 		jl_print(jl, "\tFunction \"%s\" didn't return.",
 			jl->jl_ctx[thread_id].print.stack[
 				jl->jl_ctx[thread_id].print.level]);
-		jl_sg_kill(jl);
+		exit(-1);
 	}
 	jl_mem_clr(jl->jl_ctx[thread_id].print.stack
 		[jl->jl_ctx[thread_id].print.level], 30);

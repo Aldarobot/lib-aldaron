@@ -33,7 +33,7 @@ void jl_mem_leak_init(jl_t* jl) {
 void jl_mem_leak_fail(jl_t* jl, str_t fn_name) {
 	if(jl_mem_tbiu() != jl->info) {
 		jl_print(jl, "%s: Memory Leak Fail", fn_name);
-		jl_sg_kill(jl);
+		exit(-1);
 	}
 }
 

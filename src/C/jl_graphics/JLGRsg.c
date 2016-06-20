@@ -59,7 +59,7 @@ void _jl_sg_load_jlpx(jlgr_t* jlgr,data_t* data,void **pixels,int *w,int *h) {
 
 	if(data->data[0] == 0) {
 		jl_print(jlgr->jl, "NO DATA!");
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 
 	jl_print_function(jlgr->jl, "SG_Jlpx");
@@ -69,7 +69,7 @@ void _jl_sg_load_jlpx(jlgr_t* jlgr,data_t* data,void **pixels,int *w,int *h) {
 	if ((image = IMG_Load_RW(rw, 1)) == NULL) {
 		jl_print(jlgr->jl, "Couldn't load image: %s",
 			IMG_GetError());
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 	// Covert SDL_Surface.
 	jl_data_init(jlgr->jl, &pixel_data, image->w * image->h * 4);
@@ -105,21 +105,6 @@ static inline uint32_t jl_sg_add_image__(jlgr_t* jlgr, data_t* data) {
 	JL_PRINT_DEBUG(jlgr->jl, "created image!");
 	jl_print_return(jlgr->jl, "SG_InitImgs");
 	return rtn;
-}
-
-/**
- * Show Error On Screen if screen is available, otherwise print it out.
- * Quit, And Return -1 to show there was an error.
-*/
-void jl_sg_kill(jl_t* jl) {
-	//TODO: Make Screen With Window Saying Error Message Followed By Prompt.
-	//	Also, don't automatically quit, like it does now!  ERQT can be
-	//	inline at that point.
-	jl_print(jl, "Quitting On Error....");
-	jl_print_stacktrace(jl);
-	jl->mode.count = 0;
-	exit(-1);
-	// Program is stopped at this point.
 }
 
 /**

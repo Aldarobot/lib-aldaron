@@ -151,7 +151,7 @@ uint8_t* jl_vi_load_(jl_t* jl, data_t* data, uint16_t* w, uint16_t* h) {
 //	memtester(jl, "LoadImg/Start3");
 	if ((image = IMG_Load_RW(rw, 0)) == NULL) {
 		jl_print(jl, "Couldn't load image: %s", IMG_GetError());
-		jl_sg_kill(jl);
+		exit(-1);
 	}
 //	memtester(jl, "LoadImg/Start4");
 	// Covert SDL_Surface.

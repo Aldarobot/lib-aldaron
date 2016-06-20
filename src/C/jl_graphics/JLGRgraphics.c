@@ -484,7 +484,7 @@ void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, uint8_t c, char* format, ...) {
 void jlgr_term_msge(jlgr_t* jlgr, char *message) {
 	jlgr_draw_msge(jlgr, jlgr->textures.icon, 1, message);
 	jl_print(jlgr->jl, message);
-	jl_sg_kill(jlgr->jl);
+	exit(-1);
 }
 
 /**

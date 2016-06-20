@@ -142,8 +142,8 @@ void jlgr_input_dirnear__(jlgr_t *jlgr, jlgr_input_fnct inputfn) {
 	uint8_t near_right = jlgr->main.ct.input.click &&
 		(jlgr->main.ct.msx > .6f) &&
 		(jlgr->main.ct.msx < .8f) &&
-		(jlgr->main.ct.msy * jlgr->wm.ar>.2f) &&
-		(jlgr->main.ct.msy * jlgr->wm.ar<.8f);
+		(jlgr->main.ct.msy > .2f * jlgr->wm.ar) &&
+		(jlgr->main.ct.msy < .8f * jlgr->wm.ar);
 	uint8_t near_left = jlgr->main.ct.input.click &&
 		(jlgr->main.ct.msx < .4f) &&
 		(jlgr->main.ct.msx > .2f) &&
@@ -340,7 +340,7 @@ int8_t jlgr_input_do(jlgr_t *jlgr, jlgr_control_t events, jlgr_input_fnct fn,
 	if(jlgr->main.ct.getEvents[event] == NULL) {
 		jl_print(jlgr->jl,"Null Pointer: jlgr->main.ct.getEvents.Event");
 		jl_print(jlgr->jl,"event=%d", event);
-		jl_sg_kill(jlgr->jl);
+		exit(-1);
 	}
 	// Get the input.
 	jlgr->main.ct.current_event = event;

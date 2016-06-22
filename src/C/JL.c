@@ -29,6 +29,8 @@ static inline void jl_init_libs__(jl_t* jl) {
 }
 
 static inline void jl_init__(jl_t* jl,jl_fnct _fnc_init_,str_t nm,uint64_t ctx1s) {
+	//
+	jl->loop = main_loop_;
 	JL_PRINT_DEBUG(jl, "Initializing subsystems....");
 	// Run the library's init function.
 	jl_init_libs__(jl);
@@ -59,16 +61,9 @@ static inline void jl_seconds_passed__(jl_t* jl) {
 	jl_time_reset__(jl, fps >= JL_FPS);
 }
 
-static inline void main_loop__(jl_t* jl) {
-	jl_fnct loop_ = jl->mode.mode.loop;
-
-	// Check the amount of time passed since last frame.
-	jl_seconds_passed__(jl);
-	// Run the user's mode loop.
-	loop_(jl);
-}
-
 static inline int jl_kill__(jl_t* jl, int32_t rc) {
+	if(jl->jlgr) jlgr_kill(jl->jlgr);
+	if(jl->jlau) jlau_kill(jl->jlau);
 	JL_PRINT_DEBUG(jl, "Killing SDL....");
 	jl_sdl_kill__(jl);
 	JL_PRINT_DEBUG(jl, "Killing Printing....");
@@ -78,6 +73,15 @@ static inline int jl_kill__(jl_t* jl, int32_t rc) {
 	if(!rc) JL_PRINT("| No errors ");
 	JL_PRINT("| Exiting with return value %d |\n", rc);
 	return rc;
+}
+
+void main_loop_(jl_t* jl) {
+	jl_fnct loop_ = jl->mode.mode.loop;
+
+	// Check the amount of time passed since last frame.
+	jl_seconds_passed__(jl);
+	// Run the user's mode loop.
+	loop_(jl);
 }
 
 // EXPORT FUNCTIONS
@@ -99,20 +103,17 @@ void* jl_get_context(jl_t* jl) {
 /**
  * Start JL_Lib.  Returns when program is closed.
  * @param fnc_init_: The function initialize the program.
- * @param fnc_kill_: The function to free memory before exiting.
  * @param name: The name of the program, used for storage / window name etc.
  * @param ctx_size: The size of the program context.
 **/
-int jl_start(jl_fnct fnc_init_,jl_fnct fnc_kill_,str_t name,uint64_t ctx_size) {
+int jl_start(jl_fnct fnc_init_, const char* name, uint64_t ctx_size) {
 	//Set Up Memory And Logging
 	jl_t* jl = jl_init_essential__();
 
 	// Initialize JL_lib!
 	jl_init__(jl, fnc_init_, name, ctx_size);
 	// Run the Loop
-	while(jl->mode.count) main_loop__(jl);
-	// Run Program's Kill Routine
-	fnc_kill_(jl);
+	while(jl->mode.count) ((jl_fnct)jl->loop)(jl);
 	// Kill the program
 	return jl_kill__(jl, JL_RTN_SUCCESS);
 }

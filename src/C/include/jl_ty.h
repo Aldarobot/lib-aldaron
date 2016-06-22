@@ -10,6 +10,10 @@ typedef const char* str_t;	// String Constant
 typedef char m_chr_t;		// Character Modifiable
 typedef char* m_str_t;		// String Modifiable
 
+typedef struct{
+	float x, y, z;
+}jl_vec3_t;
+
 //4 bytes of information about the string are included
 typedef struct{
 	uint8_t* data; //Actual String
@@ -90,6 +94,7 @@ typedef struct{
 
 		data_t separator;
 	}fl;
+	void* loop; // The main loop.
 	m_str_t name; // The name of the program.
 	uint32_t info; // @startup:# images loaded from media.zip.Set by others.
 	jl_err_t errf; // Set if error

@@ -42,6 +42,7 @@ uint32_t jl_gem_size(void);
 // Main - Prototypes
 	char* jl_file_convert__(jl_t* jl, str_t filename);
 	jl_ctx_t* jl_thread_get_safe__(jl_t* jl);
+	void main_loop_(jl_t* jl);
 
 	// LIB INITIALIZATION fn(Context)
 	void jl_cm_init_(jl_t* jl);
@@ -56,6 +57,8 @@ uint32_t jl_gem_size(void);
 	void jl_mem_kill_(jl_t* jl);
 	void jl_print_kill__(jl_t* jl);
 	void jl_sdl_kill__(jl_t* jl);
+	void jlau_kill(jlau_t* jlau);
+	void jlgr_kill(jlgr_t* jlgr);
 
 	// LIB THREAD INITS
 	void jl_print_init_thread__(jl_t* jl, uint8_t thread_id);

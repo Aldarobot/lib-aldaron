@@ -47,7 +47,7 @@ typedef enum{
 
 void jl_dont(jl_t* jl);
 void* jl_get_context(jl_t* jl);
-int jl_start(jl_fnct fnc_init_,jl_fnct fnc_kill_,str_t name,uint64_t ctx_size);
+int jl_start(jl_fnct fnc_init_, const char* name, uint64_t ctx_size);
 
 // "JLmem.c"
 void *jl_mem(jl_t* jl, void *a, uint32_t size);

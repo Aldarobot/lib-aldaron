@@ -17,10 +17,6 @@ typedef struct{
 	float x, y, w, h;
 }jl_rect_t;
 
-typedef struct{
-	float x, y, z;
-}jl_vec3_t;
-
 // Collision Box / Line / Etc.
 typedef struct{
 	jl_vec3_t pos; // Position ( X/Y/Z )
@@ -347,8 +343,6 @@ typedef void(*jlgr_input_fnct)(jlgr_t* jlgr, jlgr_input_t input);
 jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_);
 void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 	jl_fnct downscreen, jl_fnct resize);
-void jlgr_loop(jlgr_t* jlgr);
-void jlgr_kill(jlgr_t* jlgr);
 
 // JLGRsprite.c
 void jlgr_sprite_dont(jl_t* jl, jl_sprite_t* sprite);

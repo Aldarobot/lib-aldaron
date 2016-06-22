@@ -9,6 +9,19 @@
  */
 #include "JLGRinternal.h"
 
+static void jlgr_loop_(jl_t* jl) {
+	jlgr_t* jlgr = jl->jlgr;
+
+	// Update events.
+	jl_ct_loop__(jlgr);
+	// Run any selected menubar items.
+	jlgr_sprite_loop(jlgr, &jlgr->menubar.menubar);
+	// Update mouse
+	if(jlgr->mouse.mutex) jlgr_sprite_loop(jlgr, &jlgr->mouse);
+	// Run Main Loop
+	main_loop_(jl);
+}
+
 //
 // Global Functions
 //
@@ -26,6 +39,7 @@ jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 
 	jl_print_function(jl, "JL/GR/INIT");
 	jl->jlgr = jlgr;
+	jl->loop = jlgr_loop_;
 #if JL_PLAT == JL_PLAT_COMPUTER
 	jlgr->wm.fullscreen = fullscreen;
 #endif
@@ -77,19 +91,6 @@ void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 		};
 		jl_thread_comm_send(jlgr->jl, jlgr->comm2draw, &packet);
 	}
-}
-
-/**
- * Update input.
- * @param jlgr: The jlgr library context.
-**/
-void jlgr_loop(jlgr_t* jlgr) {
-	// Update events.
-	jl_ct_loop__(jlgr);
-	// Run any selected menubar items.
-	jlgr_sprite_loop(jlgr, &jlgr->menubar.menubar);
-	// Update mouse
-	if(jlgr->mouse.mutex) jlgr_sprite_loop(jlgr, &jlgr->mouse);
 }
 
 /**

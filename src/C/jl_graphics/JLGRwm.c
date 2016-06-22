@@ -6,7 +6,6 @@
 #include "JLGRinternal.h"
 #include "jl_opengl.h"
 
-#define JL_WM_INIT SDL_INIT_AUDIO|SDL_INIT_VIDEO
 #define JL_WM_FULLSCREEN SDL_WINDOW_FULLSCREEN_DESKTOP
 
 static void jl_wm_killedit(jl_t* jl, char *str) {
@@ -149,7 +148,6 @@ void jl_wm_resz__(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 }
 
 void jl_wm_init__(jlgr_t* jlgr) {
-	SDL_Init(JL_WM_INIT);
 	// Create Window
 	jlgr_wm_create__(jlgr);
 	// Get Resize Event
@@ -159,10 +157,11 @@ void jl_wm_init__(jlgr_t* jlgr) {
 }
 
 void jl_wm_kill__(jlgr_t* jlgr) {
+	SDL_ShowCursor(SDL_ENABLE);
 	JL_PRINT_DEBUG(jlgr->jl, "Closing Window....");
 	if (jlgr->wm.displayWindow->c != NULL) {
 //		SDL_free(jlgr->wm.displayWindow->c);
-		SDL_free(jlgr->wm.displayWindow->w);
+		SDL_DestroyWindow(jlgr->wm.displayWindow->w);
 	}
 	JL_PRINT_DEBUG(jlgr->jl, "Closed Window!");
 }

@@ -11,7 +11,7 @@
  */
 
 // Uncommented for debugging ( GL/SDL error check && verbose printing. )
-// #define JL_DEBUG_LIB
+#define JL_DEBUG_LIB
 
 #ifdef JL_DEBUG_LIB
 	#define DEBUG

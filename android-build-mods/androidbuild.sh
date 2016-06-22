@@ -35,7 +35,8 @@ SDLNETPATH=$SDLPATH/../SDL2_net-2.0.1/
 ZIPPATH=$SDLPATH/../libzip-1.1.2/
 MIKMODPATH=$SDLMIXERPATH/external/libmikmod-3.1.12/
 SMPEG2PATH=$SDLMIXERPATH/external/smpeg2-2.0.0/
-CLUMPPATH=$SDLPATH/../../src/lib/clump/
+JLLIBPATH=$SDLPATH/../..
+CLUMPPATH=$JLLIBPATH/src/lib/clump/
 
 NDKBUILD=`which ndk-build`
 if [ -z "$NDKBUILD" ];then
@@ -95,50 +96,54 @@ esac
 
 APP="$1"
 APPARR=(${APP//./ })
-BUILDPATH="$SDLPATH/build/jl_lib-android-project"
+#BUILDPATH="$SDLPATH/build/jl_lib-android-project"
+BUILDPATH="$CURDIR/build/android"
 
 # Start Building
 
-if [ "$1" = "_" ]; then
-	rm -rf $BUILDPATH
-	mkdir -p $BUILDPATH
+#	rm -rf $BUILDPATH
+mkdir -p $BUILDPATH
 
-	cp -r $SDLPATH/android-project/* $BUILDPATH
+cp -ur $JLLIBPATH/android-build-mods/android-project/* $BUILDPATH
 
-	# Link SDL sources
-	mkdir -p $BUILDPATH/jni/SDL
-	ln -s $SDLPATH/src $BUILDPATH/jni/SDL
-	ln -s $SDLPATH/include $BUILDPATH/jni/SDL
+# Link SDL sources
+mkdir -p $BUILDPATH/jni/SDL
+ln -sf $SDLPATH/src $BUILDPATH/jni/SDL
+ln -sf $SDLPATH/include $BUILDPATH/jni/SDL
 
-	cp -r $SDLPATH/Android.mk $BUILDPATH/jni/SDL
+cp -u $SDLPATH/Android.mk $BUILDPATH/jni/SDL
 
-	# Link SDL_image sources
-	ln -sTf $SDLIMAGEPATH $BUILDPATH/jni/SDL_image
+# Link SDL_image sources
+ln -sTf $SDLIMAGEPATH $BUILDPATH/jni/SDL_image
 
-	# Link SDL_mixer sources
-	ln -sTf $SDLMIXERPATH $BUILDPATH/jni/SDL_mixer
-	# Dependencies
-	ln -sTf $MIKMODPATH $BUILDPATH/jni/mikmod
-	ln -sTf $SMPEG2PATH $BUILDPATH/jni/smpeg2
+# Link SDL_mixer sources
+ln -sTf $SDLMIXERPATH $BUILDPATH/jni/SDL_mixer
+# Dependencies
+ln -sTf $MIKMODPATH $BUILDPATH/jni/mikmod
+ln -sTf $SMPEG2PATH $BUILDPATH/jni/smpeg2
 
-	# Link SDL_net sources
-	ln -sTf $SDLNETPATH $BUILDPATH/jni/SDL_net
+# Link SDL_net sources
+ln -sTf $SDLNETPATH $BUILDPATH/jni/SDL_net
 
-	# Link Lib Zip sources
-	cp -u $ZIPPATH/config.h $ZIPPATH/lib/config.h
-	ln -sTf $ZIPPATH/lib/ $BUILDPATH/jni/libzip
+# Link Lib Zip sources
+cp -u $ZIPPATH/config.h $ZIPPATH/lib/config.h
+ln -sTf $ZIPPATH/lib/ $BUILDPATH/jni/libzip
 
-	# Link Clump sources
-	ln -sTf $CLUMPPATH $BUILDPATH/jni/clump
-else
-	# Copy Top level files only
-	cp $SDLPATH/android-project/* $BUILDPATH >/dev/null 2>/dev/null
-fi
+# Link Clump sources
+ln -sTf $CLUMPPATH $BUILDPATH/jni/clump
+
+# Add icon
+rm -rf $BUILDPATH/res/
+cp -r $SDLPATH/android-project/res $BUILDPATH/res
+rm -rf $BUILDPATH/res/draw*/
+mkdir -p $BUILDPATH/res/drawable/
+cp $CURDIR/resources/icon.png $BUILDPATH/res/drawable/ic_launcher.png
+
+# Set Name of App
+PROGNAME="`sed '6q;d' data.txt`"
+sed -i "s|SDL\ App|$PROGNAME|g" $BUILDPATH/res/values/strings.xml
 
 # Link user sources
-#rm -rf $BUILDPATH/jni/src/
-#mkdir -p $BUILDPATH/jni/src/
-
 cp -u $SDLPATH/android-project/jni/src/Android.mk $BUILDPATH/jni/src/
 
 for src in "${SOURCES[@]}"
@@ -192,7 +197,7 @@ if [ -f "$APK" ]; then
 	$ADB install -r $APK
 	$ADB shell am start -a android.intent.action.MAIN -n $APP/.$ACTIVITY
 #	$ADB logcat "*:E"
-	$ADB logcat | grep I\/SDL\/APP
+	$ADB logcat | grep SDL\/APP
 	exit 0
 fi
 

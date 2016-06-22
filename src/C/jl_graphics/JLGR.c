@@ -111,7 +111,9 @@ void jlgr_kill(jlgr_t* jlgr) {
 	jl_thread_comm_send(jlgr->jl, jlgr->comm2draw, &packet);
 	JL_PRINT_DEBUG(jlgr->jl, "Waiting on threads....");
 	jlgr_thread_kill(jlgr); // Shut down thread.
+	JL_PRINT_DEBUG(jlgr->jl, "Threads are dead....");
 	jlgr_file_kill_(jlgr); // Remove clump filelist for fileviewer.
+	JL_PRINT_DEBUG(jlgr->jl, "Fileviewer is dead....");
 }
 
 // End of file.

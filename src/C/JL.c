@@ -68,13 +68,16 @@ static inline void main_loop__(jl_t* jl) {
 	loop_(jl);
 }
 
-static inline void jl_kill__(jl_t* jl, int32_t rc) {
+static inline int jl_kill__(jl_t* jl, int32_t rc) {
+	JL_PRINT_DEBUG(jl, "Killing SDL....");
+	jl_sdl_kill__(jl);
+	JL_PRINT_DEBUG(jl, "Killing Printing....");
 	jl_print_kill__(jl);
 	jl_mem_kill_(jl);
 	JL_PRINT("[\\JL_Lib] ");
 	if(!rc) JL_PRINT("| No errors ");
 	JL_PRINT("| Exiting with return value %d |\n", rc);
-	exit(rc);
+	return rc;
 }
 
 // EXPORT FUNCTIONS
@@ -100,7 +103,7 @@ void* jl_get_context(jl_t* jl) {
  * @param name: The name of the program, used for storage / window name etc.
  * @param ctx_size: The size of the program context.
 **/
-void jl_start(jl_fnct fnc_init_,jl_fnct fnc_kill_,str_t name,uint64_t ctx_size) {
+int jl_start(jl_fnct fnc_init_,jl_fnct fnc_kill_,str_t name,uint64_t ctx_size) {
 	//Set Up Memory And Logging
 	jl_t* jl = jl_init_essential__();
 
@@ -111,7 +114,7 @@ void jl_start(jl_fnct fnc_init_,jl_fnct fnc_kill_,str_t name,uint64_t ctx_size) 
 	// Run Program's Kill Routine
 	fnc_kill_(jl);
 	// Kill the program
-	jl_kill__(jl, JL_RTN_SUCCESS);
+	return jl_kill__(jl, JL_RTN_SUCCESS);
 }
 
 #if JL_PLAT == JL_PLAT_PHONE

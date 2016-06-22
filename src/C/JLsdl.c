@@ -2,6 +2,8 @@
 
 #include <time.h>
 
+#define JL_SDL_SUBSYSTEMS SDL_INIT_AUDIO|SDL_INIT_VIDEO
+
 /**
  * Time things up to a second.
  * @param jl: The library context.
@@ -27,5 +29,11 @@ double jl_sdl_timer(jl_t* jl, double* timer) {
 // internal functions:
 
 void jl_sdl_init__(jl_t* jl) {
+	SDL_Init(JL_SDL_SUBSYSTEMS);
 	jl->time.psec = 0.f;
+}
+
+void jl_sdl_kill__(jl_t* jl) {
+	SDL_QuitSubSystem(JL_SDL_SUBSYSTEMS);
+	SDL_Quit();
 }

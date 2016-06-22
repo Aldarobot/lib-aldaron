@@ -96,8 +96,6 @@ install: -release
 	 $(shell echo $(JLL_HOME))/deps/SDL2_image-2.0.1/external/jpeg-9/jconfig.h
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/libzip-Android.mk\
 	 $(shell echo $(JLL_HOME))/deps/libzip-1.1.2/lib/Android.mk
-	cp -u $(shell echo $(JLL_HOME))/android-build-mods/SDLActivity.java\
-	 $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/android-project/src/org/libsdl/app/SDLActivity.java
 
 android: -android-sdl-mods
 	# Run Install Script
@@ -108,15 +106,6 @@ android: -android-sdl-mods
 	sh $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/build-scripts/androidbuild.sh\
 		jlw.$(USERNAME).$(PACKNAME)\
 		$(shell echo $(JLL_HOME))/src/C/ $(CURDIR)/$(SRC)/
-
-android-init: -android-sdl-mods
-	# Run Build Script.
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-ndk-r11c && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/tools && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/platform-tools && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/build-tools/23.0.3 && \
-	sh $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/build-scripts/androidbuild.sh\
-		_ $(shell echo $(JLL_HOME))/src/C/ $(CURDIR)/$(SRC)/
 
 init: $(FOLDERS)
 	printf "[COMPILE] Done!\n"

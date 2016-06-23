@@ -369,9 +369,10 @@ void jlgr_menu_addicon_name(jlgr_t* jlgr);
 
 // JLGRgraphics.c:
 void jlgr_dont(jlgr_t* jlgr);
-void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t c, float a);
+void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, 
+	int16_t c, float a);
 void jlgr_fill_image_draw(jlgr_t* jlgr);
-void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, uint8_t c);
+void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, int16_t c);
 void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
 void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
 void jlgr_draw_vo(jlgr_t* jlgr, jl_vo_t* pv, jl_vec3_t* vec);
@@ -380,11 +381,11 @@ void jlgr_vos_vec(jlgr_t* jlgr, jl_vo_t *pv, uint16_t tricount,
 void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, float* colors,
 	uint8_t multicolor);
 void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
-	uint32_t tex, uint8_t c, float a);
+	uint32_t tex, float a);
 void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
-	jl_tex_t* tex, uint8_t c, float a);
+	jl_tex_t* tex, float a);
 void jlgr_vo_old(jlgr_t* jlgr, jl_vo_t* pv);
-void jlgr_draw_text(jlgr_t* jlgr, str_t str, jl_vec3_t xyz, jl_font_t f);
+void jlgr_draw_text(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f);
 void jlgr_draw_int(jlgr_t* jlgr, int64_t num, jl_vec3_t loc, jl_font_t f);
 void jlgr_draw_dec(jlgr_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
 	jl_font_t f);
@@ -411,7 +412,7 @@ void jl_gl_pbo_new(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
 void jl_gl_pbo_set(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
 	uint16_t w, uint16_t h, uint8_t bpp);
 void jl_gl_vo_init(jlgr_t* jlgr, jl_vo_t* vo);
-void jl_gl_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,uint8_t map);
+void jl_gl_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,int16_t map);
 uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 	uint32_t width, uint32_t height, uint8_t bytepp);
 float jl_gl_ar(jlgr_t* jlgr);

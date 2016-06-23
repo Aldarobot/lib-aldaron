@@ -258,9 +258,9 @@ void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm) {
  * @param pvar: The protected variable to initialize.
  * @param size: Size to allocate for pvar's data
 **/
-void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, uint64_t size) {
+void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size) {
 	pvar->lock = SDL_CreateMutex();
-	pvar->data = jl_memi(jl, size);
+	pvar->data = jl_mem_copy(jl, data, size);
 	pvar->size = size;
 }
 
@@ -285,6 +285,23 @@ void jl_thread_pvar_push(jl_pvar_t* pvar, void* data, jl_thread_pp_t b) {
 	else
 		pvar->acceptable = 1;
         SDL_UnlockMutex(pvar->lock);
+}
+
+/**
+ * @param pvar: The protected variable to lock.
+ * @param data: Data.  NULL to get data, pointer to your pointer to data to
+ *	unlock data - will be set to NULL so you can't use anymore.
+ * @returns: Pointer to data if data == NULL, or NULL if data != NULL.
+**/
+void* jl_thread_pvar_edit(jl_pvar_t* pvar, void** data) {
+	if(data == NULL) {
+		SDL_LockMutex(pvar->lock);
+		return pvar->data;
+	}else{
+		*data = NULL;
+	        SDL_UnlockMutex(pvar->lock);
+		return NULL;
+	}
 }
 
 /**

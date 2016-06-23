@@ -125,9 +125,6 @@ static inline void jlgr_wm_create__(jlgr_t* jlgr) {
 	jlgr->wm.displayWindow->w = jlgr_wm_mkwindow__(jlgr);
 	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 	jlgr->wm.displayWindow->c = jl_wm_gl_context(jlgr);
-	// Clear and update
-	jl_gl_clear(jlgr, .01, 1., .02, 1.);
-	jl_wm_loop__(jlgr);
 }
 
 // ETOM FUNCTIONS

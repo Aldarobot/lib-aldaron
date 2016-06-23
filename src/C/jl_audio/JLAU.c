@@ -13,6 +13,7 @@
 #define JLAU_DEBUG_CHECK(jlau) jlau_checkthread__(jlau)
 #define JLAU_CHANNEL_MUSIC -2
 #define JLAU_CHANNEL_SOUND -3
+#define JLAU_CHANNEL_LOCK -4
 
 /** @cond **/
 static void jlau_checkthread__(jlau_t* jlau) {
@@ -30,40 +31,6 @@ static inline int32_t jlau_sec2ms__(float sec) {
 	int32_t ms = ((int32_t)(sec * 1000.f));
 	if(ms < 20) ms = 0;
 	return ms;
-}
-
-static void jlau_playsound__(jlau_t* jlau, jlau_audio_t* audio, float in,
-	int8_t loops, jl_vec3_t* vec)
-{
-	JLAU_DEBUG_CHECK(jlau);
-	int32_t ms = jlau_sec2ms__(in);
-
-	if(audio->channel == JLAU_CHANNEL_MUSIC) {
-		Mix_HaltMusic();
-		Mix_FadeInMusic(audio->audio, 1, 20);
-	}else{
-		JLAU_PLAY_MIX_PLAY_CHANNEL:
-		if((audio->channel = Mix_FadeInChannel(-1, audio->audio, loops,
-			ms + 1)) == -1)
-		{
-			jlau->num_channels++;
-			Mix_ReserveChannels(jlau->num_channels);
-			goto JLAU_PLAY_MIX_PLAY_CHANNEL;
-		}
-		// Calculate Position
-		if(vec == NULL) {
-			Mix_SetPosition(audio->channel, 0, 0);
-		}else if(vec->x == 0 && vec->y == 0 && vec->z == 0) {
-			Mix_SetPosition(audio->channel, 0, 0);
-		}else{
-			float distance = sqrtf((vec->x*vec->x) + (vec->y*vec->y)
-				+ (vec->z*vec->z));
-			float angle = atan2f(vec->z, vec->x) * (180.f / M_PI);
-			if(angle < 0.f) angle += 360.f;
-
-			Mix_SetPosition(audio->channel, angle, distance);
-		}
-	}
 }
 
 /**
@@ -106,7 +73,40 @@ static inline void jlau_load(jlau_t* jlau, jlau_audio_t* audio,
  * @param vec: Where sound is coming from, or NULL for no position effect.
 */
 void jlau_play(jlau_t* jlau, jlau_audio_t* audio, float in, jl_vec3_t* vec) {
-	jlau_playsound__(jlau, audio, in, 0, vec);
+	JLAU_DEBUG_CHECK(jlau);
+	int32_t ms = jlau_sec2ms__(in);
+
+	if(audio->channel == JLAU_CHANNEL_MUSIC) {
+		Mix_HaltMusic();
+		Mix_FadeInMusic(audio->audio, 1, 20);
+	}else{
+		JLAU_PLAY_MIX_PLAY_CHANNEL:
+		if((audio->channel = Mix_FadeInChannel(-1, audio->audio, 0,
+			ms + 1)) == -1)
+		{
+			jlau->num_channels++;
+			Mix_ReserveChannels(jlau->num_channels);
+			goto JLAU_PLAY_MIX_PLAY_CHANNEL;
+		}
+		// Calculate Position
+		if(vec == NULL) {
+			Mix_SetPosition(audio->channel, 0, 0);
+		}else if(vec->x == 0 && vec->y == 0 && vec->z == 0) {
+			Mix_SetPosition(audio->channel, 0, 0);
+		}else{
+			float distance = sqrtf((vec->x*vec->x) + (vec->y*vec->y)
+				+ (vec->z*vec->z));
+			float angle = atan2f(vec->z, vec->x) * (180.f / M_PI);
+			if(angle < 0.f) angle += 360.f;
+
+			Mix_SetPosition(audio->channel, angle, distance);
+		}
+	}
+}
+
+void jlau_lock(jlau_t* jlau, jlau_audio_t* audio, float in, jl_vec3_t* vec) {
+	if(audio->channel != JLAU_CHANNEL_LOCK) jlau_play(jlau, audio, in, vec);
+	audio->channel = JLAU_CHANNEL_LOCK;
 }
 
 void jlau_pause(jlau_t* jlau, jlau_audio_t* audio) {
@@ -153,7 +153,6 @@ void jlau_stop(jlau_audio_t* audio, float out) {
 	int32_t channel = (audio == NULL) ? -1 : audio->channel;
 	int32_t ms = jlau_sec2ms__(out);
 
-	printf("%d\n", channel);
 	if(channel == JLAU_CHANNEL_MUSIC)
 		Mix_FadeOutMusic(ms + 1);
 	else

@@ -28,7 +28,7 @@ uint32_t _jl_sg_gpix(/*in */ SDL_Surface* surface, int32_t x, int32_t y);
 void jl_gl_viewport_screen(jlgr_t* jlgr);
 void jl_gl_poly(jlgr_t* jlgr, jl_vo_t* pv, uint32_t vertices, const float *xyzw);
 void jl_gl_vect(jlgr_t* jlgr, jl_vo_t* pv, uint32_t vertices, const float *xyzw);
-void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map, float a, uint32_t tx);
+void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* vo, float a, uint32_t tx);
 void jl_gl_transform_pr_(jlgr_t* jlgr, jl_pr_t* pr, float x, float y, float z,
 	float xm, float ym, float zm);
 void jl_gl_transform_vo_(jlgr_t* jlgr, jl_vo_t* vo, float x, float y, float z,

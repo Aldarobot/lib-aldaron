@@ -14,9 +14,9 @@ const char *source_frag_clr =
 	"varying vec4 vcolor;\n"
 	"\n"
 	"void main() {\n"
-	"	gl_FragColor = vec4(vcolor.rgb * vcolor.a, vcolor.a);\n"
+	"	gl_FragColor = vec4(vcolor.rgba);\n"
 	"}";
-	
+
 const char *source_vert_clr = 
 	GLSL_HEAD
 	"uniform vec3 translate;\n"
@@ -43,7 +43,7 @@ const char *source_frag_tex_premult =
 	"{\n"
 	"	vec4 vcolor = texture2D(texture, texcoord);\n"
 	"	vcolor.a *= multiply_alpha;\n"
-	"	gl_FragColor = vec4(vcolor.rgb * vcolor.a, vcolor.a);\n"
+	"	gl_FragColor = vec4(vcolor.rgba);\n"
 	"}";
 
 const char *source_frag_tex_charmap = 
@@ -61,7 +61,7 @@ const char *source_frag_tex_charmap =
 	"	   (vcolor.b < 0.1) && (vcolor.a > .9))\n"
 	"		vcolor = new_color;\n"
 	"	vcolor.a *= multiply_alpha;\n"
-	"	gl_FragColor = vec4(vcolor.rgb * vcolor.a, vcolor.a);\n"
+	"	gl_FragColor = vec4(vcolor.rgba);\n"
 	"}";
 
 const char *source_frag_tex = 
@@ -90,7 +90,7 @@ const char *source_vert_tex =
 	"	texcoord = texpos;\n"
 	"	gl_Position = transform * vec4(position + translate, 1.0);\n"
 	"}";
-	
+
 // Full texture
 const float DEFAULT_TC[] = {
 	0., 1.,
@@ -462,8 +462,7 @@ static inline void _jl_gl_init_enable_alpha(jlgr_t* jlgr) {
 //	JL_GL_ERROR(jlgr, 0,"glEnable( GL_CULL_FACE )");
 	glBlendColor(0.f,0.f,0.f,0.f);
 	JL_GL_ERROR(jlgr, 0,"glBlendColor");
-	glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA,
-		GL_ONE_MINUS_DST_ALPHA, GL_ONE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	JL_GL_ERROR(jlgr, 0,"glBlendFunc");
 }
 
@@ -854,9 +853,9 @@ void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
 }
 
 // Set texturing to a bitmap
-void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map, float a, uint32_t tx) {
-	_jl_gl_txtr(jlgr, &pv, a, 0);
-	pv->tx = tx;
+void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* vo, float a, uint32_t tx) {
+	_jl_gl_txtr(jlgr, &vo, a, 0);
+	vo->tx = tx;
 #ifdef JL_DEBUG_LIB
 	if(!pv->tx) {
 		jl_print(jlgr->jl, "Error: Texture=0!");
@@ -864,7 +863,7 @@ void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* pv, uint8_t map, float a, uint32_t tx) {
 		exit(-1);
 	}
 #endif
-	jl_gl_vo_txmap(jlgr, pv, 16, 16, map);
+	jl_gl_vo_txmap(jlgr, vo, 0, 0, -1);
 }
 
 //TODO:MOVE
@@ -1153,10 +1152,10 @@ void jl_gl_vo_init(jlgr_t* jlgr, jl_vo_t* vo) {
  * @param vo: The vertext object to change.
  * @param w: How many characters wide the texture is.
  * @param h: How many characters high the texture is.
- * @param map: The character value to map.
+ * @param map: The character value to map.  -1 for full texture.
 **/
-void jl_gl_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,uint8_t map) {
-	if(map) {
+void jl_gl_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,int16_t map) {
+	if(map != -1) {
 		float ww = (float)w;
 		float hh = (float)h;
 		float CX = ((float)(map%h))/ww;

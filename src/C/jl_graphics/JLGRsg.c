@@ -231,9 +231,7 @@ void jl_sg_init__(jlgr_t* jlgr) {
 	// Flip upside-down
 	jlgr->sg.bg.up.pr.scl.y = -1.;
 	jlgr->sg.bg.dn.pr.scl.y = -1.;
-	// Resize for 2 screen Default - so they initialize.
-	jlgr->sg.cs = JL_SCR_DN;
-	jl_sg_resz__(jlgr->jl);
-	jlgr->sg.cs = JL_SCR_SS;
+	// Resize.
+	jlgr->sg.cs = JL_SCR_SS; // JL_SCR_DN
 	jl_sg_resz__(jlgr->jl);
 }

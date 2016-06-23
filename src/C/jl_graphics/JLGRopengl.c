@@ -1,5 +1,22 @@
 #include "JLGRinternal.h"
-#include "jl_opengl.h"
+
+#if JL_GLTYPE == JL_GLTYPE_SDL_GL2  // SDL OpenGL 2
+	#include "SDL_opengl.h"
+	#include "lib/glext.h"
+#elif JL_GLTYPE == JL_GLTYPE_OPENGL2 // OpenGL 2
+	#if JL_PLAT == JL_PLAT_COMPUTER
+		#include "lib/glext.h"
+	#else
+		#error "JL_GLTYPE_OPENGL2 ain't supported by non-pc comps, man!"
+	#endif
+	#include "lib/glew/glew.h"
+	#define JL_GLTYPE_HAS_GLEW
+#elif JL_GLTYPE == JL_GLTYPE_SDL_ES2 // SDL OpenGLES 2
+	#include "SDL_opengles2.h"
+#elif JL_GLTYPE == JL_GLTYPE_OPENES2 // OpenGLES 2
+	#include <GLES2/gl2.h>
+	#include <GLES2/gl2ext.h>
+#endif
 
 // Shader Code
 
@@ -39,11 +56,9 @@ const char *source_frag_tex_premult =
 	"\n"
 	"varying vec2 texcoord;\n"
 	"\n"
-	"void main()\n"
-	"{\n"
+	"void main() {\n"
 	"	vec4 vcolor = texture2D(texture, texcoord);\n"
-	"	vcolor.a *= multiply_alpha;\n"
-	"	gl_FragColor = vec4(vcolor.rgba);\n"
+	"	gl_FragColor = vec4(vcolor.rgb, vcolor.a * multiply_alpha);\n"
 	"}";
 
 const char *source_frag_tex_charmap = 
@@ -54,8 +69,7 @@ const char *source_frag_tex_charmap =
 	"\n"
 	"varying vec2 texcoord;\n"
 	"\n"
-	"void main()\n"
-	"{\n"
+	"void main() {\n"
 	"	vec4 vcolor = texture2D(texture, texcoord);\n"
 	"	if((vcolor.r < 0.1) && (vcolor.g < 0.1) &&"
 	"	   (vcolor.b < 0.1) && (vcolor.a > .9))\n"
@@ -70,8 +84,7 @@ const char *source_frag_tex =
 	"\n"
 	"varying vec2 texcoord;\n"
 	"\n"
-	"void main()\n"
-	"{\n"
+	"void main() {\n"
 	"	gl_FragColor = texture2D(texture, texcoord);\n"
 	"}";
 
@@ -85,8 +98,7 @@ const char *source_vert_tex =
 	"\n"
 	"varying vec2 texcoord;\n"
 	"\n"
-	"void main()\n"
-	"{\n"
+	"void main() {\n"
 	"	texcoord = texpos;\n"
 	"	gl_Position = transform * vec4(position + translate, 1.0);\n"
 	"}";

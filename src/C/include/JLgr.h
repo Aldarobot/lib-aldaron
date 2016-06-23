@@ -24,10 +24,6 @@ typedef struct{
 }jl_area_t;
 
 // Graphical stuff
-typedef struct {
-	SDL_Window* w;		// Window
-	SDL_GLContext* c;	// GL Context
-}jl_window_t;
 
 typedef struct {
 	uint32_t gl_texture;
@@ -301,7 +297,8 @@ typedef struct{
 	#endif
 
 		char windowTitle[2][16];
-		jl_window_t* displayWindow;
+		SDL_Window* window;
+		SDL_GLContext* glcontext;
 		// The full width and height of the window.
 		int32_t w, h;
 		// Aspect Ratio of the window

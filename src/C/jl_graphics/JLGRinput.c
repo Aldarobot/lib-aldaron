@@ -8,9 +8,11 @@
 
 #include "JLGRinternal.h"
 
-//Prototypes
-	// ct.c
-	uint8_t jl_ct_key_pressed(jlgr_t *jlgr, uint8_t key);
+#if JL_PLAT == JL_PLAT_COMPUTER
+	#define SDL_MENU_KEY SDL_SCANCODE_APPLICATION
+#elif JL_PLAT == JL_PLAT_PHONE
+	#define SDL_MENU_KEY SDL_SCANCODE_MENU
+#endif
 
 /*
  * "Preval" is a pointer to previous key pressed value.
@@ -41,6 +43,17 @@ static void jlgr_input_state__(jlgr_t* jlgr, uint8_t read) {
 	}
 }
 
+/*
+ * Returns 0 if key isn't pressed
+ * Returns 1 if key is just pressed
+ * Returns 2 if key is held down
+ * Returns 3 if key is released
+*/
+uint8_t jl_ct_key_pressed__(jlgr_t *jlgr, uint8_t key) {
+	jl_ct_state__(&jlgr->main.ct.keyDown[key], jlgr->main.ct.keys[key]);
+	return jlgr->main.ct.keyDown[key];
+}
+
 static void jlgr_input_press2__(jlgr_t* jlgr, uint8_t countit) {
 	jlgr_input_state__(jlgr, countit);
 	//hrxypk
@@ -58,7 +71,7 @@ static void jlgr_input_press2__(jlgr_t* jlgr, uint8_t countit) {
 }
 
 void jl_ct_key(jlgr_t *jlgr, jlgr_input_fnct inputfn, uint8_t key) {
-	uint8_t a = jl_ct_key_pressed(jlgr, key);
+	uint8_t a = jl_ct_key_pressed__(jlgr, key);
 
 	jlgr->input.input.h = a;
 	jlgr->input.input.r = 0.;
@@ -186,11 +199,7 @@ void jlgr_input_press__(jlgr_t *jlgr, jlgr_input_fnct inputfn) {//Any touch
 void jlgr_input_dont(jlgr_t* jlgr, jlgr_input_t input) { }
 
 void jl_ct_key_menu(jlgr_t *jlgr, jlgr_input_fnct inputfn) {
-	#if JL_PLAT == JL_PLAT_COMPUTER
-	jl_ct_key(jlgr, inputfn, SDL_SCANCODE_APPLICATION); //xyrhpk
-	#elif JL_PLAT == JL_PLAT_PHONE
-	jl_ct_key(jlgr, inputfn, SDL_SCANCODE_MENU); //xyrhpk
-	#endif
+	jl_ct_key(jlgr, inputfn, SDL_MENU_KEY); //xyrhpk
 }
 
 void jl_ct_txty(void) {
@@ -245,9 +254,8 @@ static inline void jlgr_input_handle_events_platform_dependant__(jlgr_t* jlgr) {
 		else if(jlgr->main.ct.event.button.button == SDL_BUTTON_MIDDLE)
 			jlgr->main.ct.input.click_middle = isNowDown;
 	}else if(jlgr->main.ct.event.wheel.type == SDL_MOUSEWHEEL) {
-		//SDL 2.0.4 NYI
-		uint8_t flip = 1;
-			/*(direction == SDL_MOUSEWHEEL_FLIPPED) ? -1 : 1*/;
+		uint8_t flip = (jlgr->main.ct.event.wheel.direction ==
+			SDL_MOUSEWHEEL_FLIPPED) ? -1 : 1;
 		int32_t x = flip * jlgr->main.ct.event.wheel.x;
 		int32_t y = flip * jlgr->main.ct.event.wheel.y;
 		if(jlgr->main.ct.event.wheel.y > 0)
@@ -265,15 +273,24 @@ static inline void jlgr_input_handle_events_platform_dependant__(jlgr_t* jlgr) {
 
 static void jl_ct_handle_resize__(jlgr_t* jlgr) {
 	if(jlgr->main.ct.event.type==SDL_WINDOWEVENT) { //Resize
-		if((jlgr->main.ct.event.window.event == SDL_WINDOWEVENT_RESIZED)
-			 && (SDL_GetWindowFromID(
-				jlgr->main.ct.event.window.windowID) ==
-					jlgr->wm.displayWindow->w))
-		{
-			JL_PRINT_DEBUG(jlgr->jl, "INPUT/RESIZE");
-			jlgr_resz(jlgr,
-				jlgr->main.ct.event.window.data1,
-				jlgr->main.ct.event.window.data2);
+		switch(jlgr->main.ct.event.window.event) {
+			case SDL_WINDOWEVENT_RESIZED: {
+				JL_PRINT_DEBUG(jlgr->jl, "INPUT/RESIZE");
+				jlgr_resz(jlgr,
+					jlgr->main.ct.event.window.data1,
+					jlgr->main.ct.event.window.data2);
+				break;
+			}
+#if JL_PLAT == JL_PLAT_COMPUTER
+			case SDL_WINDOWEVENT_CLOSE: {
+				jl_print(jlgr->jl, "CLOSE");
+				jlgr->main.ct.back = 1;
+				break;
+			}
+#endif
+			default: {
+				break;
+			}
 		}
 	}
 }
@@ -351,13 +368,13 @@ int8_t jlgr_input_do(jlgr_t *jlgr, jlgr_control_t events, jlgr_input_fnct fn,
 }
 
 void jl_ct_getevents_(jlgr_t* jlgr) {
+	jlgr->main.ct.keys = SDL_GetKeyboardState(NULL);
+#if JL_PLAT == JL_PLAT_COMPUTER
+	jlgr->main.ct.back = jl_ct_key_pressed__(jlgr, SDL_SCANCODE_ESCAPE);
+#endif
 	while(SDL_PollEvent(&jlgr->main.ct.event))
 		jlgr_input_handle_events__(jlgr);
-	jlgr->main.ct.keys = SDL_GetKeyboardState(NULL);
-	//If Back key is pressed, then quit the program
-#if JL_PLAT == JL_PLAT_COMPUTER
-	jlgr->main.ct.back = jl_ct_key_pressed(jlgr, SDL_SCANCODE_ESCAPE);
-#elif JL_PLAT == JL_PLAT_PHONE
+#if JL_PLAT == JL_PLAT_PHONE
 	jl_ct_state__(&jlgr->main.ct.back, jlgr->main.ct.input.back);
 #endif
 }
@@ -408,7 +425,7 @@ void jl_ct_loop__(jlgr_t* jlgr) {
 			}
 		}
 		// F11 toggle fullscreen.
-		if(jl_ct_key_pressed(jlgr, SDL_SCANCODE_F11) == 1)
+		if(jl_ct_key_pressed__(jlgr, SDL_SCANCODE_F11) == 1)
 			jlgr_wm_togglefullscreen(jlgr);
 	#endif
 	jl_ct_testquit__(jlgr);
@@ -530,9 +547,9 @@ void jl_ct_init__(jlgr_t* jlgr) {
 uint8_t jl_ct_typing_get(jlgr_t *jlgr) {
 	if(!SDL_IsTextInputActive()) SDL_StartTextInput();
 	uint8_t rtn = jlgr->main.ct.text_input[jlgr->main.ct.read_cursor];
-	if(jl_ct_key_pressed(jlgr, SDL_SCANCODE_BACKSPACE) == 1) return '\b';
-	if(jl_ct_key_pressed(jlgr, SDL_SCANCODE_DELETE) == 1) return '\02';
-	if(jl_ct_key_pressed(jlgr, SDL_SCANCODE_RETURN) == 1) return '\n';
+	if(jl_ct_key_pressed__(jlgr, SDL_SCANCODE_BACKSPACE) == 1) return '\b';
+	if(jl_ct_key_pressed__(jlgr, SDL_SCANCODE_DELETE) == 1) return '\02';
+	if(jl_ct_key_pressed__(jlgr, SDL_SCANCODE_RETURN) == 1) return '\n';
 	if(!rtn) return 0;
 	jlgr->main.ct.read_cursor++;
 	return rtn;
@@ -543,16 +560,4 @@ uint8_t jl_ct_typing_get(jlgr_t *jlgr) {
 */
 void jl_ct_typing_disable(void) {
 	SDL_StopTextInput();
-}
-
-
-/**
- * Returns 0 if key isn't pressed
- * Returns 1 if key is just pressed
- * Returns 2 if key is held down
- * Returns 3 if key is released
-*/
-uint8_t jl_ct_key_pressed(jlgr_t *jlgr, uint8_t key) {
-	jl_ct_state__(&jlgr->main.ct.keyDown[key], jlgr->main.ct.keys[key]);
-	return jlgr->main.ct.keyDown[key];
 }

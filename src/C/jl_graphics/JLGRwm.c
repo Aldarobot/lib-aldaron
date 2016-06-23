@@ -4,7 +4,6 @@
 */
 
 #include "JLGRinternal.h"
-#include "jl_opengl.h"
 
 #define JL_WM_FULLSCREEN SDL_WINDOW_FULLSCREEN_DESKTOP
 
@@ -19,7 +18,7 @@ static void jlgr_wm_fscreen__(jlgr_t* jlgr, uint8_t a) {
 	// Make sure the fullscreen value is either a 1 or a 0.
 	jlgr->wm.fullscreen = !!a;
 	// Actually set whether fullscreen or not.
-	if(SDL_SetWindowFullscreen(jlgr->wm.displayWindow->w,
+	if(SDL_SetWindowFullscreen(jlgr->wm.window,
 	 jlgr->wm.fullscreen ? JL_WM_FULLSCREEN : 0))
 		jl_wm_killedit(jlgr->jl, "SDL_SetWindowFullscreen");
 	JL_PRINT_DEBUG(jlgr->jl, "Switched fullscreen on/off");
@@ -61,7 +60,7 @@ uint16_t jlgr_wm_geth(jlgr_t* jlgr) {
 void jlgr_wm_setwindowname(jlgr_t* jlgr, str_t window_name) {
 	int ii;
 
-	SDL_SetWindowTitle(jlgr->wm.displayWindow->w, window_name);
+	SDL_SetWindowTitle(jlgr->wm.window, window_name);
 	for(ii = 0; ii < 16; ii++) {
 		jlgr->wm.windowTitle[0][ii] = window_name[ii];
 		if(window_name[ii] == '\0') { break; }
@@ -95,7 +94,7 @@ static inline SDL_Window* jlgr_wm_mkwindow__(jlgr_t* jlgr) {
 }
 
 static inline SDL_GLContext* jl_wm_gl_context(jlgr_t* jlgr) {
-	SDL_GLContext* rtn = SDL_GL_CreateContext(jlgr->wm.displayWindow->w);
+	SDL_GLContext* rtn = SDL_GL_CreateContext(jlgr->wm.window);
 	if(rtn == NULL) jl_wm_killedit(jlgr->jl, "SDL_GL_CreateContext");
 	return rtn;
 }
@@ -103,7 +102,7 @@ static inline SDL_GLContext* jl_wm_gl_context(jlgr_t* jlgr) {
 //Update the SDL_displayMode structure
 void jl_wm_updatewh_(jlgr_t* jlgr) {
 	// Get Window Size
-	SDL_GetWindowSize(jlgr->wm.displayWindow->w, &jlgr->wm.w, &jlgr->wm.h);
+	SDL_GetWindowSize(jlgr->wm.window, &jlgr->wm.w, &jlgr->wm.h);
 	// Get Aspect Ratio
 	jlgr->wm.ar = ((double)jlgr->wm.h) / ((double)jlgr->wm.w);
 	JL_PRINT_DEBUG(jlgr->jl, "size = %dx%d", jlgr->wm.w, jlgr->wm.h);
@@ -111,9 +110,6 @@ void jl_wm_updatewh_(jlgr_t* jlgr) {
 
 //This is the code that actually creates the window by accessing SDL
 static inline void jlgr_wm_create__(jlgr_t* jlgr) {
-	// Allocate space for "displayWindow"
-	jlgr->wm.displayWindow = jl_memi(jlgr->jl, sizeof(jl_window_t));
-	//
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -122,16 +118,16 @@ static inline void jlgr_wm_create__(jlgr_t* jlgr) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 	// Create window.
-	jlgr->wm.displayWindow->w = jlgr_wm_mkwindow__(jlgr);
+	jlgr->wm.window = jlgr_wm_mkwindow__(jlgr);
 	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-	jlgr->wm.displayWindow->c = jl_wm_gl_context(jlgr);
+	jlgr->wm.glcontext = jl_wm_gl_context(jlgr);
 }
 
 // ETOM FUNCTIONS
 
 void jl_wm_loop__(jlgr_t* jlgr) {
 	//Update Screen
-	SDL_GL_SwapWindow(jlgr->wm.displayWindow->w); //end current draw
+	SDL_GL_SwapWindow(jlgr->wm.window); //end current draw
 	// milliseconds / 1000 to get seconds
 	jlgr->psec = jl_sdl_timer(jlgr->jl, &jlgr->timer);
 }
@@ -156,9 +152,9 @@ void jl_wm_init__(jlgr_t* jlgr) {
 void jl_wm_kill__(jlgr_t* jlgr) {
 	SDL_ShowCursor(SDL_ENABLE);
 	JL_PRINT_DEBUG(jlgr->jl, "Closing Window....");
-	if (jlgr->wm.displayWindow->c != NULL) {
-//		SDL_free(jlgr->wm.displayWindow->c);
-		SDL_DestroyWindow(jlgr->wm.displayWindow->w);
+	if (jlgr->wm.glcontext != NULL) {
+//		SDL_free(jlgr->wm.glcontext);
+		SDL_DestroyWindow(jlgr->wm.window);
 	}
 	JL_PRINT_DEBUG(jlgr->jl, "Closed Window!");
 }

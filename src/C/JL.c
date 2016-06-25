@@ -36,7 +36,7 @@ static inline void jl_init__(jl_t* jl,jl_fnct _fnc_init_,str_t nm,uint64_t ctx1s
 	jl_init_libs__(jl);
 	// Allocate the program's context.
 	jl->prg_context = jl_memi(jl, ctx1s);
-	jl->name = jl_mem_copy(jl, nm, strlen(nm));
+	jl->name = jl_mem_copy(jl, nm, strlen(nm) + 1);
 	// Run the program's init function.
 	_fnc_init_(jl);
 	JL_PRINT_DEBUG(jl, "Started JL_Lib!");

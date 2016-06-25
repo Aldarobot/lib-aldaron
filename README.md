@@ -38,7 +38,6 @@ Need help porting:
 
 # CLEAN
 
-__use only when you don't want to use current builds anymore!__
 * Clean all build folders: `make clean-all --silent`
 * Clean all dependencies: `make clean-deps --silent`
 * Clean all of the build folder: `make clean-build --silent`
@@ -51,77 +50,3 @@ __use only when you don't want to use current builds anymore!__
 - To build the android apk, sign and install use, `make android`
 - To clean builds use, `make clean`
 
-# CODE STYLE
-- Indentation is with tabs [ standard length - 8 ]
-- No more than 3 tabs to start a line, at that point a separate function
-	is needed.
-- Every function starts with a shortenned project name: JL Lib = "jl"
-	Then is followed by an underscore and file name without "JL":
-	"jl_mem"
-	After that there's another underscore and then the description.
-	"jl_mem_clr"
-	We'll call "jl_mem" the __NAMESPACE__.
-- Functions that are not available to user end in "__"
-- Functions that are end in a-z, 1-9
-- Functions available to the library user have nothing appended to them.
-- Whenever a function is a parameter, it doesn't have a __NAMESPACE__.
-	Instead it has a "par__" before the function parameter name.
-- Each file represents a subsystem.  JLmem.c represents memory management.
-- General layout of a file:
-```c
-/*
- * JL_lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-/** \file
- * examplefile.c
- *	example description
-**/
-
-// Includes.
-
-// Prototypes & Constants.
-
-/** @cond **/
-
-// Where all the static functions go.
-
-/** @endcond **/
-
-// Where all the global functions go - the ones that
-// The person who programs has access to.
-
-/** @cond **/
-
-// Where all the Exported To Other Module functions go
-// The ones the programmer doesn't have access to but
-// can't be static.
-
-/** @endcond **/
-
-/***   #End of File   ***/
-```
-Function naming:
-__Whenever there's an object being modified by functions use:__
-
-| Term | Meaning |
-| ------------- |-------------| 
-| new |	create the object. |
-| old |	delete the object. |
-| set |	set the object's data. |
-| get |	get the object's data |
-| use |	start using the object. |
-| off |	stop using the object. |
-| rsz |	resize or redraw the object. |
-| rdr |	redraw the object |
-| drw |	draw the object on the screen. |
-| rnl |	run the object's loop. |
-| ist |	get whether it's initialized/active. |
-__Subsystems Functions:__
-
-| Term | Meaning |
-| ------------- |-------------| 
-| init | run when subsystem is initialized. |
-| loop | run every frame. |
-| resz | run when window is resized. |
-| kill | run when subsystem is ready to be shutdown. |

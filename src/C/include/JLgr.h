@@ -3,6 +3,30 @@
 
 #include "jl.h"
 
+#if JL_GLTYPE == JL_GLTYPE_SDL_GL2  // SDL OpenGL 2
+	#include "SDL_opengl.h"
+	#include "lib/glext.h"
+#elif JL_GLTYPE == JL_GLTYPE_OPENGL2 // OpenGL 2
+	#if JL_PLAT == JL_PLAT_COMPUTER
+		#include "lib/glext.h"
+	#else
+		#error "JL_GLTYPE_OPENGL2 ain't supported by non-pc comps, man!"
+	#endif
+	#include "lib/glew/glew.h"
+	#define JL_GLTYPE_HAS_GLEW
+#elif JL_GLTYPE == JL_GLTYPE_SDL_ES2 // SDL OpenGLES 2
+	#include "SDL_opengles2.h"
+#elif JL_GLTYPE == JL_GLTYPE_OPENES2 // OpenGLES 2
+	#include <GLES2/gl2.h>
+	#include <GLES2/gl2ext.h>
+#endif
+
+#ifdef GL_ES_VERSION_2_0
+	#define GLSL_HEAD "#version 100\nprecision highp float;\n"
+#else
+	#define GLSL_HEAD "#version 100\n"
+#endif
+
 // Enum:
 typedef enum {
 	JL_SCR_UP,
@@ -27,9 +51,8 @@ typedef struct{
 
 typedef struct {
 	uint32_t gl_texture;
-	uint32_t gl_buffer;
 	uint16_t w, h;
-	void* pixels;
+	void* pixels; // BGRA
 }jl_tex_t;
 
 // Pre-renderer
@@ -112,6 +135,22 @@ typedef struct{
 	uint8_t k; // Which key [ a-z, 0-9 , left/right click ]
 	void* data; // Parameter
 }jlgr_input_t;
+
+typedef struct{
+	struct {
+		int32_t position;
+		int32_t texpos_color;
+	}attributes;
+
+	struct {
+		int32_t texture;
+		int32_t newcolor_malpha;
+		int32_t translate;
+		int32_t transform;
+	}uniforms;
+
+	uint32_t program;
+}jlgr_glsl_t;
 
 typedef struct{
 	jl_t* jl;
@@ -198,65 +237,19 @@ typedef struct{
 		void* loop; // ( jlgr_fnct ) For upper or lower screen.
 		uint8_t cs; // The current screen "jlgr_which_screen_t"
 	}sg;
+
+	struct{
+		jlgr_glsl_t alpha;
+		jlgr_glsl_t hue;
+	}effects;
 	
 	//Opengl Data
 	struct {
 		struct {
-			uint32_t texture;
-			uint32_t preblend;
-			uint32_t color;
-			uint32_t character;
-		}prgs;
-		//PRG: TEX
-		struct {
-			struct {
-				int32_t position;
-				int32_t texpos;
-			} attr;
-			struct {
-				int32_t textures;
-				int32_t multiply_alpha;
-				int32_t translate;
-				int32_t transform;
-			} uniforms;
-		} tex;
-		//PRG: PRM
-		struct {
-			struct {
-				int32_t position;
-				int32_t texpos;
-			} attr;
-			struct {
-				int32_t textures;
-				int32_t translate;
-				int32_t transform;
-			} uniforms;
-		} prm;
-		//PRG: CHR
-		struct {
-			struct {
-				int32_t position;
-				int32_t texpos;
-			} attr;
-			struct {
-				int32_t textures;
-				int32_t multiply_alpha;
-				int32_t new_color;
-				int32_t translate;
-				int32_t transform;
-			} uniforms;
-		} chr;
-		//PRG: CLR
-		struct {
-			struct {
-				int32_t position;
-				int32_t acolor;
-			} attr;
-			struct {
-				int32_t translate;
-				int32_t transform;
-			} uniforms;
-		} clr;
+			jlgr_glsl_t texture;
+			jlgr_glsl_t color;
+		}prg;
+
 		jl_vo_t temp_vo;
 		// Default texture coordinates.
 		uint32_t default_tc;
@@ -418,6 +411,8 @@ void jl_gl_pr_rsz(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
 void jl_gl_pr_new(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
 void jl_gl_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, jl_vec3_t* scl);
 void jl_gl_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
+void jlgr_gl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
+	const char* frag, const char* effectName);
 
 // video
 void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,

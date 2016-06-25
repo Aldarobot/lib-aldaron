@@ -6,6 +6,10 @@ DEPS_VER_SDL_NET = SDL2_net-2.0.1
 DEPS_VER_ZIP = libzip-1.1.2
 SRC_NDK = android-ndk-r11c
 
+#
+build: 
+	printf "[COMP] Built library!\n"
+
 ifneq ("$(shell uname | grep Linux)", "")
  ifneq ("$(shell uname -m | grep arm)", "")
   include compile-scripts/rpi.mk

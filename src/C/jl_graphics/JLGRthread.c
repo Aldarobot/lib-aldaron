@@ -15,10 +15,8 @@ static void jlgr_thread_programsresize(jlgr_t* jlgr) {
 
 static void jlgr_thread_resize(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	JL_PRINT_DEBUG(jlgr->jl, "Resizing to %dx%d....", w, h);
-	// Reset aspect ratio stuff.
+	// Set window size & aspect ratio stuff.
 	jl_wm_resz__(jlgr, w, h);
-	// Update the actual window.
-	jl_gl_resz__(jlgr);
 	// Update the size of the background.
 	jl_sg_resz__(jlgr->jl);
 	// Taskbar resize.
@@ -73,10 +71,8 @@ static void jlgr_thread_resize_event(jl_t* jl, void* data) {
 			uint16_t w = packet->x;
 			uint16_t h = packet->y;
 			JL_PRINT_DEBUG(jlgr->jl, "Resizing to %dx%d....", w, h);
-			// Reset aspect ratio stuff.
+			// Set window size & aspect ratio stuff.
 			jl_wm_resz__(jlgr, w, h);
-			// Update the actual window.
-			jl_gl_resz__(jlgr);
 			break;
 		} case JLGR_COMM_INIT: {
 			jlgr->draw.fn = packet->fn;
@@ -102,10 +98,14 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	// Initialize subsystems
 	JL_PRINT_DEBUG(jl, "Creating the window....");
 	jl_wm_init__(jlgr);
+	
+	jlgr_text_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "Loading default graphics from package....");
 	jl_sg_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "Setting up OpenGL....");
 	jl_gl_init__(jlgr);
+	JL_PRINT_DEBUG(jl, "Setting up effects....");
+	jlgr_effects_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "Load graphics....");
 	jlgr_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "Creating Taskbar sprite....");

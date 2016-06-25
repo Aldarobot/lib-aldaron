@@ -665,7 +665,7 @@ void jlgr_init__(jlgr_t* jlgr) {
 	JL_PRINT_DEBUG(jlgr->jl, "Drew Loading Screen");
 	// Load Graphics
 	jlgr->textures.font = jl_sg_add_image(jlgr, &packagedata,
-		"/images/jlf8.png");
+		"/images/font.png");
 	// Create Font
 	jlgr->fontcolor[0] = 0.;
 	jlgr->fontcolor[1] = 0.;

@@ -59,8 +59,8 @@ static void jlgr_input_press2__(jlgr_t* jlgr, uint8_t countit) {
 	//hrxypk
 	jlgr->input.input.h = jlgr->input.states[jlgr->main.ct.current_event];
 	jlgr->input.input.r = 0.;
-	jlgr->input.input.x = jl_ct_gmousex(jlgr);
-	jlgr->input.input.y = jl_ct_gmousey(jlgr);
+	jlgr->input.input.x = jlgr->main.ct.msx;
+	jlgr->input.input.y = jlgr->main.ct.msy;
 	if(countit) {
 		jlgr->input.input.k = 1;
 		jlgr->input.input.p = 1.;
@@ -208,20 +208,6 @@ void jl_ct_txty(void) {
 
 void jl_ct_txtn(void) {
 	SDL_StopTextInput();
-}
-
-float jl_ct_gmousex(jlgr_t* jlgr) {
-	float x = jlgr->main.ct.msx;
-//	x -= jlgr->gl.cp->cb.x;
-//	x /= jlgr->gl.cp->cb.w;
-	return x;
-}
-
-float jl_ct_gmousey(jlgr_t* jlgr) {
-	float y = jlgr->main.ct.msy;
-//	y -= jlgr->gl.cp->cb.y;
-//	y /= jlgr->gl.cp->cb.h;
-	return y;
 }
 
 static inline void jlgr_input_handle_events_platform_dependant__(jlgr_t* jlgr) {

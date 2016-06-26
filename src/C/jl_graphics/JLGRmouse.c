@@ -35,8 +35,8 @@ void jlgr_mouse_loop_(jl_t* jl, jl_sprite_t* sprite) {
 	jlgr_t* jlgr = jl->jlgr;
 
 //Update Mouse
-	jlgr->mouse.pr.cb.pos.x = jl_ct_gmousex(jlgr);
-	jlgr->mouse.pr.cb.pos.y = jl_ct_gmousey(jlgr);
+	jlgr->mouse.pr.cb.pos.x = jlgr->main.ct.msx;
+	jlgr->mouse.pr.cb.pos.y = jlgr->main.ct.msy;
 }
 
 void jlgr_mouse_init__(jlgr_t* jlgr) {

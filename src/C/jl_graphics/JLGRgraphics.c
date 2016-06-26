@@ -300,7 +300,7 @@ static void jlgr_gui_slider_touch(jlgr_t* jlgr, jlgr_input_t input) {
 	if(jlgr_sprite_collide(jlgr, spr, &jlgr->mouse) == 0 ||
 	 input.h == 0)
 		return;
-	float x = jl_ct_gmousex(jlgr) - (jl_gl_ar(jlgr) * .05 * spr->pr.cb.ofs.x);
+	float x = jlgr->main.ct.msx - (jl_gl_ar(jlgr) * .05 * spr->pr.cb.ofs.x);
 	x -= spr->pr.cb.pos.x;
 	x /= spr->pr.cb.ofs.x;
 //		x += 1.5;// - (jl_gl_ar(jl->jlgr) * .1);

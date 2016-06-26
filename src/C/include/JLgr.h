@@ -427,8 +427,6 @@ int8_t jlgr_input_do(jlgr_t *jlgr, jlgr_control_t events, jlgr_input_fnct fn,
 	void* data);
 void jlgr_input_dont(jlgr_t* jlgr, jlgr_input_t input);
 void jl_ct_quickloop_(jlgr_t* jlgr);
-float jl_ct_gmousex(jlgr_t* jlgr);
-float jl_ct_gmousey(jlgr_t* jlgr);
 uint8_t jl_ct_typing_get(jlgr_t* pusr);
 void jl_ct_typing_disable(void);
 

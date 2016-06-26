@@ -7,60 +7,43 @@ CURDIR=`pwd -P`
 
 # directories
 SRC = src
-SRC_DEPS = libs
-BUILD_OBJS = build/objs
-BUILD_TEST = build/test
-BUILD_DEPS = build/deps
+BUILD_OBJ_RELEASE = build/objs
+BUILD_OBJ_TEST = build/test
+BUILD_OBJ_PROF = build/prof
 
 PROGNAME="`sed '6q;d' data.txt`"
 PACKNAME="`sed '4q;d' data.txt`"
 USERNAME="`sed '2q;d' data.txt`"
 
-# Dependencies
-#	$(shell find $(SRC_DEPS)/ -type f -name '*.cpp')
-MODULES_DEPS_CFILES = $(subst .cpp,, \
-	$(shell find $(SRC_DEPS)/ -type f -name '*.c'))
-ifeq ("$(MODULES_DEPS_CFILES)", " ")
-	MODULES_DEPS = 
-else
-	MODULES_DEPS = $(subst .c,, $(shell basename -a  $(MODULES_DEPS_CFILES)))
-endif
-OBJS_DEPS = \
-	$(addprefix $(BUILD_DEPS)/, $(addsuffix .o,$(MODULES_DEPS)))
-HEADERS_DEPS = \
-	$(shell find $(SRC_DEPS)/ -type f -name '*.h')
-
-# Program
-#	$(shell find $(SRC)/ -type f -name '*.cpp')
-MODULES_PRG = \
+# C & C++ Modules
+MODULES = \
 	$(subst .c,, $(subst .cpp,, $(shell basename -a \
 	$(shell find $(SRC)/ -type f -name '*.c') \
+	$(shell find $(SRC)/ -type f -name '*.cpp') \
 )))
-HEADERS_PRG = \
-	$(shell find $(SRC)/ -type f -name '*.h')
+HEADERS = $(shell find $(SRC)/ -type f -name '*.h')
 
 # Test & Release
-OBJS_PRG = \
-	$(OBJS_DEPS) \
-	$(addprefix $(BUILD_TEST)/, $(addsuffix .o,$(MODULES_PRG)))
-OBJS_RLS = \
-	$(OBJS_DEPS) \
-	$(addprefix $(BUILD_OBJS)/, $(addsuffix .o,$(MODULES_PRG)))
+OBJS_PROF = $(addprefix $(BUILD_OBJ_PROF)/, $(addsuffix .o,$(MODULES)))
+OBJS_TEST = $(addprefix $(BUILD_OBJ_TEST)/, $(addsuffix .o,$(MODULES)))
+OBJS_RELEASE = $(addprefix $(BUILD_OBJ_RELEASE)/, $(addsuffix .o,$(MODULES)))
 
 # Special MAKE variable - do not rename.
-VPATH = \
-	$(shell find $(SRC)/ -type d) \
-	$(shell find $(SRC_DEPS)/ -type d)
-#
-LIB = $(shell echo $(JLL_HOME))/build/jl.o
-COMPILE = printf "[COMP/PROJ] Compiling $<....\n";$(CC) # -to- $@.
+VPATH = $(shell find $(SRC)/ -type d)
 # target: init
-FOLDERS = build/ libs/ src/
+FOLDERS = build/ src/
 
 ################################################################################
+jl-lib:
+	mkdir -p src/lib/jl-lib/
+	cp -ur $(shell echo $(JLL_HOME))/src/C/* src/lib/jl-lib/
 
--release: build-notify $(FOLDERS) -publish $(OBJS_RLS) -build
--test: build-notify $(FOLDERS) -debug $(OBJS_PRG) -build
+-release: build-notify $(FOLDERS) -publish $(OBJS_RELEASE) -build
+-test: build-notify $(FOLDERS) -test1 $(OBJS_TEST) -build
+-prof: build-notify $(FOLDERS) -test2 $(OBJS_PROF) -build
+
+prof: -prof
+	./$(JL_OUT)
 
 test: -test
 	./$(JL_OUT)
@@ -111,10 +94,7 @@ init: $(FOLDERS)
 	printf "[COMPILE] Done!\n"
 
 build-notify:
-	echo Modules: $(MODULES_PRG) $(MODULES_DEPS)
-	echo Headers: $(HEADERS_PRG) / $(HEADERS_DEPS)
-	echo Folders: N/A #$(VPATH)
-	printf "[COMP] Building program for target=$(PLATFORM)....\n"
+	# Building program for target=$(PLATFORM)....
 
 clean:
 	rm -r build/bin/ build/deps build/objs/ build/test/
@@ -122,42 +102,46 @@ clean:
 
 ################################################################################
 
-$(BUILD)/%.o: %.c $(HEADERS_PRG) $(HEADERS_DEPS)
-	$(COMPILE) $(CFLAGS) -o $@ -c $< $(JL_DEBUG)
-$(BUILD_TEST)/%.o: %.c $(HEADERS_PRG) $(HEADERS_DEPS)
-	$(COMPILE) $(CFLAGS) -o $@ -c $< $(JL_DEBUG)
-$(BUILD_OBJS)/%.o: %.c $(HEADERS_PRG) $(HEADERS_DEPS)
-	$(COMPILE) $(CFLAGS) -o $@ -c $< $(JL_DEBUG)
-$(BUILD_DEPS)/%.o: %.c $(HEADERS_DEPS)
-	printf "[COMP/DEPS] Compiling \"$<\" -to- \"$@\"....\n";
-	$(CC) -o $@ -c $< -O3 $(CFLAGS)
+$(BUILD_OBJ_PROF)/%.o: %.c $(HEADERS)
+	# Compiling Build $<....\n";
+	$(CC) $(CFLAGS) -o $@ -c $< $(JL_DEBUG)
+$(BUILD_OBJ_TEST)/%.o: %.c $(HEADERS)
+	# Compiling Test $<....\n";
+	$(CC) $(CFLAGS) -o $@ -c $< $(JL_DEBUG)
+$(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
+	# Compiling Release $<....\n";
+	$(CC) $(CFLAGS) -o $@ -c $< $(JL_DEBUG)
 
 -init-vars:
 	# Build Project
-	$(eval INCLUDES_DEPS=\
-		$(addprefix -I, $(shell find $(SRC_DEPS)/ -type d)))
 	$(eval CFLAGS_INCLUDES=\
 		-I$(shell echo $(JLL_HOME))/src/C/include/\
 		-I$(shell echo $(JLL_HOME))/src/lib/include/\
-		-iquote $(addprefix -I, $(shell find src/ -type d ))\
-		$(addprefix -I, $(shell find $(SRC_DEPS)/ -type d)))
+		-iquote $(addprefix -I, $(shell find src/ -type d )))
 	$(eval CFLAGS=$(CFLAGS_INCLUDES) -Wall)
 
--debug: -init-vars
+-test1: -init-vars
+#	$(eval GL_VERSION=-lGL) ## OpenGL
+	$(eval GL_VERSION=-lGLESv2) ## OpenGL ES
+	$(eval JL_DEBUG=-g)
+	$(eval JL_OUT=build/test.out)
+	$(eval OBJS=$(OBJS_TEST))
+-test2: -init-vars
 #	$(eval GL_VERSION=-lGL) ## OpenGL
 	$(eval GL_VERSION=-lGLESv2) ## OpenGL ES
 	$(eval JL_DEBUG=-pg -g)
 	$(eval JL_OUT=build/test.out)
-	$(eval OBJS=$(OBJS_PRG))
+	$(eval OBJS=$(OBJS_TEST))
 -publish: -init-vars
 #	$(eval GL_VERSION=-lGL) ## OpenGL
 	$(eval GL_VERSION=-lGLESv2) ## OpenGL ES
 	$(eval JL_DEBUG=-O3 -Werror)
 	$(eval JL_OUT=build/bin/$(PACKNAME))
-	$(eval OBJS=$(OBJS_RLS))
+	$(eval OBJS=$(OBJS_RELEASE))
 -build:
 	printf "[COMP] Linking ....\n"
-	$(CC) $(OBJS) $(LIB) -o $(JL_OUT) $(CFLAGS) \
+	$(CC) $(OBJS) $(shell echo $(JLL_HOME))/build/deps.o \
+		-o $(JL_OUT) $(CFLAGS) \
 		-lm -lz -ldl -lpthread -lstdc++ -ljpeg \
 		`$(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/sdl2-config --libs` \
 		$(LINKER_LIBS) $(PLATFORM_CFLAGS) \
@@ -166,13 +150,10 @@ $(BUILD_DEPS)/%.o: %.c $(HEADERS_DEPS)
 build/:
 	# Generated Files
 	mkdir -p build/bin/ # Where the output files are stored
-	mkdir -p build/deps/ # Where your project's dependencies are stored (.o)
 	mkdir -p build/objs/ # Where your program's object files are stored (.o)
 	mkdir -p build/test/ # Unoptimized version of build/objs/
-libs/:
-	mkdir -p libs/ # Where the dependencies for your project are stored (.c*)
 src/:
 	# Where your program's code files are stored (.c*)
 	mkdir -p src/include/ # Where your program's header files are stored.
-	mkdir -p src/media/ # Where your media files are stored.
+	mkdir -p src/lib/ # Where the dependencies for your project are stored (.c*)
 #end#

@@ -4,11 +4,26 @@ DEPS_VER_SDL_IMAGE = SDL2_image-2.0.1
 DEPS_VER_SDL_MIXER = SDL2_mixer-2.0.1
 DEPS_VER_SDL_NET = SDL2_net-2.0.1
 DEPS_VER_ZIP = libzip-1.1.2
-SRC_NDK = android-ndk-r11c
 
-#
-build: 
-	printf "[COMP] Built library!\n"
+SRC_NDK = android-ndk-r11c
+SRC_SDL = src/lib/sdl
+SRC_SDL_IMAGE = src/lib/sdl-image
+SRC_SDL_MIXER = src/lib/sdl-mixer
+SRC_SDL_NET = src/lib/sdl-net
+SRC_LIBZIP = src/lib/libzip
+
+OBJ_CLUMP = build/deps/clump.o
+OBJ_SDL = build/deps/sdl.o
+OBJ_SDL_IMAGE = build/deps/sdl-image.o
+OBJ_SDL_MIXER = build/deps/sdl-mixer.o
+OBJ_SDL_NET = build/deps/sdl-net.o
+OBJ_LIBZIP = build/deps/libzip.o
+
+# Default target
+build: $(OBJ_CLUMP) $(OBJ_SDL) $(OBJ_SDL_IMAGE) $(OBJ_SDL_MIXER) $(OBJ_SDL_NET) $(OBJ_LIBZIP)
+	# Linking library dependencies....
+	ar csr build/deps.o build/deps/*.o
+	# Built library dependencies!
 
 documentation:
 	doxygen compile-scripts/doxygen
@@ -23,28 +38,6 @@ else
  $(error "Platform is not supported")
 endif
 #TODO: Darwin is mac OS for uname
-
-HEADER = -Isrc/lib/ -Isrc/lib/include/ -I/opt/vc/include/ \
-	$(addprefix -I, $(shell find src/C/ -type d ))
-CC = gcc
-
-CLUMP_SRC = src/lib/clump
-SRC = src/C
-BUILD = build/obj
-# 
-MODULES = $(subst .c,, $(shell basename -a \
-	$(shell find $(SRC)/ -type f -name '*.c') \
-	$(shell find $(CLUMP_SRC)/ -type f -name '*.c') \
-))
-HEADERS = $(shell find $(SRC)/ -type f -name '*.h')
-# Special MAKE variable - do not rename.
-VPATH = \
-	$(shell find $(SRC)/ -type d) \
-	$(shell find $(CLUMP_SRC)/ -type d)
-#
-OBJS = $(addprefix $(BUILD)/, $(addsuffix .o,$(MODULES)))
-SHARED = $(BUILD)/jl.so
-STATIC = $(BUILD)/jl.a
 
 # The Set-Up Options.
 init-all: init-build deps-all
@@ -64,39 +57,10 @@ clean-build-all:
 clean-deps:
 	rm -r deps/
 
-$(BUILD)/%.o: %.c $(HEADERS)
-	printf "[COMP] compiling $<....\n"
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-build/jl.o: $(BUILD) $(OBJS)
-	printf "[COMP] compiling singular jl_lib object file....\n"
-	ar csr build/jl.o build/obj/*.o build/deps/*.o
-
--test: 
-	$(eval CFLAGS=-Wall -pg -g $(HEADER) $(PLATFORM_CFLAGS))
-
--release:
-	$(eval CFLAGS=-Wall -O3 $(HEADER) $(PLATFORM_CFLAGS))
-
-build-notify:
-	echo Modules: $(MODULES)
-	echo Headers: $(HEADERS)
-	echo Folders: $(VPATH)
-	printf "[COMP] Building jl_lib for target=$(PLATFORM)\n"
-
-# Build modules.
-test: -test build-notify build/jl.o
-	# Make "jl.o"
-	printf "[COMP] done!\n"
-
-release: -release build-notify build/jl.o
-	# Make "jl.o"
-	printf "[COMP] done!\n"
-
 # Lower Level
 deps-all: deps-most download-ndk
 deps-most: deps/ src/lib/include/ deps-sdl deps-libzip deps-sdl-net\
-	deps-sdl-image deps-sdl-mixer
+	deps-sdl-image deps-sdl-mixer deps-clump
 
 init-build:
 	mkdir -p build/deps/
@@ -108,11 +72,12 @@ deps/:
 src/lib/include/:
 	mkdir -p src/lib/include/
 
--download-sdl:
-	cd deps/ && \
+$(SRC_SDL):
+	cd src/lib/ && \
 	wget https://www.libsdl.org/release/$(DEPS_VER_SDL).zip && \
 	unzip $(DEPS_VER_SDL).zip && \
-	rm $(DEPS_VER_SDL).zip
+	rm $(DEPS_VER_SDL).zip && \
+	mv $(DEPS_VER_SDL) sdl
 
 download-ems:
 	cd deps/&& \
@@ -146,80 +111,59 @@ build-emscripten:
 	./emsdk update && \
 	./emsdk install latest && \
 	./emsdk activate latest
-deps-libzip:
-	printf "[COMP] downloading libzip...\n" && \
-	cd deps/ && \
+$(OBJ_LIBZIP):
+	# Downloading libzip....
+	cd src/lib && \
 	wget -4 http://www.nih.at/libzip/$(DEPS_VER_ZIP).tar.gz && \
 	tar -xzf $(DEPS_VER_ZIP).tar.gz && \
 	rm $(DEPS_VER_ZIP).tar.gz && \
-	printf "[COMP] compiling libzip...\n" && \
-	cd $(DEPS_VER_ZIP)/ && \
-	sh configure && \
-	make && \
-	ld -r lib/*.o -o ../../build/deps/lib_zip.o && \
-	cp lib/*.h ../../src/lib/include/ && \
-	printf "[COMP] done!\n"
-deps-sdl-image:
-	printf "[COMP] Downloading SDL_Image....\n" && \
-	cd deps/ && \
-	wget\
-	 https://www.libsdl.org/projects/SDL_image/release/$(DEPS_VER_SDL_IMAGE).zip\
-	 && \
+	mv $(DEPS_VER_ZIP)/ libzip
+	# Compiling libzip....
+	cd $(SRC_LIBZIP)/ && sh configure && make
+	ld -r $(SRC_LIBZIP)/lib/*.o -o $(OBJ_LIBZIP)
+	# Done!
+$(OBJ_SDL_IMAGE):
+	# Downloading SDL_Image....
+	cd src/lib/ && \
+	wget https://www.libsdl.org/projects/SDL_image/release/$(DEPS_VER_SDL_IMAGE).zip && \
 	unzip $(DEPS_VER_SDL_IMAGE).zip && \
 	rm $(DEPS_VER_SDL_IMAGE).zip && \
+	mv $(DEPS_VER_SDL_IMAGE) sdl-image
+	# Compiling SDL_image....
 	export PATH=$$PATH:`pwd`/$(DEPS_VER_SDL)/usr_local/bin/ && \
-	printf "[COMP] compiling SDL_image...\n" && \
-	cd $(DEPS_VER_SDL_IMAGE)/ && \
-#	autoreconf -vfi && \
-	sh configure && \
-	make && \
-	ld -r .libs/*.o -o ../../build/deps/lib_SDL_image.o && \
-#	printf "[COMP] compiling libjpeg...\n" && \
-#	cp external/jpeg-9/ ../../src/lib/ -r && \
-#	rm -f ../../src/lib/jpeg-9/jmemmac.c ../../src/lib/jpeg-9/jmem-android.c \
-#		../../src/lib/jpeg-9/jmemdos.c ../../src/lib/jpeg-9/example.c \
-#		../../src/lib/jpeg-9/jmemname.c && \
-	cp -t ../../src/lib/include/ SDL_image.h && \
-#external/jpeg-9/jpeglib.h \
-#external/jpeg-9/jconfig.h external/jpeg-9/jmorecfg.h && \
-	printf "[COMP] done!\n"
-deps-sdl-net:
-	printf "[COMP] downloading SDL_net...\n" && \
-	cd deps/ && \
-	wget https://www.libsdl.org/projects/SDL_net/release/$(DEPS_VER_SDL_NET).zip\
-	 && \
+	cd $(SRC_SDL_IMAGE)/ && sh configure && make
+	ld -r $(SRC_SDL_IMAGE)/.libs/*.o -o $(OBJ_SDL_IMAGE)
+	# Done!
+$(OBJ_SDL_NET):
+	# Downloading SDL_net....
+	cd src/lib/ && \
+	wget https://www.libsdl.org/projects/SDL_net/release/$(DEPS_VER_SDL_NET).zip && \
 	unzip $(DEPS_VER_SDL_NET).zip && \
 	rm $(DEPS_VER_SDL_NET).zip && \
-	printf "[COMP] compiling SDL_net...\n" && \
-	cd $(DEPS_VER_SDL_NET)/ && \
-	export SDL2_CONFIG=`pwd`/../$(DEPS_VER_SDL)/usr_local/bin/sdl2-config && \
-	sh configure && \
-	make && \
-	ar csr ../../build/deps/lib_SDL_net.o .libs/*.o && \
-	cp SDL_net.h ../../src/lib/include/ && \
+	mv $(DEPS_VER_SDL_NET) sdl-net
+	# Compiling SDL_net...,
+	cd $(SRC_SDL_NET)/ && export SDL2_CONFIG=`pwd`/../$(DEPS_VER_SDL)/usr_local/bin/sdl2-config && sh configure && make
+	# Linking....
+	ld -r $(SRC_SDL_NET)/.libs/*.o -o $(OBJ_SDL_NET)
 	printf "[COMP] done!\n"
 
-deps-sdl-mixer:
-	printf "[COMP] downloading SDL_mixer...\n" && \
-	cd deps/ && \
-	wget\
-	 https://www.libsdl.org/projects/SDL_mixer/release/$(DEPS_VER_SDL_MIXER).zip\
-	 && \
+$(OBJ_SDL_MIXER):
+	# Downloading SDL_mixer....
+	cd src/lib/ && \
+	wget https://www.libsdl.org/projects/SDL_mixer/release/$(DEPS_VER_SDL_MIXER).zip && \
 	unzip $(DEPS_VER_SDL_MIXER).zip && \
 	rm $(DEPS_VER_SDL_MIXER).zip && \
+	mv $(DEPS_VER_SDL_MIXER) sdl-mixer
+	# Compiling SDL_mixer....
 	export PATH=$$PATH:`pwd`/$(DEPS_VER_SDL)/usr_local/bin/ && \
-	printf "[COMP] compiling SDL_mixer...\n" && \
-	cd $(DEPS_VER_SDL_MIXER)/ && \
-	sh configure && \
-	make && \
-	rm -f build/playmus.o build/playwave.o && \
-	printf "[COMP] Linking...\n" && \
-	ld -r build/*.o -o ../../build/deps/lib_SDL_mixer.o && \
-	cp SDL_mixer.h ../../src/lib/include/SDL_mixer.h && \
-	printf "[COMP] done!\n"
+	cd $(SRC_SDL_MIXER)/ && sh configure && make
+	# Linking....
+	rm -f $(SRC_SDL_MIXER)/build/playmus.o $(SRC_SDL_MIXER)/build/playwave.o
+	ld -r $(SRC_SDL_MIXER)/build/*.o -o $(OBJ_SDL_MIXER)
+	# Done!
 
-build-clump:
-	printf "[COMP] compiling clump...\n"
+$(OBJ_CLUMP):
+	# Compiling clump....
 	gcc src/lib/clump/bitarray.c -c -o build/obj/clump_bitarray.o
 	gcc src/lib/clump/clump.c -c -o build/obj/clump_clump.o
 	gcc src/lib/clump/hash.c -c -o build/obj/clump_hash.o
@@ -227,7 +171,7 @@ build-clump:
 	gcc src/lib/clump/list.c -c -o build/obj/clump_list.o
 	gcc src/lib/clump/pool.c -c -o build/obj/clump_pool.o
 	gcc src/lib/clump/tree.c -c -o build/obj/clump_tree.o
-	ar csr build/deps/lib_clump.o build/obj/clump_*.o
-	printf "[COMP] done!\n"	
+	ld -r build/obj/clump_*.o -o $(OBJ_CLUMP)
+	# Done!	
 
 ################################################################################

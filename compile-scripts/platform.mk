@@ -2,7 +2,7 @@ ifneq ("$(shell uname | grep Linux)", "")
  ifneq ("$(shell uname -m | grep arm)", "")
   # Build for Raspberry Pi
   PLATFORM = rpi
-  PLATFORM_CFLAGS = -L/opt/vc/lib/ -lbcm_host
+  PLATFORM_CFLAGS = -L/opt/vc/lib/ -lbcm_host -DJL_PLAT_RPI
  else
   # Build for Other Linux Target
   PLATFORM = linux

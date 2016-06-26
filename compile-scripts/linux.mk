@@ -1,10 +1,7 @@
 PLATFORM = Linux
 
-deps-sdl: -download-sdl
-	printf "[COMP] compiling SDL...\n" && \
-	cd deps/$(DEPS_VER_SDL)/ && \
-	sh configure --prefix=`pwd`/usr_local/ && \
-	make -j 4 && make install && \
-	ld -r build/.libs/*.o -o ../../build/deps/lib_SDL.o && \
-	cp include/*.h ../../src/lib/include/ && \
+$(OBJ_SDL): $(SRC_SDL)
+	printf "[COMP] compiling SDL...\n"
+	cd $(SRC_SDL)/ && sh configure --prefix=`pwd`/usr_local/ && make -j 4 && make install
+	ld -r $(SRC_SDL)/build/.libs/*.o -o $(OBJ_SDL)
 	printf "[COMP] done!\n"

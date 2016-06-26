@@ -1,7 +1,7 @@
-![alt text](https://oxydeadbeef.github.io/jl-lib/html/logo.png)
 
 
-# INTRODUCTION
+# INTRODUCTION --- ![alt text](https://oxydeadbeef.github.io/jl-lib/html/logo.png)
+
 
 
 JL_LIB is a powerful & easy to use library that uses OpenGL/OpenGLES

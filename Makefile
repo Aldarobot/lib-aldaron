@@ -10,6 +10,9 @@ SRC_NDK = android-ndk-r11c
 build: 
 	printf "[COMP] Built library!\n"
 
+documentation:
+	doxygen compile-scripts/doxygen
+
 ifneq ("$(shell uname | grep Linux)", "")
  ifneq ("$(shell uname -m | grep arm)", "")
   include compile-scripts/rpi.mk

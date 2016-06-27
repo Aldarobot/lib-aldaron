@@ -28,13 +28,6 @@
  */
 #define JL_VERSION "6.0.0 beta"
 
-// Uncommented for debugging ( GL/SDL error check && verbose printing. )
-#define JL_DEBUG_LIB
-
-#ifdef JL_DEBUG_LIB
-	#define DEBUG
-#endif
-
 //Platform Declarations
 #define JL_PLAT_COMPUTER 0 //PC/MAC
 #define JL_PLAT_PHONE 1 //ANDROID/IPHONE
@@ -267,7 +260,7 @@ void jl_print_rewrite(jl_t* jl, const char* format, ... );
 void jl_print_function(jl_t* jl, str_t fn_name);
 void jl_print_return(jl_t* jl, str_t fn_name);
 void jl_print_stacktrace(jl_t* jl);
-#ifdef DEBUG
+#ifdef JL_DEBUG
 	#define JL_PRINT_DEBUG(jl, ...) jl_print(jl, __VA_ARGS__)
 #else
 	#define JL_PRINT_DEBUG(jl, ...)

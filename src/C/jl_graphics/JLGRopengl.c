@@ -70,7 +70,7 @@ static void jl_gl_framebuffer_status__(jlgr_t* jlgr);
 static void jl_gl_framebuffer_use__(jlgr_t* jlgr, jl_pr_t* pr);
 
 // Definitions:
-#ifdef JL_DEBUG_LIB
+#ifdef JL_DEBUG
 	#define JL_GL_ERROR(jlgr, x, fname) jl_gl_get_error___(jlgr, x, fname)
 	#define JL_EGL_ERROR(jlgr, x, fname) jl_gl_egl_geterror__(jlgr, x, fname)
 #else
@@ -80,7 +80,7 @@ static void jl_gl_framebuffer_use__(jlgr_t* jlgr, jl_pr_t* pr);
 
 // Functions:
 
-#ifdef JL_DEBUG_LIB
+#ifdef JL_DEBUG
 	static void jl_gl_get_error___(jlgr_t* jlgr, int width, str_t fname) {
 		uint8_t thread = jl_thread_current(jlgr->jl);
 		if(thread != 1) {
@@ -118,7 +118,7 @@ static void jl_gl_buffer_use__(jlgr_t* jlgr, GLuint *buffer) {
 	// Make buffer if not initialized.
 	if(*buffer == 0) {
 		glGenBuffers(1, buffer);
-#ifdef JL_DEBUG_LIB
+#ifdef JL_DEBUG
 		JL_GL_ERROR(jlgr, 0,"buffer gen");
 		if(*buffer == 0) {
 			jl_print(jlgr->jl,
@@ -247,7 +247,7 @@ GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 
 static void jl_gl_texture_make__(jlgr_t* jlgr, uint32_t *tex) {
 	glGenTextures(1, tex);
-#ifdef JL_DEBUG_LIB
+#ifdef JL_DEBUG
 	if(!(*tex)) {
 		JL_GL_ERROR(jlgr, 0, "jl_gl_texture_make__: glGenTextures");
 		jl_print(jlgr->jl, "jl_gl_texture_make__: GL tex = 0");
@@ -289,7 +289,7 @@ static void jl_gl_texture__bind__(jlgr_t* jlgr, uint32_t tex) {
 }
 
 // Bind a texture.
-#ifdef JL_DEBUG_LIB
+#ifdef JL_DEBUG
 static void jl_gl_texture_bind__(jlgr_t* jlgr, uint32_t tex) {
 	if(tex == 0) {
 		jl_print(jlgr->jl, "jl_gl_texture_bind__: GL tex = 0");
@@ -353,7 +353,7 @@ uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 
 //Lower Level Stuff
 static inline void jl_gl_usep__(jlgr_t* jlgr, GLuint prg) {
-#ifdef JL_DEBUG_LIB
+#ifdef JL_DEBUG
 	if(!prg) {
 		jl_print(jlgr->jl, "shader program uninit'd!");
 		exit(-1);
@@ -802,7 +802,7 @@ void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
 void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* vo, float a, uint32_t tx) {
 	_jl_gl_txtr(jlgr, &vo, a, 0);
 	vo->tx = tx;
-#ifdef JL_DEBUG_LIB
+#ifdef JL_DEBUG
 	if(!vo->tx) {
 		jl_print(jlgr->jl, "Error: Texture=0!");
 		jl_print_stacktrace(jlgr->jl);

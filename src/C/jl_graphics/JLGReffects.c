@@ -33,4 +33,5 @@ void jlgr_effects_init__(jlgr_t* jlgr) {
 	JL_PRINT_DEBUG(jlgr->jl, "MAKING EFFECT: HUE");
 	jlgr_gl_shader_init(jlgr, &jlgr->effects.hue, NULL,
 		JL_EFFECT_HUE, "new_color");
+	JL_PRINT_DEBUG(jlgr->jl, "MADE EFFECTS!");
 }

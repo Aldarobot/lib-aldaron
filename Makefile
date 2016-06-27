@@ -20,7 +20,7 @@ OBJ_SDL_NET = build/deps/sdl-net.o
 OBJ_LIBZIP = build/deps/libzip.o
 
 # Default target
-build: $(OBJ_CLUMP) $(OBJ_SDL) $(OBJ_SDL_IMAGE) $(OBJ_SDL_MIXER) $(OBJ_SDL_NET) $(OBJ_LIBZIP)
+build: build/ $(OBJ_CLUMP) $(OBJ_SDL) $(OBJ_SDL_IMAGE) $(OBJ_SDL_MIXER) $(OBJ_SDL_NET) $(OBJ_LIBZIP)
 	# Linking library dependencies....
 	ar csr build/deps.o build/deps/*.o
 	# Built library dependencies!
@@ -54,20 +54,15 @@ clean-build:
 	printf "[COMP] Done!\n"
 clean-build-all:
 	rm -r build/
-clean-deps:
-	rm -r deps/
 
 # Lower Level
 deps-all: deps-most download-ndk
 deps-most: deps/ src/lib/include/ deps-sdl deps-libzip deps-sdl-net\
 	deps-sdl-image deps-sdl-mixer deps-clump
 
-init-build:
+build/:
 	mkdir -p build/deps/
 	mkdir -p build/obj/
-
-deps/:
-	mkdir -p deps/
 
 src/lib/include/:
 	mkdir -p src/lib/include/
@@ -130,7 +125,7 @@ $(OBJ_SDL_IMAGE):
 	rm $(DEPS_VER_SDL_IMAGE).zip && \
 	mv $(DEPS_VER_SDL_IMAGE) sdl-image
 	# Compiling SDL_image....
-	export PATH=$$PATH:`pwd`/$(DEPS_VER_SDL)/usr_local/bin/ && \
+	export PATH=$$PATH:`pwd`/$(SRC_SDL)/usr_local/bin/ && \
 	cd $(SRC_SDL_IMAGE)/ && sh configure && make
 	ld -r $(SRC_SDL_IMAGE)/.libs/*.o -o $(OBJ_SDL_IMAGE)
 	# Done!
@@ -142,7 +137,7 @@ $(OBJ_SDL_NET):
 	rm $(DEPS_VER_SDL_NET).zip && \
 	mv $(DEPS_VER_SDL_NET) sdl-net
 	# Compiling SDL_net...,
-	cd $(SRC_SDL_NET)/ && export SDL2_CONFIG=`pwd`/../$(DEPS_VER_SDL)/usr_local/bin/sdl2-config && sh configure && make
+	cd $(SRC_SDL_NET)/ && export SDL2_CONFIG=`pwd`/../sdl/usr_local/bin/sdl2-config && sh configure && make
 	# Linking....
 	ld -r $(SRC_SDL_NET)/.libs/*.o -o $(OBJ_SDL_NET)
 	printf "[COMP] done!\n"
@@ -155,7 +150,7 @@ $(OBJ_SDL_MIXER):
 	rm $(DEPS_VER_SDL_MIXER).zip && \
 	mv $(DEPS_VER_SDL_MIXER) sdl-mixer
 	# Compiling SDL_mixer....
-	export PATH=$$PATH:`pwd`/$(DEPS_VER_SDL)/usr_local/bin/ && \
+	export PATH=$$PATH:`pwd`/$(SRC_SDL)/usr_local/bin/ && \
 	cd $(SRC_SDL_MIXER)/ && sh configure && make
 	# Linking....
 	rm -f $(SRC_SDL_MIXER)/build/playmus.o $(SRC_SDL_MIXER)/build/playwave.o

@@ -116,8 +116,14 @@ $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 	# Build Project
 	$(eval CFLAGS_INCLUDES=\
 		-I$(shell echo $(JLL_HOME))/src/C/include/\
-		-I$(shell echo $(JLL_HOME))/src/lib/include/\
-		-iquote $(addprefix -I, $(shell find src/ -type d )))
+		-I$(shell echo $(JLL_HOME))/src/lib/clump/\
+		-I$(shell echo $(JLL_HOME))/src/lib/libzip/lib\
+		-I$(shell echo $(JLL_HOME))/src/lib/sdl/include/\
+		-I$(shell echo $(JLL_HOME))/src/lib/sdl-image/\
+		-I$(shell echo $(JLL_HOME))/src/lib/sdl-mixer/\
+		-I$(shell echo $(JLL_HOME))/src/lib/sdl-net/\
+		-iquote $(addprefix -I, $(shell find src/ -type d ))\
+		$(PLATFORM_INCLUDES))
 	$(eval CFLAGS=$(CFLAGS_INCLUDES) -Wall)
 
 -test1: -init-vars
@@ -143,7 +149,7 @@ $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 	$(CC) $(OBJS) $(shell echo $(JLL_HOME))/build/deps.o \
 		-o $(JL_OUT) $(CFLAGS) \
 		-lm -lz -ldl -lpthread -lstdc++ -ljpeg \
-		`$(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/sdl2-config --libs` \
+		`$(shell echo $(JLL_HOME))/src/lib/sdl/sdl2-config --libs` \
 		$(LINKER_LIBS) $(PLATFORM_CFLAGS) \
 		$(GL_VERSION) $(JL_DEBUG)
 	printf "[COMP] Done [ OpenGL Version = $(GL_VERSION) ]!\n"

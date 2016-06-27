@@ -202,45 +202,45 @@ GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 
 	GLuint program = glCreateProgram();
 	JL_GL_ERROR(jlgr, 0,"glCreateProgram");
-	if (program) {
-		GLint linkStatus = GL_FALSE;
-
-		glAttachShader(program, vertexShader);
-		JL_GL_ERROR(jlgr, 0,"glAttachShader (vertex)");
-		glAttachShader(program, pixelShader);
-		JL_GL_ERROR(jlgr, 0,"glAttachShader (fragment)");
-		glLinkProgram(program);
-		JL_GL_ERROR(jlgr, 0,"glLinkProgram");
-		glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
-		JL_GL_ERROR(jlgr, 0,"glGetProgramiv");
-		glValidateProgram(program);
-		JL_GL_ERROR(jlgr, 1,"glValidateProgram");
-		if (linkStatus != GL_TRUE) {
-			GLint bufLength = 0;
-			char* buf;
-
-			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &bufLength);
-			JL_GL_ERROR(jlgr, 1,"glGetProgramiv");
-			if (bufLength) {
-				buf = (char*) malloc(bufLength);
-				if (buf) {
-					glGetProgramInfoLog(program, bufLength, NULL, buf);
-					jl_print(jlgr->jl,
-						"Could not link program:%s",buf);
-					exit(-1);
-				}else{
-					jl_print(jlgr->jl, "failed malloc");
-					exit(-1);
-				}
-			}else{
-				glDeleteProgram(program);
-				jl_print(jlgr->jl, "no info log");
-				exit(-1);
-			}
-		}
-	}else{
+	if (!program) {
 		jl_print(jlgr->jl, "Failed to load program");
 		exit(-1);
+	}
+
+	GLint linkStatus = GL_FALSE;
+
+	glAttachShader(program, vertexShader);
+	JL_GL_ERROR(jlgr, 0,"glAttachShader (vertex)");
+	glAttachShader(program, pixelShader);
+	JL_GL_ERROR(jlgr, 0,"glAttachShader (fragment)");
+	glLinkProgram(program);
+	JL_GL_ERROR(jlgr, 0,"glLinkProgram");
+	glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+	JL_GL_ERROR(jlgr, 0,"glGetProgramiv");
+	glValidateProgram(program);
+	JL_GL_ERROR(jlgr, 1,"glValidateProgram");
+	if (linkStatus != GL_TRUE) {
+		GLint bufLength = 0;
+		char* buf;
+
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &bufLength);
+		JL_GL_ERROR(jlgr, 1,"glGetProgramiv");
+		if (bufLength) {
+			buf = (char*) malloc(bufLength);
+			if (buf) {
+				glGetProgramInfoLog(program, bufLength, NULL, buf);
+				jl_print(jlgr->jl,
+					"Could not link program:%s",buf);
+				exit(-1);
+			}else{
+				jl_print(jlgr->jl, "failed malloc");
+				exit(-1);
+			}
+		}else{
+			glDeleteProgram(program);
+			jl_print(jlgr->jl, "no info log");
+			exit(-1);
+		}
 	}
 	return program;
 }

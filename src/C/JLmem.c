@@ -6,7 +6,7 @@
  * the variables.  Has a specialized string type.
 */
 
-#include "jl_pr.h"
+#include "JLprivate.h"
 #include <malloc.h>
 
 /**

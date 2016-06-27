@@ -1,5 +1,7 @@
 // JL_LIB
 	#include "jl.h"
+	#include "jlau.h"
+	#include "jlgr.h"
 // Standard Libraries
 	#include <stdio.h>
 	#include <dirent.h>

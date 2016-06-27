@@ -6,7 +6,7 @@
  * JLGRtext.c
  *	Draw text on screen.
  */
-#include "JLGRinternal.h"
+#include "JLGRprivate.h"
 
 void jlgr_text_init__(jlgr_t* jlgr) {
 }

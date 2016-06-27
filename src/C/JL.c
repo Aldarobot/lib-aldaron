@@ -1,4 +1,4 @@
-#include "jl_pr.h"
+#include "JLprivate.h"
 
 #if JL_PLAT == JL_PLAT_PHONE
 	#include <jni.h>

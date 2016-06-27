@@ -6,7 +6,7 @@
  * JLGRsprite.c
  *	Handles the sprites.
  */
-#include "JLGRinternal.h"
+#include "JLGRprivate.h"
 
 static void jlgr_sprite_draw_to_pr__(jl_t *jl) {
 	jl_sprite_t *sprite = jl_mem_temp(jl, NULL);

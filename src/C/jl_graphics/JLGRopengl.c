@@ -1,4 +1,4 @@
-#include "JLGRinternal.h"
+#include "JLGRprivate.h"
 
 // Shader Code
 

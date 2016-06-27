@@ -1,5 +1,5 @@
-#include "JLgr.h"
-#include "jl_pr.h"
+#include "jlgr.h"
+#include "JLprivate.h"
 
 typedef enum{
 	JLGR_ID_NULL,

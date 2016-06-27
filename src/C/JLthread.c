@@ -6,7 +6,7 @@
  * JLthread.c
  *	This file handles a separate thread for drawing graphics.
 **/
-#include "jl_pr.h"
+#include "JLprivate.h"
 
 //
 // Static Functions

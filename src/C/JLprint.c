@@ -8,7 +8,7 @@
  *	trace.
 **/
 
-#include "jl_pr.h"
+#include "JLprivate.h"
 
 static void _jl_print_current(jl_t *jl, uint8_t thread_id) {
 	int i;

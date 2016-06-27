@@ -6,7 +6,7 @@
  * JLGRmenu.c
  *	This file handles the menubar.
 **/
-#include "JLGRinternal.h"
+#include "JLGRprivate.h"
 
 typedef struct{
 	// Used for all icons on the menubar.

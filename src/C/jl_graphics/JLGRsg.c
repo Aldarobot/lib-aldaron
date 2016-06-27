@@ -6,7 +6,7 @@
  * JLGRsg.c
  *	sg AKA. Simple Graphics does the window handling.
 **/
-#include "JLGRinternal.h"
+#include "JLGRprivate.h"
 
 // SG Prototypes
 void jl_gl_draw_prendered(jlgr_t* jlgr, jl_vo_t* pv);

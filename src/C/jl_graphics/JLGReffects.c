@@ -1,4 +1,4 @@
-#include "JLGRinternal.h"
+#include "JLGRprivate.h"
 
 const char *JL_EFFECT_ALPHA = 
 	GLSL_HEAD

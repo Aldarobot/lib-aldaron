@@ -6,7 +6,7 @@
  * JLGRmouse.c
  *	This file handles the mouse.
 **/
-#include "JLGRinternal.h"
+#include "JLGRprivate.h"
 
 //
 // Static Functions

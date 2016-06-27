@@ -6,7 +6,7 @@
  * JLfiles.c
  * 	This allows you to modify the file system.  It uses libzip.
  */
-#include "jl_pr.h"
+#include "JLprivate.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>

@@ -1,4 +1,4 @@
-#include "JLGRinternal.h"
+#include "JLGRprivate.h"
 
 static char* jlgr_file_fullname__(jlgr_t* jlgr, char* selecteddir,
 	char* selecteditem)

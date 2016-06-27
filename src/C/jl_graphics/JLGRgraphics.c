@@ -7,7 +7,7 @@
  *	A High Level Graphics Library that supports sprites, texture loading,
  *	2D rendering & 3D rendering.
  */
-#include "JLGRinternal.h"
+#include "JLGRprivate.h"
 
 typedef struct {
 	jl_vec3_t where[2];

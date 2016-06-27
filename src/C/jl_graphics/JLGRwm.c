@@ -3,7 +3,7 @@
  *	Window Manager - Manages creating / destroying / redrawing windows.
 */
 
-#include "JLGRinternal.h"
+#include "JLGRprivate.h"
 
 #define JL_WM_FULLSCREEN SDL_WINDOW_FULLSCREEN_DESKTOP
 

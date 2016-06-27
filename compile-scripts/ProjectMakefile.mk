@@ -100,6 +100,12 @@ clean:
 	rm -r build/bin/ build/deps build/objs/ build/test/
 	mkdir -p build/bin/ build/deps build/objs/ build/test/
 
+clean-jl-lib:
+	rm -r src/lib/jl-lib/
+
+update-jl-lib: clean-jl-lib jl-lib
+	# Done!
+
 ################################################################################
 
 $(BUILD_OBJ_PROF)/%.o: %.c $(HEADERS)

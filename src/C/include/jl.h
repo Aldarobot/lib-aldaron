@@ -7,7 +7,69 @@
 #define JLL
 
 #include <stdint.h>
-#include "jl_me.h" // Simple CPU info
+#include "clump.h" // LibClump
+// Include libs
+#include "SDL_image.h"
+#if JL_PLAT == JL_PLAT_COMPUTER
+	#include "SDL.h"
+#elif JL_PLAT == JL_PLAT_PHONE
+	#include "SDL_test_common.h"
+	#include "SDL_main.h"
+#endif
+
+/**
+ * Version System:
+ * 	major version "." minor version "." debug version "."
+ *
+ *	A new major version is made every time your code will break.
+ *	A new minor version is made every time new features are added.
+ *	A new debug version is made for every debug.
+ *	A new -x version is made for every commit with alpha/beta extension.
+ */
+#define JL_VERSION "6.0.0 beta"
+
+// Uncommented for debugging ( GL/SDL error check && verbose printing. )
+#define JL_DEBUG_LIB
+
+#ifdef JL_DEBUG_LIB
+	#define DEBUG
+#endif
+
+//Platform Declarations
+#define JL_PLAT_COMPUTER 0 //PC/MAC
+#define JL_PLAT_PHONE 1 //ANDROID/IPHONE
+#define JL_PLAT_GAME 2 // 3DS
+#if defined(__IPHONEOS__) || defined(__ANDROID__)
+        #define JL_PLAT JL_PLAT_PHONE
+#else
+        #define JL_PLAT JL_PLAT_COMPUTER
+#endif
+
+//Determine Which OpenGL to use.
+
+#define JL_GLTYPE_NO_SPRT 0 // No Support for OpenGL
+// GLES version 2
+#define JL_GLTYPE_SDL_GL2 1 // Include OpenGL with SDL
+#define JL_GLTYPE_OPENGL2 2 // Include OpenGL with glut.
+#define JL_GLTYPE_SDL_ES2 3 // Include OpenGLES 2 with SDL
+#define JL_GLTYPE_OPENES2 4 // Include OpenGLES 2 standardly.
+// Newer versions...
+
+#define JL_GLTYPE JL_GLTYPE_NO_SPRT
+
+// Platform Capabilities.
+#if JL_PLAT == JL_PLAT_COMPUTER
+	// All Linux Platforms
+	#undef JL_GLTYPE
+	#define JL_GLTYPE JL_GLTYPE_SDL_ES2
+	// Windows
+	// #define JL_GLTYPE JL_GLTYPE_SDL_GL2
+#elif JL_PLAT == JL_PLAT_PHONE
+	#undef JL_GLTYPE
+	#define JL_GLTYPE JL_GLTYPE_SDL_ES2
+#else
+	#error "NO OpenGL support for this platform!"
+#endif
 
 // Return Values
 enum {
@@ -34,12 +96,113 @@ typedef enum{
 	JL_THREAD_PP_UF, // Push forcefully, and make unacceptable until pull
 }jl_thread_pp_t;
 
-#include "jl_ty.h" // Variable Types
-#include "jl_ct.h" // Input Types
-#include "clump.h" // LibClump
-// Include libs
-#include "JLgr.h"
-#include "JLau.h"
+typedef const char chr_t;	// Character Constant
+typedef const char* str_t;	// String Constant
+typedef char m_chr_t;		// Character Modifiable
+typedef char* m_str_t;		// String Modifiable
+
+typedef struct{
+	float x, y, z;
+}jl_vec3_t;
+
+//4 bytes of information about the string are included
+typedef struct{
+	uint8_t* data; //Actual String
+	uint32_t size; //Allocated Space In String
+	uint32_t curs; //Cursor In String
+}data_t;
+
+typedef struct{
+	SDL_mutex *lock;	/** The mutex lock on the "data" */
+	uint8_t pnum;		/** Number of packets in structure (upto 16 ) */
+	uint32_t size;		/** Size of "data" */
+	void* data[32];		/** The data attached to the mutex */
+}jl_comm_t;
+
+// Thread-Protected Variable
+typedef struct{
+	SDL_mutex *lock;	/** The mutex lock on the "data" */
+	void* data;		/** The data attached to the mutex */
+	uint64_t size;		/** Size of "data" */
+	uint8_t acceptable;	/** Accepts push 0/1 **/
+}jl_pvar_t;
+
+// Thread-Wait Variable
+typedef struct{
+	SDL_atomic_t wait;
+}jl_wait_t;
+
+//Standard Mode Class
+typedef struct {
+	void* init;
+	void* loop;
+	void* kill;
+}jl_mode_t;
+
+// Thread-Specific context.
+typedef struct{
+	SDL_Thread* thread;
+	SDL_threadID thread_id;
+
+	struct {
+		int8_t ofs2;
+		char stack[50][30];
+		uint8_t level;
+	}print;
+
+	void* temp_ptr;
+}jl_ctx_t;
+
+typedef struct{
+	struct {
+		uint8_t graphics; //graphics are enabled
+		uint8_t fileviewer; //Fileviewer is enabled
+		uint8_t filesys; // Filesystem is enabled.
+		uint8_t input; // Input is enabled.
+		uint8_t quickloop; // Quickloop is enabled
+	}has;
+	struct{
+		void* printfn; // Function for printing
+		uint8_t bkspc; // Backspace.
+		SDL_mutex* mutex; // Mutex for printing to terminal
+	}print;
+	struct{
+		double psec; // Seconds since last frame.
+		double timer; // Time 1 frame ago started
+	}time;
+	struct {
+		jl_mode_t *mdes; // Array Sizof Number Of Modes
+		jl_mode_t mode; // Current Mode Data
+		uint16_t which;
+		uint16_t count;
+	}mode;
+	struct {
+		struct{
+			char* root; // The root directory "-- JL_Lib/"
+			char* cprg; // The current program "-- JL_Lib/program"
+			char* errf; // The error file "-- JL_Lib/errf.txt"
+		}paths; // Paths to different files.
+
+		data_t separator;
+	}fl;
+	void* loop; // The main loop.
+	m_str_t name; // The name of the program.
+	uint32_t info; // @startup:# images loaded from media.zip.Set by others.
+	jl_err_t errf; // Set if error
+	//
+	uint8_t mode_switch_skip;
+	//
+	jl_ctx_t jl_ctx[16];
+	// Program's context.
+	void* prg_context;
+	// Built-in library pointers.
+	void* jlgr;
+	void* jlau;
+}jl_t;
+
+typedef void(*jl_fnct)(jl_t* jl);
+typedef void(*jl_data_fnct)(jl_t* jl, void* data);
+typedef void(*jl_print_fnt)(jl_t* jl, const char * print);
 
 #define JL_IMG_HEADER "JLVM0:JYMJ\0" // File format for images
 //1=format,4=size,x=data

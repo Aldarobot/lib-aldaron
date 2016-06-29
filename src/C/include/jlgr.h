@@ -532,7 +532,14 @@ void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
 void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
 	jl_tex_t* tex, float a);
 void jlgr_vo_old(jlgr_t* jlgr, jl_vo_t* pv);
-void jlgr_draw_text(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f);
+/**
+ * Draw text on the current pre-renderer.
+ * @param 'jl': library context
+ * @param 'str': the text to draw
+ * @param 'loc': the position to draw it at
+ * @param 'f': the font to use.
+**/
+void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f);
 void jlgr_draw_int(jlgr_t* jlgr, int64_t num, jl_vec3_t loc, jl_font_t f);
 void jlgr_draw_dec(jlgr_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
 	jl_font_t f);

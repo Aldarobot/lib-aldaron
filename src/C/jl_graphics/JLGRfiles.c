@@ -204,7 +204,7 @@ void jlgr_openfile_loop(jlgr_t* jlgr) {
 
 	jlgr_fill_image_set(jlgr, jlgr->textures.icon, 16, 16, 1, 1.);
 	jlgr_fill_image_draw(jlgr);
-	jlgr_draw_text(jlgr, "Select File", (jl_vec3_t) { .02, .02, 0. },
+	jlgr_text_draw(jlgr, "Select File", (jl_vec3_t) { .02, .02, 0. },
 		jlgr->font);
 
 	jlgr_input_do(jlgr, JL_INPUT_JOYC, jl_fl_user_select_dir__, NULL);
@@ -217,7 +217,7 @@ void jlgr_openfile_loop(jlgr_t* jlgr) {
 			stringtoprint = "//this folder//";
 		}
 		if(i - (jlgr->fl.cpage * (jlgr->fl.drawupto+1)) >= 0)
-			jlgr_draw_text(jlgr, stringtoprint, (jl_vec3_t) {
+			jlgr_text_draw(jlgr, stringtoprint, (jl_vec3_t) {
 				.06,
 				.08 + (jlgr->font.size *
 					(i - (jlgr->fl.cpage * (
@@ -252,10 +252,10 @@ void jlgr_openfile_loop(jlgr_t* jlgr) {
 			jlgr->fl.prompt = 0;
 		}
 	}else{
-		jlgr_draw_text(jlgr, ">", (jl_vec3_t) {
+		jlgr_text_draw(jlgr, ">", (jl_vec3_t) {
 			.02, .08 + (.04 * jlgr->fl.cursor), 0. },
 			jlgr->font);
-		jlgr_draw_text(jlgr, jlgr->fl.dirname,
+		jlgr_text_draw(jlgr, jlgr->fl.dirname,
 			(jl_vec3_t) { .02, jl_gl_ar(jlgr) - .02, 0. },
 			(jl_font_t) { jlgr->textures.icon, 0,
 				jlgr->fontcolor, .02});

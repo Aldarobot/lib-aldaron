@@ -139,7 +139,7 @@ static void jlgr_menubar_text__(jlgr_t* jlgr,float* color,float y,str_t text) {
 	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(&jlgr->menubar.menubar);
 	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), y, 0. };
 
-	jlgr_draw_text(jlgr, text, tr,
+	jlgr_text_draw(jlgr, text, tr,
 		(jl_font_t) { jlgr->textures.icon, 0, color, 
 			.1 / strlen(text)});
 }
@@ -171,12 +171,12 @@ static void jlgr_menu_name_draw__(jlgr_t* jlgr) {
 	float text_size = jl_gl_ar(jlgr) * .5;
 
 	jlgr_menu_name_draw2__(jlgr);
-	jlgr_draw_text(jlgr, jlgr->wm.windowTitle[0],
+	jlgr_text_draw(jlgr, jlgr->wm.windowTitle[0],
 		(jl_vec3_t) { 1. - (jl_gl_ar(jlgr) * (menu->draw.cursor+1.)),
 			0., 0. },
 		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, 
 			text_size});
-	jlgr_draw_text(jlgr, jlgr->wm.windowTitle[1],
+	jlgr_text_draw(jlgr, jlgr->wm.windowTitle[1],
 		(jl_vec3_t) { 1. - (jl_gl_ar(jlgr) * (menu->draw.cursor+1.)),
 			text_size, 0. },
 		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, 

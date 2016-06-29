@@ -57,7 +57,7 @@ uint16_t jlgr_wm_geth(jlgr_t* jlgr) {
  * @param jlgr: The library context.
  * @param window_name: What to name the window.
 **/
-void jlgr_wm_setwindowname(jlgr_t* jlgr, str_t window_name) {
+void jlgr_wm_setwindowname(jlgr_t* jlgr, const char* window_name) {
 	int ii;
 
 	SDL_SetWindowTitle(jlgr->wm.window, window_name);

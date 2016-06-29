@@ -543,13 +543,31 @@ void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f);
 void jlgr_draw_int(jlgr_t* jlgr, int64_t num, jl_vec3_t loc, jl_font_t f);
 void jlgr_draw_dec(jlgr_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
 	jl_font_t f);
-void jlgr_draw_text_area(jlgr_t* jlgr, jl_sprite_t * spr, str_t txt);
-void jlgr_draw_text_sprite(jlgr_t* jlgr,jl_sprite_t * spr, str_t txt);
+/**
+ * Draw text within the boundary of a sprite
+ * @param 'jl': library context
+ * @param 'spr': the boundary sprite
+ * @param 'txt': the text to draw
+**/
+void jlgr_text_draw_area(jlgr_t* jlgr, jl_sprite_t * spr, const char* txt);
+/**
+ * Draw a sprite, then draw text within the boundary of a sprite
+ * @param 'jl': library context
+ * @param 'spr': the boundary sprite
+ * @param 'txt': the text to draw
+**/
+void jlgr_draw_text_sprite(jlgr_t* jlgr, jl_sprite_t* spr, const char* txt);
 void jlgr_draw_ctxt(jlgr_t* jlgr, char *str, float yy, float* color);
 void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine);
 void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, uint8_t c, char* format, ...);
 void jlgr_term_msge(jlgr_t* jlgr, char* message);
-void jlgr_slidebtn_rsz(jlgr_t* jlgr, jl_sprite_t * spr, str_t txt);
+/**
+ * Re-draw/-size a slide button, and activate if it is pressed.
+ * @param jlgr: The library context.
+ * @param spr: The slide button sprite.
+ * @param txt: The text to draw on the button.
+**/
+void jlgr_slidebtn_rsz(jlgr_t* jlgr, jl_sprite_t * spr, const char* txt);
 void jlgr_slidebtn_loop(jlgr_t* jlgr, jl_sprite_t * spr, float defaultx,
 	float slidex, jlgr_input_fnct prun);
 void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
@@ -558,7 +576,13 @@ uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
 	float h, data_t* string);
 void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 	uint8_t isdouble, float* x1, float* x2);
-void jlgr_notify(jlgr_t* jlgr, str_t notification);
+/**
+ * THREAD: Main thread.
+ * Pop-Up a notification bar.
+ * @param jl: the libary context
+ * @param notification: The message to display.
+*/
+void jlgr_notify(jlgr_t* jlgr, const char* notification);
 
 // OpenGL
 void jl_gl_pbo_new(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
@@ -595,16 +619,39 @@ uint8_t jl_ct_typing_get(jlgr_t* pusr);
 void jl_ct_typing_disable(void);
 
 // JLGRfiles.c
-uint8_t jlgr_openfile_init(jlgr_t* jlgr, str_t program_name, void *newfiledata,
-	uint64_t newfilesize);
+/**
+ * Open directory for file viewer.
+ * If '!' is put at the beginning of "program_name", then it's treated as a
+ *	relative path instead of a program name.
+ * @param jl: The library context
+ * @param program_name: program name or '!'+relative path
+ * @param newfiledata: any new files created with the fileviewer will
+ *	automatically be saved with this data.
+ * @param newfilesize: size of "newfiledata"
+ * @returns 0: if can't open the directory. ( Doesn't exist, Bad permissions )
+ * @returns 1: on success.
+**/
+uint8_t jlgr_openfile_init(jlgr_t* jlgr, const char* program_name,
+	void *newfiledata, uint64_t newfilesize);
 void jlgr_openfile_loop(jlgr_t* jlgr);
-str_t jlgr_openfile_kill(jlgr_t* jlgr);
+/**
+ * Get the results from the file viewer.
+ * @param jlgr: Library Context.
+ * @returns: If done, name of selected file.  If not done, NULL is returned.
+**/
+const char* jlgr_openfile_kill(jlgr_t* jlgr);
 
 // Window Management
 void jlgr_wm_setfullscreen(jlgr_t* jlgr, uint8_t is);
 void jlgr_wm_togglefullscreen(jlgr_t* jlgr);
 uint16_t jlgr_wm_getw(jlgr_t* jlgr);
 uint16_t jlgr_wm_geth(jlgr_t* jlgr);
-void jlgr_wm_setwindowname(jlgr_t* jlgr, str_t window_name);
+/**
+ * THREAD: Drawing.
+ * Set the title of a window.
+ * @param jlgr: The library context.
+ * @param window_name: What to name the window.
+**/
+void jlgr_wm_setwindowname(jlgr_t* jlgr, const char* window_name);
 
 #endif

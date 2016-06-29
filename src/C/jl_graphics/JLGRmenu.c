@@ -135,7 +135,9 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 	jlgr->menubar.menubar.loop = jlgr_menubar_loop_;
 }
 
-static void jlgr_menubar_text__(jlgr_t* jlgr,float* color,float y,str_t text) {
+static void jlgr_menubar_text__(jlgr_t* jlgr, float* color, float y,
+	const char* text)
+{
 	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(&jlgr->menubar.menubar);
 	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), y, 0. };
 

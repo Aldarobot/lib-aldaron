@@ -30,7 +30,7 @@ static void jl_fl_user_select_check_extradir__(char *dirname) {
 static uint8_t jl_fl_user_select_open_dir__(jlgr_t* jlgr, char *dirname) {
 	DIR *dir;
 	struct dirent *ent;
-	str_t converted_filename;
+	const char* converted_filename;
 
 	jl_fl_user_select_check_extradir__(dirname);
 	if(dirname[1] == '\0') {
@@ -96,8 +96,8 @@ static uint8_t jl_fl_user_select_open_dir__(jlgr_t* jlgr, char *dirname) {
  * @returns 0: if can't open the directory. ( Doesn't exist, Bad permissions )
  * @returns 1: on success.
 **/
-uint8_t jlgr_openfile_init(jlgr_t* jlgr, str_t program_name, void *newfiledata,
-	uint64_t newfilesize)
+uint8_t jlgr_openfile_init(jlgr_t* jlgr, const char* program_name,
+	void *newfiledata, uint64_t newfilesize)
 {
 	jlgr->fl.returnit = 0;
 	jlgr->fl.inloop = 1;
@@ -267,10 +267,10 @@ void jlgr_openfile_loop(jlgr_t* jlgr) {
 
 /**
  * Get the results from the file viewer.
- * @param jl: Library Context.
+ * @param jlgr: Library Context.
  * @returns: If done, name of selected file.  If not done, NULL is returned.
 **/
-str_t jlgr_openfile_kill(jlgr_t* jlgr) {
+const char* jlgr_openfile_kill(jlgr_t* jlgr) {
 	if(jlgr->fl.returnit)
 		return jlgr->fl.dirname;
 	else

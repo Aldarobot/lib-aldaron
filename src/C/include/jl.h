@@ -89,11 +89,6 @@ typedef enum{
 	JL_THREAD_PP_UF, // Push forcefully, and make unacceptable until pull
 }jl_thread_pp_t;
 
-typedef const char chr_t;	// Character Constant
-typedef const char* str_t;	// String Constant
-typedef char m_chr_t;		// Character Modifiable
-typedef char* m_str_t;		// String Modifiable
-
 typedef struct{
 	float x, y, z;
 }jl_vec3_t;
@@ -179,7 +174,7 @@ typedef struct{
 		data_t separator;
 	}fl;
 	void* loop; // The main loop.
-	m_str_t name; // The name of the program.
+	char* name; // The name of the program.
 	uint32_t info; // @startup:# images loaded from media.zip.Set by others.
 	jl_err_t errf; // Set if error
 	//
@@ -210,11 +205,28 @@ void *jl_mem(jl_t* jl, void *a, uint32_t size);
 void *jl_memi(jl_t* jl, uint32_t size);
 void *jl_mem_copy(jl_t* jl, const void *src, uint64_t size);
 uint64_t jl_mem_tbiu(void);
+/**
+ * Start checking for memory leaks.  Pair up with 1 or multiple calls to
+ * jl_mem_leak_fail() to check for memory leaks.
+ * @param jl: The library context.
+**/
 void jl_mem_leak_init(jl_t* jl);
-void jl_mem_leak_fail(jl_t* jl, str_t fn_name);
+/**
+ * Exit if there's been a memory leak since the last call to jl_mem_leak_init().
+ * @param jl: The library context.
+ * @param fn_name: Recommended that it is the name of function that leak could
+ * happen in, but can be whatever you want.
+**/
+void jl_mem_leak_fail(jl_t* jl, const char* fn_name);
 void jl_mem_clr(void* mem, uint64_t size);
 void jl_mem_copyto(const void* src, void* dst, uint64_t size);
-void jl_mem_format(char* rtn, str_t format, ... );
+/**
+ * Format a string.
+ * @param rtn: A variable to put the formated string.  It is assumed the size is
+ *	80 bytes ( char rtn[80] )
+ * @param format: The format string, can include %s, %f, %d, etc.
+**/
+void jl_mem_format(char* rtn, const char* format, ... );
 uint32_t jl_mem_random_int(uint32_t a);
 void *jl_mem_temp(jl_t* jl, void *mem);
 double jl_mem_addwrange(double v1, double v2);
@@ -224,7 +236,12 @@ double jl_mem_difwrange(double v1, double v2);
 void jl_data_clear(jl_t* jl, data_t* pa);
 void jl_data_init(jl_t* jl, data_t* a, uint32_t size);
 void jl_data_free(data_t* pstr);
-void jl_data_mkfrom_str(data_t* a, str_t string);
+/**
+ * Converts "string" into a data_t* and returns it.
+ * @param string: String to convert
+ * @returns: new "strt" with same contents as "string".
+*/
+void jl_data_mkfrom_str(data_t* a, const char* string);
 void jl_data_mkfrom_data(jl_t* jl, data_t* a, uint32_t size, const void *data);
 void jl_data_data(jl_t *jl, data_t* a, const data_t* b, uint64_t bytes);
 void jl_data_merg(jl_t *jl, data_t* a, const data_t* b);
@@ -238,7 +255,14 @@ void jl_data_resize(jl_t *jl, data_t* pstr, uint32_t newsize);
 void jl_data_insert_byte(jl_t *jl, data_t* pstr, uint8_t pvalue);
 void jl_data_insert_data(jl_t *jl, data_t* pstr, const void* data, uint32_t size);
 char* jl_data_tostring(jl_t* jl, data_t* a);
-uint8_t jl_data_test_next(data_t* script, str_t particle);
+/**
+ * Tests if the next thing in array script is equivalent to particle.
+ * @param script: The array script.
+ * @param particle: The phrase to look for.
+ * @return 1: If particle is at the cursor.
+ * @return 0: If particle is not at the cursor.
+*/
+uint8_t jl_data_test_next(data_t* script, const char* particle);
 void jl_data_read_upto(jl_t* jl, data_t* compiled, data_t* script, uint8_t end,
 	uint32_t psize);
 
@@ -255,10 +279,25 @@ void jl_mode_exit(jl_t* jl);
 
 // "JLprint.c"
 void jl_print_set(jl_t* jl, jl_print_fnt fn_);
-void jl_print(jl_t* jl, str_t format, ... );
+/**
+ * Print text to the terminal.
+ * @param jl: the library context.
+ * @param format: what to print.
+*/
+void jl_print(jl_t* jl, const char* format, ... );
 void jl_print_rewrite(jl_t* jl, const char* format, ... );
-void jl_print_function(jl_t* jl, str_t fn_name);
-void jl_print_return(jl_t* jl, str_t fn_name);
+/**
+ * Open a printing block.
+ * @param jl: The library context.
+ * @param fn_name: The name of the block.
+**/
+void jl_print_function(jl_t* jl, const char* fn_name);
+/**
+ * Close a printing block.
+ * @param jl: The library context.
+ * @param fn_name: The name of the block.
+**/
+void jl_print_return(jl_t* jl, const char* fn_name);
 void jl_print_stacktrace(jl_t* jl);
 #ifdef JL_DEBUG
 	#define JL_PRINT_DEBUG(jl, ...) jl_print(jl, __VA_ARGS__)
@@ -267,24 +306,97 @@ void jl_print_stacktrace(jl_t* jl);
 #endif
 
 // "JLfile.c"
-void jl_file_print(jl_t* jl, str_t fname, str_t msg);
-uint8_t jl_file_exist(jl_t* jl, str_t path);
-void jl_file_rm(jl_t* jl, str_t filename);
-void jl_file_save(jl_t* jl, const void *file, const char *name,
-	uint32_t bytes);
-void jl_file_load(jl_t* jl, data_t* load, str_t file_name);
-char jl_file_pk_save(jl_t* jl, str_t packageFileName, str_t fileName,
-	void *data, uint64_t dataSize);
+/**
+ * Print text to a file.
+ * @param jl: The library context.
+ * @param fname: The name of the file to print to.
+ * @param msg: The text to print.
+**/
+void jl_file_print(jl_t* jl, const char* fname, const char* msg);
+/**
+ * Check whether a file or directory exists.
+ * @param jl: The library context.
+ * @param path: The path to the file to check.
+ * @returns 0: If the file doesn't exist.
+ * @returns 1: If the file does exist and is a directory.
+ * @returns 2: If the file does exist and isn't a directory.
+ * @returns 3: If the file exists and the user doesn't have permissions to open.
+ * @returns 255: This should never happen.
+**/
+uint8_t jl_file_exist(jl_t* jl, const char* path);
+/**
+ * Delete a file.
+ * @param jl: The library context.
+ * @param filename: The path of the file to delete.
+**/
+void jl_file_rm(jl_t* jl, const char* filename);
+/**
+ * Save A File To The File System.  Save Data of "bytes" bytes in "file" to
+ * file "name"
+ * @param jl: Library Context
+ * @param file: Data To Save To File
+ * @param name: The Name Of The File to save to
+ * @param bytes: Size of "File"
+ */
+void jl_file_save(jl_t* jl, const void *file, const char *name, uint32_t bytes);
+/**
+ * Load a File from the file system.  Returns bytes loaded from "file_name"
+ * @param jl: Library Context
+ * @param load: Location to store loaded data.
+ * @param file_name: file to load
+ * @returns A readable "strt" containing the bytes from the file.
+ */
+void jl_file_load(jl_t* jl, data_t* load, const char* file_name);
+/**
+ * Save file "filename" with contents "data" of size "dataSize" to package
+ * "packageFileName"
+ * @param jl: Library Context
+ * @param packageFileName: Name of package to Save to
+ * @param fileName: the file to Save to within the package.
+ * @param data: the data to save to the file
+ * @param dataSize: the # of bytes to save from the data to the file.
+ * @returns 0: On success
+ * @returns 1: If File is unable to be made.
+ */
+char jl_file_pk_save(jl_t* jl, const char* packageFileName,
+	const char* fileName, void *data, uint64_t dataSize);
 char* jl_file_pk_compress(jl_t* jl, const char* folderName);
-void jl_file_pk_load_fdata(jl_t* jl,data_t* rtn,data_t* data,str_t file_name);
+/**
+ * Load a zip package from memory.
+ * @param jl: The library context.
+ * @param rtn: An empty data_t structure to return to.  Needs to be freed.
+ * @param data: The data that contains the zip file.
+ * @param file_name: The name of the file to load.
+**/
+void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
+	const char* file_name);
 void jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
 	const char *filename);
 uint8_t jl_file_dir_mk(jl_t* jl, const char* path);
 struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive);
-str_t jl_file_get_resloc(jl_t* jl, str_t prg_folder, str_t fname);
+/**
+ * Get the designated location for a resource file. Resloc = Resource Location
+ * @param jl: Library Context.
+ * @param prg_folder: The name of the folder for all of the program's resources.
+ *	For a company "PlopGrizzly" with game "Super Game":
+ *		Pass: "PlopGrizzly_SG"
+ *	For an individual game developer "Jeron Lau" with game "Cool Game":
+ *		Pass: "JeronLau_CG"
+ *	If prg_folder is NULL, uses the program name from jl_start.
+ * @param fname: Name Of Resource Pack
+ * @returns: The designated location for a resouce pack
+*/
+char* jl_file_get_resloc(jl_t* jl, const char* prg_folder, const char* fname);
 
 // "JLthread.c"
-uint8_t jl_thread_new(jl_t *jl, str_t name, SDL_ThreadFunction fn);
+/**
+ * Create a thread.  User can program up to 16 threads.
+ * @param jl: The library context.
+ * @param name: The name of the thread.
+ * @param fn: The main function of the thread.
+ * @returns: The thread ID number.
+**/
+uint8_t jl_thread_new(jl_t *jl, const char* name, SDL_ThreadFunction fn);
 uint8_t jl_thread_current(jl_t *jl);
 int32_t jl_thread_old(jl_t *jl, uint8_t threadnum);
 SDL_mutex* jl_thread_mutex_new(jl_t *jl);

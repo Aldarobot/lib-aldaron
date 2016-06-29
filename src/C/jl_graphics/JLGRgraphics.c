@@ -226,7 +226,7 @@ void jlgr_draw_dec(jlgr_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
  * @param 'spr': the boundary sprite
  * @param 'txt': the text to draw
 **/
-void jlgr_text_draw_area(jlgr_t* jlgr, jl_sprite_t * spr, str_t txt){
+void jlgr_text_draw_area(jlgr_t* jlgr, jl_sprite_t * spr, const char* txt) {
 	float fontsize = .9 / strlen(txt);
 	jlgr_text_draw(jlgr, txt,
 		(jl_vec3_t) { .05,.5 * (jl_gl_ar(jlgr) - fontsize),0. },
@@ -240,7 +240,7 @@ void jlgr_text_draw_area(jlgr_t* jlgr, jl_sprite_t * spr, str_t txt){
  * @param 'spr': the boundary sprite
  * @param 'txt': the text to draw
 **/
-void jlgr_text_draw_sprite(jlgr_t* jlgr,jl_sprite_t * spr, str_t txt) {
+void jlgr_draw_text_sprite(jlgr_t* jlgr, jl_sprite_t* spr, const char* txt) {
 	jlgr_fill_image_set(jlgr, jlgr->textures.icon, 16, 16, 1, 1.);
 	jlgr_fill_image_draw(jlgr);
 	jlgr_text_draw_area(jlgr, spr, txt);
@@ -479,10 +479,12 @@ void jlgr_popup(jlgr_t* jlgr, char *name, char *message,
 
 /**
  * Re-draw/-size a slide button, and activate if it is pressed.
- * @param 'txt': the text to draw on the button.
+ * @param jlgr: The library context.
+ * @param spr: The slide button sprite.
+ * @param txt: The text to draw on the button.
 **/
-void jlgr_slidebtn_rsz(jlgr_t* jlgr, jl_sprite_t * spr, str_t txt) {
-	jlgr_text_draw_sprite(jlgr, spr, txt);
+void jlgr_slidebtn_rsz(jlgr_t* jlgr, jl_sprite_t * spr, const char* txt) {
+	jlgr_draw_text_sprite(jlgr, spr, txt);
 }
 
 /**
@@ -578,7 +580,7 @@ uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
  * @param jl: the libary context
  * @param notification: The message to display.
 */
-void jlgr_notify(jlgr_t* jlgr, str_t notification) {
+void jlgr_notify(jlgr_t* jlgr, const char* notification) {
 	jlgr_comm_notify_t packet;
 	packet.id = JLGR_COMM_NOTIFY;
 	jl_mem_copyto(notification, packet.string, 256);

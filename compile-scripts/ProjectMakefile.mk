@@ -34,7 +34,7 @@ VPATH = $(shell find $(SRC)/ -type d)
 FOLDERS = build/ src/
 
 ################################################################################
-jl-lib:
+jl-lib: $(shell echo $(JLL_HOME))/src/C/
 	mkdir -p src/lib/jl-lib/
 	cp -ur $(shell echo $(JLL_HOME))/src/C/* src/lib/jl-lib/
 
@@ -97,8 +97,8 @@ build-notify:
 	# Building program for target=$(PLATFORM)....
 
 clean:
-	rm -r build/bin/ build/deps build/objs/ build/test/
-	mkdir -p build/bin/ build/deps build/objs/ build/test/
+	rm -fr build/bin/ build/objs/ build/test/
+	mkdir -p build/bin/ build/objs/ build/test/
 
 clean-jl-lib:
 	rm -r src/lib/jl-lib/
@@ -121,7 +121,6 @@ $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 -init-vars:
 	# Build Project
 	$(eval CFLAGS_INCLUDES=\
-		-I$(shell echo $(JLL_HOME))/src/C/include/\
 		-I$(shell echo $(JLL_HOME))/src/lib/clump/\
 		-I$(shell echo $(JLL_HOME))/src/lib/libzip/lib\
 		-I$(shell echo $(JLL_HOME))/src/lib/sdl/include/\

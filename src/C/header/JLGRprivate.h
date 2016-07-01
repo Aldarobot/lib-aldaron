@@ -28,19 +28,15 @@ uint32_t _jl_sg_gpix(/*in */ SDL_Surface* surface, int32_t x, int32_t y);
 void jl_gl_viewport_screen(jlgr_t* jlgr);
 void jl_gl_poly(jlgr_t* jlgr, jl_vo_t* pv, uint32_t vertices, const float *xyzw);
 void jl_gl_vect(jlgr_t* jlgr, jl_vo_t* pv, uint32_t vertices, const float *xyzw);
-void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* vo, float a, uint32_t tx);
-void jl_gl_transform_pr_(jlgr_t* jlgr, jl_pr_t* pr, float x, float y, float z,
-	float xm, float ym, float zm);
-void jl_gl_transform_vo_(jlgr_t* jlgr, jl_vo_t* vo, float x, float y, float z,
-	float xm, float ym, float zm);
-void jl_gl_transform_chr_(jlgr_t* jlgr, float x, float y, float z,
-	float xm, float ym, float zm);
-void jl_gl_draw(jlgr_t* jlgr, jl_vo_t* pv);
-void jl_gl_draw_chr(jlgr_t* jlgr, jl_vo_t* pv,
-	float r, float g, float b, float a);
-void jl_gl_draw_pr_(jl_t* jlc, jl_pr_t* pr);
+void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* vo, uint32_t tx);
+void jlgr_opengl_transform_(jlgr_t* jlgr, jlgr_glsl_t* sh,
+	float xe, float ye, float ze, float xm, float ym, float zm, float ar);
 void jl_gl_vo_free(jlgr_t* jlgr, jl_vo_t *pv);
 uint32_t jl_gl_w(jlgr_t* jlgr);
+void jlgr_opengl_uniform1f_(jlgr_t* jlgr, GLint uv, float a);
+void jlgr_opengl_uniform3f_(jlgr_t* jlgr, GLint uv, float x, float y, float z);
+void jlgr_opengl_uniform4f_(jlgr_t* jlgr, GLint uv, float x, float y, float z,
+	float w);
 
 //DL
 void _jl_sg_loop(jlgr_t* jlgr);

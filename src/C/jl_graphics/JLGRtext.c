@@ -24,7 +24,7 @@ void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
 	jl_vec3_t tr = { 0., 0., 0. };
 	jl_vo_t* vo = &jlgr->gl.temp_vo;
 
-	jlgr_vos_image(jlgr, vo, rc, jlgr->textures.font, 1.);
+	jlgr_vos_image(jlgr, vo, rc, jlgr->textures.font);
 	for(i = 0; i < strlen(str); i++) {
 		if(text[i] == '\n') {
 			tr.x = 0, tr.y += f.size;
@@ -32,10 +32,9 @@ void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
 		}
 		//Font 0:0
 		jl_gl_vo_txmap(jlgr, vo, 16, 16, text[i]);
-		jl_gl_transform_chr_(jlgr, tr.x, tr.y, tr.z,
-			1., 1., 1.);
-		jl_gl_draw_chr(jlgr, vo, f.colors[0], f.colors[1], f.colors[2],
-			f.colors[3]);
+//		jlgr_opengl_transform_(jlgr, &jlgr->effects.hue, tr.x, tr.y, tr.z,
+//			1., 1., 1., jl_gl_ar(jlgr));
+		jlgr_effects_vo_hue(jlgr, vo, tr, f.colors);
 		tr.x += f.size * ( 3. / 4. );
 	}
 }

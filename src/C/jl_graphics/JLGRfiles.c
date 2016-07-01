@@ -202,7 +202,7 @@ void jlgr_openfile_loop(jlgr_t* jlgr) {
 
 	iterator = cl_list_iterator_create(jlgr->fl.filelist);
 
-	jlgr_fill_image_set(jlgr, jlgr->textures.icon, 16, 16, 1, 1.);
+	jlgr_fill_image_set(jlgr, jlgr->textures.icon, 16, 16, 1);
 	jlgr_fill_image_draw(jlgr);
 	jlgr_text_draw(jlgr, "Select File", (jl_vec3_t) { .02, .02, 0. },
 		jlgr->font);
@@ -295,7 +295,7 @@ static void jl_fl_btn_makefile_draw__(jl_t* jl, uint8_t resize, void* ctx) {
 	jl_rect_t rc = { 0., 0., jl_gl_ar(jlgr), jl_gl_ar(jlgr) };
 	jl_vec3_t tr = { 0., 0., 0. };
 
-	jlgr_vos_image(jlgr, &jlgr->gl.temp_vo, rc, jlgr->textures.icon, 1.);
+	jlgr_vos_image(jlgr, &jlgr->gl.temp_vo, rc, jlgr->textures.icon);
 	jl_gl_vo_txmap(jlgr, &jlgr->gl.temp_vo, 16, 16, 9);
 	jlgr_draw_vo(jlgr, &jlgr->gl.temp_vo, &tr);
 }
@@ -313,7 +313,7 @@ static void jl_fl_btn_makefolder_draw__(jl_t* jl, uint8_t resize, void* ctx) {
 	jl_rect_t rc = { 0., 0., jl_gl_ar(jlgr), jl_gl_ar(jlgr) };
 	jl_vec3_t tr = { 0., 0., 0. };
 
-	jlgr_vos_image(jlgr, &jlgr->gl.temp_vo, rc, jlgr->textures.icon, 1.);
+	jlgr_vos_image(jlgr, &jlgr->gl.temp_vo, rc, jlgr->textures.icon);
 	jl_gl_vo_txmap(jlgr, &jlgr->gl.temp_vo, 16, 16, 10);
 	jlgr_draw_vo(jlgr, &jlgr->gl.temp_vo, &tr);
 }

@@ -363,18 +363,17 @@ static inline void jl_gl_usep__(jlgr_t* jlgr, GLuint prg) {
 	JL_GL_ERROR(jlgr, prg, "glUseProgram");
 }
 
-static void jl_gl_setalpha__(jlgr_t* jlgr, float a) {
-	glUniform1f(jlgr->effects.alpha.uniforms.newcolor_malpha, a);
+void jlgr_opengl_uniform1f_(jlgr_t* jlgr, GLint uv, float a) {
+	glUniform1f(uv, a);
 	JL_GL_ERROR(jlgr, 0,"glUniform1f");
 }
 
-static void jl_gl_uniform3f__(jlgr_t* jlgr, GLint uv, float x, float y, float z)
-{
+void jlgr_opengl_uniform3f_(jlgr_t* jlgr, GLint uv, float x, float y, float z) {
 	glUniform3f(uv, x, y, z);
 	JL_GL_ERROR(jlgr, 0,"glUniform3f");
 }
 
-static void jl_gl_uniform4f__(jlgr_t* jlgr, GLint uv, float x, float y, float z,
+void jlgr_opengl_uniform4f_(jlgr_t* jlgr, GLint uv, float x, float y, float z,
 	float w)
 {
 	glUniform4f(uv, x, y, z, w);
@@ -658,18 +657,10 @@ static void jl_gl_depthbuffer_off__(jlgr_t* jlgr) {
 }
 */
 
-static void _jl_gl_txtr(jlgr_t* jlgr, jl_vo_t** pv, float a, uint8_t is_rt) {
+static void _jl_gl_txtr(jlgr_t* jlgr, jl_vo_t** pv, uint8_t is_rt) {
 	if((*pv) == NULL) (*pv) = &jlgr->gl.temp_vo;
-	// Set Simple Variabes
-	(*pv)->a = a;
 	// Make sure non-textured colors aren't attempted
 	(*pv)->tx = 0;
-}
-
-static inline uint8_t _jl_gl_set_shader(jlgr_t* jlgr, jl_vo_t* pv) {
-	uint8_t isTextured = (!!pv->tx);
-	jl_gl_usep__(jlgr, isTextured ? jlgr->effects.alpha.program : jlgr->gl.prg.color.program);
-	return isTextured;
 }
 
 // Prepare to draw a solid color
@@ -679,12 +670,10 @@ static inline void _jl_gl_draw_colr(jlgr_t* jlgr, jl_vo_t* pv) {
 }
 
 // Prepare to draw a texture with texture coordinates "tc". 
-static void _jl_gl_draw_txtr(jlgr_t* jlgr, float a, uint32_t tx, uint32_t* tc) {
+static inline void _jl_gl_draw_txtr(jlgr_t* jlgr, uint32_t tx, uint32_t* tc) {
 	jl_print_function(jlgr->jl, "OPENGL/Draw Texture");
 	// Bind Texture Coordinates to shader
 	_jl_gl_setv(jlgr, tc, jlgr->effects.alpha.attributes.texpos_color, 2);
-	// Set Alpha Value In Shader
-	jl_gl_setalpha__(jlgr, a);
 	// Bind the texture
 	jl_gl_texture_bind__(jlgr, tx);
 	jl_print_return(jlgr->jl, "OPENGL/Draw Texture");
@@ -696,17 +685,6 @@ static void jl_gl_draw_vertices(jlgr_t* jlgr, uint32_t* gl, int32_t attr) {
 
 static void jl_gl_draw_final__(jlgr_t* jlgr, uint8_t rs, uint32_t vc) {
 	_jl_gl_draw_arrays(jlgr, rs ? GL_TRIANGLES : GL_TRIANGLE_FAN, vc);
-}
-
-static void _jl_gl_draw_onts(jlgr_t* jlgr, uint32_t* gl, uint8_t isTextured,
-	uint8_t rs, uint32_t vc)
-{
-	// Update the position variable in shader.
-	jl_gl_draw_vertices(jlgr, gl, isTextured ?
-		jlgr->effects.alpha.attributes.position :
-		jlgr->gl.prg.color.attributes.position);
-	// Draw the image on the screen!
-	jl_gl_draw_final__(jlgr, rs, vc);
 }
 
 /************************/
@@ -799,8 +777,8 @@ void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
 }
 
 // Set texturing to a bitmap
-void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* vo, float a, uint32_t tx) {
-	_jl_gl_txtr(jlgr, &vo, a, 0);
+void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* vo, uint32_t tx) {
+	_jl_gl_txtr(jlgr, &vo, 0);
 	vo->tx = tx;
 #ifdef JL_DEBUG
 	if(!vo->tx) {
@@ -813,126 +791,47 @@ void jl_gl_txtr_(jlgr_t* jlgr, jl_vo_t* vo, float a, uint32_t tx) {
 }
 
 //TODO:MOVE
-// Shader true if texturing, false if coloring
 // X,Y,Z are all [0. -> 1.]
 // X,Y are turned into [-.5 -> .5] - center around zero.
-static void jl_gl_translate_transform__(jlgr_t* jlgr, int32_t translate,
-	int32_t transform, uint32_t which, float xe, float ye, float ze,
-	float xm, float ym, float zm, float ar)
+void jlgr_opengl_transform_(jlgr_t* jlgr, jlgr_glsl_t* sh,
+	float xe, float ye, float ze, float xm, float ym, float zm, float ar)
 {
-	// Determine which shader to use
-	jl_gl_usep__(jlgr, which);
 	// Set the uniforms
-	glUniform3f(translate, xe - (1./2.), ye - (ar/2.), ze);
+	glUniform3f(sh->uniforms.translate, xe - (1./2.), ye - (ar/2.), ze);
 	JL_GL_ERROR(jlgr, 0,"glUniform3f - translate");
-	glUniform4f(transform, 2. * xm, 2. * (ym / ar), 2. * zm, 1.f);
+	glUniform4f(sh->uniforms.transform, 2. * xm, 2. * (ym / ar), 2. * zm, 1.f);
 	JL_GL_ERROR(jlgr, 0,"glUniform3f - transform");
 }
 
-void jl_gl_transform_pr_(jlgr_t* jlgr, jl_pr_t* pr, float x, float y, float z,
-	float xm, float ym, float zm)
-{
-	jl_print_function(jlgr->jl, "OPENGL TRANSFORM!");
-	float ar = jl_gl_ar(jlgr);
-
-	jl_gl_translate_transform__(jlgr, jlgr->gl.prg.texture.uniforms.translate,
-		jlgr->gl.prg.texture.uniforms.transform,
-		jlgr->gl.prg.texture.program, x, y, z, xm, ym, zm, ar);
-	jl_print_return(jlgr->jl, "OPENGL TRANSFORM!");
+/**
+ * Bind shader ( Prepare to draw ).
+ * @param jlgr: The library context.
+ * @param sh: The shader to use.
+**/
+void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh) {
+	// Select Shader.
+	jl_gl_usep__(jlgr, sh->program);
 }
 
-void jl_gl_transform_vo_(jlgr_t* jlgr, jl_vo_t* vo, float x, float y, float z,
-	float xm, float ym, float zm)
-{
-	float ar = jl_gl_ar(jlgr);
+/**
+ * Draw vertex object.
+ * @param jlgr: The library context.
+ * @param vo: The vertex object to draw.
+ * @param sh: The shader to use ( must be the same one used with
+ *	jlgr_opengl_draw1(). )
+**/
+void jlgr_opengl_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
+	jl_print_function(jlgr->jl, "GL/Draw");
+	// Use Temporary Vertex Object If no vertex object.
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
-
-	jl_gl_translate_transform__(jlgr,
-		vo->tx ?
-			jlgr->effects.alpha.uniforms.translate :
-			jlgr->gl.prg.color.uniforms.translate,
-		vo->tx ?
-			jlgr->effects.alpha.uniforms.transform :
-			jlgr->gl.prg.color.uniforms.transform,
-		vo->tx ?
-			jlgr->effects.alpha.program :
-			jlgr->gl.prg.color.program,
-		x, y, z, xm, ym, zm, ar);
-}
-
-void jl_gl_transform_chr_(jlgr_t* jlgr, float x, float y, float z,
-	float xm, float ym, float zm)
-{
-	float ar = jl_gl_ar(jlgr);
-
-	jl_gl_translate_transform__(jlgr, jlgr->effects.hue.uniforms.translate,
-		jlgr->effects.hue.uniforms.transform, 
-		jlgr->effects.hue.program, x, y, z, xm, ym, zm, ar);
-}
-
-//Draw object with "vertices" vertices.  The vertex data is in "x","y" and "z".
-//"map" refers to the charecter map.  0 means don't zoom in to one character.
-//Otherwise it will zoom in x16 to a single charecter
-/**
- * If "pv" is NULL then draw what's on the temporary buffer
- * Else render vertex object "pv" on the screen.
-*/
-void jl_gl_draw(jlgr_t* jlgr, jl_vo_t* pv) {
-	jl_print_function(jlgr->jl, "OPENGL/Draw");
-	// Use Temporary Vertex Object If no vertex object.
-	if(pv == NULL) pv = &jlgr->gl.temp_vo;
-	// Determine which shader to use: texturing or coloring?
-	uint8_t isTextured = _jl_gl_set_shader(jlgr, pv);
-	// Set texture and transparency if texturing.  If colors: bind colors
-	if(pv->tx) _jl_gl_draw_txtr(jlgr, pv->a, pv->tx, &pv->bt);
-	else _jl_gl_draw_colr(jlgr, pv);
-	// Draw onto the screen.
-	_jl_gl_draw_onts(jlgr, &pv->gl, isTextured, pv->rs, pv->vc);
-	jl_print_return(jlgr->jl, "OPENGL/Draw");
-}
-
-/**
- * If "pv" is NULL then draw what's on the temporary buffer
- * Else render vertex object "pv" on the screen.
-*/
-void jl_gl_draw_chr(jlgr_t* jlgr, jl_vo_t* pv,
-	float r, float g, float b, float a)
-{
-	// Use Temporary Vertex Object If no vertex object.
-	if(pv == NULL) pv = &jlgr->gl.temp_vo;
-	// Set Shader
-	jl_gl_usep__(jlgr, jlgr->effects.hue.program);
-	// Bind Texture Coordinates to shader
-	_jl_gl_setv(jlgr, &pv->bt, jlgr->effects.hue.attributes.texpos_color, 2);
-	// Set New Color In Shader
-	jl_gl_uniform4f__(jlgr, jlgr->effects.hue.uniforms.newcolor_malpha, r, g, b, a);
-	// Bind the texture
-	glBindTexture(GL_TEXTURE_2D, pv->tx);
-	JL_GL_ERROR(jlgr, pv->tx, "jl_gl_draw_chr: glBindTexture");
+	// Set texture if texturing.  If colors: bind colors
+	if(vo->tx) _jl_gl_draw_txtr(jlgr, vo->tx, &vo->bt);
+	else _jl_gl_draw_colr(jlgr, vo);
 	// Update the position variable in shader.
-	jl_gl_draw_vertices(jlgr, &pv->gl, jlgr->effects.hue.attributes.position);
+	jl_gl_draw_vertices(jlgr, &vo->gl, sh->attributes.position);
 	// Draw the image on the screen!
-	jl_gl_draw_final__(jlgr, pv->rs, pv->vc);
-}
-
-// Draw the pre-rendered texture.
-void jl_gl_draw_pr_(jl_t* jl, jl_pr_t* pr) {
-	jlgr_t* jlgr = jl->jlgr;
-
-	jl_print_function(jlgr->jl, "DRAW PR!");
-	// Initialize Framebuffer, if not already init'd
-	jl_gl_framebuffer_init__(jlgr, pr);
-	// Use pre-mixed texturing shader.
-	jl_gl_usep__(jlgr, jlgr->gl.prg.texture.program);
-	// Bind Texture Coordinates to shader
-	_jl_gl_setv(jlgr, &jlgr->gl.default_tc, jlgr->gl.prg.texture.attributes.texpos_color, 2);
-	// Bind the texture
-	jl_gl_texture_bind__(jlgr, pr->tx);
-	// Update the position variable in shader.
-	_jl_gl_setv(jlgr, &pr->gl, jlgr->gl.prg.texture.attributes.position, 3);
-	// Draw the image on the screen!
-	_jl_gl_draw_arrays(jlgr, GL_TRIANGLE_FAN, 4);
-	jl_print_return(jlgr->jl, "DRAW PR!");
+	jl_gl_draw_final__(jlgr, vo->rs, vo->vc);
+	jl_print_return(jlgr->jl, "GL/Draw");
 }
 
 static int32_t _jl_gl_getu(jlgr_t* jlgr, GLuint prg, const char *var) {
@@ -1200,17 +1099,30 @@ void jl_gl_pr_new(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px) {
  * @param scl: The scale factor.
 **/
 void jl_gl_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, jl_vec3_t* scl) {
+	// Initialize Framebuffer, if not already init'd
+	jl_gl_framebuffer_init__(jlgr, pr);
+	// Bind texture shader.
+	jlgr_opengl_draw1(jlgr, &jlgr->gl.prg.texture);
+	// Transform
 	if(vec == NULL) {
-		jl_gl_transform_pr_(jlgr, pr,
-			0.f, 0.f, 0.f, 1., 1., 1.);
+		jlgr_opengl_transform_(jlgr, &jlgr->gl.prg.texture,
+			0.f, 0.f, 0.f, 1., 1., 1., jl_gl_ar(jlgr));
 	}else if(scl == NULL) {
-		jl_gl_transform_pr_(jlgr, pr,
-			vec->x, vec->y, vec->z, 1., 1., 1.);
+		jlgr_opengl_transform_(jlgr, &jlgr->gl.prg.texture,
+			vec->x, vec->y, vec->z, 1., 1., 1., jl_gl_ar(jlgr));
 	}else{
-		jl_gl_transform_pr_(jlgr, pr,
-			vec->x, vec->y, vec->z, scl->x, scl->y, scl->z);	
+		jlgr_opengl_transform_(jlgr, &jlgr->gl.prg.texture,
+			vec->x, vec->y, vec->z, scl->x, scl->y, scl->z,
+			jl_gl_ar(jlgr));	
 	}
-	jl_gl_draw_pr_(jlgr->jl, pr);
+	// Bind Texture Coordinates to shader
+	_jl_gl_setv(jlgr, &jlgr->gl.default_tc, jlgr->gl.prg.texture.attributes.texpos_color, 2);
+	// Bind the texture
+	jl_gl_texture_bind__(jlgr, pr->tx);
+	// Update the position variable in shader.
+	_jl_gl_setv(jlgr, &pr->gl, jlgr->gl.prg.texture.attributes.position, 3);
+	// Draw the image on the screen!
+	_jl_gl_draw_arrays(jlgr, GL_TRIANGLE_FAN, 4);
 }
 
 void jl_gl_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw) {
@@ -1245,17 +1157,17 @@ void jl_gl_init__(jlgr_t* jlgr) {
 	//Set uniform values
 	JL_PRINT_DEBUG(jlgr->jl, "Setting color uniforms....");
 	jl_gl_usep__(jlgr, jlgr->gl.prg.color.program);
-	jl_gl_uniform3f__(jlgr, jlgr->gl.prg.color.uniforms.translate, 0.f, 0.f, 0.f);
-	jl_gl_uniform4f__(jlgr, jlgr->gl.prg.color.uniforms.transform, 1.f, 1.f, 1.f,
+	jlgr_opengl_uniform3f_(jlgr, jlgr->gl.prg.color.uniforms.translate, 0.f, 0.f, 0.f);
+	jlgr_opengl_uniform4f_(jlgr, jlgr->gl.prg.color.uniforms.transform, 1.f, 1.f, 1.f,
 		1.f);
 	JL_PRINT_DEBUG(jlgr->jl, "Setting texture uniforms....");
 	jl_gl_usep__(jlgr, jlgr->gl.prg.texture.program);
-	jl_gl_uniform3f__(jlgr, jlgr->gl.prg.texture.uniforms.translate, 0.f, 0.f, 0.f);
-	jl_gl_uniform4f__(jlgr, jlgr->gl.prg.texture.uniforms.transform, 1.f, 1.f, 1.f,
+	jlgr_opengl_uniform3f_(jlgr, jlgr->gl.prg.texture.uniforms.translate, 0.f, 0.f, 0.f);
+	jlgr_opengl_uniform4f_(jlgr, jlgr->gl.prg.texture.uniforms.transform, 1.f, 1.f, 1.f,
 		1.f);
 /*	jl_gl_usep__(jlgr, jlgr->effects.alpha.program);
-	jl_gl_uniform3f__(jlgr, jlgr->effects.alpha.uniforms.translate, 0.f, 0.f, 0.f);
-	jl_gl_uniform4f__(jlgr, jlgr->effects.alpha.uniforms.transform, 1.f, 1.f, 1.f,
+	jlgr_opengl_uniform3f_(jlgr, jlgr->effects.alpha.uniforms.translate, 0.f, 0.f, 0.f);
+	jlgr_opengl_uniform4f_(jlgr, jlgr->effects.alpha.uniforms.transform, 1.f, 1.f, 1.f,
 		1.f);*/
 	// Make sure no pre-renderer is activated.
 	jl_gl_pr_off(jlgr);

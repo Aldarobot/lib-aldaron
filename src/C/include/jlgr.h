@@ -227,6 +227,22 @@ typedef struct {
 	jl_vec3_t scl;	// Scaling vector.
 }jl_pr_t;
 
+typedef struct{
+	struct {
+		int32_t position;
+		int32_t texpos_color;
+	}attributes;
+
+	struct {
+		int32_t texture;
+		int32_t newcolor_malpha;
+		int32_t translate;
+		int32_t transform;
+	}uniforms;
+
+	uint32_t program;
+}jlgr_glsl_t;
+
 //Vertex Object
 typedef struct{
 	// Basic:
@@ -239,7 +255,6 @@ typedef struct{
 	float* cc;	// Colors
 	// Texturing:
 	uint32_t tx;	// ID to texture. [ 0 = Colors Instead ]
-	float a;	// Converted Alpha.
 }jl_vo_t;
 
 typedef struct {
@@ -292,22 +307,6 @@ typedef struct{
 	uint8_t k; // Which key [ a-z, 0-9 , left/right click ]
 	void* data; // Parameter
 }jlgr_input_t;
-
-typedef struct{
-	struct {
-		int32_t position;
-		int32_t texpos_color;
-	}attributes;
-
-	struct {
-		int32_t texture;
-		int32_t newcolor_malpha;
-		int32_t translate;
-		int32_t transform;
-	}uniforms;
-
-	uint32_t program;
-}jlgr_glsl_t;
 
 typedef struct{
 	jl_t* jl;
@@ -517,20 +516,32 @@ void jlgr_menu_addicon_name(jlgr_t* jlgr);
 // JLGRgraphics.c:
 void jlgr_dont(jlgr_t* jlgr);
 void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, 
-	int16_t c, float a);
+	int16_t c);
 void jlgr_fill_image_draw(jlgr_t* jlgr);
 void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, int16_t c);
 void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
 void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
-void jlgr_draw_vo(jlgr_t* jlgr, jl_vo_t* pv, jl_vec3_t* vec);
+/**
+ * Draw a vertex object with offset by translation.
+ * @param jl: The library context.
+ * @param vo: The vertex object to draw.
+ * @param vec: The vector of offset/translation.
+**/
+void jlgr_draw_vo(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t* vec);
 void jlgr_vos_vec(jlgr_t* jlgr, jl_vo_t *pv, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor);
 void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, float* colors,
 	uint8_t multicolor);
-void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
-	uint32_t tex, float a);
-void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
-	jl_tex_t* tex, float a);
+/**
+ * Set a vertex object to an Image.
+ *
+ * @param jlgr: The library context
+ * @param vo: The vertex object
+ * @param rc: the rectangle to draw the image in.
+ * @param tex:  the ID of the image.
+**/
+void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex);
+void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, jl_tex_t* tex);
 void jlgr_vo_old(jlgr_t* jlgr, jl_vo_t* pv);
 /**
  * Draw text on the current pre-renderer.
@@ -601,6 +612,55 @@ void jl_gl_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, jl_vec3_t* scl);
 void jl_gl_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
 void jlgr_gl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
 	const char* frag, const char* effectName);
+
+// JLGRopengl.c
+/**
+ * Bind shader ( Prepare to draw ).
+ * @param jlgr: The library context.
+ * @param sh: The shader to use.
+**/
+void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh);
+/**
+ * Draw vertex object.
+ * @param jlgr: The library context.
+ * @param vo: The vertex object to draw.
+ * @param sh: The shader to use ( must be the same one used with
+ *	jlgr_opengl_draw1(). )
+**/
+void jlgr_opengl_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh);
+
+// JLGReffects.c
+/**
+ * Set the effect uniform variable in a shader to a float.
+ * @param jlgr: The library context.
+ * @param sh: The shader object.
+ * @param x: The float value.
+**/
+void jlgr_effects_uniform1(jlgr_t* jlgr, jlgr_glsl_t* sh, float x);
+/**
+ * Set the effect uniform variable in a shader to a vec3.
+ * @param jlgr: The library context.
+ * @param sh: The shader object.
+ * @param x, y, z: The vec3 value.
+**/
+void jlgr_effects_uniform3(jlgr_t* jlgr, jlgr_glsl_t* sh, float x, float y,
+	float z);
+/**
+ * Set the effect uniform variable in a shader to a vec4.
+ * @param jlgr: The library context.
+ * @param sh: The shader object.
+ * @param x, y, z, w: The vec4 value.
+**/
+void jlgr_effects_uniform4(jlgr_t* jlgr, jlgr_glsl_t* sh, float x, float y,
+	float z, float w);
+/**
+ * Draw a vertex object, changing te hue of each pixel.
+ * @param jlgr: The library context.
+ * @param vo: The vertex object to draw.
+ * @param offs: The offset to draw it at.
+ * @param c: The new hue ( r, g, b, a ) [ 0.f - 1.f ]
+**/
+void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]);
 
 // video
 void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,

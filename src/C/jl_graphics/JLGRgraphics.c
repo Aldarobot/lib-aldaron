@@ -60,15 +60,13 @@ void jlgr_dont(jlgr_t* jlgr) { }
  * @param i:  the ID of the image.
  * @param c: is 0 unless you want to use the image as
  * 	a charecter map, then it will zoom into charecter 'chr'.
- * @param a: the transparency each pixel is multiplied by; 1. is
- *	solid and 0. is totally invisble.
 **/
 void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, 
-	int16_t c, float a)
+	int16_t c)
 {
 	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
 
-	jlgr_vos_image(jlgr, &jlgr->gr.vos.whole_screen, rc, tex, a);
+	jlgr_vos_image(jlgr, &jlgr->gr.vos.whole_screen, rc, tex);
 	jl_gl_vo_txmap(jlgr, &jlgr->gr.vos.whole_screen, 0, 0, -1);
 }
 
@@ -83,18 +81,22 @@ void jlgr_fill_image_draw(jlgr_t* jlgr) {
 /**
  * Draw a vertex object with offset by translation.
  * @param jl: The library context.
- * @param pv: The vertex object to draw.
+ * @param vo: The vertex object to draw.
  * @param vec: The vector of offset/translation.
 **/
-void jlgr_draw_vo(jlgr_t* jlgr, jl_vo_t* pv, jl_vec3_t* vec) {
+void jlgr_draw_vo(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t* vec) {
+	jlgr_glsl_t* shader = vo->tx ?
+		&jlgr->gl.prg.texture : &jlgr->gl.prg.color;
+
+	jlgr_opengl_draw1(jlgr, shader);
 	if(vec == NULL) {
-		jl_gl_transform_vo_(jlgr, pv,
-			0.f, 0.f, 0.f, 1., 1., 1.);
+		jlgr_opengl_transform_(jlgr, shader,
+			0.f, 0.f, 0.f, 1., 1., 1., jl_gl_ar(jlgr));
 	}else{
-		jl_gl_transform_vo_(jlgr, pv,
-			vec->x, vec->y, vec->z, 1., 1., 1.);
+		jlgr_opengl_transform_(jlgr, shader,
+			vec->x, vec->y, vec->z, 1., 1., 1., jl_gl_ar(jlgr));
 	}
-	jl_gl_draw(jlgr, pv);
+	jlgr_opengl_draw2(jlgr, vo, shader);
 }
 
 /**
@@ -139,19 +141,12 @@ void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, float* colors,
 /**
  * Set a vertex object to an Image.
  *
- * @param jl: The library context
- * @param pv: The vertex object
+ * @param jlgr: The library context
+ * @param vo: The vertex object
  * @param rc: the rectangle to draw the image in.
- * @param g: the image group that the image pointed to by 'i' is in.
- * @param i:  the ID of the image.
- * @param c: is 0 unless you want to use the image as
- * 	a charecter map, then it will zoom into charecter 'chr'.
- * @param a: the transparency each pixel is multiplied by; 1. is
- *	solid and 0. is totally invisble.
+ * @param tex:  the ID of the image.
 **/
-void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, uint32_t tex,
-	float a)
-{
+void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex) {
 	//From bottom left & clockwise
 	float Oone[] = {
 		rc.x,		rc.y + rc.h,	0.f,
@@ -159,14 +154,12 @@ void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, uint32_t tex,
 		rc.x + rc.w,	rc.y,		0.f,
 		rc.x + rc.w,	rc.y + rc.h,	0.f };
 	// Overwrite the vertex object
-	jl_gl_poly(jlgr, pv, 4, Oone);
+	jl_gl_poly(jlgr, vo, 4, Oone);
 	// Texture the vertex object
-	jl_gl_txtr_(jlgr, pv, a, tex);
+	jl_gl_txtr_(jlgr, vo, tex);
 }
 
-void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
-	jl_tex_t* tex, float a)
-{
+void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, jl_tex_t* tex) {
 	//From bottom left & clockwise
 	float Oone[] = {
 		rc.x,		rc.y + rc.h,	0.f,
@@ -176,7 +169,7 @@ void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc,
 	// Overwrite the vertex object
 	jl_gl_poly(jlgr, pv, 4, Oone);
 	// Texture the vertex object
-	jl_gl_txtr_(jlgr, pv, a, tex->gl_texture);
+	jl_gl_txtr_(jlgr, pv, tex->gl_texture);
 }
 
 /**
@@ -241,7 +234,7 @@ void jlgr_text_draw_area(jlgr_t* jlgr, jl_sprite_t * spr, const char* txt) {
  * @param 'txt': the text to draw
 **/
 void jlgr_draw_text_sprite(jlgr_t* jlgr, jl_sprite_t* spr, const char* txt) {
-	jlgr_fill_image_set(jlgr, jlgr->textures.icon, 16, 16, 1, 1.);
+	jlgr_fill_image_set(jlgr, jlgr->textures.icon, 16, 16, 1);
 	jlgr_fill_image_draw(jlgr);
 	jlgr_text_draw_area(jlgr, spr, txt);
 }
@@ -315,9 +308,9 @@ static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
 	float colors[] = { .06f, .04f, 0.f, 1.f };
 
 	jl_gl_clear(jlgr, .01, .08, 0., 1.);
-	jlgr_vos_image(jlgr, &(slider->vo[0]), rc, jlgr->textures.font, 1.);
+	jlgr_vos_image(jlgr, &(slider->vo[0]), rc, jlgr->textures.font);
 	jl_gl_vo_txmap(jlgr, &(slider->vo[0]), 	16, 16, 235);
-	jlgr_vos_image(jlgr, &(slider->vo[1]), rc2, jlgr->textures.game, 1.);
+	jlgr_vos_image(jlgr, &(slider->vo[1]), rc2, jlgr->textures.game);
 	jl_gl_vo_txmap(jlgr, &(slider->vo[1]), 	16, 16, 16);
 	
 	jlgr_vos_rec(jlgr, &(slider->vo[2]), rc1, colors, 0);
@@ -377,7 +370,7 @@ void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
  * Draw a background on the screen
 **/
 void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, int16_t c) {
-	jlgr_fill_image_set(jlgr, tex, w, h, c, 1.);
+	jlgr_fill_image_set(jlgr, tex, w, h, c);
 	jlgr_fill_image_draw(jlgr);
 }
 

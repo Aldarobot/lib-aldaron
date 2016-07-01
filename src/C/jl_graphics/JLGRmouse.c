@@ -8,14 +8,6 @@
 **/
 #include "JLGRprivate.h"
 
-//
-// Static Functions
-//
-
-//
-// Used elsewhere in library.
-//
-
 // Run when mouse needs to be redrawn.
 void jlgr_mouse_draw_(jl_t* jl, uint8_t resize, void* ctx) {
 	// Draw mouse, if using appropriate.
@@ -24,7 +16,7 @@ void jlgr_mouse_draw_(jl_t* jl, uint8_t resize, void* ctx) {
 	jl_vo_t* mouse_vo = ctx;
 	jl_rect_t rc = { 0.f, 0.f, 1.f, 1.f };
 
-	jlgr_vos_image(jlgr, mouse_vo, rc, jlgr->textures.font, 1.);
+	jlgr_vos_image(jlgr, mouse_vo, rc, jlgr->textures.font);
 	jl_gl_vo_txmap(jlgr, mouse_vo, 16, 16, 255);
 	jlgr_draw_vo(jlgr, mouse_vo, NULL);
 #endif

@@ -26,6 +26,78 @@ const char *JL_EFFECT_HUE =
 	"		vec4(grayscale, grayscale, grayscale, vcolor.a);\n"
 	"}";
 
+/**
+ * Set the effect uniform variable in a shader to a float.
+ * @param jlgr: The library context.
+ * @param sh: The shader object.
+ * @param x: The float value.
+**/
+void jlgr_effects_uniform1(jlgr_t* jlgr, jlgr_glsl_t* sh, float x) {
+	jlgr_opengl_uniform1f_(jlgr, sh->uniforms.newcolor_malpha, x);
+}
+
+/**
+ * Set the effect uniform variable in a shader to a vec3.
+ * @param jlgr: The library context.
+ * @param sh: The shader object.
+ * @param x, y, z: The vec3 value.
+**/
+void jlgr_effects_uniform3(jlgr_t* jlgr, jlgr_glsl_t* sh, float x, float y,
+	float z)
+{
+	jlgr_opengl_uniform3f_(jlgr, sh->uniforms.newcolor_malpha, x, y, z);
+}
+
+/**
+ * Set the effect uniform variable in a shader to a vec4.
+ * @param jlgr: The library context.
+ * @param sh: The shader object.
+ * @param x, y, z, w: The vec4 value.
+**/
+void jlgr_effects_uniform4(jlgr_t* jlgr, jlgr_glsl_t* sh, float x, float y,
+	float z, float w)
+{
+	jlgr_opengl_uniform4f_(jlgr, sh->uniforms.newcolor_malpha, x, y, z, w);
+}
+
+/**
+ * Draw a vertex object with alpha effect.
+ * @param jlgr: The library context.
+ * @param vo: The vertex object to draw.
+ * @param offs: The offset vector to translate by.
+ * @param a: The alpha value to multiply each pixel by. [ 0.f - 1.f ]
+**/
+void jlgr_effects_vo_alpha(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a) {
+	// Bind shader
+	jlgr_opengl_draw1(jlgr, &jlgr->effects.alpha);
+	// Translate by offset vector
+	jlgr_opengl_transform_(jlgr, &jlgr->effects.alpha,
+		offs.x, offs.y, offs.z, 1., 1., 1., jl_gl_ar(jlgr));
+	// Set Alpha Value In Shader
+	jlgr_effects_uniform1(jlgr, &jlgr->effects.alpha, a);
+	// Draw on screen
+	jlgr_opengl_draw2(jlgr, vo, &jlgr->effects.alpha);
+}
+
+/**
+ * Draw a vertex object, changing te hue of each pixel.
+ * @param jlgr: The library context.
+ * @param vo: The vertex object to draw.
+ * @param offs: The offset to draw it at.
+ * @param c: The new hue ( r, g, b, a ) [ 0.f - 1.f ]
+**/
+void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]) {
+	// Bind shader
+	jlgr_opengl_draw1(jlgr, &jlgr->effects.hue);
+	// Translate by offset vector
+	jlgr_opengl_transform_(jlgr, &jlgr->effects.hue,
+		offs.x, offs.y, offs.z, 1., 1., 1., jl_gl_ar(jlgr));
+	// Set Hue Value In Shader
+	jlgr_effects_uniform4(jlgr, &jlgr->effects.hue, c[0], c[1], c[2], c[3]);
+	// Draw on screen
+	jlgr_opengl_draw2(jlgr, vo, &jlgr->effects.hue);
+}
+
 void jlgr_effects_init__(jlgr_t* jlgr) {
 	JL_PRINT_DEBUG(jlgr->jl, "MAKING EFFECT: ALPHA");
 	jlgr_gl_shader_init(jlgr, &jlgr->effects.alpha, NULL,

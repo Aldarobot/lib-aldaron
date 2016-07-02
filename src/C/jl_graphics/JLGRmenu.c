@@ -59,7 +59,7 @@ static inline void jlgr_menubar_shadow__(jlgr_t* jlgr,jl_menu_draw_t* menu_draw)
 
 		if(_draw_icon_ == NULL) break;
 		// Draw shadow
-		jlgr_draw_vo(jlgr, &menu_draw->shadow, &tr);
+		jlgr_vo_draw(jlgr, &menu_draw->shadow, &tr);
 		// Draw Icon
 		_draw_icon_(jlgr);
 	}
@@ -109,14 +109,14 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 	float shadow_color[] = { 0.f, 0.f, 0.f, .5f };
 	jl_menu_t menu;
 
-	jl_gl_vo_init(jlgr, &menu.draw.icon);
-	jl_gl_vo_init(jlgr, &menu.draw.shadow);
+	jlgr_vo_init(jlgr, &menu.draw.icon);
+	jlgr_vo_init(jlgr, &menu.draw.shadow);
 
 	// Make the shadow vertex object.
-	jlgr_vos_rec(jlgr, &menu.draw.shadow, rc_shadow, shadow_color, 0);
+	jlgr_vo_set_rect(jlgr, &menu.draw.shadow, rc_shadow, shadow_color, 0);
 	// Make the icon vertex object.
-	jlgr_vos_image(jlgr, &menu.draw.icon, rc_icon, jlgr->textures.icon);
-	jl_gl_vo_txmap(jlgr, &menu.draw.icon, 16, 16, JLGR_ID_UNKNOWN);
+	jlgr_vo_set_image(jlgr, &menu.draw.icon, rc_icon, jlgr->textures.icon);
+	jlgr_vo_txmap(jlgr, &menu.draw.icon, 16, 16, JLGR_ID_UNKNOWN);
 	// Clear the menubar & make pre-renderer.
 	for( menu.draw.cursor = 0; menu.draw.cursor < 10;
 		menu.draw.cursor++)
@@ -237,9 +237,9 @@ void jlgr_menu_draw_icon(jlgr_t* jlgr, uint32_t tex, uint8_t c) {
 	jl_menu_draw_t* menu_draw = jlgr_sprite_getdrawctx(&jlgr->menubar.menubar);
 	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), 0., 0. };
 
-	jlgr_vos_image(jlgr, &menu_draw->icon, rc_icon, tex);
-	jl_gl_vo_txmap(jlgr, &menu_draw->icon, 16, 16, c);
-	jlgr_draw_vo(jlgr, &menu_draw->icon, &tr);
+	jlgr_vo_set_image(jlgr, &menu_draw->icon, rc_icon, tex);
+	jlgr_vo_txmap(jlgr, &menu_draw->icon, 16, 16, c);
+	jlgr_vo_draw(jlgr, &menu_draw->icon, &tr);
 }
 
 /**

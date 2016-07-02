@@ -21,13 +21,10 @@ typedef struct {
 	jl_gui_slider_draw draw;
 }jl_gui_slider_main;
 
-/***      @cond       ***/
-/************************/
-/*** Static Functions ***/
-/************************/
+/** @cond */
 
 static inline void _jlgr_init_vos(jlgr_t* jlgr) {
-	jl_gl_vo_init(jlgr, &jlgr->gr.vos.whole_screen);
+	jlgr_vo_init(jlgr, &jlgr->gr.vos.whole_screen);
 }
 
 static void _jlgr_popup_loop(jl_t *jl) {
@@ -45,10 +42,7 @@ static void _jlgr_textbox_cm(jlgr_t* jlgr, jlgr_input_t input) {
 		jlgr->gr.textbox_string->curs++;
 }
 
-/**      @endcond      **/
-/************************/
-/*** Global Functions ***/
-/************************/
+/** @endcond */
 
 void jlgr_dont(jlgr_t* jlgr) { }
 
@@ -66,8 +60,8 @@ void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h,
 {
 	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
 
-	jlgr_vos_image(jlgr, &jlgr->gr.vos.whole_screen, rc, tex);
-	jl_gl_vo_txmap(jlgr, &jlgr->gr.vos.whole_screen, 0, 0, -1);
+	jlgr_vo_set_image(jlgr, &jlgr->gr.vos.whole_screen, rc, tex);
+	jlgr_vo_txmap(jlgr, &jlgr->gr.vos.whole_screen, 0, 0, -1);
 }
 
 /**
@@ -75,114 +69,11 @@ void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h,
  * @param jl: The library context.
 **/
 void jlgr_fill_image_draw(jlgr_t* jlgr) {
-	jlgr_draw_vo(jlgr, &jlgr->gr.vos.whole_screen, NULL);
+	jlgr_vo_draw(jlgr, &jlgr->gr.vos.whole_screen, NULL);
 }
 
 /**
- * Draw a vertex object with offset by translation.
- * @param jl: The library context.
- * @param vo: The vertex object to draw.
- * @param vec: The vector of offset/translation.
-**/
-void jlgr_draw_vo(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t* vec) {
-	jlgr_glsl_t* shader = vo->tx ?
-		&jlgr->gl.prg.texture : &jlgr->gl.prg.color;
-
-	jlgr_opengl_draw1(jlgr, shader);
-	if(vec == NULL) {
-		jlgr_opengl_transform_(jlgr, shader,
-			0.f, 0.f, 0.f, 1., 1., 1., jl_gl_ar(jlgr));
-	}else{
-		jlgr_opengl_transform_(jlgr, shader,
-			vec->x, vec->y, vec->z, 1., 1., 1., jl_gl_ar(jlgr));
-	}
-	jlgr_opengl_draw2(jlgr, vo, shader);
-}
-
-/**
- * Set a Vertex object to vector graphics.
- * 
-**/
-void jlgr_vos_vec(jlgr_t* jlgr, jl_vo_t *pv, uint16_t tricount,
-	float* triangles, float* colors, uint8_t multicolor)
-{
-	// Overwrite the vertex object
-	jl_gl_vect(jlgr, pv, tricount * 3, triangles);
-	// Texture the vertex object
-	if(multicolor) jlgr_vo_color_gradient(jlgr, pv, colors);
-	else jlgr_vo_color_solid(jlgr, pv, colors);
-}
-
-/**
- * Set a vertex object to a rectangle.
- * @param jl: The library context.
- * @param pv: The vertex object
- * @param rc: The rectangle coordinates.
- * @param colors: The color(s) to use - [ R, G, B, A ]
- * @param multicolor: If 0: Then 1 color is used.
- *	If 1: Then 1 color per each vertex is used.
-**/
-void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, float* colors,
-	uint8_t multicolor)
-{
-	float rectangle_coords[] = {
-		rc.x,		rc.y + rc.h,	0.f,
-		rc.x,		rc.y,		0.f,
-		rc.x + rc.w,	rc.y,		0.f,
-		rc.x + rc.w,	rc.y + rc.h,	0.f };
-
-	// Overwrite the vertex object
-	jl_gl_poly(jlgr, pv, 4, rectangle_coords);
-	// Texture the vertex object
-	if(multicolor) jlgr_vo_color_gradient(jlgr, pv, colors);
-	else jlgr_vo_color_solid(jlgr, pv, colors);
-}
-
-/**
- * Set a vertex object to an Image.
- *
- * @param jlgr: The library context
- * @param vo: The vertex object
- * @param rc: the rectangle to draw the image in.
- * @param tex:  the ID of the image.
-**/
-void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex) {
-	//From bottom left & clockwise
-	float Oone[] = {
-		rc.x,		rc.y + rc.h,	0.f,
-		rc.x,		rc.y,		0.f,
-		rc.x + rc.w,	rc.y,		0.f,
-		rc.x + rc.w,	rc.y + rc.h,	0.f };
-	// Overwrite the vertex object
-	jl_gl_poly(jlgr, vo, 4, Oone);
-	// Texture the vertex object
-	jl_gl_txtr_(jlgr, vo, tex);
-}
-
-void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, jl_tex_t* tex) {
-	//From bottom left & clockwise
-	float Oone[] = {
-		rc.x,		rc.y + rc.h,	0.f,
-		rc.x,		rc.y,		0.f,
-		rc.x + rc.w,	rc.y,		0.f,
-		rc.x + rc.w,	rc.y + rc.h,	0.f };
-	// Overwrite the vertex object
-	jl_gl_poly(jlgr, pv, 4, Oone);
-	// Texture the vertex object
-	jl_gl_txtr_(jlgr, pv, tex->gl_texture);
-}
-
-/**
- * Free a vertex object.
- * @param jl: The library context
- * @param pv: The vertex object to free
-**/
-void jlgr_vo_old(jlgr_t* jlgr, jl_vo_t* pv) {
-	jl_gl_vo_free(jlgr, pv);
-}
-
-/**
- * draw an integer on the screen
+ * Draw an integer on the screen
  * @param 'jl': library context
  * @param 'num': the number to draw
  * @param 'loc': the position to draw it at
@@ -308,20 +199,20 @@ static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
 	float colors[] = { .06f, .04f, 0.f, 1.f };
 
 	jl_gl_clear(jlgr, .01, .08, 0., 1.);
-	jlgr_vos_image(jlgr, &(slider->vo[0]), rc, jlgr->textures.font);
-	jl_gl_vo_txmap(jlgr, &(slider->vo[0]), 	16, 16, 235);
-	jlgr_vos_image(jlgr, &(slider->vo[1]), rc2, jlgr->textures.game);
-	jl_gl_vo_txmap(jlgr, &(slider->vo[1]), 	16, 16, 16);
+	jlgr_vo_set_image(jlgr, &(slider->vo[0]), rc, jlgr->textures.font);
+	jlgr_vo_txmap(jlgr, &(slider->vo[0]), 	16, 16, 235);
+	jlgr_vo_set_image(jlgr, &(slider->vo[1]), rc2, jlgr->textures.game);
+	jlgr_vo_txmap(jlgr, &(slider->vo[1]), 	16, 16, 16);
 	
-	jlgr_vos_rec(jlgr, &(slider->vo[2]), rc1, colors, 0);
+	jlgr_vo_set_rect(jlgr, &(slider->vo[2]), rc1, colors, 0);
 	// Draw Sliders
-	jlgr_draw_vo(jlgr, &(slider->vo[0]), NULL);
+	jlgr_vo_draw(jlgr, &(slider->vo[0]), NULL);
 	// Draw Slide 1
-	jlgr_draw_vo(jlgr, &(slider->vo[2]), &slider->where[0]);
-	jlgr_draw_vo(jlgr, &(slider->vo[1]), &slider->where[0]);
+	jlgr_vo_draw(jlgr, &(slider->vo[2]), &slider->where[0]);
+	jlgr_vo_draw(jlgr, &(slider->vo[1]), &slider->where[0]);
 	// Draw Slide 2
-	jlgr_draw_vo(jlgr, &(slider->vo[2]), &slider->where[1]);
-	jlgr_draw_vo(jlgr, &(slider->vo[1]), &slider->where[1]);
+	jlgr_vo_draw(jlgr, &(slider->vo[2]), &slider->where[1]);
+	jlgr_vo_draw(jlgr, &(slider->vo[1]), &slider->where[1]);
 }
 
 /**
@@ -355,9 +246,9 @@ void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 	slider.x1 = x1, slider.x2 = x2;
 	(*slider.x1) = 0.;
 	(*slider.x2) = 1.;
-	jl_gl_vo_init(jlgr, &slider.draw.vo[0]);
-	jl_gl_vo_init(jlgr, &slider.draw.vo[1]);
-	jl_gl_vo_init(jlgr, &slider.draw.vo[2]);
+	jlgr_vo_init(jlgr, &slider.draw.vo[0]);
+	jlgr_vo_init(jlgr, &slider.draw.vo[1]);
+	jlgr_vo_init(jlgr, &slider.draw.vo[2]);
 	slider.isRange = isdouble;
 
 	jlgr_sprite_init(jlgr, sprite, rectangle,
@@ -379,7 +270,7 @@ void jlgr_draw_loadingbar(jlgr_t* jlgr, double loaded) {
 		.95,jl_gl_ar(jlgr)*.45};
 	float colors[] = { 0., 1., 0., 1. };
 
-	jlgr_vos_rec(jlgr, NULL, bar, colors, 0);
+	jlgr_vo_set_rect(jlgr, NULL, bar, colors, 0);
 }
 
 //TODO: MOVE
@@ -518,8 +409,8 @@ void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 		float glow_color[] = { 1., 1., 1., .25 };
 
 		// Draw glow
-		jlgr_vos_rec(jlgr, &jlgr->gl.temp_vo, rc, glow_color, 0);
-		jlgr_draw_vo(jlgr, &jlgr->gl.temp_vo, NULL);
+		jlgr_vo_set_rect(jlgr, &jlgr->gl.temp_vo, rc, glow_color, 0);
+		jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo, NULL);
 		// Description
 		jlgr_text_draw(jlgr, txt,
 			(jl_vec3_t)
@@ -649,7 +540,3 @@ void jlgr_init__(jlgr_t* jlgr) {
 
 /**      @endcond      **/
 /***   #End of File   ***/
-
-uint8_t* jlgr_load_image(jl_t* jl, data_t* data, uint16_t* w, uint16_t* h) {
-	return jl_vi_load_(jl, data, w, h);
-}

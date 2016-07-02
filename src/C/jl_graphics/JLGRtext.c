@@ -10,10 +10,10 @@
 
 /**
  * Draw text on the current pre-renderer.
- * @param 'jl': library context
- * @param 'str': the text to draw
- * @param 'loc': the position to draw it at
- * @param 'f': the font to use.
+ * @param jlgr: The library context
+ * @param str: The text to draw
+ * @param loc: The position to draw it at
+ * @param f: The font to use.
 **/
 void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
 	if(str == NULL) return;
@@ -24,16 +24,14 @@ void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
 	jl_vec3_t tr = { 0., 0., 0. };
 	jl_vo_t* vo = &jlgr->gl.temp_vo;
 
-	jlgr_vos_image(jlgr, vo, rc, jlgr->textures.font);
+	jlgr_vo_set_image(jlgr, vo, rc, jlgr->textures.font);
 	for(i = 0; i < strlen(str); i++) {
 		if(text[i] == '\n') {
 			tr.x = 0, tr.y += f.size;
 			continue;
 		}
 		//Font 0:0
-		jl_gl_vo_txmap(jlgr, vo, 16, 16, text[i]);
-//		jlgr_opengl_transform_(jlgr, &jlgr->effects.hue, tr.x, tr.y, tr.z,
-//			1., 1., 1., jl_gl_ar(jlgr));
+		jlgr_vo_txmap(jlgr, vo, 16, 16, text[i]);
 		jlgr_effects_vo_hue(jlgr, vo, tr, f.colors);
 		tr.x += f.size * ( 3. / 4. );
 	}

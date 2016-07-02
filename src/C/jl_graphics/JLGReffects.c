@@ -76,7 +76,7 @@ void jlgr_effects_vo_alpha(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a) {
 	// Set Alpha Value In Shader
 	jlgr_effects_uniform1(jlgr, &jlgr->effects.alpha, a);
 	// Draw on screen
-	jlgr_opengl_draw2(jlgr, vo, &jlgr->effects.alpha);
+	jlgr_vo_draw2(jlgr, vo, &jlgr->effects.alpha);
 }
 
 /**
@@ -95,7 +95,15 @@ void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]) {
 	// Set Hue Value In Shader
 	jlgr_effects_uniform4(jlgr, &jlgr->effects.hue, c[0], c[1], c[2], c[3]);
 	// Draw on screen
-	jlgr_opengl_draw2(jlgr, vo, &jlgr->effects.hue);
+	jlgr_vo_draw2(jlgr, vo, &jlgr->effects.hue);
+}
+
+void jlgr_effects_alpha(jlgr_t* jlgr, float a) {
+	
+}
+
+void jlgr_effects_hue(jlgr_t* jlgr, float c[]) {
+	
 }
 
 void jlgr_effects_init__(jlgr_t* jlgr) {

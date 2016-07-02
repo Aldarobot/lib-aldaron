@@ -1,4 +1,5 @@
 #include "JLprivate.h"
+#include "SDL.h"
 
 #include <time.h>
 

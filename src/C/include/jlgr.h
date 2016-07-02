@@ -20,6 +20,7 @@
 	#include <GLES2/gl2.h>
 	#include <GLES2/gl2ext.h>
 #endif
+#include "SDL_events.h"
 
 #ifdef GL_ES_VERSION_2_0
 	#define GLSL_HEAD "#version 100\nprecision highp float;\n"
@@ -216,7 +217,6 @@ typedef struct {
 typedef struct {
 	// What to render
 	uint32_t tx;	// ID to texture.
-	uint32_t db;	// ID to Depth Buffer
 	uint32_t fb;	// ID to Frame Buffer
 	uint16_t w, h;	// Width and hieght of texture
 	// Render Area
@@ -257,11 +257,18 @@ typedef struct{
 	uint32_t tx;	// ID to texture. [ 0 = Colors Instead ]
 }jl_vo_t;
 
+/**
+ * Font type.
+**/
 typedef struct {
-	int32_t tex; // Group ID, Image ID
-	uint8_t multicolor; // Allow Multiple Colors
-	float* colors; // The Colors
-	float size; // The Size
+	/** The texture ID of the font. */
+	int32_t tex;
+	/** Whether to allow multiple colors ( gradient ). */
+	uint8_t multicolor;
+	/** The color value(s). */
+	float* colors;
+	/** The size to draw the text ( 0. - 1. ). */
+	float size;
 }jl_font_t;
 
 typedef struct{
@@ -519,65 +526,18 @@ void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h,
 	int16_t c);
 void jlgr_fill_image_draw(jlgr_t* jlgr);
 void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, int16_t c);
-void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
-void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
-/**
- * Draw a vertex object with offset by translation.
- * @param jl: The library context.
- * @param vo: The vertex object to draw.
- * @param vec: The vector of offset/translation.
-**/
-void jlgr_draw_vo(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t* vec);
-void jlgr_vos_vec(jlgr_t* jlgr, jl_vo_t *pv, uint16_t tricount,
-	float* triangles, float* colors, uint8_t multicolor);
-void jlgr_vos_rec(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, float* colors,
-	uint8_t multicolor);
-/**
- * Set a vertex object to an Image.
- *
- * @param jlgr: The library context
- * @param vo: The vertex object
- * @param rc: the rectangle to draw the image in.
- * @param tex:  the ID of the image.
-**/
-void jlgr_vos_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex);
-void jlgr_vos_texture(jlgr_t* jlgr, jl_vo_t *pv, jl_rect_t rc, jl_tex_t* tex);
-void jlgr_vo_old(jlgr_t* jlgr, jl_vo_t* pv);
-/**
- * Draw text on the current pre-renderer.
- * @param 'jl': library context
- * @param 'str': the text to draw
- * @param 'loc': the position to draw it at
- * @param 'f': the font to use.
-**/
+
+// JLGRtext.c:
 void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f);
 void jlgr_draw_int(jlgr_t* jlgr, int64_t num, jl_vec3_t loc, jl_font_t f);
 void jlgr_draw_dec(jlgr_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
 	jl_font_t f);
-/**
- * Draw text within the boundary of a sprite
- * @param 'jl': library context
- * @param 'spr': the boundary sprite
- * @param 'txt': the text to draw
-**/
 void jlgr_text_draw_area(jlgr_t* jlgr, jl_sprite_t * spr, const char* txt);
-/**
- * Draw a sprite, then draw text within the boundary of a sprite
- * @param 'jl': library context
- * @param 'spr': the boundary sprite
- * @param 'txt': the text to draw
-**/
 void jlgr_draw_text_sprite(jlgr_t* jlgr, jl_sprite_t* spr, const char* txt);
 void jlgr_draw_ctxt(jlgr_t* jlgr, char *str, float yy, float* color);
 void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine);
 void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, uint8_t c, char* format, ...);
 void jlgr_term_msge(jlgr_t* jlgr, char* message);
-/**
- * Re-draw/-size a slide button, and activate if it is pressed.
- * @param jlgr: The library context.
- * @param spr: The slide button sprite.
- * @param txt: The text to draw on the button.
-**/
 void jlgr_slidebtn_rsz(jlgr_t* jlgr, jl_sprite_t * spr, const char* txt);
 void jlgr_slidebtn_loop(jlgr_t* jlgr, jl_sprite_t * spr, float defaultx,
 	float slidex, jlgr_input_fnct prun);
@@ -587,79 +547,50 @@ uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
 	float h, data_t* string);
 void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 	uint8_t isdouble, float* x1, float* x2);
-/**
- * THREAD: Main thread.
- * Pop-Up a notification bar.
- * @param jl: the libary context
- * @param notification: The message to display.
-*/
 void jlgr_notify(jlgr_t* jlgr, const char* notification);
+
+// JLGRvo.c
+void jlgr_vo_init(jlgr_t* jlgr, jl_vo_t* vo);
+void jlgr_vo_set_vg(jlgr_t* jlgr, jl_vo_t *vo, uint16_t tricount,
+	float* triangles, float* colors, uint8_t multicolor);
+void jlgr_vo_set_rect(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
+	uint8_t multicolor);
+void jlgr_vo_set_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex);
+void jlgr_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,int16_t map);
+void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
+void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
+void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh);
+void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t* vec);
+void jlgr_vo_free(jlgr_t* jlgr, jl_vo_t *vo);
+
+// JLGRpr.c
+void jlgr_pr_off(jlgr_t* jlgr);
+void jlgr_pr_resize(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
+void jlgr_pr_init(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
+void jlgr_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, jl_vec3_t* scl);
+void jlgr_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
 
 // OpenGL
 void jl_gl_pbo_new(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
 	uint16_t w, uint16_t h, uint8_t bpp);
 void jl_gl_pbo_set(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
 	uint16_t w, uint16_t h, uint8_t bpp);
-void jl_gl_vo_init(jlgr_t* jlgr, jl_vo_t* vo);
-void jl_gl_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,int16_t map);
 uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 	uint32_t width, uint32_t height, uint8_t bytepp);
 float jl_gl_ar(jlgr_t* jlgr);
 void jl_gl_clear(jlgr_t* jlgr, float r, float g, float b, float a);
-void jl_gl_pr_rsz(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
-void jl_gl_pr_new(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
-void jl_gl_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, jl_vec3_t* scl);
-void jl_gl_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
 void jlgr_gl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
 	const char* frag, const char* effectName);
 
 // JLGRopengl.c
-/**
- * Bind shader ( Prepare to draw ).
- * @param jlgr: The library context.
- * @param sh: The shader to use.
-**/
 void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh);
-/**
- * Draw vertex object.
- * @param jlgr: The library context.
- * @param vo: The vertex object to draw.
- * @param sh: The shader to use ( must be the same one used with
- *	jlgr_opengl_draw1(). )
-**/
-void jlgr_opengl_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh);
 
 // JLGReffects.c
-/**
- * Set the effect uniform variable in a shader to a float.
- * @param jlgr: The library context.
- * @param sh: The shader object.
- * @param x: The float value.
-**/
 void jlgr_effects_uniform1(jlgr_t* jlgr, jlgr_glsl_t* sh, float x);
-/**
- * Set the effect uniform variable in a shader to a vec3.
- * @param jlgr: The library context.
- * @param sh: The shader object.
- * @param x, y, z: The vec3 value.
-**/
 void jlgr_effects_uniform3(jlgr_t* jlgr, jlgr_glsl_t* sh, float x, float y,
 	float z);
-/**
- * Set the effect uniform variable in a shader to a vec4.
- * @param jlgr: The library context.
- * @param sh: The shader object.
- * @param x, y, z, w: The vec4 value.
-**/
 void jlgr_effects_uniform4(jlgr_t* jlgr, jlgr_glsl_t* sh, float x, float y,
 	float z, float w);
-/**
- * Draw a vertex object, changing te hue of each pixel.
- * @param jlgr: The library context.
- * @param vo: The vertex object to draw.
- * @param offs: The offset to draw it at.
- * @param c: The new hue ( r, g, b, a ) [ 0.f - 1.f ]
-**/
 void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]);
 
 // video
@@ -679,39 +610,16 @@ uint8_t jl_ct_typing_get(jlgr_t* pusr);
 void jl_ct_typing_disable(void);
 
 // JLGRfiles.c
-/**
- * Open directory for file viewer.
- * If '!' is put at the beginning of "program_name", then it's treated as a
- *	relative path instead of a program name.
- * @param jl: The library context
- * @param program_name: program name or '!'+relative path
- * @param newfiledata: any new files created with the fileviewer will
- *	automatically be saved with this data.
- * @param newfilesize: size of "newfiledata"
- * @returns 0: if can't open the directory. ( Doesn't exist, Bad permissions )
- * @returns 1: on success.
-**/
 uint8_t jlgr_openfile_init(jlgr_t* jlgr, const char* program_name,
 	void *newfiledata, uint64_t newfilesize);
 void jlgr_openfile_loop(jlgr_t* jlgr);
-/**
- * Get the results from the file viewer.
- * @param jlgr: Library Context.
- * @returns: If done, name of selected file.  If not done, NULL is returned.
-**/
 const char* jlgr_openfile_kill(jlgr_t* jlgr);
 
-// Window Management
+// JLGRwm.c
 void jlgr_wm_setfullscreen(jlgr_t* jlgr, uint8_t is);
 void jlgr_wm_togglefullscreen(jlgr_t* jlgr);
 uint16_t jlgr_wm_getw(jlgr_t* jlgr);
 uint16_t jlgr_wm_geth(jlgr_t* jlgr);
-/**
- * THREAD: Drawing.
- * Set the title of a window.
- * @param jlgr: The library context.
- * @param window_name: What to name the window.
-**/
 void jlgr_wm_setwindowname(jlgr_t* jlgr, const char* window_name);
 
 #endif

@@ -6,7 +6,9 @@
  * JLfiles.c
  * 	This allows you to modify the file system.  It uses libzip.
  */
+/** @cond **/
 #include "JLprivate.h"
+#include "SDL_filesystem.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -22,9 +24,6 @@
 #if JL_PLAT == JL_PLAT_PHONE
 	extern const char* JL_FL_BASE;
 #endif
-
-/** @cond **/
-// Static Functions
 
 // This function converts linux filenames to native filnames
 char* jl_file_convert__(jl_t* jl, const char* filename) {

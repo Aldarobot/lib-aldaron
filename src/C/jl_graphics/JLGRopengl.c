@@ -57,7 +57,7 @@ const char *JL_SHADER_TEX_VERT =
 #endif
 
 #ifdef JL_DEBUG
-	static void jl_gl_get_error___(jlgr_t* jlgr, int width, str_t fname) {
+	static void jl_gl_get_error___(jlgr_t* jlgr, int width, const char* fname) {
 		uint8_t thread = jl_thread_current(jlgr->jl);
 		if(thread != 1) {
 			jl_print(jlgr->jl, "\"%s\" is on the Wrong Thread: %d",

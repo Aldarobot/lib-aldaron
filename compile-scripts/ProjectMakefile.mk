@@ -38,9 +38,9 @@ jl-lib: $(shell echo $(JLL_HOME))/src/C/
 	mkdir -p src/lib/jl-lib/
 	cp -ur $(shell echo $(JLL_HOME))/src/C/* src/lib/jl-lib/
 
--release: build-notify $(FOLDERS) -publish $(OBJS_RELEASE) -build
--test: build-notify $(FOLDERS) -test1 $(OBJS_TEST) -build
--prof: build-notify $(FOLDERS) -test2 $(OBJS_PROF) -build
+-release: build-notify $(FOLDERS) -publish $(OBJS_RELEASE) -link
+-test: build-notify $(FOLDERS) -test1 $(OBJS_TEST) -link
+-prof: build-notify $(FOLDERS) -test2 $(OBJS_PROF) -link
 
 prof: -prof
 	./$(JL_OUT)
@@ -101,7 +101,7 @@ clean:
 	mkdir -p build/bin/ build/objs/ build/test/
 
 clean-jl-lib:
-	rm -r src/lib/jl-lib/
+	rm -fr src/lib/jl-lib/
 
 update-jl-lib: clean-jl-lib jl-lib
 	# Done!
@@ -109,13 +109,13 @@ update-jl-lib: clean-jl-lib jl-lib
 ################################################################################
 
 $(BUILD_OBJ_PROF)/%.o: %.c $(HEADERS)
-	# Compiling Build $<....\n";
+	echo Compiling Build $<....
 	$(CC) $(CFLAGS) -o $@ -c $< $(JL_DEBUG)
 $(BUILD_OBJ_TEST)/%.o: %.c $(HEADERS)
-	# Compiling Test $<....\n";
+	echo Compiling Test $<....
 	$(CC) $(CFLAGS) -o $@ -c $< $(JL_DEBUG)
 $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
-	# Compiling Release $<....\n";
+	echo Compiling Release $<....
 	$(CC) $(CFLAGS) -o $@ -c $< $(JL_DEBUG)
 
 -init-vars:
@@ -149,15 +149,14 @@ $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 	$(eval JL_DEBUG=-O3 -Werror)
 	$(eval JL_OUT=build/bin/$(PACKNAME))
 	$(eval OBJS=$(OBJS_RELEASE))
--build:
-	printf "[COMP] Linking ....\n"
+-link:
+	echo Linking....
 	$(CC) $(OBJS) $(shell echo $(JLL_HOME))/build/deps.o \
 		-o $(JL_OUT) $(CFLAGS) \
 		-lm -lz -ldl -lpthread -lstdc++ -ljpeg \
-		`$(shell echo $(JLL_HOME))/src/lib/sdl/sdl2-config --libs` \
 		$(LINKER_LIBS) $(PLATFORM_CFLAGS) \
 		$(GL_VERSION) $(JL_DEBUG)
-	printf "[COMP] Done [ OpenGL Version = $(GL_VERSION) ]!\n"
+	echo Done! # [ OpenGL Version = $(GL_VERSION) ]
 build/:
 	# Generated Files
 	mkdir -p build/bin/ # Where the output files are stored

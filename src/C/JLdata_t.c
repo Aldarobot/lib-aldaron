@@ -135,7 +135,7 @@ void jl_data_delete_byte(jl_t *jl, data_t* pstr) {
 		pstr->data[i] = pstr->data[i+1];
 	pstr->size--;
 	pstr->data[pstr->size] = '\0';
-	pstr->data = jl_mem(jl, pstr->data, pstr->size);
+	if(pstr->size != 0) pstr->data = jl_mem(jl, pstr->data, pstr->size);
 	jl_data_truncate_curs__(pstr);
 }
 

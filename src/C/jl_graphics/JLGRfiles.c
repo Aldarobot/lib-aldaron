@@ -240,7 +240,7 @@ void jlgr_openfile_loop(jlgr_t* jlgr) {
 		jlgr->fl.cpage--;
 	}
 	if(jlgr->fl.prompt) {
-		if(jlgr_draw_textbox(jlgr, .02, jl_gl_ar(jlgr) - .06, .94, .02,
+/*		if(jlgr_draw_textbox(jlgr, .02, jl_gl_ar(jlgr) - .06, .94, .02,
 			jlgr->fl.promptstring))
 		{
 			char *name = jlgr_file_fullname__(jlgr,
@@ -251,7 +251,7 @@ void jlgr_openfile_loop(jlgr_t* jlgr) {
 				name, jlgr->fl.newfilesize);
 			jl_fl_user_select_open_dir__(jlgr, jlgr->fl.dirname);
 			jlgr->fl.prompt = 0;
-		}
+		}*/
 	}else{
 		jlgr_text_draw(jlgr, ">", (jl_vec3_t) {
 			.02, .08 + (.04 * jlgr->fl.cursor), 0. },

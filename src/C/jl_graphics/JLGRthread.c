@@ -50,12 +50,6 @@ static void jlgr_thread_event(jl_t* jl, void* data) {
 				packet->fn(jl);
 			}
 			break;
-		} case JLGR_COMM_NOTIFY: {
-			jlgr_comm_notify_t* packeta = data;
-			jl_mem_copyto(packeta->string,
-				jlgr->gr.notification.message, 255);
-			jlgr->gr.notification.timeTilVanish = 3.5;
-			break;
 		} default: {
 			break;
 		}
@@ -157,6 +151,7 @@ int jlgr_thread_draw(void* data) {
 }
 
 void jlgr_thread_init(jlgr_t* jlgr) {
+	jl_thread_pvar_init(jlgr->jl, &jlgr->pvar, NULL, sizeof(jlgr_pvar_t));
 	jlgr->thread = jl_thread_new(jlgr->jl, "JL_Lib/Graphics",
 		jlgr_thread_draw);
 }

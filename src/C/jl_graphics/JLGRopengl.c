@@ -388,7 +388,8 @@ static inline void _jl_gl_init_enable_alpha(jlgr_t* jlgr) {
 //	JL_GL_ERROR(jlgr, 0,"glEnable( GL_CULL_FACE )");
 	glBlendColor(0.f,0.f,0.f,0.f);
 	JL_GL_ERROR(jlgr, 0,"glBlendColor");
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA,
+		GL_DST_ALPHA);
 	JL_GL_ERROR(jlgr, 0,"glBlendFunc");
 }
 
@@ -612,7 +613,7 @@ static inline void _jl_gl_make_res(jlgr_t* jlgr) {
 
 /**
  * Get the Aspect Ratio of the pre-renderer in use.
- * @param jl: The library context.
+ * @param jlgr: The library context.
 **/
 float jl_gl_ar(jlgr_t* jlgr) {
 	uint8_t thread = jl_thread_current(jlgr->jl);
@@ -625,6 +626,7 @@ float jl_gl_ar(jlgr_t* jlgr) {
 
 /**
  * Get the Width for the pre-renderer in use.
+ * @param jlgr: The library context.
 **/
 uint32_t jl_gl_w(jlgr_t* jlgr) {
 	uint32_t w;
@@ -635,7 +637,7 @@ uint32_t jl_gl_w(jlgr_t* jlgr) {
 
 /**
  * Clear the screen with a color
- * @param jl: The library context.
+ * @param jlgr: The library context.
  * @param r: The amount of red [ 0.f - 1.f ]
  * @param g: The amount of green [ 0.f - 1.f ]
  * @param b: The amount of blue [ 0.f - 1.f ]

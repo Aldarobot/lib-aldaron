@@ -78,7 +78,9 @@ void jlau_play(jlau_t* jlau, jlau_audio_t* audio, float in, jl_vec3_t* vec) {
 
 	if(audio->channel == JLAU_CHANNEL_MUSIC) {
 		Mix_HaltMusic();
-		Mix_FadeInMusic(audio->audio, 1, 20);
+		// Get around SDL_Mixer Bug.
+		if(ms >= 20) Mix_FadeInMusic(audio->audio, 1, ms);
+		else Mix_PlayMusic(audio->audio, 1);
 	}else{
 		JLAU_PLAY_MIX_PLAY_CHANNEL:
 		if((audio->channel = Mix_FadeInChannel(-1, audio->audio, 0,

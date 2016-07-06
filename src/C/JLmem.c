@@ -192,6 +192,20 @@ double jl_mem_difwrange(double v1, double v2) {
 		return rtn2;
 }
 
+/**
+ * Count the number of characters in as string until 'chr' is a character.
+ * @param string: The string to check
+ * @param chr: The character to look for.
+**/
+uint32_t jl_mem_string_upto(const char* string, char chr) {
+	int i;
+
+	for(i = 0; i < strlen(string); i++) {
+		if(string[i] == chr) return i;
+	}
+	return strlen(string);
+}
+
 jl_t* jl_mem_init_(void) {
 	jl_t* jl = jl_memi(NULL, sizeof(jl_t));
 	//Prepare user data structure

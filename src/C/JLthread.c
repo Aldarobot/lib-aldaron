@@ -260,7 +260,7 @@ void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm) {
 **/
 void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size) {
 	pvar->lock = SDL_CreateMutex();
-	pvar->data = jl_mem_copy(jl, data, size);
+	pvar->data = data ? jl_mem_copy(jl, data, size) : jl_memi(jl, size);
 	pvar->size = size;
 }
 

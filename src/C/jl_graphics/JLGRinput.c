@@ -202,14 +202,6 @@ void jl_ct_key_menu(jlgr_t *jlgr, jlgr_input_fnct inputfn) {
 	jl_ct_key(jlgr, inputfn, SDL_MENU_KEY); //xyrhpk
 }
 
-void jl_ct_txty(void) {
-	SDL_StartTextInput();
-}
-
-void jl_ct_txtn(void) {
-	SDL_StopTextInput();
-}
-
 static inline void jlgr_input_handle_events_platform_dependant__(jlgr_t* jlgr) {
 #if JL_PLAT == JL_PLAT_PHONE
 	if( jlgr->main.ct.event.type==SDL_FINGERDOWN ) {
@@ -529,8 +521,10 @@ void jl_ct_init__(jlgr_t* jlgr) {
  * Get any keys that are currently being typed.  Output in Aski.
  * If phone, pops up keyboard if not already up.  If nothing is being typed,
  * returns 0.
+ * @param jlgr: The library context.
+ * @returns: The key pressed.
 */
-uint8_t jl_ct_typing_get(jlgr_t *jlgr) {
+uint8_t jlgr_input_typing_get(jlgr_t *jlgr) {
 	if(!SDL_IsTextInputActive()) SDL_StartTextInput();
 	uint8_t rtn = jlgr->main.ct.text_input[jlgr->main.ct.read_cursor];
 	if(jl_ct_key_pressed__(jlgr, SDL_SCANCODE_BACKSPACE) == 1) return '\b';
@@ -542,8 +536,8 @@ uint8_t jl_ct_typing_get(jlgr_t *jlgr) {
 }
 
 /**
- * If phone, hides keyboard.
+ * Stop receiving input from jl_input_typing_get(). If phone, hides keyboard.
 */
-void jl_ct_typing_disable(void) {
+void jlgr_input_typing_disable(void) {
 	SDL_StopTextInput();
 }

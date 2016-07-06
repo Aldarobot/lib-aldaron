@@ -203,6 +203,7 @@ uint32_t jl_mem_random_int(uint32_t a);
 void *jl_mem_temp(jl_t* jl, void *mem);
 double jl_mem_addwrange(double v1, double v2);
 double jl_mem_difwrange(double v1, double v2);
+uint32_t jl_mem_string_upto(const char* string, char chr);
 
 // "JLdata_t.c"
 void jl_data_clear(jl_t* jl, data_t* pa);

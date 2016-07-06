@@ -89,6 +89,8 @@ void jl_mode_switch(jl_t* jl, uint16_t mode) {
 	// Run the new mode's init functions.
 	init_ = jl->mode.mode.init;
 	init_(jl);
+	//
+	printf("Switch mode %d\n", mode);
 }
 
 /**
@@ -100,6 +102,7 @@ void jl_mode_exit(jl_t* jl) {
 	uint16_t which = jl->mode.which;
 	jl_fnct kill_ = jl->mode.mode.kill;
 
+	jl_print(jl, "which = %d", which);
 	// Run exit routine.
 	kill_(jl);
 	// If mode is same as before, then quit.

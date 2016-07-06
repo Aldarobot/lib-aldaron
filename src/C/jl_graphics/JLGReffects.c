@@ -1,5 +1,7 @@
 #include "JLGRprivate.h"
 
+/** @cond */
+
 const char *JL_EFFECT_ALPHA = 
 	GLSL_HEAD
 	"uniform sampler2D texture;\n"
@@ -22,9 +24,20 @@ const char *JL_EFFECT_HUE =
 	"void main() {\n"
 	"	vec4 vcolor = texture2D(texture, texcoord);\n"
 	"	float grayscale = (vcolor.r + vcolor.g + vcolor.b) / 3.f;\n"
-	"	gl_FragColor = new_color * \n"
-	"		vec4(grayscale, grayscale, grayscale, vcolor.a);\n"
+	"	gl_FragColor = \n"
+	"		vec4(new_color.r * grayscale, new_color.g * grayscale,"
+	"		new_color.b * grayscale, new_color.a * vcolor.a);\n"
 	"}";
+
+static void jlgr_effect_pr_hue__(jl_t* jl) {
+	jlgr_t* jlgr = jl->jlgr;
+	jlgr_vo_set_image(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
+		0., 0., 1., jl_gl_ar(jlgr) }, jlgr->gl.cp->tx);
+	jlgr_effects_vo_hue(jlgr, &jlgr->gl.temp_vo, (jl_vec3_t) {
+		0.f, 0.f, 0.f }, jlgr->effects.colors);
+}
+
+/** @endcond */
 
 /**
  * Set the effect uniform variable in a shader to a float.
@@ -102,8 +115,15 @@ void jlgr_effects_alpha(jlgr_t* jlgr, float a) {
 	
 }
 
+/**
+ * Apply a hue change effect to everything that's been drawn on the current pre-
+ * renderer so far.
+ * @param jlgr: The library context.
+ * @param c: The hue to make everything.
+**/
 void jlgr_effects_hue(jlgr_t* jlgr, float c[]) {
-	
+	jl_mem_copyto(c, jlgr->effects.colors, sizeof(float) * 4);
+	jlgr_pr(jlgr, jlgr->gl.cp, jlgr_effect_pr_hue__);
 }
 
 void jlgr_effects_init__(jlgr_t* jlgr) {

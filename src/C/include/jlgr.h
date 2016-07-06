@@ -28,6 +28,16 @@
 	#define GLSL_HEAD "#version 100\n"
 #endif
 
+#define JLGR_TEXT_CMD "\x01"
+#define JLGR_TEXT_BOLD JLGR_TEXT_CMD "\x01"
+#define JLGR_TEXT_ITALIC JLGR_TEXT_CMD "\x02"
+#define JLGR_TEXT_THIN JLGR_TEXT_CMD "\x03"
+#define JLGR_TEXT_NORMAL JLGR_TEXT_CMD "\x04"
+#define JLGR_TEXT_ALIGNL JLGR_TEXT_CMD "\x10"
+#define JLGR_TEXT_ALIGNC JLGR_TEXT_CMD "\x11"
+#define JLGR_TEXT_ALIGNR JLGR_TEXT_CMD "\x12"
+#define JLGR_TEXT_ALIGNJ JLGR_TEXT_CMD "\x13"
+
 typedef enum{
 	JLGR_INPUT_PRESS_ISNT, // User is not currently using the control
 	JLGR_INPUT_PRESS_JUST, // User just started using the control
@@ -316,6 +326,13 @@ typedef struct{
 }jlgr_input_t;
 
 typedef struct{
+	struct {
+		float timeTilVanish;
+		char message[256];
+	} notification;
+}jlgr_pvar_t;
+
+typedef struct{
 	jl_t* jl;
 
 	// For Programer's Use
@@ -327,9 +344,7 @@ typedef struct{
 	SDL_mutex* mutex; // Mutex to lock wshare structure.
 	jl_comm_t* comm2draw; // thread communication variable.
 	jl_wait_t wait;
-	struct {
-		SDL_mutex *usr_ctx;
-	}mutexs;
+	jl_pvar_t pvar; // Shared context.
 
 	struct{
 		jlgr_input_t input;
@@ -404,6 +419,7 @@ typedef struct{
 	struct{
 		jlgr_glsl_t alpha;
 		jlgr_glsl_t hue;
+		float colors[4];
 	}effects;
 	
 	//Opengl Data
@@ -424,12 +440,8 @@ typedef struct{
 		jl_sprite_t menubar;
 	}menubar;
 
-	//Graphics
+	// Gui
 	struct {
-		struct {
-			double timeTilVanish;
-			char message[256];
-		} notification;
 		struct {
 			char* window_name;
 			char* message;
@@ -443,8 +455,13 @@ typedef struct{
 			uint16_t t;
 			uint8_t c;
 		}msge;
-		data_t* textbox_string;
-	}gr;
+		struct{
+			data_t* string;
+			float counter;
+			uint8_t do_it;
+			uint8_t cursor;
+		}textbox;
+	}gui;
 
 	// Window Management
 	struct {
@@ -543,11 +560,11 @@ void jlgr_slidebtn_loop(jlgr_t* jlgr, jl_sprite_t * spr, float defaultx,
 	float slidex, jlgr_input_fnct prun);
 void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 	char *txt, jlgr_input_fnct prun);
-uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
-	float h, data_t* string);
+uint8_t jlgr_gui_textbox_loop(jlgr_t* jlgr, data_t* string);
+void jlgr_gui_textbox_draw(jlgr_t* jlgr, jl_rect_t rc);
 void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 	uint8_t isdouble, float* x1, float* x2);
-void jlgr_notify(jlgr_t* jlgr, const char* notification);
+void jlgr_notify(jlgr_t* jlgr, const char* notification, ...);
 
 // JLGRvo.c
 void jlgr_vo_init(jlgr_t* jlgr, jl_vo_t* vo);
@@ -591,7 +608,9 @@ void jlgr_effects_uniform3(jlgr_t* jlgr, jlgr_glsl_t* sh, float x, float y,
 	float z);
 void jlgr_effects_uniform4(jlgr_t* jlgr, jlgr_glsl_t* sh, float x, float y,
 	float z, float w);
+void jlgr_effects_vo_alpha(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a);
 void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]);
+void jlgr_effects_hue(jlgr_t* jlgr, float c[]);
 
 // video
 void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
@@ -606,8 +625,8 @@ int8_t jlgr_input_do(jlgr_t *jlgr, jlgr_control_t events, jlgr_input_fnct fn,
 	void* data);
 void jlgr_input_dont(jlgr_t* jlgr, jlgr_input_t input);
 void jl_ct_quickloop_(jlgr_t* jlgr);
-uint8_t jl_ct_typing_get(jlgr_t* pusr);
-void jl_ct_typing_disable(void);
+uint8_t jlgr_input_typing_get(jlgr_t *jlgr);
+void jlgr_input_typing_disable(void);
 
 // JLGRfiles.c
 uint8_t jlgr_openfile_init(jlgr_t* jlgr, const char* program_name,

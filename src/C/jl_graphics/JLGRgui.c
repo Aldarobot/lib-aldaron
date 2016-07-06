@@ -24,22 +24,34 @@ typedef struct {
 /** @cond */
 
 static inline void _jlgr_init_vos(jlgr_t* jlgr) {
-	jlgr_vo_init(jlgr, &jlgr->gr.vos.whole_screen);
+	jlgr_vo_init(jlgr, &jlgr->gui.vos.whole_screen);
 }
 
 static void _jlgr_popup_loop(jl_t *jl) {
 }
 
-static void _jlgr_textbox_cm(jlgr_t* jlgr, jlgr_input_t input) {
-	// TODO: Make Cursor Move
-	// Left
-	jl_ct_typing_disable();
-	if(jlgr->gr.textbox_string->curs)
-		jlgr->gr.textbox_string->curs--;
-	// Right
-	jl_ct_typing_disable();
-	if(jlgr->gr.textbox_string->curs < jlgr->gr.textbox_string->size)
-		jlgr->gr.textbox_string->curs++;
+static void jlgr_gui_textbox_cursor__(jlgr_t* jlgr, jlgr_input_t input) {
+	if(input.h == 2) jlgr->gui.textbox.counter += jlgr->jl->time.psec;
+	if(input.h != 1 && jlgr->gui.textbox.do_it != 1) return;
+	switch(input.k) {
+		case JLGR_INPUT_DIR_RT: {
+			if(jlgr->gui.textbox.string->curs <
+			 jlgr->gui.textbox.string->size)
+				jlgr->gui.textbox.string->curs++;
+			jlgr_input_typing_disable();
+			jlgr->gui.textbox.cursor = 1;
+			jlgr->gui.textbox.counter = 0.f;
+			break;
+		}
+		case JLGR_INPUT_DIR_LT: {
+			if(jlgr->gui.textbox.string->curs)
+				jlgr->gui.textbox.string->curs--;
+			jlgr_input_typing_disable();
+			jlgr->gui.textbox.cursor = 1;
+			jlgr->gui.textbox.counter = 0.f;
+			break;
+		}
+	}
 }
 
 /** @endcond */
@@ -50,9 +62,10 @@ void jlgr_dont(jlgr_t* jlgr) { }
  * Prepare to draw an image that takes up the entire pre-renderer or
  * screen.
  * @param jlgr: The library context.
- * @param g: the image group that the image pointed to by 'i' is in.
- * @param i:  the ID of the image.
- * @param c: is 0 unless you want to use the image as
+ * @param tex: The texture to draw.
+ * @param w: Width ( in characters ) of character map.
+ * @param h: Height ( in characters ) of character map.
+ * @param c: is -1 unless you want to use the image as
  * 	a charecter map, then it will zoom into charecter 'chr'.
 **/
 void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, 
@@ -60,8 +73,8 @@ void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h,
 {
 	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
 
-	jlgr_vo_set_image(jlgr, &jlgr->gr.vos.whole_screen, rc, tex);
-	jlgr_vo_txmap(jlgr, &jlgr->gr.vos.whole_screen, 0, 0, -1);
+	jlgr_vo_set_image(jlgr, &jlgr->gui.vos.whole_screen, rc, tex);
+	jlgr_vo_txmap(jlgr, &jlgr->gui.vos.whole_screen, w, h, c);
 }
 
 /**
@@ -69,7 +82,7 @@ void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h,
  * @param jl: The library context.
 **/
 void jlgr_fill_image_draw(jlgr_t* jlgr) {
-	jlgr_vo_draw(jlgr, &jlgr->gr.vos.whole_screen, NULL);
+	jlgr_vo_draw(jlgr, &jlgr->gui.vos.whole_screen, NULL);
 }
 
 /**
@@ -99,7 +112,7 @@ void jlgr_draw_dec(jlgr_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
 	char display[10];
 	char convert[10];
 
-	sprintf(convert, "%%%df", dec);
+	sprintf(convert, "%%.%df", dec);
 	sprintf(display, convert, num);
 	jlgr_text_draw(jlgr, display, loc, f);
 }
@@ -277,9 +290,9 @@ void jlgr_draw_loadingbar(jlgr_t* jlgr, double loaded) {
 void jlgr_draw_msge__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
-	jlgr_draw_bg(jlgr, jlgr->gr.msge.t, 16, 16, jlgr->gr.msge.c);
-	if(jlgr->gr.msge.message[0])
-		jlgr_draw_ctxt(jlgr, jlgr->gr.msge.message, 9./32.,
+	jlgr_draw_bg(jlgr, jlgr->gui.msge.t, 16, 16, jlgr->gui.msge.c);
+	if(jlgr->gui.msge.message[0])
+		jlgr_draw_ctxt(jlgr, jlgr->gui.msge.message, 9./32.,
 			jlgr->fontcolor);
 }
 
@@ -322,14 +335,14 @@ void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, uint8_t c, char* format, ...) {
 
 		// Print on screen.
 		va_start(arglist, format);
-		vsprintf(jlgr->gr.msge.message, format, arglist);
+		vsprintf(jlgr->gui.msge.message, format, arglist);
 		va_end(arglist);
 	}else{
-		jlgr->gr.msge.message[0] = '\0';
+		jlgr->gui.msge.message[0] = '\0';
 	}
 	jl_print_function(jlgr->jl, "JLGR_MSGE");
-	jlgr->gr.msge.t = tex;
-	jlgr->gr.msge.c = c;
+	jlgr->gui.msge.t = tex;
+	jlgr->gui.msge.c = c;
 	JL_PRINT_DEBUG(jlgr->jl, "DRAW LOADSCREEN");
 	
 	jlgr_draw_loadscreen(jlgr, jlgr_draw_msge__);
@@ -354,9 +367,9 @@ void jlgr_term_msge(jlgr_t* jlgr, char *message) {
 void jlgr_popup(jlgr_t* jlgr, char *name, char *message,
 	jl_popup_button_t *btns, uint8_t opt_count)
 {
-	jlgr->gr.popup.window_name = name;
-	jlgr->gr.popup.message = message;
-	jlgr->gr.popup.btns = btns;
+	jlgr->gui.popup.window_name = name;
+	jlgr->gui.popup.message = message;
+	jlgr->gui.popup.btns = btns;
 	jl_mode_override(jlgr->jl, (jl_mode_t)
 		{jl_mode_exit, _jlgr_popup_loop, jl_dont});
 }
@@ -423,17 +436,27 @@ void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 }
 
 /**
- * Draw A Textbox.
- * @return 1 if return/enter is pressed.
- * @return 0 if not.
-*/
-uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
-	float h, data_t* string)
-{
+ * Check for keyboard input and store in string.
+ * @param jlgr: The library context.
+ * @param string: The string to store to.
+ * @returns 1: if return/enter is pressed.
+ * @returns 0: if not.
+**/
+uint8_t jlgr_gui_textbox_loop(jlgr_t* jlgr, data_t* string) {
 	uint8_t bytetoinsert = 0;
 
-	jlgr->gr.textbox_string = string;
-	if((bytetoinsert = jl_ct_typing_get(jlgr))) {
+	jlgr->gui.textbox.string = string;
+	jlgr->gui.textbox.counter += jlgr->jl->time.psec;
+	if(jlgr->gui.textbox.counter > .5) {
+		jlgr->gui.textbox.counter -= .5;
+		jlgr->gui.textbox.do_it = 1;
+		if(jlgr->gui.textbox.cursor) jlgr->gui.textbox.cursor = 0;
+		else jlgr->gui.textbox.cursor = 1;
+	}else{
+		jlgr->gui.textbox.do_it = 0;
+	}
+	jlgr_input_do(jlgr, JL_INPUT_JOYC, jlgr_gui_textbox_cursor__, NULL);
+	if((bytetoinsert = jlgr_input_typing_get(jlgr))) {
 		if(bytetoinsert == '\b') {
 			if(string->curs == 0) return 0;
 			string->curs--;
@@ -448,14 +471,28 @@ uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
 		}
 //			JL_PRINT("inserting %1s\n", &bytetoinsert);
 	}
-	jlgr_input_do(jlgr, JL_INPUT_JOYC, _jlgr_textbox_cm, NULL);
-//		jlgr_draw_image(jl, 0, 0, x, y, w, h, ' ', 1.);
-	jlgr_text_draw(jlgr, (char*)(string->data),
-		(jl_vec3_t) {x, y, 0.},
-		(jl_font_t) {jlgr->textures.icon,0,jlgr->fontcolor,h});
+	return 0;
+}
+
+/**
+ * Draw A Textbox.  Must be paired on main thread by jlgr_gui_textbox_loop().
+ * @param jlgr: The library context.
+ * @param rc: Dimensions to draw textbox.
+*/
+void jlgr_gui_textbox_draw(jlgr_t* jlgr, jl_rect_t rc){
+	float cursor_color[] = { 0.1f, 0.1f, 0.1f, 1.f };
+	if(jlgr->gui.textbox.cursor) {
+		jlgr_vo_set_rect(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
+			rc.x + (jlgr->gui.textbox.string->curs * rc.h * .75),
+			rc.y, rc.h * .05, rc.h }, cursor_color, 0);
+		jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo, NULL);
+	}
+	jlgr_text_draw(jlgr, (char*)(jlgr->gui.textbox.string->data),
+		(jl_vec3_t) {rc.x, rc.y, 0.},
+		(jl_font_t) {jlgr->textures.icon,0,jlgr->fontcolor,rc.h});
 //		jlgr_draw_image(jl, 0, 0,
 //			x + (h*((float)string->curs-.5)), y, h, h, 252, 1.);
-	return 0;
+
 }
 
 /**
@@ -464,13 +501,16 @@ uint8_t jlgr_draw_textbox(jlgr_t* jlgr, float x, float y, float w,
  * @param jl: the libary context
  * @param notification: The message to display.
 */
-void jlgr_notify(jlgr_t* jlgr, const char* notification) {
-	jlgr_comm_notify_t packet;
-	packet.id = JLGR_COMM_NOTIFY;
-	jl_mem_copyto(notification, packet.string, 256);
-	packet.string[strlen(notification)] = '\0';
+void jlgr_notify(jlgr_t* jlgr, const char* notification, ...) {
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar, NULL);
+	va_list arglist;
 
-	jl_thread_comm_send(jlgr->jl, jlgr->comm2draw, &packet);
+	va_start( arglist, notification );
+	vsprintf( pjlgr->notification.message, notification, arglist );
+	va_end( arglist );
+	pjlgr->notification.timeTilVanish = 4.5;
+
+	jl_thread_pvar_edit(&jlgr->pvar, (void**)&pjlgr);
 }
 
 /***      @cond       ***/
@@ -480,19 +520,21 @@ void jlgr_notify(jlgr_t* jlgr, const char* notification) {
 
 void _jlgr_loopb(jlgr_t* jlgr) {
 	//Message Display
-	if(jlgr->gr.notification.timeTilVanish > 0.f) {
-		if(jlgr->gr.notification.timeTilVanish > .5) {
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar, NULL);
+	if(pjlgr->notification.timeTilVanish > 0.f) {
+		if(pjlgr->notification.timeTilVanish > .5) {
 			float color[] = { 1., 1., 1., 1. };
-			jlgr_draw_ctxt(jlgr, jlgr->gr.notification.message, 0,
+			jlgr_draw_ctxt(jlgr, pjlgr->notification.message, 0,
 				color);
 		}else{
 			float color[] = { 1., 1., 1.,
-				(jlgr->gr.notification.timeTilVanish / .5)};
-			jlgr_draw_ctxt(jlgr, jlgr->gr.notification.message, 0,
+				(pjlgr->notification.timeTilVanish / .5)};
+			jlgr_draw_ctxt(jlgr, pjlgr->notification.message, 0,
 				color);
 		}
-		jlgr->gr.notification.timeTilVanish-=jlgr->psec;
+		pjlgr->notification.timeTilVanish-=jlgr->psec;
 	}
+	jl_thread_pvar_edit(&jlgr->pvar, (void**)&pjlgr);
 }
 
 void _jlgr_loopa(jlgr_t* jlgr) {
@@ -530,7 +572,9 @@ void jlgr_init__(jlgr_t* jlgr) {
 	// Draw message on the screen
 	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "LOADING JL_LIB....");
 	// Set other variables
-	jlgr->gr.notification.timeTilVanish = 0.f;
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar, NULL);
+	pjlgr->notification.timeTilVanish = 0.f;
+	jl_thread_pvar_edit(&jlgr->pvar, (void**)&pjlgr);
 	// Load other images....
 	jlgr->textures.icon = jl_sg_add_image(jlgr, &packagedata,
 		"/images/taskbar_items.png");

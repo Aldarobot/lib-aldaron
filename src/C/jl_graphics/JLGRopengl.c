@@ -463,6 +463,12 @@ void jlgr_opengl_framebuffer_addtx_(jlgr_t* jlgr, uint32_t tx) {
 	JL_GL_ERROR(jlgr, tx,"jl_gl_framebuffer_addtx: glFramebufferTexture2D");
 }
 
+void jlgr_opengl_framebuffer_subtx_(jlgr_t* jlgr) {
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+		GL_TEXTURE_2D, 0, 0);
+	JL_GL_ERROR(jlgr, tx,"jl_gl_framebuffer_addtx: glFramebufferTexture2D");
+}
+
 void jlgr_opengl_framebuffer_status_(jlgr_t* jlgr) {
 	// Check to see if framebuffer was made properly.
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){

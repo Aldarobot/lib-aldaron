@@ -2,6 +2,7 @@
 
 #if JL_PLAT == JL_PLAT_PHONE
 	#include <jni.h>
+	#include "SDL_log.h"
 
 	const char* JL_FL_BASE;
 #endif
@@ -132,6 +133,10 @@ Java_org_libsdl_app_SDLActivity_nativeJlSendData( JNIEnv *env, jobject obj,
 	SDL_Log("nativeJlSendData\n");
 	JL_FL_BASE = (*env)->GetStringUTFChars(env, data, 0);
 	SDL_Log("nativeJlSendData \"%s\"\n", JL_FL_BASE);
+}
+
+int SDL_main(char* argv[], int argc) {
+	main(argv, argc);
 }
 
 #endif

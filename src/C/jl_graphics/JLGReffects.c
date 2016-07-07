@@ -2,6 +2,9 @@
 
 /** @cond */
 
+void jlgr_opengl_framebuffer_subtx_(jlgr_t* jlgr);
+void jlgr_opengl_framebuffer_addtx_(jlgr_t* jlgr, uint32_t tx);
+
 const char *JL_EFFECT_ALPHA = 
 	GLSL_HEAD
 	"uniform sampler2D texture;\n"
@@ -23,7 +26,8 @@ const char *JL_EFFECT_HUE =
 	"\n"
 	"void main() {\n"
 	"	vec4 vcolor = texture2D(texture, texcoord);\n"
-	"	float grayscale = (vcolor.r + vcolor.g + vcolor.b) / 3.f;\n"
+	"	mediump float grayscale = vcolor.r + vcolor.g + vcolor.b;\n"
+	"	grayscale = grayscale / 3.0;\n"
 	"	gl_FragColor = \n"
 	"		vec4(new_color.r * grayscale, new_color.g * grayscale,"
 	"		new_color.b * grayscale, new_color.a * vcolor.a);\n"
@@ -31,10 +35,16 @@ const char *JL_EFFECT_HUE =
 
 static void jlgr_effect_pr_hue__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
+
+	jlgr_opengl_framebuffer_subtx_(jlgr);
 	jlgr_vo_set_image(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
 		0., 0., 1., jl_gl_ar(jlgr) }, jlgr->gl.cp->tx);
+	jlgr_opengl_framebuffer_addtx_(jlgr, jlgr->gl.cp->tx);
 	jlgr_effects_vo_hue(jlgr, &jlgr->gl.temp_vo, (jl_vec3_t) {
 		0.f, 0.f, 0.f }, jlgr->effects.colors);
+//	jlgr_vo_set_image(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
+//		0., 0., 1., jl_gl_ar(jlgr) }, jlgr->textures.font);
+//	jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo, NULL);
 }
 
 /** @endcond */

@@ -957,7 +957,7 @@ public class SDLActivity extends Activity {
 class SDLMain implements Runnable {
 	@Override
 	public void run() {
-		System.out.println(":I/SDL/APP: Running Program\n");
+		System.out.println(":I/SDL/APP: Running Program....\n");
 		String state = Environment.getExternalStorageState();
 		if (! Environment.MEDIA_MOUNTED.equals(state)) {
 			System.out.println(":I/SDL/APP: Mount your media.\n");
@@ -966,6 +966,7 @@ class SDLMain implements Runnable {
 		SDLActivity.nativeJlSendData(Environment.
 			getExternalStorageDirectory().getAbsolutePath() + "/");
 		// Runs SDL_main()
+		System.out.println(":I/SDL/APP: Running SDL's nativeInit....\n");
 		SDLActivity.nativeInit(SDLActivity.mSingleton.getArguments());
 		System.out.println(":I/SDL/APP: SDL thread terminated");
 	}

@@ -436,16 +436,24 @@ void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 }
 
 /**
- * Check for keyboard input and store in string.
+ * Set the data string for a textbox.
  * @param jlgr: The library context.
  * @param string: The string to store to.
+**/
+void jlgr_gui_textbox_init(jlgr_t* jlgr, data_t* string) {
+	jlgr->gui.textbox.string = string;
+}
+
+/**
+ * Check for keyboard input and store in string.  Do not call before
+ *	jlgr_gui_textbox_init().
+ * @param jlgr: The library context.
  * @returns 1: if return/enter is pressed.
  * @returns 0: if not.
 **/
-uint8_t jlgr_gui_textbox_loop(jlgr_t* jlgr, data_t* string) {
+uint8_t jlgr_gui_textbox_loop(jlgr_t* jlgr) {
 	uint8_t bytetoinsert = 0;
 
-	jlgr->gui.textbox.string = string;
 	jlgr->gui.textbox.counter += jlgr->jl->time.psec;
 	if(jlgr->gui.textbox.counter > .5) {
 		jlgr->gui.textbox.counter -= .5;
@@ -458,15 +466,15 @@ uint8_t jlgr_gui_textbox_loop(jlgr_t* jlgr, data_t* string) {
 	jlgr_input_do(jlgr, JL_INPUT_JOYC, jlgr_gui_textbox_cursor__, NULL);
 	if((bytetoinsert = jlgr_input_typing_get(jlgr))) {
 		if(bytetoinsert == '\b') {
-			if(string->curs == 0) return 0;
-			string->curs--;
-			jl_data_delete_byte(jlgr->jl, string);
+			if(jlgr->gui.textbox.string->curs == 0) return 0;
+			jlgr->gui.textbox.string->curs--;
+			jl_data_delete_byte(jlgr->jl, jlgr->gui.textbox.string);
 		}else if(bytetoinsert == '\02') {
-			jl_data_delete_byte(jlgr->jl, string);
+			jl_data_delete_byte(jlgr->jl, jlgr->gui.textbox.string);
 		}else if(bytetoinsert == '\n') {
 			return 1;
 		}else{
-			jl_data_insert_byte(jlgr->jl, string,
+			jl_data_insert_byte(jlgr->jl, jlgr->gui.textbox.string,
 				 bytetoinsert);
 		}
 //			JL_PRINT("inserting %1s\n", &bytetoinsert);

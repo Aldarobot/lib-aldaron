@@ -42,9 +42,6 @@ static void jlgr_effect_pr_hue__(jl_t* jl) {
 	jlgr_opengl_framebuffer_addtx_(jlgr, jlgr->gl.cp->tx);
 	jlgr_effects_vo_hue(jlgr, &jlgr->gl.temp_vo, (jl_vec3_t) {
 		0.f, 0.f, 0.f }, jlgr->effects.colors);
-//	jlgr_vo_set_image(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
-//		0., 0., 1., jl_gl_ar(jlgr) }, jlgr->textures.font);
-//	jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo, NULL);
 }
 
 /** @endcond */

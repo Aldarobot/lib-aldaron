@@ -28,16 +28,18 @@ if [ -z "$1" ] || [ -z "$SOURCES" ]; then
 	exit 1
 fi
 
-SDLPATH="$( cd "$(dirname "$0")/.." ; pwd -P )"
-SDLIMAGEPATH=$SDLPATH/../SDL2_image-2.0.1/
-SDLMIXERPATH=$SDLPATH/../SDL2_mixer-2.0.1/
-SDLNETPATH=$SDLPATH/../SDL2_net-2.0.1/
-ZIPPATH=$SDLPATH/../libzip-1.1.2/
+JLLIBPATH="$( cd "$(dirname "$0")/.." ; pwd -P )"
+JLLIBLIBPATH=$JLLIBPATH/src/lib
+CLUMPPATH=$JLLIBLIBPATH/clump/
+SDLPATH=$JLLIBLIBPATH/sdl/
+SDLIMAGEPATH=$JLLIBLIBPATH/sdl-image/
+SDLMIXERPATH=$JLLIBLIBPATH/sdl-mixer/
+SDLNETPATH=$JLLIBLIBPATH/sdl-net/
+ZIPPATH=$JLLIBPATH/deps/libzip-1.1.2/
 MIKMODPATH=$SDLMIXERPATH/external/libmikmod-3.1.12/
 SMPEG2PATH=$SDLMIXERPATH/external/smpeg2-2.0.0/
-JLLIBPATH=$SDLPATH/../..
-CLUMPPATH=$JLLIBPATH/src/lib/clump/
 
+# Find programs
 NDKBUILD=`which ndk-build`
 if [ -z "$NDKBUILD" ];then
 	echo "Could not find ndk-build, install Android's NDK and add it to the path"
@@ -96,15 +98,13 @@ esac
 
 APP="$1"
 APPARR=(${APP//./ })
-#BUILDPATH="$SDLPATH/build/jl_lib-android-project"
 BUILDPATH="$CURDIR/build/android"
 
 # Start Building
-
-#	rm -rf $BUILDPATH
 mkdir -p $BUILDPATH
 
-cp -ur $JLLIBPATH/android-build-mods/android-project/* $BUILDPATH
+cp -ur $JLLIBPATH/android-build-mods/android-project/* $BUILDPATH # 1-time update
+cp -r $JLLIBPATH/android-build-mods/update/* $BUILDPATH # check for updates always
 
 # Link SDL sources
 mkdir -p $BUILDPATH/jni/SDL
@@ -133,15 +133,16 @@ ln -sTf $ZIPPATH/lib/ $BUILDPATH/jni/libzip
 ln -sTf $CLUMPPATH $BUILDPATH/jni/clump
 
 # Add icon
-rm -rf $BUILDPATH/res/
-cp -r $SDLPATH/android-project/res $BUILDPATH/res
-rm -rf $BUILDPATH/res/draw*/
 mkdir -p $BUILDPATH/res/drawable/
 cp $CURDIR/resources/icon.png $BUILDPATH/res/drawable/ic_launcher.png
 
 # Set Name of App
 PROGNAME="`sed '6q;d' data.txt`"
 sed -i "s|SDL\ App|$PROGNAME|g" $BUILDPATH/res/values/strings.xml
+
+# Set Orientation
+ORIENTATION="`sed '8q;d' data.txt`"
+sed -i "s|JL_ORIENTATION|$ORIENTATION|g" $BUILDPATH/AndroidManifest.xml
 
 # Link user sources
 cp -u $SDLPATH/android-project/jni/src/Android.mk $BUILDPATH/jni/src/

@@ -1102,42 +1102,6 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 		SDLActivity.onNativeResize(width, height, sdlFormat, mDisplay.getRefreshRate());
 		Log.v("SDL", "Window size: " + width + "x" + height);
 
- 
-		boolean skip = false;
-		int requestedOrientation = SDLActivity.mSingleton.getRequestedOrientation();
-
-		if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
-		{
-			// Accept any
-		}
-		else if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-		{
-			if (mWidth > mHeight) {
-			   skip = true;
-			}
-		} else if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-			if (mWidth < mHeight) {
-			   skip = true;
-			}
-		}
-
-		// Special Patch for Square Resolution: Black Berry Passport
-		if (skip) {
-		   double min = Math.min(mWidth, mHeight);
-		   double max = Math.max(mWidth, mHeight);
-		   
-		   if (max / min < 1.20) {
-			  Log.v("SDL", "Don't skip on such aspect-ratio. Could be a square resolution.");
-			  skip = false;
-		   }
-		}
-
-		if (skip) {
-		   Log.v("SDL", "Skip .. Surface is not ready.");
-		   return;
-		}
-
-
 		// Set mIsSurfaceReady to 'true' *before* making a call to handleResume
 		SDLActivity.mIsSurfaceReady = true;
 		SDLActivity.onNativeSurfaceChanged();

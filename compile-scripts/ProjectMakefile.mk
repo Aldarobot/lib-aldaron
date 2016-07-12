@@ -2,6 +2,7 @@
 
 # Figure out which platform.
 include $(shell echo $(JLL_HOME))/compile-scripts/platform.mk
+include $(shell echo $(JLL_HOME))/compile-scripts/mopub-sdk.mk
 
 CURDIR=`pwd -P`
 
@@ -67,8 +68,6 @@ install: -release
 
 -android-sdl-mods:
 	# Apply SDL mods.
-	cp -u $(shell echo $(JLL_HOME))/android-build-mods/androidbuild.sh\
-	 $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/build-scripts/androidbuild.sh
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/Android.mk\
 	 $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/android-project/jni/src/
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/Android_static.mk\
@@ -81,14 +80,19 @@ install: -release
 	 $(shell echo $(JLL_HOME))/deps/libzip-1.1.2/lib/Android.mk
 
 android: -android-sdl-mods
+	cp -u $(shell echo $(JLL_HOME))/android-build-mods/SDL_config_android.h\
+	 $(shell echo $(JLL_HOME))/src/lib/sdl/include/SDL_config.h
 	# Run Install Script
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-ndk-r11c && \
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/tools && \
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/platform-tools && \
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/build-tools/23.0.3 && \
-	sh $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/build-scripts/androidbuild.sh\
+	sh $(shell echo $(JLL_HOME))/android-build-mods/androidbuild.sh\
 		jlw.$(USERNAME).$(PACKNAME)\
 		$(shell echo $(JLL_HOME))/src/C/ $(CURDIR)/$(SRC)/
+
+android-with-ads: mopub-sdk
+	
 
 init: $(FOLDERS)
 	printf "[COMPILE] Done!\n"

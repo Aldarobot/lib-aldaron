@@ -560,7 +560,8 @@ void jlgr_slidebtn_loop(jlgr_t* jlgr, jl_sprite_t * spr, float defaultx,
 	float slidex, jlgr_input_fnct prun);
 void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 	char *txt, jlgr_input_fnct prun);
-uint8_t jlgr_gui_textbox_loop(jlgr_t* jlgr, data_t* string);
+void jlgr_gui_textbox_init(jlgr_t* jlgr, data_t* string);
+uint8_t jlgr_gui_textbox_loop(jlgr_t* jlgr);
 void jlgr_gui_textbox_draw(jlgr_t* jlgr, jl_rect_t rc);
 void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 	uint8_t isdouble, float* x1, float* x2);

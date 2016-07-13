@@ -407,11 +407,13 @@ typedef struct{
 			int32_t norm;
 			int32_t lightPos;
 			int32_t color;
+			int32_t ambient;
 		}light;
 
 		float colors[4];
 		jl_vec3_t normal;
 		jl_vec3_t lightPos;
+		float ambient[3];
 	}effects;
 	
 	//Opengl Data
@@ -605,10 +607,10 @@ void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh);
 void jlgr_effects_vo_alpha(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a);
 void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]);
 void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
-	jl_vec3_t normal, jl_vec3_t lightPos, float color[]);
+	jl_vec3_t normal, jl_vec3_t lightPos, float color[], float ambient[]);
 void jlgr_effects_hue(jlgr_t* jlgr, float c[]);
 void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t normal, jl_vec3_t lightPos,
-	float c[]);
+	float c[], float ambient[]);
 
 // video
 void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,

@@ -44,26 +44,22 @@ const char* JL_EFFECT_LIGHT =
 	"uniform vec3 light_color;\n"
 	"uniform vec3 norm;\n"
 	"uniform vec3 lightPos;\n"
-//	"uniform vec3 viewPos;\n"
+	"uniform vec3 ambient;\n"
 	"\n"
 	"void main() {\n"
-	// Ambient Light
-	"	float ambientStrength = 0.1f;\n"
-	"	vec3 ambient = ambientStrength * light_color;\n"
 	// Diffuse
 	"	vec3 lightDir = normalize(lightPos - fragpos);\n"
 	"	float diff = max(dot(norm, lightDir), 0.0);\n"
 	"	vec3 diffuse = diff * light_color;\n"
 	// Specular
 	"	float specularStrength = 0.5f;\n"
-//	"	vec3 viewDir = normalize(viewPos - fragpos);\n"
-	"	vec3 viewDir = normalize(vec3(0.0,0.0,-0.1)-fragpos);\n"
+	"	vec3 viewDir = normalize(-fragpos);\n"
 	"	vec3 reflectDir = reflect(-lightDir, norm);\n"
 	"	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);\n"
 	"	vec3 specular = specularStrength * spec * light_color;\n"
 	// Result
-	"	vec3 result = (ambient + diffuse + specular);\n"
-	"	gl_FragColor = vec4(result, 1.0f) * texture2D(texture, texcoord);\n"
+	"	gl_FragColor = vec4(ambient + diffuse + specular, 1.0f) *\n"
+	"		texture2D(texture, texcoord);\n"
 	"}";
 
 const char* JL_EFFECT_LIGHTV =
@@ -104,7 +100,7 @@ static void jlgr_effect_pr_light__(jl_t* jl) {
 	jlgr_opengl_framebuffer_addtx_(jlgr, jlgr->gl.cp->tx);
 	jlgr_effects_vo_light(jlgr, &jlgr->gl.temp_vo, (jl_vec3_t) {
 		0.f, 0.f, 0.f }, jlgr->effects.normal, jlgr->effects.lightPos,
-		jlgr->effects.colors);
+		jlgr->effects.colors, jlgr->effects.ambient);
 }
 
 /** @endcond */
@@ -149,7 +145,7 @@ void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]) {
 }
 
 void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
-	jl_vec3_t normal, jl_vec3_t lightPos, float color[])
+	jl_vec3_t normal, jl_vec3_t lightPos, float color[], float ambient[])
 {
 	// Bind shader
 	jlgr_opengl_draw1(jlgr, &jlgr->effects.light.shader);
@@ -163,6 +159,8 @@ void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
 		normal.x, normal.y, normal.z);
 	jlgr_opengl_uniform3(jlgr, jlgr->effects.light.lightPos,
 		lightPos.x, lightPos.y, lightPos.z);
+	jlgr_opengl_uniform3(jlgr, jlgr->effects.light.ambient,
+		ambient[0], ambient[1], ambient[2]);
 	// Draw on screen
 	jlgr_vo_draw2(jlgr, vo, &jlgr->effects.hue.shader);
 }
@@ -179,9 +177,10 @@ void jlgr_effects_hue(jlgr_t* jlgr, float c[]) {
 }
 
 void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t normal, jl_vec3_t lightPos,
-	float c[])
+	float c[], float ambient[])
 {
 	jl_mem_copyto(c, jlgr->effects.colors, sizeof(float) * 3);
+	jl_mem_copyto(c, jlgr->effects.ambient, sizeof(float) * 3);
 	jlgr->effects.normal = normal;
 	jlgr->effects.lightPos = lightPos;
 	jlgr_pr(jlgr, jlgr->gl.cp, jlgr_effect_pr_light__);
@@ -209,6 +208,8 @@ void jlgr_effects_init__(jlgr_t* jlgr) {
 		&jlgr->effects.light.lightPos, "lightPos");
 	jlgr_opengl_shader_uniform(jlgr, &jlgr->effects.light.shader,
 		&jlgr->effects.light.color, "light_color");
+	jlgr_opengl_shader_uniform(jlgr, &jlgr->effects.light.shader,
+		&jlgr->effects.light.ambient, "ambient");
 
 	JL_PRINT_DEBUG(jlgr->jl, "MADE EFFECTS!");
 }

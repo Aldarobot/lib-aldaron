@@ -40,19 +40,14 @@ void jl_gl_vo_free(jlgr_t* jlgr, jl_vo_t *pv);
 uint32_t jl_gl_w(jlgr_t* jlgr);
 
 // JLGRopengl.c
-void jlgr_opengl_buffer_set_(jlgr_t* jlgr, GLuint *buffer,
+void jlgr_opengl_buffer_set_(jlgr_t* jlgr, uint32_t *buffer,
 	const void *buffer_data, uint16_t buffer_size);
 void jlgr_opengl_buffer_old_(jlgr_t* jlgr, uint32_t *buffer);
-void jlgr_opengl_uniform1f_(jlgr_t* jlgr, GLint uv, float a);
-void jlgr_opengl_uniform3f_(jlgr_t* jlgr, GLint uv, float x, float y, float z);
-void jlgr_opengl_uniform4f_(jlgr_t* jlgr, GLint uv, float x, float y, float z,
-	float w);
 void jlgr_opengl_setv(jlgr_t* jlgr, uint32_t* buff, uint32_t vertexAttrib,
 	uint8_t xyzw);
 void jlgr_opengl_vertices_(jlgr_t* jlgr, const float *xyzw, uint8_t vertices,
 	float* cv, uint32_t* gl);
 void jlgr_opengl_texture_bind_(jlgr_t* jlgr, uint32_t tex);
-void jlgr_opengl_draw_arrays_(jlgr_t* jlgr, GLenum mode, uint8_t count);
 
 //DL
 void _jl_sg_loop(jlgr_t* jlgr);

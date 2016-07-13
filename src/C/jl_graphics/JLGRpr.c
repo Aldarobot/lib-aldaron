@@ -7,6 +7,7 @@
  *	Pre-Renderer object ( framebuffer ).
  */
 #include "JLGRprivate.h"
+#include "jlgr_opengl_private.h"
 
 /** @cond */
 

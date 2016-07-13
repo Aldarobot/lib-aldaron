@@ -2,31 +2,7 @@
 #define JLGR
 
 #include "jl.h"
-
-#if JL_GLTYPE == JL_GLTYPE_SDL_GL2  // SDL OpenGL 2
-	#include "SDL_opengl.h"
-	#include "SDL_opengl_glext.h"
-#elif JL_GLTYPE == JL_GLTYPE_OPENGL2 // OpenGL 2
-	#if JL_PLAT == JL_PLAT_COMPUTER
-		#include "lib/glext.h"
-	#else
-		#error "JL_GLTYPE_OPENGL2 ain't supported by non-pc comps, man!"
-	#endif
-	#include "lib/glew/glew.h"
-	#define JL_GLTYPE_HAS_GLEW
-#elif JL_GLTYPE == JL_GLTYPE_SDL_ES2 // SDL OpenGLES 2
-	#include "SDL_opengles2.h"
-#elif JL_GLTYPE == JL_GLTYPE_OPENES2 // OpenGLES 2
-	#include <GLES2/gl2.h>
-	#include <GLES2/gl2ext.h>
-#endif
 #include "SDL_events.h"
-
-#ifdef GL_ES_VERSION_2_0
-	#define GLSL_HEAD "#version 100\nprecision highp float;\n"
-#else
-	#define GLSL_HEAD "#version 100\n"
-#endif
 
 #define JLGR_TEXT_CMD "\x01"
 #define JLGR_TEXT_BOLD JLGR_TEXT_CMD "\x01"
@@ -245,7 +221,6 @@ typedef struct{
 
 	struct {
 		int32_t texture;
-		int32_t newcolor_malpha;
 		int32_t translate;
 		int32_t transform;
 	}uniforms;
@@ -416,10 +391,27 @@ typedef struct{
 		uint8_t cs; // The current screen "jlgr_which_screen_t"
 	}sg;
 
-	struct{
-		jlgr_glsl_t alpha;
-		jlgr_glsl_t hue;
+	struct {
+		struct {
+			jlgr_glsl_t shader;
+			int32_t fade;
+		}alpha;
+
+		struct {
+			jlgr_glsl_t shader;
+			int32_t new_color;
+		}hue;
+
+		struct {
+			jlgr_glsl_t shader;
+			int32_t norm;
+			int32_t lightPos;
+			int32_t color;
+		}light;
+
 		float colors[4];
+		jl_vec3_t normal;
+		jl_vec3_t lightPos;
 	}effects;
 	
 	//Opengl Data
@@ -597,21 +589,26 @@ uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 	uint32_t width, uint32_t height, uint8_t bytepp);
 float jl_gl_ar(jlgr_t* jlgr);
 void jl_gl_clear(jlgr_t* jlgr, float r, float g, float b, float a);
-void jlgr_gl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
-	const char* frag, const char* effectName);
 
 // JLGRopengl.c
+void jlgr_opengl_uniform1(jlgr_t* jlgr, int32_t uv, float x);
+void jlgr_opengl_uniform3(jlgr_t* jlgr, int32_t uv, float x, float y, float z);
+void jlgr_opengl_uniform4(jlgr_t* jlgr, int32_t uv, float x, float y, float z,
+	float w);
+void jlgr_opengl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
+	const char* frag, uint8_t has_tex);
+void jlgr_opengl_shader_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl,
+	int32_t* uniform, const char* name);
 void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh);
 
 // JLGReffects.c
-void jlgr_effects_uniform1(jlgr_t* jlgr, jlgr_glsl_t* sh, float x);
-void jlgr_effects_uniform3(jlgr_t* jlgr, jlgr_glsl_t* sh, float x, float y,
-	float z);
-void jlgr_effects_uniform4(jlgr_t* jlgr, jlgr_glsl_t* sh, float x, float y,
-	float z, float w);
 void jlgr_effects_vo_alpha(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a);
 void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]);
+void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
+	jl_vec3_t normal, jl_vec3_t lightPos, float color[]);
 void jlgr_effects_hue(jlgr_t* jlgr, float c[]);
+void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t normal, jl_vec3_t lightPos,
+	float c[]);
 
 // video
 void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,

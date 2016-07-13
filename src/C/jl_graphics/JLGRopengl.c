@@ -1,4 +1,5 @@
 #include "JLGRprivate.h"
+#include "jlgr_opengl_private.h"
 
 const char *JL_SHADER_CLR_FRAG = 
 	GLSL_HEAD
@@ -49,15 +50,13 @@ const char *JL_SHADER_TEX_VERT =
 	"}";
 
 #ifdef JL_DEBUG
-	#define JL_GL_ERROR(jlgr, x, fname) jl_gl_get_error___(jlgr, x, fname)
-	#define JL_EGL_ERROR(jlgr, x, fname) jl_gl_egl_geterror__(jlgr, x, fname)
+	#define JL_GL_ERROR(jlgr, x, fname) jlgr_opengl_error__(jlgr, x, fname)
 #else
 	#define JL_GL_ERROR(jlgr, x, fname) ;
-	#define JL_EGL_ERROR(jlgr, x, fname) ;
 #endif
 
 #ifdef JL_DEBUG
-	static void jl_gl_get_error___(jlgr_t* jlgr, int width, const char* fname) {
+	static void jlgr_opengl_error__(jlgr_t* jlgr, int width, const char* fname) {
 		uint8_t thread = jl_thread_current(jlgr->jl);
 		if(thread != 1) {
 			jl_print(jlgr->jl, "\"%s\" is on the Wrong Thread: %d",
@@ -90,12 +89,12 @@ const char *JL_SHADER_TEX_VERT =
 	}
 #endif
 
-static void jl_gl_buffer_use__(jlgr_t* jlgr, GLuint *buffer) {
+static void jl_gl_buffer_use__(jlgr_t* jlgr, uint32_t *buffer) {
 	// Make buffer if not initialized.
 	if(*buffer == 0) {
 		glGenBuffers(1, buffer);
 #ifdef JL_DEBUG
-		JL_GL_ERROR(jlgr, 0,"buffer gen");
+		jlgr_opengl_error__(jlgr, 0,"buffer gen");
 		if(*buffer == 0) {
 			jl_print(jlgr->jl,
 				"buffer is made wrongly on thread #%d!",
@@ -109,7 +108,7 @@ static void jl_gl_buffer_use__(jlgr_t* jlgr, GLuint *buffer) {
 	JL_GL_ERROR(jlgr, *buffer, "bind buffer");
 }
 
-void jlgr_opengl_buffer_set_(jlgr_t* jlgr, GLuint *buffer,
+void jlgr_opengl_buffer_set_(jlgr_t* jlgr, uint32_t *buffer,
 	const void *buffer_data, uint16_t buffer_size)
 {
 	//Bind Buffer "buffer"
@@ -147,9 +146,13 @@ GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
 			if (infoLen) {
 				buf = (char*) malloc(infoLen);
 				if (buf) {
-					glGetShaderInfoLog(shader, infoLen, NULL, buf);
+					glGetShaderInfoLog(shader, infoLen,
+						NULL, buf);
+					const char* msg =
+						(shaderType==GL_VERTEX_SHADER)?
+						"vertex shader":"fragment shader";
 					jl_print(jlgr->jl,
-						"Could not compile shader:%s",buf);
+						"Could not compile %s:%s",msg,buf);
 					exit(-1);
 				}
 				glDeleteShader(shader);
@@ -163,14 +166,16 @@ GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
 GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 	const char* pFragmentSource)
 {
-	GLuint vertexShader = jl_gl_load_shader(jlgr, GL_VERTEX_SHADER, pVertexSource);
+	GLuint vertexShader =
+		jl_gl_load_shader(jlgr, GL_VERTEX_SHADER, pVertexSource);
 	if (!vertexShader) {
 		jl_print(jlgr->jl, "couldn't load vertex shader");
 		exit(-1);
 	}
 
-	GLuint pixelShader = jl_gl_load_shader(jlgr, GL_FRAGMENT_SHADER, pFragmentSource);
-	if (!pixelShader) {
+	GLuint fragmentShader =
+		jl_gl_load_shader(jlgr, GL_FRAGMENT_SHADER, pFragmentSource);
+	if (!fragmentShader) {
 		jl_print(jlgr->jl, "couldn't load fragment shader");
 		exit(-1);
 	}
@@ -186,7 +191,7 @@ GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 
 	glAttachShader(program, vertexShader);
 	JL_GL_ERROR(jlgr, 0,"glAttachShader (vertex)");
-	glAttachShader(program, pixelShader);
+	glAttachShader(program, fragmentShader);
 	JL_GL_ERROR(jlgr, 0,"glAttachShader (fragment)");
 	glLinkProgram(program);
 	JL_GL_ERROR(jlgr, 0,"glLinkProgram");
@@ -224,11 +229,11 @@ static void jl_gl_texture_make__(jlgr_t* jlgr, uint32_t *tex) {
 	glGenTextures(1, tex);
 #ifdef JL_DEBUG
 	if(!(*tex)) {
-		JL_GL_ERROR(jlgr, 0, "jl_gl_texture_make__: glGenTextures");
+		jlgr_opengl_error__(jlgr, 0, "jl_gl_texture_make__: glGenTextures");
 		jl_print(jlgr->jl, "jl_gl_texture_make__: GL tex = 0");
 		exit(-1);
 	}
-	JL_GL_ERROR(jlgr, 0, "jl_gl_texture_make__: glGenTextures");
+	jlgr_opengl_error__(jlgr, 0, "jl_gl_texture_make__: glGenTextures");
 #endif
 }
 
@@ -331,17 +336,35 @@ static inline void jl_gl_usep__(jlgr_t* jlgr, GLuint prg) {
 	JL_GL_ERROR(jlgr, prg, "glUseProgram");
 }
 
-void jlgr_opengl_uniform1f_(jlgr_t* jlgr, GLint uv, float a) {
-	glUniform1f(uv, a);
-	JL_GL_ERROR(jlgr, 0,"glUniform1f");
+/**
+ * Set a uniform variable in a shader to a float.
+ * @param jlgr: The library context.
+ * @param uv: The uniform variable.
+ * @param x: The float value.
+**/
+void jlgr_opengl_uniform1(jlgr_t* jlgr, int32_t uv, float x) {
+	glUniform1f(uv, x);
+	JL_GL_ERROR(jlgr, uv, "glUniform1f");
 }
 
-void jlgr_opengl_uniform3f_(jlgr_t* jlgr, GLint uv, float x, float y, float z) {
+/**
+ * Set a uniform variable in a shader to a vec3.
+ * @param jlgr: The library context.
+ * @param uv: The uniform variable.
+ * @param x, y, z: The vec3 value.
+**/
+void jlgr_opengl_uniform3(jlgr_t* jlgr, int32_t uv, float x, float y, float z){
 	glUniform3f(uv, x, y, z);
 	JL_GL_ERROR(jlgr, 0,"glUniform3f");
 }
 
-void jlgr_opengl_uniform4f_(jlgr_t* jlgr, GLint uv, float x, float y, float z,
+/**
+ * Set the effect uniform variable in a shader to a vec4.
+ * @param jlgr: The library context.
+ * @param sh: The shader object.
+ * @param x, y, z, w: The vec4 value.
+**/
+void jlgr_opengl_uniform4(jlgr_t* jlgr, int32_t uv, float x, float y, float z,
 	float w)
 {
 	glUniform4f(uv, x, y, z, w);
@@ -460,13 +483,15 @@ void jlgr_opengl_framebuffer_addtx_(jlgr_t* jlgr, uint32_t tx) {
 	// Set "*tex" as color attachment #0.
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 		GL_TEXTURE_2D, tx, 0);
-	JL_GL_ERROR(jlgr, tx,"jl_gl_framebuffer_addtx: glFramebufferTexture2D");
+	JL_GL_ERROR(jlgr, tx,
+		"jlgr_opengl_framebuffer_addtx_: glFramebufferTexture2D");
 }
 
 void jlgr_opengl_framebuffer_subtx_(jlgr_t* jlgr) {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 		GL_TEXTURE_2D, 0, 0);
-	JL_GL_ERROR(jlgr, tx,"jl_gl_framebuffer_addtx: glFramebufferTexture2D");
+	JL_GL_ERROR(jlgr, 0,
+		"jlgr_opengl_framebuffer_subtx_: glFramebufferTexture2D");
 }
 
 void jlgr_opengl_framebuffer_status_(jlgr_t* jlgr) {
@@ -512,18 +537,21 @@ void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh) {
 }
 
 static int32_t _jl_gl_getu(jlgr_t* jlgr, GLuint prg, const char *var) {
-	int32_t a;
-	if((a = glGetUniformLocation(prg, var)) == -1) {
+	int32_t a = glGetUniformLocation(prg, var);
+#ifdef JL_DEBUG
+	if(a == -1) {
 		jl_print(jlgr->jl, ":opengl: bad name; is: %s", var);
 		exit(-1);
 	}
-	JL_GL_ERROR(jlgr, a,"glGetUniformLocation");
+	jlgr_opengl_error__(jlgr, a,"glGetUniformLocation");
+#endif
 	return a;
 }
 
 void _jl_gl_geta(jlgr_t* jlgr, GLuint prg, int32_t *attrib, const char *title) {
 	if((*attrib = glGetAttribLocation(prg, title)) == -1) {
-		jl_print(jlgr->jl, 
+		jl_print(jlgr->jl, "for name \"%s\":", title);
+		jl_print(jlgr->jl,
 			"attribute name is either reserved or non-existant");
 		exit(-1);
 	}
@@ -551,10 +579,10 @@ static inline void _jl_gl_init_setup_gl(jlgr_t* jlgr) {
  * @param glsl: The jlgr_glsl_t object to initialize.
  * @param vert: The vertex shader - NULL for texture support.
  * @param frag: The fragment shader.
- * @param effectName: Name of effect to use ( must be a uniform variable ).
+ * @param has_tex: Whether has texture or not.
 **/
-void jlgr_gl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
-	const char* frag, const char* effectName)
+void jlgr_opengl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
+	const char* frag, uint8_t has_tex)
 {
 	const char* vertShader = vert ? vert : JL_SHADER_TEX_VERT;
 	// Program
@@ -566,32 +594,40 @@ void jlgr_gl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
 	// Position Attribute
 	_jl_gl_geta(jlgr, glsl->program, &glsl->attributes.position, "position");
 	// If custom vertex shader, don't assume texture is defined
-	if(vert) {
-		// Color Attribute
-		_jl_gl_geta(jlgr, glsl->program, &glsl->attributes.texpos_color,
-			"acolor");
-	}else{
+	if(has_tex) {
 		// Texture
 		glsl->uniforms.texture =
 			_jl_gl_getu(jlgr, glsl->program, "texture");
 		// Texture Position Attribute
 		_jl_gl_geta(jlgr, glsl->program, &glsl->attributes.texpos_color,
 			 "texpos");
-	}
-	// Effects
-	if(effectName) {
-		glsl->uniforms.newcolor_malpha =
-			_jl_gl_getu(jlgr, glsl->program, effectName);
+	}else{
+		// Color Attribute
+		_jl_gl_geta(jlgr, glsl->program, &glsl->attributes.texpos_color,
+			"acolor");
 	}
 }
 
+/**
+ * Get a uniform from shader.
+ * @param jlgr: The library context.
+ * @param glsl: The shader.
+ * @param uniform: The uniform to get ( output ).
+ * @param name: The name of the uniform.
+**/
+void jlgr_opengl_shader_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl,
+	int32_t* uniform, const char* name)
+{
+	*uniform = _jl_gl_getu(jlgr, glsl->program, name);
+}
+
 static inline void _jl_gl_init_shaders(jlgr_t* jlgr) {
-	JL_PRINT_DEBUG(jlgr->jl, "Making GLSL program: texture");
-	jlgr_gl_shader_init(jlgr, &jlgr->gl.prg.texture, NULL,
-		JL_SHADER_TEX_FRAG, NULL);
-	JL_PRINT_DEBUG(jlgr->jl, "Making GLSL program: color");
-	jlgr_gl_shader_init(jlgr, &jlgr->gl.prg.color, JL_SHADER_CLR_VERT,
-		JL_SHADER_CLR_FRAG, NULL);
+	JL_PRINT_DEBUG(jlgr->jl, "Making Shader: texture");
+	jlgr_opengl_shader_init(jlgr, &jlgr->gl.prg.texture, NULL,
+		JL_SHADER_TEX_FRAG, 1);
+	JL_PRINT_DEBUG(jlgr->jl, "Making Shader: color");
+	jlgr_opengl_shader_init(jlgr, &jlgr->gl.prg.color, JL_SHADER_CLR_VERT,
+		JL_SHADER_CLR_FRAG, 0);
 	JL_PRINT_DEBUG(jlgr->jl, "Set up shaders!");
 }
 

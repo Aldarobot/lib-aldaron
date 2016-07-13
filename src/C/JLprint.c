@@ -90,32 +90,35 @@ static void jl_print_reset_print_descriptor_(jl_t* jl, uint8_t thread_id) {
 
 static void jl_print_toconsole__(jl_t* jl, const char* input) {
 	uint8_t thread_id = jl_thread_current(jl);
-	int i = 0;
+	int32_t i = 0;
 	char buffer[256];
 	char buffer2[80];
 
 	jl_mem_copyto(input, buffer, strlen(input) + 1);
 	while(i != -1) {
-		const char* text = buffer + (80 * i);
+		const char* text = buffer + i;
 		// If string is empty; quit
 		if((!text) || (!text[0])) break;
 		// Clear and reset the print buffer
 		jl_print_reset_print_descriptor_(jl, thread_id);
 		// Print upto 80 characters to the terminal
-		int chr_cnt = 73 - jl->jl_ctx[thread_id].print.level;
-		char convert[10];
+		int chr_cnt = 80 - (jl->jl_ctx[thread_id].print.level +
+			strlen(jl->jl_ctx[thread_id].print.stack[
+				jl->jl_ctx[thread_id].print.level]) + 3);
 		if(strlen(text) > chr_cnt - 1) {
-			i++;
+			int32_t total_chr;
+			for(total_chr = chr_cnt; total_chr > 0; total_chr--) {
+				if(text[total_chr] == ' ') break;
+			}
+			chr_cnt = total_chr > 5 ? total_chr:79;
+			i += chr_cnt;
 		}else{
 			chr_cnt = strlen(text);
 			i = -1; // break
 		}
-
-		sprintf(convert, "%%%ds\n", chr_cnt);
-
-		jl_mem_format(buffer2, convert, text);
-		JL_PRINT("%s", buffer2);
-
+		jl_mem_copyto(text, buffer2, chr_cnt);
+		buffer2[chr_cnt] = '\0';
+		JL_PRINT("%s\n", buffer2);
 
 		jl_file_print(jl, jl->fl.paths.errf, buffer2);
 	}

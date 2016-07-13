@@ -7,6 +7,7 @@
  *	Vertex Buffer Objects -> draw things on the screen.
  */
 #include "JLGRprivate.h"
+#include "jlgr_opengl_private.h"
 
 /** @cond */
 
@@ -221,7 +222,7 @@ void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
 	if(vo->tx) {
 		// Bind Texture Coordinates to shader
 		jlgr_opengl_setv(jlgr, &vo->bt,
-			jlgr->effects.alpha.attributes.texpos_color, 2);
+			jlgr->effects.alpha.shader.attributes.texpos_color, 2);
 		// Bind the texture
 		jlgr_opengl_texture_bind_(jlgr, vo->tx);
 	}else{

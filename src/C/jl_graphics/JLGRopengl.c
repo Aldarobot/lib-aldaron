@@ -11,17 +11,22 @@ const char *JL_SHADER_CLR_FRAG =
 
 const char *JL_SHADER_CLR_VERT = 
 	GLSL_HEAD
-	"uniform vec3 translate;\n"
-	"uniform vec4 transform;\n"
+	"uniform mat4 scale_object;\n"
+	"uniform mat4 rotate_object;\n"
+	"uniform mat4 translate_object;\n"
+	"uniform mat4 rotate_camera;\n"
+	"uniform mat4 project_scene;\n"
 	"\n"
-	"attribute vec3 position;\n"
+	"attribute vec4 position;\n"
 	"attribute vec4 acolor;\n"
 	"\n"
 	"varying vec4 vcolor;\n"
 	"\n"
 	"void main() {\n"
-	"	gl_Position = transform * vec4(position + translate, 1.0);\n"
 	"	vcolor = acolor;\n"
+	"	gl_Position = project_scene * rotate_camera *\n"
+	"		translate_object * rotate_object * scale_object *\n"
+	"		position;\n"
 	"}";
 
 const char *JL_SHADER_TEX_FRAG = 
@@ -36,17 +41,22 @@ const char *JL_SHADER_TEX_FRAG =
 
 const char *JL_SHADER_TEX_VERT = 
 	GLSL_HEAD
-	"uniform vec3 translate;\n"
-	"uniform vec4 transform;\n"
+	"uniform mat4 scale_object;\n"
+	"uniform mat4 rotate_object;\n"
+	"uniform mat4 translate_object;\n"
+	"uniform mat4 rotate_camera;\n"
+	"uniform mat4 project_scene;\n"
 	"\n"
-	"attribute vec3 position;\n"
+	"attribute vec4 position;\n"
 	"attribute vec2 texpos;\n"
 	"\n"
 	"varying vec2 texcoord;\n"
 	"\n"
 	"void main() {\n"
 	"	texcoord = texpos;\n"
-	"	gl_Position = transform * vec4(position + translate, 1.0);\n"
+	"	gl_Position = project_scene * rotate_camera *\n"
+	"		translate_object * rotate_object * scale_object *\n"
+	"		position;\n"
 	"}";
 
 #ifdef JL_DEBUG
@@ -406,9 +416,9 @@ static inline void _jl_gl_init_disable_extras(jlgr_t* jlgr) {
 
 static inline void _jl_gl_init_enable_alpha(jlgr_t* jlgr) {
 	glEnable(GL_BLEND);
-	JL_GL_ERROR(jlgr, 0,"glEnable( GL_BLEND )");
-//	glEnable(GL_CULL_FACE);
-//	JL_GL_ERROR(jlgr, 0,"glEnable( GL_CULL_FACE )");
+	JL_GL_ERROR(jlgr, 0,"glEnable( BLEND )");
+	glEnable(GL_CULL_FACE);
+	JL_GL_ERROR(jlgr, 0,"glEnable( CULL FACE )");
 	glBlendColor(0.f,0.f,0.f,0.f);
 	JL_GL_ERROR(jlgr, 0,"glBlendColor");
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA,
@@ -513,17 +523,71 @@ void jl_gl_viewport_screen(jlgr_t* jlgr) {
 	jlgr_opengl_viewport_(jlgr, jlgr->wm.w, jlgr->wm.h);
 }
 
-//TODO:MOVE
-// X,Y,Z are all [0. -> 1.]
-// X,Y are turned into [-.5 -> .5] - center around zero.
-void jlgr_opengl_transform_(jlgr_t* jlgr, jlgr_glsl_t* sh,
-	float xe, float ye, float ze, float xm, float ym, float zm, float ar)
+/**
+ * Set an objects scale, rotation, and translation for a shader.
+ * Set Camera's Rotation
+ * @param jlgr: The library context.
+ * @param 
+ * @param fov: Field of View.
+ * @param ar: Aspect ratio
+ * @param near: The near clipping pane.
+ * @param far: The far clipping pane.
+**/
+void jlgr_opengl_matrix(jlgr_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
+	jl_vec3_t rotatev, jl_vec3_t translatev, jl_vec3_t lookv,
+	float fov, float ar, float near, float far)
 {
-	// Set the uniforms
-	glUniform3f(sh->uniforms.translate, xe - (1./2.), ye - (ar/2.), ze);
-	JL_GL_ERROR(jlgr, 0,"glUniform3f - translate");
-	glUniform4f(sh->uniforms.transform, 2. * xm, 2. * (ym / ar), 2. * zm, 1.f);
-	JL_GL_ERROR(jlgr, 0,"glUniform3f - transform");
+//	jl_vec3_t vecTranslate = (jl_vec3_t) {
+//		translatev.x - (1./2.), translatev.y - (ar/2.), translatev.z };
+//		0.f, 0.f, 0.f };
+//	jl_vec3_t vecScale = (jl_vec3_t) { 1.f, 1.f, 1.f };
+//		scalev.x, scalev.y / ar, scalev.z };
+	float scale[] = {
+		2. * scalev.x, 0.f, 0.f, 0.f,
+		0.f, 2. * scalev.y / ar, 0.f, 0.f,
+		0.f, 0.f, 2. * scalev.z, 0.f,
+		0.f, 0.f, 0.f, 1.f
+	};
+	float rotate_object[] = {
+		1.f, 0.f, 0.f, 0.f,
+		0.f, 1.f, 0.f, 0.f,
+		0.f, 0.f, 1.f, 0.f,
+		0.f, 0.f, 0.f, 1.f
+	};
+	float translate[] = {
+		1.f, 0.f, 0.f, (translatev.x * 2.f) - 1.f,
+		0.f, 1.f, 0.f, (translatev.y * 2.f / ar) - 1.f,
+		0.f, 0.f, 1.f, (translatev.z * 2.f),
+		0.f, 0.f, 0.f, 1.f
+	};
+	float rotate_scene[] = {
+		1.f, 0.f, 0.f, 0.f,
+		0.f, 1.f, 0.f, 0.f,
+		0.f, 0.f, 1.f, 0.f,
+		0.f, 0.f, 0.f, 1.f
+	};
+	// Projection Matrix
+	near = 0.1f;
+	far = 100.f;
+	float angleOfView = 90.f;
+	float do_scale = 1.f / tan(angleOfView * 0.5f * M_PI / 180.f);
+
+	float projection[] = {
+		do_scale, 0.f, 0.f, 0.f,
+		0.f, do_scale, 0.f, 0.f,
+		0.f, 0.f, 1.f, -1.f,
+		0.f, 0.f, -1.f, 1.f
+	};
+	glUniformMatrix4fv(sh->uniforms.scale_object, 1, 1, scale);
+	JL_GL_ERROR(jlgr, 0, "matrix_object - scale");
+	glUniformMatrix4fv(sh->uniforms.rotate_object, 1, 1, rotate_object);
+	JL_GL_ERROR(jlgr, 0, "matrix_object - rotate");
+	glUniformMatrix4fv(sh->uniforms.translate_object, 1, 1, translate);
+	JL_GL_ERROR(jlgr, 0, "matrix_object - translate");
+	glUniformMatrix4fv(sh->uniforms.rotate_camera, 1, 1, rotate_scene);
+	JL_GL_ERROR(jlgr, 0, "matrix_object - rotate world");
+	glUniformMatrix4fv(sh->uniforms.project_scene, 1, 1, projection);
+	JL_GL_ERROR(jlgr, 0, "matrix_object - projection");
 }
 
 /**
@@ -587,10 +651,17 @@ void jlgr_opengl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
 	const char* vertShader = vert ? vert : JL_SHADER_TEX_VERT;
 	// Program
 	glsl->program = jl_gl_glsl_prg_create(jlgr, vertShader, frag);
-	// Translate Vector
-	glsl->uniforms.translate = _jl_gl_getu(jlgr,glsl->program,"translate");
-	// Transform Vector
-	glsl->uniforms.transform = _jl_gl_getu(jlgr,glsl->program, "transform");
+	// Matrices
+	glsl->uniforms.scale_object =
+		_jl_gl_getu(jlgr,glsl->program,"scale_object");
+	glsl->uniforms.rotate_object =
+		_jl_gl_getu(jlgr,glsl->program,"rotate_object");
+	glsl->uniforms.translate_object =
+		_jl_gl_getu(jlgr,glsl->program,"translate_object");
+	glsl->uniforms.rotate_camera =
+		_jl_gl_getu(jlgr,glsl->program,"rotate_camera");
+	glsl->uniforms.project_scene =
+		_jl_gl_getu(jlgr,glsl->program,"project_scene");
 	// Position Attribute
 	_jl_gl_geta(jlgr, glsl->program, &glsl->attributes.position, "position");
 	// If custom vertex shader, don't assume texture is defined
@@ -644,6 +715,7 @@ static inline void _jl_gl_make_res(jlgr_t* jlgr) {
 	JL_PRINT_DEBUG(jlgr->jl, "making default texc buff!");
 	// Default GL Texture Coordinate Buffer
 	jlgr_opengl_buffer_set_(jlgr, &jlgr->gl.default_tc, DEFAULT_TC, 8);
+	jlgr_opengl_buffer_set_(jlgr, &jlgr->gl.upsidedown_tc, UPSIDEDOWN_TC, 8);
 	JL_PRINT_DEBUG(jlgr->jl, "made temp vo & default tex. c. buff!");
 	jl_print_return(jlgr->jl, "GL_Init");
 }

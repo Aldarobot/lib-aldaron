@@ -210,7 +210,6 @@ typedef struct {
 	float ar;	// Aspect Ratio: h:w
 	float cv[4*3];	// Converted Vertices
 	jl_area_t cb;	// 2D/3D collision box.
-	jl_vec3_t scl;	// Scaling vector.
 }jl_pr_t;
 
 typedef struct{
@@ -221,8 +220,12 @@ typedef struct{
 
 	struct {
 		int32_t texture;
-		int32_t translate;
-		int32_t transform;
+		// Matrices
+		int32_t scale_object;
+		int32_t rotate_object;
+		int32_t translate_object;
+		int32_t rotate_camera;
+		int32_t project_scene;
 	}uniforms;
 
 	uint32_t program;
@@ -267,6 +270,7 @@ typedef struct{
 	void* draw;		// (jlgr_sprite_draw_fnt) Draw function
 	uint8_t update;		// Whether sprite should redraw or not.
 	jl_pr_t pr;		// Pre-renderer / collision box.
+	uint8_t rs;		// Render style.
 }jl_sprite_t;
 
 typedef void (*jlgr_sprite_draw_fnt)(jl_t* jl, uint8_t resize, void* ctx_draw);
@@ -408,6 +412,7 @@ typedef struct{
 			int32_t lightPos;
 			int32_t color;
 			int32_t ambient;
+			int32_t shininess;
 		}light;
 
 		float colors[4];
@@ -426,6 +431,7 @@ typedef struct{
 		jl_vo_t temp_vo;
 		// Default texture coordinates.
 		uint32_t default_tc;
+		uint32_t upsidedown_tc;
 		
 		jl_pr_t* cp; // Renderer currently being drawn on.
 	}gl;
@@ -579,7 +585,7 @@ void jlgr_vo_free(jlgr_t* jlgr, jl_vo_t *vo);
 void jlgr_pr_off(jlgr_t* jlgr);
 void jlgr_pr_resize(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
 void jlgr_pr_init(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
-void jlgr_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, jl_vec3_t* scl);
+void jlgr_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, uint8_t orient);
 void jlgr_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
 
 // OpenGL
@@ -607,10 +613,11 @@ void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh);
 void jlgr_effects_vo_alpha(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a);
 void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]);
 void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
-	jl_vec3_t normal, jl_vec3_t lightPos, float color[], float ambient[]);
+	jl_vec3_t normal, jl_vec3_t lightPos, float color[], float ambient[],
+	float shininess);
 void jlgr_effects_hue(jlgr_t* jlgr, float c[]);
 void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t normal, jl_vec3_t lightPos,
-	float c[], float ambient[]);
+	float c[], float ambient[], float shininess);
 
 // video
 void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,

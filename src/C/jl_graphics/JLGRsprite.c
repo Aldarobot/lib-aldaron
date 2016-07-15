@@ -78,13 +78,7 @@ void jlgr_sprite_draw(jlgr_t* jlgr, jl_sprite_t *spr) {
 
 	// Redraw if needed.
 	if(spr->update) jlgr_sprite_redraw__(jlgr, spr);
-	jlgr_pr_draw(jlgr, &spr->pr, &spr->pr.cb.pos, &spr->pr.scl);
-/*	jl_gl_transform_pr_(jlgr, &spr->pr,
-		spr->pr.cb.pos.x, spr->pr.cb.pos.y, spr->pr.cb.pos.z,
-		spr->pr.scl.x, spr->pr.scl.y, spr->pr.scl.z);
-
-	jl_gl_draw_pr_(jlgr->jl, &spr->pr);*/
-	//
+	jlgr_pr_draw(jlgr, &spr->pr, &spr->pr.cb.pos, spr->rs);
 	jl_thread_mutex_unlock(jlgr->jl, spr->mutex);
 	jl_print_return(jlgr->jl, "Sprite Draw!");
 }
@@ -163,6 +157,7 @@ void jlgr_sprite_init(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	if(draw_ctx_size)
 		sprite->ctx_draw = jl_mem_copy(jlgr->jl, draw_ctx, draw_ctx_size);
 	sprite->ctx_draw_size = draw_ctx_size;
+	sprite->rs = 0;
 }
 
 /**

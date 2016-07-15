@@ -158,8 +158,6 @@ void jlgr_pr_init(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px) {
 	jl_mem_clr(pr->cv, 4*sizeof(float)*3);
 	// Set width, height and aspect ratio.
 	jlgr_pr_set__(pr, w, h, w_px);
-	// Set transformation
-	pr->scl = (jl_vec3_t) { 1., 1., 1. };
 	jl_print_return(jlgr->jl, "GL_PR_NEW");
 }
 
@@ -168,27 +166,37 @@ void jlgr_pr_init(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px) {
  * @param jlgr: The library context.
  * @param pr: The pre-rendered texture.
  * @param vec: The vector of offset/translation.
- * @param scl: The scale factor.
+ * @param orient: 1 for upside-down 0 for normal.
 **/
-void jlgr_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, jl_vec3_t* scl) {
+void jlgr_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, uint8_t orient) {
 	// Initialize Framebuffer, if not already init'd
 	jlgr_pr_init__(jlgr, pr);
 	// Bind texture shader.
 	jlgr_opengl_draw1(jlgr, &jlgr->gl.prg.texture);
 	// Transform
 	if(vec == NULL) {
-		jlgr_opengl_transform_(jlgr, &jlgr->gl.prg.texture,
-			0.f, 0.f, 0.f, 1., 1., 1., jl_gl_ar(jlgr));
-	}else if(scl == NULL) {
-		jlgr_opengl_transform_(jlgr, &jlgr->gl.prg.texture,
-			vec->x, vec->y, vec->z, 1., 1., 1., jl_gl_ar(jlgr));
+		jlgr_opengl_matrix(jlgr, &jlgr->gl.prg.texture,
+			(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
+			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
+			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Translate
+			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
+			1.f, jl_gl_ar(jlgr), 0.f, 1.f);
+//		jlgr_opengl_transform_(jlgr, ,
+//			0.f, 0.f, 0.f, 1., 1., 1., jl_gl_ar(jlgr));
 	}else{
-		jlgr_opengl_transform_(jlgr, &jlgr->gl.prg.texture,
-			vec->x, vec->y, vec->z, scl->x, scl->y, scl->z,
-			jl_gl_ar(jlgr));	
+		jlgr_opengl_matrix(jlgr, &jlgr->gl.prg.texture,
+			(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
+			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
+			(jl_vec3_t) { vec->x, vec->y, vec->z }, // Translate
+			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
+			1.f, jl_gl_ar(jlgr), 0.f, 1.f);
+//		jlgr_opengl_transform_(jlgr, &jlgr->gl.prg.texture,
+//			vec->x, vec->y, vec->z, 1., 1., 1., jl_gl_ar(jlgr));
 	}
 	// Bind Texture Coordinates to shader
-	jlgr_opengl_setv(jlgr, &jlgr->gl.default_tc, jlgr->gl.prg.texture.attributes.texpos_color, 2);
+	jlgr_opengl_setv(jlgr, orient
+		? &jlgr->gl.upsidedown_tc : &jlgr->gl.default_tc,
+		jlgr->gl.prg.texture.attributes.texpos_color, 2);
 	// Bind the texture
 	jlgr_opengl_texture_bind_(jlgr, pr->tx);
 	// Update the position variable in shader.

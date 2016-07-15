@@ -9,6 +9,13 @@
 	1., 1. \
 }
 
+#define UPSIDEDOWN_TC (const float[]) { \
+	0., 0., \
+	0., 1., \
+	1., 1., \
+	1., 0. \
+}
+
 typedef enum{
 	JLGR_ID_NULL,
 	JLGR_ID_UNKNOWN,
@@ -34,8 +41,9 @@ typedef struct{
 
 uint32_t _jl_sg_gpix(/*in */ SDL_Surface* surface, int32_t x, int32_t y);
 void jl_gl_viewport_screen(jlgr_t* jlgr);
-void jlgr_opengl_transform_(jlgr_t* jlgr, jlgr_glsl_t* sh,
-	float xe, float ye, float ze, float xm, float ym, float zm, float ar);
+void jlgr_opengl_matrix(jlgr_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
+	jl_vec3_t rotatev, jl_vec3_t translatev, jl_vec3_t lookv,
+	float fov, float ar, float near, float far);
 void jl_gl_vo_free(jlgr_t* jlgr, jl_vo_t *pv);
 uint32_t jl_gl_w(jlgr_t* jlgr);
 

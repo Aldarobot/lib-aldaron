@@ -250,11 +250,19 @@ void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t* vec) {
 
 	jlgr_opengl_draw1(jlgr, shader);
 	if(vec == NULL) {
-		jlgr_opengl_transform_(jlgr, shader,
-			0.f, 0.f, 0.f, 1., 1., 1., jl_gl_ar(jlgr));
+		jlgr_opengl_matrix(jlgr, shader,
+			(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
+			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
+			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Translate
+			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
+			1.f, jl_gl_ar(jlgr), 0.f, 1.f); 
 	}else{
-		jlgr_opengl_transform_(jlgr, shader,
-			vec->x, vec->y, vec->z, 1., 1., 1., jl_gl_ar(jlgr));
+		jlgr_opengl_matrix(jlgr, shader,
+			(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
+			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
+			(jl_vec3_t) { vec->x, vec->y, vec->z }, // Translate
+			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
+			1.f, jl_gl_ar(jlgr), 0.f, 1.f);
 	}
 	jlgr_vo_draw2(jlgr, vo, shader);
 }

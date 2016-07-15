@@ -40,24 +40,22 @@ const char* JL_EFFECT_LIGHT =
 	"varying vec2 texcoord;\n"
 	"\n"
 	"varying vec3 fragpos;\n"
+	"varying vec4 lightloc;\n"
 	"\n"
 	"uniform vec3 light_color;\n"
 	"uniform vec3 norm;\n"
-	"uniform vec3 lightPos;\n"
 	"uniform vec3 ambient;\n"
 	"uniform float shininess;\n"
 	"\n"
 	"void main() {\n"
 	// Diffuse
-	"	vec3 lightDir = normalize(lightPos - fragpos);\n"
+	"	vec3 lightDir = normalize(lightloc.xyz - fragpos);\n"
 	"	float diff = max(dot(norm, lightDir), 0.0);\n"
 	"	vec3 diffuse = diff * light_color;\n"
 	// Specular
-	"	float specularStrength = 0.5f;\n"
-	"	vec3 viewDir = normalize(-fragpos);\n"
-	"	vec3 reflectDir = reflect(-lightDir, norm);\n"
-	"	float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);\n"
-	"	vec3 specular = specularStrength * spec * light_color;\n"
+	"	vec3 halfwayDir = normalize(lightDir + normalize(-fragpos));\n"
+	"	float spec = pow(max(dot(norm, halfwayDir), 0.0), shininess);\n"
+	"	vec3 specular = spec * light_color;\n"
 	// Result
 	"	gl_FragColor = vec4(ambient + diffuse + specular, 1.0f) *\n"
 	"		texture2D(texture, texcoord);\n"
@@ -70,19 +68,22 @@ const char* JL_EFFECT_LIGHTV =
 	"uniform mat4 translate_object;\n"
 	"uniform mat4 rotate_camera;\n"
 	"uniform mat4 project_scene;\n"
+	"uniform mat4 lightPos;\n"
 	"\n"
 	"attribute vec4 position;\n"
 	"attribute vec2 texpos;\n"
 	"\n"
 	"varying vec2 texcoord;\n"
 	"varying vec3 fragpos;\n"
+	"varying vec4 lightloc;\n"
 	"\n"
 	"void main() {\n"
 	"	texcoord = texpos;\n"
 	"	vec4 pos = project_scene * rotate_camera *\n"
 	"		translate_object * rotate_object * scale_object *\n"
 	"		position;\n"
-	"	fragpos = vec3(pos.x, pos.y, pos.z);"
+	"	fragpos = vec3(pos.x, pos.y, pos.z);\n"
+	"	lightloc = lightPos * vec4(0.0, 0.0, 0.0, 1.0);\n"
 	"	gl_Position = pos;\n"
 	"}";
 
@@ -167,6 +168,12 @@ void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
 	jl_vec3_t normal, jl_vec3_t lightPos, float color[], float ambient[],
 	float shininess)
 {
+	float m[] = {
+		1.f, 0.f, 0.f, (lightPos.x * 2.f) - 1.f,
+		0.f, 1.f, 0.f, (lightPos.y * 2.f / jl_gl_ar(jlgr)) - 1.f,
+		0.f, 0.f, 1.f, (lightPos.z * 2.f),
+		0.f, 0.f, 0.f, 1.f
+	};
 	// Bind shader
 	jlgr_opengl_draw1(jlgr, &jlgr->effects.light.shader);
 	// Translate by offset vector
@@ -176,15 +183,12 @@ void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
 		(jl_vec3_t) { offs.x, offs.y, offs.z }, // Translate
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
 		1.f, jl_gl_ar(jlgr), 0.f, 1.f);
-//	jlgr_opengl_transform_(jlgr, &jlgr->effects.light.shader,
-//		offs.x, offs.y, offs.z, 1., 1., 1., jl_gl_ar(jlgr));
-	// Set Hue Value In Shader
+	// Set Values In Shader
 	jlgr_opengl_uniform3(jlgr, jlgr->effects.light.color,
 		color[0], color[1], color[2]);
 	jlgr_opengl_uniform3(jlgr, jlgr->effects.light.norm,
 		normal.x, normal.y, normal.z);
-	jlgr_opengl_uniform3(jlgr, jlgr->effects.light.lightPos,
-		lightPos.x, lightPos.y, lightPos.z);
+	jlgr_opengl_uniformM(jlgr, jlgr->effects.light.lightPos, m);
 	jlgr_opengl_uniform3(jlgr, jlgr->effects.light.ambient,
 		ambient[0], ambient[1], ambient[2]);
 	jlgr_opengl_uniform1(jlgr, jlgr->effects.light.shininess, shininess);

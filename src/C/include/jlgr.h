@@ -603,6 +603,7 @@ void jlgr_opengl_uniform1(jlgr_t* jlgr, int32_t uv, float x);
 void jlgr_opengl_uniform3(jlgr_t* jlgr, int32_t uv, float x, float y, float z);
 void jlgr_opengl_uniform4(jlgr_t* jlgr, int32_t uv, float x, float y, float z,
 	float w);
+void jlgr_opengl_uniformM(jlgr_t* jlgr, int32_t uv, float m[]);
 void jlgr_opengl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
 	const char* frag, uint8_t has_tex);
 void jlgr_opengl_shader_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl,

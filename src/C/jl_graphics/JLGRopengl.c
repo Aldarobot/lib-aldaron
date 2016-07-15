@@ -365,20 +365,31 @@ void jlgr_opengl_uniform1(jlgr_t* jlgr, int32_t uv, float x) {
 **/
 void jlgr_opengl_uniform3(jlgr_t* jlgr, int32_t uv, float x, float y, float z){
 	glUniform3f(uv, x, y, z);
-	JL_GL_ERROR(jlgr, 0,"glUniform3f");
+	JL_GL_ERROR(jlgr, uv, "glUniform3f");
 }
 
 /**
  * Set the effect uniform variable in a shader to a vec4.
  * @param jlgr: The library context.
- * @param sh: The shader object.
+ * @param uv: The uniform variable.
  * @param x, y, z, w: The vec4 value.
 **/
 void jlgr_opengl_uniform4(jlgr_t* jlgr, int32_t uv, float x, float y, float z,
 	float w)
 {
 	glUniform4f(uv, x, y, z, w);
-	JL_GL_ERROR(jlgr, 0,"glUniform4f");
+	JL_GL_ERROR(jlgr, uv, "glUniform4f");
+}
+
+/**
+ * Set the effect uniform variable in a shader to a mat4.
+ * @param jlgr: The library context.
+ * @param uv: The uniform variable.
+ * @param m: The mat4 value.
+**/
+void jlgr_opengl_uniformM(jlgr_t* jlgr, int32_t uv, float m[]) {
+	glUniformMatrix4fv(uv, 1, 1, m);
+	JL_GL_ERROR(jlgr, uv, "glUniformMatrix4fv");
 }
 
 //This pushes VBO "buff" up to the shader's vertex attribute "vertexAttrib"
@@ -537,11 +548,6 @@ void jlgr_opengl_matrix(jlgr_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
 	jl_vec3_t rotatev, jl_vec3_t translatev, jl_vec3_t lookv,
 	float fov, float ar, float near, float far)
 {
-//	jl_vec3_t vecTranslate = (jl_vec3_t) {
-//		translatev.x - (1./2.), translatev.y - (ar/2.), translatev.z };
-//		0.f, 0.f, 0.f };
-//	jl_vec3_t vecScale = (jl_vec3_t) { 1.f, 1.f, 1.f };
-//		scalev.x, scalev.y / ar, scalev.z };
 	float scale[] = {
 		2. * scalev.x, 0.f, 0.f, 0.f,
 		0.f, 2. * scalev.y / ar, 0.f, 0.f,

@@ -164,6 +164,7 @@ static void _jl_sg_loop_ds(jlgr_t* jlgr) {
 
 // Single screen loop
 static void _jl_sg_loop_ss(jlgr_t* jlgr) {
+//	jlgr->sg.bg.dn.pr.cb.pos.z = -0.1f;
 	// Draw lower screen - default screen
 	jlgr_sprite_redraw(jlgr, &jlgr->sg.bg.dn, NULL);
 	jlgr_sprite_draw(jlgr, &jlgr->sg.bg.dn);

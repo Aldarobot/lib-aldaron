@@ -2,6 +2,11 @@
 #define JLGR
 
 #include "jl.h"
+
+// jlgr_effects/types
+#define JLGR_EFFECTS_TYPES
+#include "jlgr_effects.h"
+
 #include "SDL_events.h"
 
 #define JLGR_TEXT_CMD "\x01"
@@ -416,9 +421,8 @@ typedef struct{
 		}light;
 
 		float colors[4];
-		jl_vec3_t normal;
-		jl_vec3_t lightPos;
-		float ambient[3];
+
+		jlgr_effects_light_t lights;
 	}effects;
 	
 	//Opengl Data
@@ -599,10 +603,10 @@ float jl_gl_ar(jlgr_t* jlgr);
 void jl_gl_clear(jlgr_t* jlgr, float r, float g, float b, float a);
 
 // JLGRopengl.c
-void jlgr_opengl_uniform1(jlgr_t* jlgr, int32_t uv, float x);
-void jlgr_opengl_uniform3(jlgr_t* jlgr, int32_t uv, float x, float y, float z);
-void jlgr_opengl_uniform4(jlgr_t* jlgr, int32_t uv, float x, float y, float z,
-	float w);
+void jlgr_opengl_uniform1(jlgr_t* jlgr, uint8_t e, int32_t uv, float* x);
+void jlgr_opengl_uniform1i(jlgr_t* jlgr, uint8_t e, int32_t uv, int32_t* x);
+void jlgr_opengl_uniform3(jlgr_t* jlgr, uint8_t e, int32_t uv, float* xyz);
+void jlgr_opengl_uniform4(jlgr_t* jlgr, uint8_t e, int32_t uv, float* xyzw);
 void jlgr_opengl_uniformM(jlgr_t* jlgr, int32_t uv, float m[]);
 void jlgr_opengl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
 	const char* frag, uint8_t has_tex);
@@ -613,12 +617,13 @@ void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh);
 // JLGReffects.c
 void jlgr_effects_vo_alpha(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a);
 void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]);
-void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
-	jl_vec3_t normal, jl_vec3_t lightPos, float color[], float ambient[],
-	float shininess);
+void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs);
 void jlgr_effects_hue(jlgr_t* jlgr, float c[]);
-void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t normal, jl_vec3_t lightPos,
-	float c[], float ambient[], float shininess);
+void jlgr_effects_light(jlgr_t* jlgr, float shininess);
+void jlgr_effects_light_clear(jlgr_t* jlgr);
+void jlgr_effects_light_add(jlgr_t* jlgr, jl_vec3_t point, float ambient[],
+	float diffuse[], float specular[], float c, float l, float q);
+void jlgr_effects_light_update(jlgr_t* jlgr);
 
 // video
 void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,

@@ -141,7 +141,6 @@ void jl_print_set(jl_t* jl, jl_print_fnt fn_) {
 }
 
 static void jl_print_function__(jl_t* jl,const char* fn_name,uint8_t thread_id){
-//	uint8_t thread_id = jl_thread_current(jl);
 	int size = strlen(fn_name);
 
 	jl->jl_ctx[thread_id].print.level++;
@@ -150,16 +149,6 @@ static void jl_print_function__(jl_t* jl,const char* fn_name,uint8_t thread_id){
 		[jl->jl_ctx[thread_id].print.level], size);
 	jl->jl_ctx[thread_id].print.stack
 		[jl->jl_ctx[thread_id].print.level][size] = '\0';
-
-/*	jl->jl_ctx[thread_id].print.level++;*/
-/*	jl->jl_ctx[thread_id].print.ofs2++;*/
-/*	jl_mem_copyto(jl->jl_ctx[jl_thread_current(jl)].temp,*/
-/*		jl->jl_ctx[thread_id].print.stack*/
-/*			[jl->jl_ctx[thread_id].print.level], 255);*/
-/*	i32_t size = strlen(jl->jl_ctx[thread_id].print.stack*/
-/*			[jl->jl_ctx[thread_id].print.level]);*/
-/*	jl->jl_ctx[thread_id].print.stack*/
-/*		[jl->jl_ctx[thread_id].print.level][size] = '\0';*/
 }
 
 /**
@@ -247,7 +236,12 @@ void jl_print_return(jl_t* jl, const char* fn_name) {
 	}
 	jl_mem_clr(jl->jl_ctx[thread_id].print.stack
 		[jl->jl_ctx[thread_id].print.level], 30);
-	jl->jl_ctx[thread_id].print.level--;
+	if(jl->jl_ctx[thread_id].print.level) {
+		jl->jl_ctx[thread_id].print.level--;
+	}else{
+		printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH!\n");
+		exit(-1);
+	}
 	jl->jl_ctx[thread_id].print.ofs2 -= 1;
 	jl_thread_mutex_unlock(jl, jl->print.mutex);
 }

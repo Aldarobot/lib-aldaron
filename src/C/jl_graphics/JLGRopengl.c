@@ -147,12 +147,14 @@ GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
 		JL_GL_ERROR(jlgr, 0,"glCompileShader");
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 		JL_GL_ERROR(jlgr, 0,"glGetShaderiv");
+		printf("OOH!\n");
 		if (!compiled) {
 			GLint infoLen = 0;
 			char* buf;
 
 			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
 			JL_GL_ERROR(jlgr, 1,"glGetShaderiv");
+			printf("AHG!\n");
 			if (infoLen) {
 				buf = (char*) malloc(infoLen);
 				if (buf) {
@@ -168,6 +170,8 @@ GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
 				glDeleteShader(shader);
 				shader = 0;
 			}
+			jl_print(jlgr->jl, "Failed to make shader.");
+			exit(-1);
 		}
 	}
 	return shader;
@@ -176,26 +180,31 @@ GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
 GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 	const char* pFragmentSource)
 {
+	JL_PRINT_DEBUG(jlgr->jl, "Making program....");
 	GLuint vertexShader =
 		jl_gl_load_shader(jlgr, GL_VERTEX_SHADER, pVertexSource);
 	if (!vertexShader) {
 		jl_print(jlgr->jl, "couldn't load vertex shader");
 		exit(-1);
 	}
-
+	JL_PRINT_DEBUG(jlgr->jl, "Frag shader....");
 	GLuint fragmentShader =
 		jl_gl_load_shader(jlgr, GL_FRAGMENT_SHADER, pFragmentSource);
+	printf("AH!\n");
 	if (!fragmentShader) {
 		jl_print(jlgr->jl, "couldn't load fragment shader");
 		exit(-1);
 	}
-
+	printf("AAH!\n");
+	JL_PRINT_DEBUG(jlgr->jl, "Together Shader....");
 	GLuint program = glCreateProgram();
 	JL_GL_ERROR(jlgr, 0,"glCreateProgram");
 	if (!program) {
 		jl_print(jlgr->jl, "Failed to load program");
 		exit(-1);
 	}
+
+	JL_PRINT_DEBUG(jlgr->jl, "Linking....");
 
 	GLint linkStatus = GL_FALSE;
 
@@ -232,6 +241,7 @@ GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 			exit(-1);
 		}
 	}
+	JL_PRINT_DEBUG(jlgr->jl, "Made program!");
 	return program;
 }
 
@@ -349,23 +359,29 @@ static inline void jl_gl_usep__(jlgr_t* jlgr, GLuint prg) {
 /**
  * Set a uniform variable in a shader to a float.
  * @param jlgr: The library context.
+ * @param e: The number of elements in an array, or 1 if uniform isn't array.
  * @param uv: The uniform variable.
  * @param x: The float value.
 **/
-void jlgr_opengl_uniform1(jlgr_t* jlgr, int32_t uv, float x) {
-	glUniform1f(uv, x);
-	JL_GL_ERROR(jlgr, uv, "glUniform1f");
+void jlgr_opengl_uniform1(jlgr_t* jlgr, uint8_t e, int32_t uv, float* x) {
+	glUniform1fv(uv, e, x);
+	JL_GL_ERROR(jlgr, uv, "glUniform1fv");
+}
+
+void jlgr_opengl_uniform1i(jlgr_t* jlgr, uint8_t e, int32_t uv, int32_t* x) {
+	glUniform1iv(uv, e, x);
+	JL_GL_ERROR(jlgr, uv, "glUniform1iv");
 }
 
 /**
  * Set a uniform variable in a shader to a vec3.
  * @param jlgr: The library context.
  * @param uv: The uniform variable.
- * @param x, y, z: The vec3 value.
+ * @param xyz: The vec3 value.
 **/
-void jlgr_opengl_uniform3(jlgr_t* jlgr, int32_t uv, float x, float y, float z){
-	glUniform3f(uv, x, y, z);
-	JL_GL_ERROR(jlgr, uv, "glUniform3f");
+void jlgr_opengl_uniform3(jlgr_t* jlgr, uint8_t e, int32_t uv, float* xyz) {
+	glUniform3fv(uv, e, xyz);
+	JL_GL_ERROR(jlgr, uv, "glUniform3fv");
 }
 
 /**
@@ -374,11 +390,9 @@ void jlgr_opengl_uniform3(jlgr_t* jlgr, int32_t uv, float x, float y, float z){
  * @param uv: The uniform variable.
  * @param x, y, z, w: The vec4 value.
 **/
-void jlgr_opengl_uniform4(jlgr_t* jlgr, int32_t uv, float x, float y, float z,
-	float w)
-{
-	glUniform4f(uv, x, y, z, w);
-	JL_GL_ERROR(jlgr, uv, "glUniform4f");
+void jlgr_opengl_uniform4(jlgr_t* jlgr, uint8_t e, int32_t uv, float* xyzw) {
+	glUniform4fv(uv, e, xyzw);
+	JL_GL_ERROR(jlgr, uv, "glUniform4fv");
 }
 
 /**
@@ -602,7 +616,6 @@ void jlgr_opengl_matrix(jlgr_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
  * @param sh: The shader to use.
 **/
 void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh) {
-	// Select Shader.
 	jl_gl_usep__(jlgr, sh->program);
 }
 

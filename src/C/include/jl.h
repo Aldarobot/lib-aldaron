@@ -86,6 +86,10 @@ typedef struct{
 	float x, y, z;
 }jl_vec3_t;
 
+typedef struct{
+	float x, y, z, w;
+}jl_vec4_t;
+
 //4 bytes of information about the string are included
 typedef struct{
 	uint8_t* data; //Actual String

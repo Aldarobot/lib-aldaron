@@ -74,6 +74,7 @@ const char* JL_EFFECT_LIGHT =
 	"\n"
 	"uniform vec3 norm;\n"
 	"uniform float shininess;\n"
+	"uniform float max_brightness;\n"
 	"\n"
 	"#define NUM_LIGHTS %d\n"
 	"\n"
@@ -116,7 +117,7 @@ const char* JL_EFFECT_LIGHT =
 	// Point light
 	"	for(int i = 0; i < NUM_LIGHTS; i++) result += point_light(pl[i]);\n"
 	// Result
-	"	gl_FragColor = vec4(result, 1.0) * texture2D(texture, texcoord);\n"
+	"	gl_FragColor = vec4(result * max_brightness, 1.0) * texture2D(texture, texcoord);\n"
 	"}";
 
 const char* JL_EFFECT_LIGHTV =
@@ -161,7 +162,7 @@ static void jlgr_effect_pr_light__(jl_t* jl) {
 		0., 0., 1., jl_gl_ar(jlgr) }, jlgr->gl.cp->tx);
 	jlgr_opengl_framebuffer_addtx_(jlgr, jlgr->gl.cp->tx);
 	jlgr_effects_vo_light(jlgr, &jlgr->gl.temp_vo,
-		(jl_vec3_t) { 0.f, 0.f, 0.f });
+		(jl_vec3_t) { 0.f, 0.f, 0.f }, jlgr->effects.vec3);
 }
 
 /** @endcond */
@@ -212,9 +213,17 @@ void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]) {
 	jlgr_vo_draw2(jlgr, vo, &jlgr->effects.hue.shader);
 }
 
-void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs) {
+/**
+ * @param material: material light properties
+ *  ( shininess, max brightness, unused )
+ *  or null for default material ( 32.f, 1.f, 0.f )
+**/
+void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
+	jl_vec3_t* material)
+{
+	jl_vec3_t default_material = (jl_vec3_t) { 32.f, 1.f, 0.f };
+	if(material == NULL) material = &default_material;
 	float normal[] = { 0.f, 0.f, 1.f };
-	float shininess = 32.f;
 #ifdef JL_DEBUG
 	if(jlgr->effects.lights.point_count == 0) {
 		jl_print(jlgr->jl, "jlgr_effects_vo_light: No lights have been"
@@ -227,10 +236,10 @@ void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs) {
 	// Bind shader
 	jlgr_opengl_draw1(jlgr, &lightsource->shader);
 	// Update uniforms for material.
-	jlgr_opengl_uniform3(jlgr, 1, lightsource->uniform_normal,
-		normal);
-	jlgr_opengl_uniform1(jlgr, 1, lightsource->uniform_shininess,
-		&shininess);
+	jlgr_opengl_uniform3(jlgr, 1, lightsource->uniform_normal, normal);
+	jlgr_opengl_uniform1(jlgr, 1, lightsource->uniform_shininess,&material->x);
+	jlgr_opengl_uniform(jlgr, &lightsource->shader,&material->y, 1,
+		"max_brightness");
 	// Translate by offset vector
 	jlgr_opengl_matrix(jlgr, &lightsource->shader,
 		(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
@@ -254,14 +263,15 @@ void jlgr_effects_hue(jlgr_t* jlgr, float c[]) {
 }
 
 /**
- * @param shininess: Material shininess.
+ * @param material: Material shininess / Max brightness
 **/
-void jlgr_effects_light(jlgr_t* jlgr, float shininess) {
+void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t* material) {
 //	jl_mem_copyto(c, jlgr->effects.colors, sizeof(float) * 3);
 //	jl_mem_copyto(c, jlgr->effects.ambient, sizeof(float) * 3);
 //	jlgr->effects.normal = normal;
 //	jlgr->effects.lightPos = lightPos;
 //	jlgr->effects.colors[3] = shininess;
+	jlgr->effects.vec3 = material;
 	jlgr_pr(jlgr, jlgr->gl.cp, jlgr_effect_pr_light__);
 }
 

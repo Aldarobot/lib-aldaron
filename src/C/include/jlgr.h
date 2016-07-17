@@ -420,6 +420,7 @@ typedef struct{
 		}light;
 
 		float colors[4];
+		jl_vec3_t* vec3;
 
 		jlgr_effects_light_t lights;
 	}effects;
@@ -620,9 +621,10 @@ void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh);
 // JLGReffects.c
 void jlgr_effects_vo_alpha(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a);
 void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]);
-void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs);
+void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
+	jl_vec3_t* material);
 void jlgr_effects_hue(jlgr_t* jlgr, float c[]);
-void jlgr_effects_light(jlgr_t* jlgr, float shininess);
+void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t* material);
 void jlgr_effects_light_clear(jlgr_t* jlgr);
 void jlgr_effects_light_add(jlgr_t* jlgr, jl_vec3_t point, float ambient[],
 	float diffuse[], float specular[], float c, float l, float q);

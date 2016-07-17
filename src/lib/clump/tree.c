@@ -1,7 +1,7 @@
 /*
  * tree.c	A generic tree-set or -map
  *
- * Copyright (c) 2007-2012  Douglas P Lau
+ * Copyright (c) 2007-2014  Douglas P Lau
  *
  * Public functions:
  *
@@ -25,7 +25,7 @@
  */
 /** \file
  *
- * A tree is a generic collection whici implements both sorted sets and sorted
+ * A tree is a generic collection which implements both sorted sets and sorted
  * maps.
  * A map uses a bit more memory than a set, but allows an arbitrary value to be
  * mapped to each key.
@@ -439,7 +439,15 @@ struct cl_tree *cl_tree_create_map(cl_compare_cb *fn_compare) {
  * @param tree The tree (set or map).
  */
 void cl_tree_destroy(struct cl_tree *tree) {
+	assert(tree);
 	cl_pool_destroy(tree->pool);
+#ifndef NDEBUG
+	tree->fn_compare = NULL;
+	tree->pool = NULL;
+	tree->leaf = NULL;
+	tree->root = NULL;
+	tree->match = NULL;
+#endif
 	free(tree);
 }
 
@@ -485,7 +493,8 @@ static struct cl_node *cl_tree_search(struct cl_tree *tree, const void *key) {
  */
 bool cl_tree_contains(struct cl_tree *tree, const void *key) {
 	struct cl_node *n = cl_tree_search(tree, key);
-	return cl_tree_compare(tree, n, key) == CL_EQUAL;
+	return !cl_tree_is_leaf(tree, n) &&
+	       (cl_tree_compare(tree, n, key) == CL_EQUAL);
 }
 
 /** Get (peek) the first key in a sub-tree.
@@ -795,6 +804,7 @@ struct cl_tree_iterator *cl_tree_iterator_create(struct cl_tree *tree) {
  * @param it The tree iterator.
  */
 void cl_tree_iterator_destroy(struct cl_tree_iterator *it) {
+	assert(it);
 	struct cl_tree *tree = it->tree;
 	struct cl_tree_branch *br = it->branch;
 	while(br) {
@@ -802,8 +812,10 @@ void cl_tree_iterator_destroy(struct cl_tree_iterator *it) {
 		cl_pool_release(tree->pool, br);
 		br = next;
 	}
-	/* Make sure user doesn't reuse iterator after destroying */
+#ifndef NDEBUG
 	it->tree = NULL;
+	it->branch = NULL;
+#endif
 	cl_pool_release(tree->pool, it);
 }
 

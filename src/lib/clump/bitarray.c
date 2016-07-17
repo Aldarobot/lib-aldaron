@@ -57,6 +57,9 @@ struct cl_bitarray *cl_bitarray_create(void) {
  */
 void cl_bitarray_destroy(struct cl_bitarray *ba) {
 	assert(ba);
+#ifndef NDEBUG
+	ba->buf = NULL;
+#endif
 	free(ba);
 }
 

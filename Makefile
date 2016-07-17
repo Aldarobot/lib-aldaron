@@ -21,6 +21,7 @@ OBJ_LIBZIP = build/deps/libzip.o
 
 # Default target
 build: build/ $(OBJ_CLUMP) $(OBJ_SDL) $(OBJ_SDL_IMAGE) $(OBJ_SDL_MIXER) $(OBJ_SDL_NET) $(OBJ_LIBZIP)
+	rm build/deps.o
 	# Linking library dependencies....
 	ar csr build/deps.o build/deps/*.o
 	# Built library dependencies!
@@ -157,14 +158,16 @@ $(OBJ_SDL_MIXER):
 	ld -r $(SRC_SDL_MIXER)/build/*.o -o $(OBJ_SDL_MIXER)
 	# Done!
 
-$(OBJ_CLUMP):
+$(OBJ_CLUMP): src/lib/clump/*
 	# Compiling clump....
+	gcc src/lib/clump/array.c -c -o build/obj/clump_array.o
 	gcc src/lib/clump/bitarray.c -c -o build/obj/clump_bitarray.o
 	gcc src/lib/clump/clump.c -c -o build/obj/clump_clump.o
 	gcc src/lib/clump/hash.c -c -o build/obj/clump_hash.o
 	gcc src/lib/clump/hcodec.c -c -o build/obj/clump_hcodec.o
 	gcc src/lib/clump/list.c -c -o build/obj/clump_list.o
 	gcc src/lib/clump/pool.c -c -o build/obj/clump_pool.o
+	gcc src/lib/clump/rhash.c -c -o build/obj/clump_rhash.o
 	gcc src/lib/clump/tree.c -c -o build/obj/clump_tree.o
 	ld -r build/obj/clump_*.o -o $(OBJ_CLUMP)
 	# Done!	

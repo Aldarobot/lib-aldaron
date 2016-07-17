@@ -10,7 +10,7 @@
  *	cl_hcodec_encode	Encode a block of data
  *	cl_hcodec_decode	Decode a block of data
  *
- * This is a data compression module intended to compressing fixed-length
+ * This is a data compression module intended to compress fixed-length
  * blocks of data (as opposed to streams).  Each block of data is treated
  * independently, with an accompanying code book.  Very small blocks (less
  * than 100 bytes) and very random blocks will not compress well.  The goal
@@ -117,6 +117,10 @@ void cl_hcodec_destroy(struct cl_hcodec *hc) {
 	assert(hc);
 	cl_bitarray_destroy(hc->bits);
 	cl_tree_destroy(hc->pqueue);
+#ifndef NDEBUG
+	hc->pqueue = NULL;
+	hc->bits = NULL;
+#endif
 	free(hc);
 }
 

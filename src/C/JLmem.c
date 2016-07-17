@@ -148,6 +148,20 @@ void jl_mem_format(char* rtn, const char* format, ... ) {
 }
 
 /**
+ * Format a string.
+ * @param rtn: A variable to put the formated string.  The size must be the size
+ *	of format plus an additional 128 bytes for expansion.
+ * @param format: The string to format.
+**/
+void jl_mem_format2(char* rtn, const char* format, ...) {
+	va_list arglist;
+
+	va_start( arglist, format );
+	vsnprintf( rtn, strlen(format) + 128, format, arglist );
+	va_end( arglist );
+}
+
+/**
  * Generate a random integer from 0 to "a"
  * @param a: 1 more than the maximum # to return
  * @returns: a random integer from 0 to "a"

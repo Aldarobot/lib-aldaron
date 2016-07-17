@@ -163,7 +163,7 @@ GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
 					const char* msg =
 						(shaderType==GL_VERTEX_SHADER)?
 						"vertex shader":"fragment shader";
-					jl_print(jlgr->jl,
+					printf(
 						"Could not compile %s:%s",msg,buf);
 					exit(-1);
 				}
@@ -354,6 +354,100 @@ static inline void jl_gl_usep__(jlgr_t* jlgr, GLuint prg) {
 #endif
 	glUseProgram(prg);
 	JL_GL_ERROR(jlgr, prg, "glUseProgram");
+}
+
+/**
+ * Modify a uniform variable
+ * @param jlgr: The library context.
+ * @param glsl: The shader the uniform variable belongs to.
+ * @param x: The value to push.
+ * @param vec: 1-4 for float-vec2-vec3-vec4
+ * @param name: Format variable for uniform name.
+**/
+void jlgr_opengl_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl, float* x, uint8_t vec,
+	const char* name, ...)
+{
+#ifdef JL_DEBUG
+	if(glsl == NULL) {
+		jl_print(jlgr->jl, "jlgr_opengl_uniform: NULL SHADER");
+		exit(-1);
+	}
+#endif
+	int32_t uv;
+	char uniform_name[256];
+
+	// Store the format in uniform_name.
+	va_list arglist;
+	va_start( arglist, name );
+	vsprintf( uniform_name, name, arglist );
+	va_end( arglist );
+	// Bind Shader
+	jlgr_opengl_draw1(jlgr, glsl);
+	// Get uniform
+	jlgr_opengl_shader_uniform(jlgr, glsl, &uv, uniform_name);
+
+	switch(vec) {
+		case 1:
+			glUniform1f(uv, x[0]);
+			break;
+		case 2:
+			glUniform2f(uv, x[0], x[1]);
+			break;
+		case 3:
+			glUniform3f(uv, x[0], x[1], x[2]);
+			break;
+		case 4:
+			glUniform4f(uv, x[0], x[1], x[2], x[3]);
+			break;
+		default:
+			jl_print(jlgr->jl, "vec must be 1-4");
+			break;
+	}
+	JL_GL_ERROR(jlgr, uv, "glUniform..f");
+}
+
+/**
+ * Modify a uniform variable
+ * @param jlgr: The library context.
+ * @param glsl: The shader the uniform variable belongs to.
+ * @param x: The value to push.
+ * @param vec: 1-4 for float-vec2-vec3-vec4
+ * @param name: Format variable for uniform name.
+**/
+void jlgr_opengl_uniformi(jlgr_t* jlgr, jlgr_glsl_t* glsl, int32_t* x,
+	uint8_t vec, const char* name, ...)
+{
+	int32_t uv;
+	char uniform_name[256];
+
+	// Store the format in uniform_name.
+	va_list arglist;
+	va_start( arglist, name );
+	vsprintf( uniform_name, name, arglist );
+	va_end( arglist );
+	// Bind Shader
+	jlgr_opengl_draw1(jlgr, glsl);
+	// Get uniform
+	jlgr_opengl_shader_uniform(jlgr, glsl, &uv, uniform_name);
+
+	switch(vec) {
+		case 1:
+			glUniform1i(uv, x[0]);
+			break;
+		case 2:
+			glUniform2i(uv, x[0], x[1]);
+			break;
+		case 3:
+			glUniform3i(uv, x[0], x[1], x[2]);
+			break;
+		case 4:
+			glUniform4i(uv, x[0], x[1], x[2], x[3]);
+			break;
+		default:
+			jl_print(jlgr->jl, "vec must be 1-4");
+			break;
+	}
+	JL_GL_ERROR(jlgr, uv, "glUniform..i");
 }
 
 /**

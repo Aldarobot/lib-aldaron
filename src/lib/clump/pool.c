@@ -91,11 +91,14 @@ static void cl_pool_block_free(struct cl_pool *p, void **block) {
  * @param p Memory pool.
  */
 void cl_pool_destroy(struct cl_pool *p) {
+	assert(p);
 	cl_pool_block_free(p, p->block_head);
 	cl_pool_block_free(p, p->block_free);
+#ifndef NDEBUG
 	p->block_head = NULL;
 	p->block_free = NULL;
 	p->free_head = NULL;
+#endif
 	free(p);
 }
 

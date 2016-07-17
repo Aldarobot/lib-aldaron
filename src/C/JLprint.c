@@ -164,7 +164,7 @@ void jl_print(jl_t* jl, const char* format, ... ) {
 	jl_print_fnt print_out_ = jl->print.printfn;
 	va_list arglist;
 
-	// Store the format in jl->temp.
+	// Store the format in temp.
 	va_start( arglist, format );
 	vsprintf( temp, format, arglist );
 	va_end( arglist );
@@ -186,7 +186,7 @@ void jl_print_rewrite(jl_t* jl, const char* format, ... ) {
 	uint8_t thread_id = jl_thread_current(jl);
 	va_list arglist;
 
-	// Store the format in jl->temp.
+	// Store the format in temp.
 	va_start( arglist, format );
 	vsprintf( temp, format, arglist );
 	va_end( arglist );

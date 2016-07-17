@@ -3,10 +3,6 @@
 
 #include "jl.h"
 
-// jlgr_effects/types
-#define JLGR_EFFECTS_TYPES
-#include "jlgr_effects.h"
-
 #include "SDL_events.h"
 
 #define JLGR_TEXT_CMD "\x01"
@@ -316,6 +312,10 @@ typedef struct{
 	} notification;
 }jlgr_pvar_t;
 
+// jlgr_effects/types
+#define JLGR_EFFECTS_TYPES
+#include "jlgr_effects.h"
+
 typedef struct{
 	jl_t* jl;
 
@@ -412,7 +412,6 @@ typedef struct{
 		}hue;
 
 		struct {
-			jlgr_glsl_t shader;
 			int32_t norm;
 			int32_t lightPos;
 			int32_t color;
@@ -603,6 +602,10 @@ float jl_gl_ar(jlgr_t* jlgr);
 void jl_gl_clear(jlgr_t* jlgr, float r, float g, float b, float a);
 
 // JLGRopengl.c
+void jlgr_opengl_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl, float* x, uint8_t vec,
+	const char* name, ...);
+void jlgr_opengl_uniformi(jlgr_t* jlgr, jlgr_glsl_t* glsl, int32_t* x,
+	uint8_t vec, const char* name, ...);
 void jlgr_opengl_uniform1(jlgr_t* jlgr, uint8_t e, int32_t uv, float* x);
 void jlgr_opengl_uniform1i(jlgr_t* jlgr, uint8_t e, int32_t uv, int32_t* x);
 void jlgr_opengl_uniform3(jlgr_t* jlgr, uint8_t e, int32_t uv, float* xyz);

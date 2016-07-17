@@ -203,6 +203,7 @@ void jl_mem_leak_fail(jl_t* jl, const char* fn_name);
 void jl_mem_clr(void* mem, uint64_t size);
 void jl_mem_copyto(const void* src, void* dst, uint64_t size);
 void jl_mem_format(char* rtn, const char* format, ... );
+void jl_mem_format2(char* rtn, const char* format, ...);
 uint32_t jl_mem_random_int(uint32_t a);
 void *jl_mem_temp(jl_t* jl, void *mem);
 double jl_mem_addwrange(double v1, double v2);

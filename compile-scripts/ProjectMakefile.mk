@@ -66,18 +66,18 @@ install: -release
 	cp -u --recursive -t $$JLL_PATH/ build/bin/*; \
 	printf "Done!\n"
 
--android-sdl-mods:
+-android-sdl-mods: $(shell echo $(JLL_HOME))/android-build-mods/*
 	# Apply SDL mods.
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/Android.mk\
-	 $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/android-project/jni/src/
+	 $(shell echo $(JLL_HOME))/src/lib/sdl/android-project/jni/src/
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/Android_static.mk\
-	 $(shell echo $(JLL_HOME))/deps/SDL2-2.0.4/android-project/jni/src/
+	 $(shell echo $(JLL_HOME))/src/lib/sdl/android-project/jni/src/
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/SDL_image-Android.mk\
-	 $(shell echo $(JLL_HOME))/deps/SDL2_image-2.0.1/Android.mk
+	 $(shell echo $(JLL_HOME))/src/lib/sdl-image/Android.mk
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/jconfig.h\
-	 $(shell echo $(JLL_HOME))/deps/SDL2_image-2.0.1/external/jpeg-9/jconfig.h
+	 $(shell echo $(JLL_HOME))/src/lib/sdl-image/external/jpeg-9/jconfig.h
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/libzip-Android.mk\
-	 $(shell echo $(JLL_HOME))/deps/libzip-1.1.2/lib/Android.mk
+	 $(shell echo $(JLL_HOME))/src/lib/libzip/lib/Android.mk
 
 android: -android-sdl-mods
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/SDL_config_android.h\

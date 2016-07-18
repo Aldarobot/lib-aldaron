@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := clump
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)
-LOCAL_CFLAGS :=
+LOCAL_CFLAGS := -std=c99
 
 LOCAL_SRC_FILES += $(subst $(LOCAL_PATH)/,, \
 	$(wildcard $(LOCAL_PATH)/*.c) \

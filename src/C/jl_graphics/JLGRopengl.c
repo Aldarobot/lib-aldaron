@@ -665,10 +665,11 @@ void jlgr_opengl_matrix(jlgr_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
 		0.f, 0.f, 0.f, 1.f
 	};
 	float translate[] = {
-		1.f, 0.f, 0.f, (translatev.x * 2.f) - 1.f,
-		0.f, 1.f, 0.f, (translatev.y * 2.f / ar) - 1.f,
-		0.f, 0.f, 1.f, (translatev.z * 2.f),
-		0.f, 0.f, 0.f, 1.f
+		1.f, 0.f, 0.f, 0.f,
+		0.f, 1.f, 0.f, 0.f,
+		0.f, 0.f, 1.f, 0.f, 
+		(translatev.x * 2.f) - 1.f, (translatev.y * 2.f / ar) - 1.f,
+			(translatev.z * 2.f), 1.f
 	};
 	float rotate_scene[] = {
 		1.f, 0.f, 0.f, 0.f,
@@ -688,15 +689,15 @@ void jlgr_opengl_matrix(jlgr_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
 		0.f, 0.f, 1.f, -1.f,
 		0.f, 0.f, -1.f, 1.f
 	};
-	glUniformMatrix4fv(sh->uniforms.scale_object, 1, 1, scale);
+	glUniformMatrix4fv(sh->uniforms.scale_object, 1, 0, scale);
 	JL_GL_ERROR(jlgr, 0, "matrix_object - scale");
-	glUniformMatrix4fv(sh->uniforms.rotate_object, 1, 1, rotate_object);
+	glUniformMatrix4fv(sh->uniforms.rotate_object, 1, 0, rotate_object);
 	JL_GL_ERROR(jlgr, 0, "matrix_object - rotate");
-	glUniformMatrix4fv(sh->uniforms.translate_object, 1, 1, translate);
+	glUniformMatrix4fv(sh->uniforms.translate_object, 1, 0, translate);
 	JL_GL_ERROR(jlgr, 0, "matrix_object - translate");
-	glUniformMatrix4fv(sh->uniforms.rotate_camera, 1, 1, rotate_scene);
+	glUniformMatrix4fv(sh->uniforms.rotate_camera, 1, 0, rotate_scene);
 	JL_GL_ERROR(jlgr, 0, "matrix_object - rotate world");
-	glUniformMatrix4fv(sh->uniforms.project_scene, 1, 1, projection);
+	glUniformMatrix4fv(sh->uniforms.project_scene, 1, 0, projection);
 	JL_GL_ERROR(jlgr, 0, "matrix_object - projection");
 }
 

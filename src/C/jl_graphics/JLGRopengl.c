@@ -147,14 +147,12 @@ GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
 		JL_GL_ERROR(jlgr, 0,"glCompileShader");
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 		JL_GL_ERROR(jlgr, 0,"glGetShaderiv");
-		printf("OOH!\n");
 		if (!compiled) {
 			GLint infoLen = 0;
 			char* buf;
 
 			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
 			JL_GL_ERROR(jlgr, 1,"glGetShaderiv");
-			printf("AHG!\n");
 			if (infoLen) {
 				buf = (char*) malloc(infoLen);
 				if (buf) {
@@ -190,12 +188,10 @@ GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 	JL_PRINT_DEBUG(jlgr->jl, "Frag shader....");
 	GLuint fragmentShader =
 		jl_gl_load_shader(jlgr, GL_FRAGMENT_SHADER, pFragmentSource);
-	printf("AH!\n");
 	if (!fragmentShader) {
 		jl_print(jlgr->jl, "couldn't load fragment shader");
 		exit(-1);
 	}
-	printf("AAH!\n");
 	JL_PRINT_DEBUG(jlgr->jl, "Together Shader....");
 	GLuint program = glCreateProgram();
 	JL_GL_ERROR(jlgr, 0,"glCreateProgram");

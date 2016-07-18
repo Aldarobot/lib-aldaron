@@ -79,41 +79,34 @@ const char* JL_EFFECT_LIGHT =
 	"#define NUM_LIGHTS %d\n"
 	"\n"
 	"struct PointLight{\n"
+	"	float power;\n"
 	"	vec3 position;\n"
-	"\n"
-	"	float constant;\n"
-	"	float linear;\n"
-	"	float quadratic;\n"
-	"\n"
-	"	vec3 ambient;\n"
 	"	vec3 diffuse;\n"
 	"	vec3 specular;\n"
 	"};\n"
 	"\n"
 	"uniform PointLight pl[32];\n"
+	"uniform vec3 ambient;\n"
 	"\n"
 	"vec3 point_light(PointLight pointlight) {\n"
 	"	vec3 difference = pointlight.position - fragpos;\n"
 	"	vec3 lightDir = normalize(difference);\n"
 	"	float distance = length(difference);\n"
 	"	vec3 light = \n"
-	// Ambient
-	"		pointlight.ambient + \n"
 	// Diffuse
 	"		max(dot(norm, lightDir), 0.0) * pointlight.diffuse + \n"
 	// Specular
-	"		pow(max(dot(norm, normalize(lightDir + \n"
-	"			normalize(-fragpos))), 0.0), shininess)\n"
-	"			* pointlight.specular;\n"
+	"		pointlight.specular *\n"
+	"			pow(max(dot(norm, normalize(lightDir - \n"
+	"				normalize(fragpos))), 0.0), shininess);\n"
 	// Attenuation
-	"	light *= 1.0 / (pointlight.constant +\n"
-	"		pointlight.linear * distance +\n"
-	"		pointlight.quadratic * (distance * distance));\n"
+	"	light /= (pointlight.power * distance * distance);\n"
 	"	return light;\n"
 	"}\n"
 	"\n"
 	"void main() {\n"
-	"	vec3 result = vec3(0.0, 0.0, 0.0);\n"
+	// Ambient
+	"	vec3 result = ambient;\n"
 	// Point light
 	"	for(int i = 0; i < NUM_LIGHTS; i++) result += point_light(pl[i]);\n"
 	// Result
@@ -266,11 +259,6 @@ void jlgr_effects_hue(jlgr_t* jlgr, float c[]) {
  * @param material: Material shininess / Max brightness
 **/
 void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t* material) {
-//	jl_mem_copyto(c, jlgr->effects.colors, sizeof(float) * 3);
-//	jl_mem_copyto(c, jlgr->effects.ambient, sizeof(float) * 3);
-//	jlgr->effects.normal = normal;
-//	jlgr->effects.lightPos = lightPos;
-//	jlgr->effects.colors[3] = shininess;
 	jlgr->effects.vec3 = material;
 	jlgr_pr(jlgr, jlgr->gl.cp, jlgr_effect_pr_light__);
 }
@@ -281,6 +269,7 @@ void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t* material) {
 void jlgr_effects_light_clear(jlgr_t* jlgr) {
 	jlgr->effects.lights.has_directional = 0;
 	jlgr->effects.lights.point_count = 0;
+	jlgr->effects.lights.ambient = (jl_vec3_t) { 0.f, 0.f, 0.f };
 }
 
 /**
@@ -291,7 +280,7 @@ void jlgr_effects_light_clear(jlgr_t* jlgr) {
  * @param c, l, q: Light properties.
 **/
 void jlgr_effects_light_add(jlgr_t* jlgr, jl_vec3_t point, float ambient[],
-	float diffuse[], float specular[], float c, float l, float q)
+	float diffuse[], float specular[], float power)
 {
 	int which = jlgr->effects.lights.point_count;
 	jlgr_effects_lightsource_t* lightsource;
@@ -320,28 +309,23 @@ void jlgr_effects_light_add(jlgr_t* jlgr, jl_vec3_t point, float ambient[],
 		(point.y * 2.f/jl_gl_ar(jlgr))-1.f,
 		(point.z * 2.f)
 	};
-	lightsource->ambient = (jl_vec3_t) {
-		ambient[0], ambient[1], ambient[2]
-	};
+	jl_vec3_t add_ambient = (jl_vec3_t){ambient[0], ambient[1], ambient[2]};
 	lightsource->diffuse = (jl_vec3_t) {
 		diffuse[0], diffuse[1], diffuse[2]
 	};
 	lightsource->specular = (jl_vec3_t) {
 		specular[0], specular[1], specular[2]
 	};
-	lightsource->constant = c;
-	lightsource->linear = l;
-	lightsource->quadratic = q;
+	lightsource->power = 1.f / power;
+	// Add ambient light.
+	jl_mem_vec_add(&jlgr->effects.lights.ambient, &add_ambient);
 }
 
 void jlgr_effects_light_update(jlgr_t* jlgr) {
-	jl_print(jlgr->jl, "Light count = %d", jlgr->effects.lights.point_count);
 	int i;
 	jlgr_effects_lightsource_t* lightsource = cl_array_borrow(
 		jlgr->effects.lights.lights, jlgr->effects.lights.point_count - 1);
-	jl_print(jlgr->jl, "%p\n",lightsource);
 	jlgr_glsl_t* shader = &(lightsource->shader);
-	jl_print(jlgr->jl, "%p\n",shader);
 
 	for(i = 0; i < jlgr->effects.lights.point_count; i++) {
 		lightsource = cl_array_borrow(jlgr->effects.lights.lights, i);
@@ -349,17 +333,8 @@ void jlgr_effects_light_update(jlgr_t* jlgr) {
 			(float*) &lightsource->position, 3,
 			"pl[%d].position", i);
 		jlgr_opengl_uniform(jlgr, shader,
-			&lightsource->constant, 1,
-			"pl[%d].constant", i);
-		jlgr_opengl_uniform(jlgr, shader,
-			&lightsource->linear, 1,
-			"pl[%d].linear", i);
-		jlgr_opengl_uniform(jlgr, shader,
-			&lightsource->quadratic, 1,
-			"pl[%d].quadratic", i);
-		jlgr_opengl_uniform(jlgr, shader,
-			(float*) &lightsource->ambient, 3,
-			"pl[%d].ambient", i);
+			&lightsource->power, 1,
+			"pl[%d].power", i);
 		jlgr_opengl_uniform(jlgr, shader,
 			(float*) &lightsource->diffuse, 3,
 			"pl[%d].diffuse", i);
@@ -367,6 +342,8 @@ void jlgr_effects_light_update(jlgr_t* jlgr) {
 			(float*) &lightsource->specular, 3,
 			"pl[%d].specular", i);
 	}
+	jlgr_opengl_uniform(jlgr, shader,
+		(float*) &jlgr->effects.lights.ambient, 3, "ambient");
 }
 
 void jlgr_effects_init__(jlgr_t* jlgr) {

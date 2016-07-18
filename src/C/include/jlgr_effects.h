@@ -8,15 +8,12 @@ typedef struct{
 	int32_t uniform_normal;
 	int32_t uniform_shininess;
 	// Colors
-	jl_vec3_t ambient;
 	jl_vec3_t diffuse;
 	jl_vec3_t specular;
 	//
 	jl_vec3_t position;
 	// 
-	float constant;
-	float linear;
-	float quadratic;
+	float power;
 }jlgr_effects_lightsource_t;
 
 typedef struct{
@@ -35,6 +32,8 @@ typedef struct{
 	// Point Light
 	int32_t point_count;
 	struct cl_array *lights;
+	// Ambient light
+	jl_vec3_t ambient;
 }jlgr_effects_light_t;
 
 	#endif

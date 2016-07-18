@@ -32,21 +32,6 @@ static void jlgr_vo_color_buffer__(jlgr_t* jlgr, jl_vo_t* vo, float* cc) {
 	jlgr_opengl_buffer_set_(jlgr, &vo->bt, vo->cc, vo->vc * 4);
 }
 
-// Set texturing to a bitmap
-static void jlgr_vo_txtr__(jlgr_t* jlgr, jl_vo_t* vo, uint32_t tx) {
-	if(vo == NULL) vo = &jlgr->gl.temp_vo;
-	// Make sure non-textured colors aren't attempted
-	vo->tx = tx;
-#ifdef JL_DEBUG
-	if(!vo->tx) {
-		jl_print(jlgr->jl, "Error: Texture=0!");
-		jl_print_stacktrace(jlgr->jl);
-		exit(-1);
-	}
-#endif
-	jlgr_vo_txmap(jlgr, vo, 0, 0, -1);
-}
-
 // Set vertices for a polygon.
 static void jlgr_vo_poly__(jlgr_t* jlgr, jl_vo_t* vo, uint32_t vertices,
 	const float *xyzw)
@@ -134,6 +119,26 @@ void jlgr_vo_set_rect(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
 }
 
 /**
+ * Set the vertex object's texturing to an image.
+ * @param jlgr: The library context.
+ * @param vo: The vertex object to modify.
+ * @param img: The image to display on the vertex object.
+**/
+void jlgr_vo_image(jlgr_t* jlgr, jl_vo_t *vo, uint32_t img) {
+	if(vo == NULL) vo = &jlgr->gl.temp_vo;
+	// Make sure non-textured colors aren't attempted
+	vo->tx = img;
+#ifdef JL_DEBUG
+	if(!vo->tx) {
+		jl_print(jlgr->jl, "Error: Texture=0!");
+		jl_print_stacktrace(jlgr->jl);
+		exit(-1);
+	}
+#endif
+	jlgr_vo_txmap(jlgr, vo, 0, 0, -1);
+}
+
+/**
  * Set a vertex object to an Image.
  *
  * @param jlgr: The library context
@@ -151,7 +156,7 @@ void jlgr_vo_set_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex) {
 	// Overwrite the vertex object
 	jlgr_vo_poly__(jlgr, vo, 4, Oone);
 	// Texture the vertex object
-	jlgr_vo_txtr__(jlgr, vo, tex);
+	jlgr_vo_image(jlgr, vo, tex);
 }
 
 /**

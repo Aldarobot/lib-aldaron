@@ -577,6 +577,7 @@ void jlgr_vo_set_vg(jlgr_t* jlgr, jl_vo_t *vo, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor);
 void jlgr_vo_set_rect(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
 	uint8_t multicolor);
+void jlgr_vo_image(jlgr_t* jlgr, jl_vo_t *vo, uint32_t img);
 void jlgr_vo_set_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex);
 void jlgr_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,int16_t map);
 void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
@@ -627,7 +628,7 @@ void jlgr_effects_hue(jlgr_t* jlgr, float c[]);
 void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t* material);
 void jlgr_effects_light_clear(jlgr_t* jlgr);
 void jlgr_effects_light_add(jlgr_t* jlgr, jl_vec3_t point, float ambient[],
-	float diffuse[], float specular[], float c, float l, float q);
+	float diffuse[], float specular[], float power);
 void jlgr_effects_light_update(jlgr_t* jlgr);
 
 // video

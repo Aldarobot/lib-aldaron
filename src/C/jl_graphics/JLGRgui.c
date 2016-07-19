@@ -463,7 +463,9 @@ uint8_t jlgr_gui_textbox_loop(jlgr_t* jlgr) {
 	}else{
 		jlgr->gui.textbox.do_it = 0;
 	}
+#if JL_PLAT == JL_PLAT_COMPUTER
 	jlgr_input_do(jlgr, JL_INPUT_JOYC, jlgr_gui_textbox_cursor__, NULL);
+#endif
 	if((bytetoinsert = jlgr_input_typing_get(jlgr))) {
 		if(bytetoinsert == '\b') {
 			if(jlgr->gui.textbox.string->curs == 0) return 0;
@@ -472,12 +474,12 @@ uint8_t jlgr_gui_textbox_loop(jlgr_t* jlgr) {
 		}else if(bytetoinsert == '\02') {
 			jl_data_delete_byte(jlgr->jl, jlgr->gui.textbox.string);
 		}else if(bytetoinsert == '\n') {
+			jlgr_input_typing_disable();
 			return 1;
 		}else{
 			jl_data_insert_byte(jlgr->jl, jlgr->gui.textbox.string,
 				 bytetoinsert);
 		}
-//			JL_PRINT("inserting %1s\n", &bytetoinsert);
 	}
 	return 0;
 }

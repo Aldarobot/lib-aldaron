@@ -25,10 +25,17 @@
 #define JL_PLAT_COMPUTER 0 //PC/MAC
 #define JL_PLAT_PHONE 1 //ANDROID/IPHONE
 #define JL_PLAT_GAME 2 // 3DS
-#if defined(__IPHONEOS__) || defined(__ANDROID__)
+#if defined(__ANDROID__)
         #define JL_PLAT JL_PLAT_PHONE
+	#define JL_PHONE
+	#define JL_PHONE_ANDROID
+#elif defined(__IPHONEOS__)
+        #define JL_PLAT JL_PLAT_PHONE
+	#define JL_PHONE
+	#define JL_PHONE_APPLE
 #else
         #define JL_PLAT JL_PLAT_COMPUTER
+	#define JL_COMPUTER
 #endif
 
 //Determine Which OpenGL to use.

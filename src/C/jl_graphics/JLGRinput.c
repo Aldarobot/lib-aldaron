@@ -518,7 +518,7 @@ void jl_ct_init__(jlgr_t* jlgr) {
 }
 
 /**
- * Get any keys that are currently being typed.  Output in Aski.
+ * Get any keys that are currently being typed.
  * If phone, pops up keyboard if not already up.  If nothing is being typed,
  * returns 0.
  * @param jlgr: The library context.

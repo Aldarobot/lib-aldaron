@@ -89,5 +89,7 @@
     -->
     <!-- version-tag: 1 -->
     <import file="${sdk.dir}/tools/ant/build.xml" />
+    <property name="java.target" value="1.5" />
+    <property name="java.source" value="1.5" />
 
 </project>

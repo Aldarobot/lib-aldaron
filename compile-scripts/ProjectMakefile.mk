@@ -2,6 +2,8 @@
 
 # Figure out which platform.
 include $(shell echo $(JLL_HOME))/compile-scripts/platform.mk
+
+JLL_DEPS = $(shell echo $(JLL_HOME))/deps
 include $(shell echo $(JLL_HOME))/compile-scripts/mopub-sdk.mk
 
 CURDIR=`pwd -P`
@@ -78,10 +80,14 @@ install: -release
 	 $(shell echo $(JLL_HOME))/src/lib/sdl-image/external/jpeg-9/jconfig.h
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/libzip-Android.mk\
 	 $(shell echo $(JLL_HOME))/src/lib/libzip/lib/Android.mk
-
-android: -android-sdl-mods
 	cp -u $(shell echo $(JLL_HOME))/android-build-mods/SDL_config_android.h\
 	 $(shell echo $(JLL_HOME))/src/lib/sdl/include/SDL_config.h
+
+android: -android-sdl-mods
+	cp $(shell echo $(JLL_HOME))/android-build-mods/AndroidManifest.xml\
+	 $(shell echo $(JLL_HOME))/android-build-mods/update/AndroidManifest.xml
+	cp $(shell echo $(JLL_HOME))/android-build-mods/SDLActivity.java\
+	 $(shell echo $(JLL_HOME))/android-build-mods/update/src/org/libsdl/app/SDLActivity.java
 	# Run Install Script
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-ndk-r11c && \
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/tools && \
@@ -91,8 +97,21 @@ android: -android-sdl-mods
 		jlw.$(USERNAME).$(PACKNAME)\
 		$(shell echo $(JLL_HOME))/src/C/ $(CURDIR)/$(SRC)/
 
-android-with-ads: mopub-sdk
-	
+android-with-ads: -android-sdl-mods
+	cp $(shell echo $(JLL_HOME))/android-build-mods/AndroidManifest-mopub.xml\
+	 $(shell echo $(JLL_HOME))/android-build-mods/update/AndroidManifest.xml
+	cp $(shell echo $(JLL_HOME))/android-build-mods/SDLActivity-ad.java\
+	 $(shell echo $(JLL_HOME))/android-build-mods/update/src/org/libsdl/app/SDLActivity.java
+#	cp -ur $(shell echo $(JLL_HOME))/deps/mopub-sdk/src/main/\
+#	 build/android/src/
+	# Run Install Script
+	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-ndk-r11c && \
+	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/tools && \
+	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/platform-tools && \
+	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/build-tools/23.0.3 && \
+	sh $(shell echo $(JLL_HOME))/android-build-mods/androidbuild.sh\
+		jlw.$(USERNAME).$(PACKNAME)\
+		$(shell echo $(JLL_HOME))/src/C/ $(CURDIR)/$(SRC)/
 
 init: $(FOLDERS)
 	printf "[COMPILE] Done!\n"

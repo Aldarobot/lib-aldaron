@@ -168,13 +168,14 @@ sed -i "s|SDLActivity|$APP|g" $BUILDPATH/build.xml
 # Fill in a default Activity
 echo "package $APP;" >  "$ACTIVITY.java"
 echo "import org.libsdl.app.SDLActivity;" >> "$ACTIVITY.java"
+#echo "import com.mopub.mobileads;" >> "$ACTIVITY.java"
 echo "public class $ACTIVITY extends SDLActivity {}" >> "$ACTIVITY.java"
 
 # Update project and build
 cd $BUILDPATH
 
 # $ANDROID list targets
-$ANDROID update project --path $BUILDPATH --target 1
+$ANDROID update project --path $BUILDPATH --target android-22
 $NDKBUILD -j $NCPUS $NDKARGS
 
 # Check for release key, and make if doesn't exist

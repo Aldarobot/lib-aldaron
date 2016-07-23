@@ -1,9 +1,9 @@
-mopub-sdk: $(shell echo $(JLL_HOME))/deps
-	cd $(shell echo $(JLL_HOME))/deps && \
-	wget https://s3.amazonaws.com/mopub-android-sdk/mopub-android-full-sdk.zip && \
+$(JLL_DEPS)/mopub-sdk/: $(JLL_DEPS)/
+	cd $(JLL_DEPS)/ && \
+	wget https://s3.amazonaws.com/mopub-android-sdk/mopub-android-base-sdk.zip && \
 	unzip mopub-android-full-sdk.zip && \
 	rm mopub-android-full-sdk.zip
 
-$(JLL_DEPS):
-	mkdir -p $(shell echo $(JLL_HOME))/deps
+$(JLL_DEPS)/:
+	mkdir -p $(JLL_DEPS)/
 ###

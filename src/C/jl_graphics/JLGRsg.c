@@ -183,9 +183,9 @@ static void jl_sg_init_ds_(jl_t* jl) {
 		1., .5 * jlgr->wm.ar
 	};
 
-	jlgr_sprite_resize(jlgr, &jlgr->sg.bg.up, &rcrd);
-	rcrd.y = .5 * jlgr->wm.ar;
 	jlgr_sprite_resize(jlgr, &jlgr->sg.bg.dn, &rcrd);
+	rcrd.y = .5 * jlgr->wm.ar;
+	jlgr_sprite_resize(jlgr, &jlgr->sg.bg.up, &rcrd);
 	// Set double screen loop.
 	jlgr->sg.loop = _jl_sg_loop_ds;
 	if(jlgr->sg.cs == JL_SCR_SS) jlgr->sg.cs = JL_SCR_DN;

@@ -1,7 +1,6 @@
 TODO:
-	1. Fix thread mutex locking delay times by having less mutex locks.
-	2. Add full embeded sprite system.
-	3. Fix Documentation problems.
-	4. Add wi-fi communications
-	5. Make a VM option for running over wi-fi
-	6. Add 3D support
+	* Remove old thread API
+	* Fix Documentation problems
+	* Add wi-fi communications
+	* Make a VM option for running over wi-fi
+	* Add 3D support

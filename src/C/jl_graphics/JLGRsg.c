@@ -9,6 +9,12 @@
 #include "JLGRprivate.h"
 #include "SDL_image.h"
 
+#if JL_PLAT == JL_PLAT_PHONE
+	extern float JL_SHRINK_HEIGHT;
+#else
+	#define JL_SHRINK_HEIGHT 0.1f
+#endif
+
 // SG Prototypes
 void jl_gl_draw_prendered(jlgr_t* jlgr, jl_vo_t* pv);
 
@@ -171,6 +177,7 @@ static void _jl_sg_loop_ss(jlgr_t* jlgr) {
 
 // Run the current loop.
 void _jl_sg_loop(jlgr_t* jlgr) {
+	jl_gl_clear(jlgr, 0.f, 0.f, 0.f, 1.);
 	jl_print_function(jlgr->jl, "SG_LP");
 	((jlgr_fnct)jlgr->sg.loop)(jlgr);
 	jl_print_return(jlgr->jl, "SG_LP");
@@ -179,12 +186,12 @@ void _jl_sg_loop(jlgr_t* jlgr) {
 static void jl_sg_init_ds_(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 	jl_rect_t rcrd = {
-		0., 0.,
-		1., .5 * jlgr->wm.ar
+		0.f, 0.f,
+		1.f, .5f * (1.f - JL_SHRINK_HEIGHT) * jlgr->wm.ar
 	};
 
 	jlgr_sprite_resize(jlgr, &jlgr->sg.bg.dn, &rcrd);
-	rcrd.y = .5 * jlgr->wm.ar;
+	rcrd.y = .5f * (1.f - JL_SHRINK_HEIGHT) * jlgr->wm.ar;
 	jlgr_sprite_resize(jlgr, &jlgr->sg.bg.up, &rcrd);
 	// Set double screen loop.
 	jlgr->sg.loop = _jl_sg_loop_ds;
@@ -195,7 +202,7 @@ static void jl_sg_init_ss_(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 	jl_rect_t rcrd = {
 		0.f, 0.f,
-		1., jlgr->wm.ar
+		1.f, jlgr->wm.ar * (1.f - JL_SHRINK_HEIGHT)
 	};
 
 	jlgr_sprite_resize(jlgr, &jlgr->sg.bg.dn, &rcrd);

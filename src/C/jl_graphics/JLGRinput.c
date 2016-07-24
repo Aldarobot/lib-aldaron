@@ -14,6 +14,12 @@
 	#define SDL_MENU_KEY SDL_SCANCODE_MENU
 #endif
 
+#if JL_PLAT == JL_PLAT_PHONE
+	extern float JL_SHRINK_HEIGHT;
+#else
+	#define JL_SHRINK_HEIGHT 0.1f
+#endif
+
 /*
  * "Preval" is a pointer to previous key pressed value.
  *	 0 if key isn't pressed
@@ -208,6 +214,8 @@ static inline void jlgr_input_handle_events_platform_dependant__(jlgr_t* jlgr) {
 		jlgr->main.ct.msx = jlgr->main.ct.event.tfinger.x;
 		jlgr->main.ct.input.click = 1;
 		jlgr->main.ct.msy = jlgr->main.ct.event.tfinger.y * jlgr->wm.ar;
+		jlgr->main.ct.msy -= JL_SHRINK_HEIGHT;
+		jlgr->main.ct.msy /= (1.f - JL_SHRINK_HEIGHT);
 		if(jlgr->sg.cs != JL_SCR_SS) {
 			jlgr->main.ct.msy = jlgr->main.ct.msy * 2.;
 			jlgr->main.ct.msy -= jlgr->wm.ar;

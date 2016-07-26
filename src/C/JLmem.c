@@ -218,6 +218,17 @@ void jl_mem_vec_add(jl_vec3_t* v1, const jl_vec3_t* v2) {
 }
 
 /**
+ * Subtract a vector from another vector.
+ * @param v1: Vector to change.
+ * @param v2: Vector to subtract.
+**/
+void jl_mem_vec_sub(jl_vec3_t* v1, const jl_vec3_t v2) {
+	v1->x -= v2.x;
+	v1->y -= v2.y;
+	v1->z -= v2.z;
+}
+
+/**
  * Count the number of characters in as string until 'chr' is a character.
  * @param string: The string to check
  * @param chr: The character to look for.

@@ -11,6 +11,35 @@
 
 /** @cond */
 
+static inline void jlgr_vo_bounding_box(jlgr_t* jlgr, jl_vo_t* vo,
+	const float *xyzw, uint32_t vertices)
+{
+	int i;
+	vo->pr.cb.pos = (jl_vec3_t) { xyzw[0], xyzw[1], xyzw[2] };
+	vo->pr.cb.ofs = (jl_vec3_t) { xyzw[0], xyzw[1], xyzw[2] };
+	for(i = 1; i < vertices; i++) {
+		jl_vec3_t new_vertex = {
+			xyzw[(3 * i)],
+			xyzw[(3 * i) + 1],
+			xyzw[(3 * i) + 2] };
+
+		if(new_vertex.x < vo->pr.cb.pos.x)
+			vo->pr.cb.pos.x = new_vertex.x;
+		if(new_vertex.y < vo->pr.cb.pos.y)
+			vo->pr.cb.pos.y = new_vertex.y;
+		if(new_vertex.z < vo->pr.cb.pos.z)
+			vo->pr.cb.pos.z = new_vertex.z;
+
+		if(new_vertex.x > vo->pr.cb.ofs.x)
+			vo->pr.cb.ofs.x = new_vertex.x;
+		if(new_vertex.y > vo->pr.cb.ofs.y)
+			vo->pr.cb.ofs.y = new_vertex.y;
+		if(new_vertex.z > vo->pr.cb.ofs.z)
+			vo->pr.cb.ofs.z = new_vertex.z;
+	}
+	jl_mem_vec_sub(&vo->pr.cb.ofs, vo->pr.cb.pos);
+}
+
 static void jlgr_vo_vertices__(jlgr_t* jlgr, jl_vo_t* vo, const float *xyzw,
 	uint32_t vertices)
 {
@@ -22,6 +51,12 @@ static void jlgr_vo_vertices__(jlgr_t* jlgr, jl_vo_t* vo, const float *xyzw,
 		vo->cv = jl_mem(jlgr->jl, vo->cv, vertices * sizeof(float) * 3);
 		// Set vo->cv & vo->gl
 		jlgr_opengl_vertices_(jlgr, xyzw, vertices, vo->cv, &vo->gl);
+		// Set bounding box
+		jlgr_vo_bounding_box(jlgr, vo, xyzw, vertices);
+		// Update pre-renderer
+		jl_print(jlgr->jl, "sizex: %f", vo->pr.cb.ofs.x);
+		jlgr_pr_resize(jlgr, &vo->pr, vo->pr.cb.ofs.x, vo->pr.cb.ofs.y,
+			jlgr->wm.w * vo->pr.cb.ofs.x);
 	}
 }
 
@@ -73,6 +108,10 @@ void jlgr_vo_init(jlgr_t* jlgr, jl_vo_t* vo) {
 	vo->rs = 0;
 	// Texture
 	vo->tx = 0;
+	// Pre-renderer
+	jlgr_pr_init(jlgr, &vo->pr);
+	// Position
+	vo->fs = (jl_vec3_t) { 0.f, 0.f, 0.f };
 }
 
 /**

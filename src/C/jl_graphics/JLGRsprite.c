@@ -140,7 +140,7 @@ void jlgr_sprite_init(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	sprite->rw = rc.w;
 	sprite->rh = rc.h;
 	// Make pre-renderer
-	jlgr_pr_init(jlgr, &sprite->pr, rc.w, rc.h, jl_gl_w(jlgr) * sprite->rw);
+	jlgr_pr_init(jlgr, &sprite->pr);
 	// Set collision box.
 	sprite->pr.cb.pos.x = rc.x; sprite->pr.cb.pos.y = rc.y;
 	sprite->pr.cb.ofs.x = rc.w; sprite->pr.cb.ofs.y = rc.h;

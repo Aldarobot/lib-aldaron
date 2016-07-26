@@ -34,9 +34,9 @@ const char* JL_EFFECT_HUE =
 	"		new_color.b * grayscale, new_color.a * vcolor.a);\n"
 	"}";
 
-const char* JL_EFFECT_LIGHT =
+const char* JL_EFFECT_DIRLIGHT =
 	GLSL_HEAD
-/*	"uniform vec3 direction;\n"
+	"uniform vec3 direction;\n"
 	"uniform vec3 direction_ambient;\n"
 	"uniform vec3 direction_diffuse;\n"
 	"uniform vec3 direction_specular;\n"
@@ -66,7 +66,9 @@ const char* JL_EFFECT_LIGHT =
 	"	// Directional light\n"
 	"	vec3 result = CalcDirLight(norm, view_dir);\n"
 	"}";
-*/
+
+const char* JL_EFFECT_LIGHT =
+	GLSL_HEAD
 	"uniform sampler2D texture;\n"
 	"varying vec2 texcoord;\n"
 	"\n"
@@ -110,7 +112,34 @@ const char* JL_EFFECT_LIGHT =
 	// Point light
 	"	for(int i = 0; i < NUM_LIGHTS; i++) result += point_light(pl[i]);\n"
 	// Result
-	"	gl_FragColor = vec4(result * max_brightness, 1.0) * texture2D(texture, texcoord);\n"
+	"	gl_FragColor = vec4(max_brightness * result, 1.0) * texture2D(texture, texcoord);\n"
+	"}";
+
+// Simple Point Light.
+const char* JL_EFFECT_LIGHT_AA =
+	GLSL_HEAD
+	"uniform sampler2D texture;\n"
+	"varying vec2 texcoord;\n"
+	"\n"
+	"varying vec3 fragpos;\n"
+	"\n"
+	// Material
+	"uniform float brightness;\n"
+	"\n"
+	// Light
+	"uniform vec3 color;\n"
+	"uniform vec3 power;\n"
+	"uniform vec3 where;\n"
+	"\n"
+	"void main() {\n"
+	// Expansion
+	"	float mdist = length(where - fragpos);\n"
+	// Limit
+	"	if(mdist > power.y) discard;\n"
+	// Feather
+	"	float light = power.z / pow(mdist, power.x);\n"
+	// Output
+	"	gl_FragColor = vec4(min(light, 1.0) * brightness * color, 1.0) * texture2D(texture, texcoord);\n"
 	"}";
 
 const char* JL_EFFECT_LIGHTV =
@@ -156,6 +185,35 @@ static void jlgr_effect_pr_light__(jl_t* jl) {
 	jlgr_opengl_framebuffer_addtx_(jlgr, jlgr->gl.cp->tx);
 	jlgr_effects_vo_light(jlgr, &jlgr->gl.temp_vo,
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, jlgr->effects.vec3);
+}
+
+static void jlgr_effects_light_clear__(jl_t* jl) {
+	jl_gl_clear(jl->jlgr, 0.f, 0.f, 0.f, 1.f);
+}
+
+static void jlgr_effects_light_aa__(jl_t* jl) {
+	jlgr_t* jlgr = jl->jlgr;
+
+	// Bind shader
+	jlgr_opengl_draw1(jlgr, &jlgr->effects.light.aa);
+	// Update uniforms for material.
+	jlgr_opengl_uniform(jlgr, &jlgr->effects.light.aa,
+		(float*)&jlgr->effects.light.light_position, 3, "where");
+	jlgr_opengl_uniform(jlgr, &jlgr->effects.light.aa,
+		(float*)&jlgr->effects.light.light_color, 3, "color");
+	jlgr_opengl_uniform(jlgr, &jlgr->effects.light.aa,
+		(float*)&jlgr->effects.light.light_power, 3, "power");
+	jlgr_opengl_uniform(jlgr, &jlgr->effects.light.aa,
+		&jlgr->effects.light.material_brightness, 1, "brightness");
+	// Translate by offset vector
+	jlgr_opengl_matrix(jlgr, &jlgr->effects.light.aa,
+		(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
+		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
+		jlgr->effects.vo->fs, // Translate
+		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
+		1.f, jl_gl_ar(jlgr), 0.f, 1.f);
+	// Draw on screen
+	jlgr_vo_draw2(jlgr, jlgr->effects.vo, &jlgr->effects.light.aa);
 }
 
 /** @endcond */
@@ -204,6 +262,56 @@ void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]) {
 	jlgr_opengl_uniform4(jlgr, 1, jlgr->effects.hue.new_color, c);
 	// Draw on screen
 	jlgr_vo_draw2(jlgr, vo, &jlgr->effects.hue.shader);
+}
+
+/**
+ * Clear pre-rendered light for a vertex object.
+ * Must be called before
+ *	* jlgr_effects_vo_light_aa()
+ * @param jlgr: The library context.
+ * @param vo: The vertex object.
+**/
+void jlgr_effects_light_reset(jlgr_t* jlgr, jl_vo_t* vo) {
+	jlgr_pr(jlgr, &vo->pr, jlgr_effects_light_clear__);
+}
+
+/**
+ * Render light for a vertex object.  Type: ambient attenuation light.
+ * @param jlgr: The library context.
+ * @param vo: The vertex object.
+ * @param light_power: There are 3 different values.
+ *	- x: Light feathering.  Bigger values mean less feathering, lesser
+ *		values mean quicker feathering.
+ *	- y: Force stop.  Light will be forced to stay within this radius.
+ *	- z: Expand: Make light brighter longer with smaller values.
+**/
+void jlgr_effects_light_aa(jlgr_t* jlgr, jl_vo_t* vo,
+	jl_vec3_t light_position, jl_vec3_t light_color, jl_vec3_t light_power,
+	float material_brightness)
+{
+	jlgr->effects.vo = vo;
+	jlgr->effects.light.light_position = (jl_vec3_t) {
+		(light_position.x * 2.f)-1.f,
+		(light_position.y * 2.f)-1.f,
+		(light_position.z * 2.f)
+	};
+	jlgr->effects.light.light_color = light_color;
+	jlgr->effects.light.light_power = (jl_vec3_t) {
+		light_power.x,
+		light_power.y + 1.f,
+		light_power.z
+	};
+	jlgr->effects.light.material_brightness = material_brightness;
+	jlgr_pr(jlgr, &vo->pr, jlgr_effects_light_aa__);
+}
+
+/**
+ * Draw a vertex object with effects.
+ * @param jlgr: The library context.
+ * @param vo: The vertex object.
+**/
+void jlgr_effects_draw(jlgr_t* jlgr, jl_vo_t* vo) {
+	jlgr_pr_draw(jlgr, &vo->pr, &vo->fs, 0);
 }
 
 /**
@@ -358,6 +466,10 @@ void jlgr_effects_init__(jlgr_t* jlgr) {
 		JL_EFFECT_HUE, 1);
 	jlgr_opengl_shader_uniform(jlgr, &jlgr->effects.hue.shader,
 		&jlgr->effects.hue.new_color, "new_color");
+
+	JL_PRINT_DEBUG(jlgr->jl, "MAKING EFFECT: LIGHT/AA");
+	jlgr_opengl_shader_init(jlgr, &jlgr->effects.light.aa,
+		JL_EFFECT_LIGHTV, JL_EFFECT_LIGHT_AA, 1);
 
 	JL_PRINT_DEBUG(jlgr->jl, "MADE EFFECTS!");
 	jlgr->effects.lights.lights = cl_array_create(

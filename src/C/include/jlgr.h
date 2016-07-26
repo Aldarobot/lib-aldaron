@@ -244,6 +244,10 @@ typedef struct{
 	float* cc;	// Colors
 	// Texturing:
 	uint32_t tx;	// ID to texture. [ 0 = Colors Instead ]
+	// Pre-rendered effects (framebuffer):
+	jl_pr_t pr;
+	// Position on screen.
+	jl_vec3_t fs;
 }jl_vo_t;
 
 /**
@@ -373,13 +377,13 @@ typedef struct{
 
 			uint8_t current_event;
 		}ct;
-	} main;
+	}main;
 
 	struct {
 		uint8_t rtn;
 		jl_fnct fn;
 		jlgr_redraw_t redraw;
-	} draw;
+	}draw;
 
 	// Window Info
 	struct {
@@ -412,15 +416,24 @@ typedef struct{
 		}hue;
 
 		struct {
+			jlgr_glsl_t aa;
+
 			int32_t norm;
 			int32_t lightPos;
 			int32_t color;
 			int32_t ambient;
 			int32_t shininess;
+
+			// Shader drawing settings
+			jl_vec3_t light_position;
+			jl_vec3_t light_color;
+			jl_vec3_t light_power;
+			float material_brightness;
 		}light;
 
 		float colors[4];
 		jl_vec3_t* vec3;
+		jl_vo_t* vo;
 
 		jlgr_effects_light_t lights;
 	}effects;
@@ -504,7 +517,7 @@ typedef struct{
 		uint32_t logo; // JL_Lib Loading Logo
 		uint32_t game; // Game Graphics
 		uint32_t icon; // Icons
-	} textures;
+	}textures;
 
 	double timer;
 	double psec;
@@ -589,7 +602,7 @@ void jlgr_vo_free(jlgr_t* jlgr, jl_vo_t *vo);
 // JLGRpr.c
 void jlgr_pr_off(jlgr_t* jlgr);
 void jlgr_pr_resize(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
-void jlgr_pr_init(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
+void jlgr_pr_init(jlgr_t* jlgr, jl_pr_t* pr);
 void jlgr_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, uint8_t orient);
 void jlgr_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
 
@@ -625,6 +638,13 @@ void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]);
 void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
 	jl_vec3_t* material);
 void jlgr_effects_hue(jlgr_t* jlgr, float c[]);
+
+void jlgr_effects_light_reset(jlgr_t* jlgr, jl_vo_t* vo);
+void jlgr_effects_light_aa(jlgr_t* jlgr, jl_vo_t* vo,
+	jl_vec3_t light_position, jl_vec3_t light_color, jl_vec3_t light_power,
+	float material_brightness);
+void jlgr_effects_draw(jlgr_t* jlgr, jl_vo_t* vo);
+
 void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t* material);
 void jlgr_effects_light_clear(jlgr_t* jlgr);
 void jlgr_effects_light_add(jlgr_t* jlgr, jl_vec3_t point, float ambient[],

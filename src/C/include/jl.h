@@ -216,6 +216,7 @@ void *jl_mem_temp(jl_t* jl, void *mem);
 double jl_mem_addwrange(double v1, double v2);
 double jl_mem_difwrange(double v1, double v2);
 void jl_mem_vec_add(jl_vec3_t* v1, const jl_vec3_t* v2);
+void jl_mem_vec_sub(jl_vec3_t* v1, const jl_vec3_t v2);
 uint32_t jl_mem_string_upto(const char* string, char chr);
 
 // "JLdata_t.c"

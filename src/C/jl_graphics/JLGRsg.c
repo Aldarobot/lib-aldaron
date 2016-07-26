@@ -12,7 +12,7 @@
 #if JL_PLAT == JL_PLAT_PHONE
 	extern float JL_SHRINK_HEIGHT;
 #else
-	#define JL_SHRINK_HEIGHT 0.1f
+	#define JL_SHRINK_HEIGHT 0.f
 #endif
 
 // SG Prototypes

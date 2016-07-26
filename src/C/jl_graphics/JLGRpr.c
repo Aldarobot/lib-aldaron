@@ -57,29 +57,29 @@ static void jlgr_pr_init__(jlgr_t* jlgr, jl_pr_t* pr) {
 }
 
 static void jlgr_pr_use__(jlgr_t* jlgr, jl_pr_t* pr) {
-	jl_print_function(jlgr->jl, "jlgr_pr_use__");
+	jl_t* jl = jlgr->jl;
+
+	jl_print_function(jl, "jlgr_pr_use__");
 	jlgr_pr_init__(jlgr, pr);
 	if(pr->w == 0) {
-		jl_print(jlgr->jl,
-		 "jlgr_pr_use__ failed: 'w' must be more than 0");
-		exit(-1);
+		jl_print(jl, "jlgr_pr_use__ failed: 'w' must be more than 0");
 	}else if(pr->h == 0) {
-		jl_print(jlgr->jl,
-		 "jlgr_pr_use__ failed: 'h' must be more than 0");
-		exit(-1);
+		jl_print(jl, "jlgr_pr_use__ failed: 'h' must be more than 0");
 	}else if((pr->w > GL_MAX_TEXTURE_SIZE)||(pr->h > GL_MAX_TEXTURE_SIZE)) {
-		jl_print(jlgr->jl, "_jl_gl_pr_obj_make() failed:");
-		jl_print(jlgr->jl, "w = %d,h = %d", pr->w, pr->h);
-		jl_print(jlgr->jl, "texture is too big for graphics card.");
-		exit(-1);
+		jl_print(jl, "_jl_gl_pr_obj_make() failed:");
+		jl_print(jl, "w = %d,h = %d", pr->w, pr->h);
+		jl_print(jl, "texture is too big for graphics card.");
+	}else{
+		// Bind the texture.
+		jlgr_opengl_texture_bind_(jlgr, pr->tx);
+		// Bind the framebuffer.
+		jlgr_opengl_framebuffer_bind_(jlgr, pr->fb);
+		// Render on the whole framebuffer [ lower left -> upper right ]
+		jlgr_opengl_viewport_(jlgr, pr->w, pr->h);
+		jl_print_return(jl, "jlgr_pr_use__");
+		return; // success.
 	}
-	// Bind the texture.
-	jlgr_opengl_texture_bind_(jlgr, pr->tx);
-	// Bind the framebuffer.
-	jlgr_opengl_framebuffer_bind_(jlgr, pr->fb);
-	// Render on the whole framebuffer [ lower left -> upper right ]
-	jlgr_opengl_viewport_(jlgr, pr->w, pr->h);
-	jl_print_return(jlgr->jl, "jlgr_pr_use__");
+	exit(-1);
 }
 
 static void jlgr_pr_set__(jl_pr_t *pr, float w, float h, uint16_t w_px) {
@@ -142,14 +142,16 @@ void jlgr_pr_resize(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px){
 
 /**
  * THREAD: any
- * Make a new pre-renderer.  Call to jl_gl_pr_rsz(); is necessary after this.
+ * Make a new pre-renderer.  Call to jlgr_pr_resize(); is necessary after this.
  * @param jlgr: The library context.
  * @param w: The display width. [ 0. - 1. ]
  * @param h: The display height. [ 0. - 1. ]
  * @param w_px: The resolution in pixels along the x axis [ 1- ]
 **/
-void jlgr_pr_init(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px) {
-	jl_print_function(jlgr->jl, "GL_PR_NEW");
+void jlgr_pr_init(jlgr_t* jlgr, jl_pr_t* pr) {
+	jl_t* jl = jlgr->jl;
+
+	jl_print_function(jl, "GL_PR_NEW");
 	// Set the initial pr structure values - Nothings made yet.
 	pr->tx = 0;
 	pr->fb = 0;
@@ -157,8 +159,8 @@ void jlgr_pr_init(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px) {
 	// Clear pr->cv
 	jl_mem_clr(pr->cv, 4*sizeof(float)*3);
 	// Set width, height and aspect ratio.
-	jlgr_pr_set__(pr, w, h, w_px);
-	jl_print_return(jlgr->jl, "GL_PR_NEW");
+	jlgr_pr_set__(pr, 1.f, 1.f, 1);
+	jl_print_return(jl, "GL_PR_NEW");
 }
 
 /**
@@ -205,17 +207,18 @@ void jlgr_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, uint8_t orient) {
 	jlgr_opengl_draw_arrays_(jlgr, GL_TRIANGLE_FAN, 4);
 }
 
-void jlgr_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw) {
+void jlgr_pr(jlgr_t* jlgr, jl_pr_t* pr, jl_fnct par__redraw) {
+	jl_t* jl = jlgr->jl;
 	jl_pr_t* oldpr = jlgr->gl.cp;
 
 	if(!pr) {
-		jl_print(jlgr->jl, "Drawing on lost pre-renderer.");
+		jl_print(jl, "Drawing on lost pre-renderer.");
 		exit(-1);
 	}
 	// Use the vo's pr
 	jlgr_pr_use2__(jlgr, pr);
 	// Render to the pr.
-	par__redraw(jlgr->jl);
+	par__redraw(jl);
 	// Go back to the previous pre-renderer.
 	jlgr_pr_use2__(jlgr, oldpr);
 }

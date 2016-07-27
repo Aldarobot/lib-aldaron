@@ -246,8 +246,6 @@ typedef struct{
 	uint32_t tx;	// ID to texture. [ 0 = Colors Instead ]
 	// Pre-rendered effects (framebuffer):
 	jl_pr_t pr;
-	// Position on screen.
-	jl_vec3_t fs;
 }jl_vo_t;
 
 /**
@@ -543,6 +541,7 @@ void jlgr_sprite_init(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	void* draw_ctx, uint32_t draw_ctx_size);
 void jlgr_sprite_free(jlgr_t* jlgr, jl_sprite_t* sprite);
 uint8_t jlgr_sprite_collide(jlgr_t* jlgr, jl_sprite_t *spr1, jl_sprite_t *spr2);
+void jlgr_sprite_clamp(jl_vec3_t xyz, jl_area_t area, jl_vec3_t* rtn);
 void* jlgr_sprite_getcontext(jl_sprite_t *sprite);
 void* jlgr_sprite_getdrawctx(jl_sprite_t *sprite);
 
@@ -595,6 +594,7 @@ void jlgr_vo_set_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex);
 void jlgr_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,int16_t map);
 void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
 void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
+void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos);
 void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh);
 void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t* vec);
 void jlgr_vo_free(jlgr_t* jlgr, jl_vo_t *vo);

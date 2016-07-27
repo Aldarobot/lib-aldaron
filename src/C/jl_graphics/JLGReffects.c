@@ -5,6 +5,8 @@
 
 void jlgr_opengl_framebuffer_subtx_(jlgr_t* jlgr);
 void jlgr_opengl_framebuffer_addtx_(jlgr_t* jlgr, uint32_t tx);
+void jlgr_opengl_blend_add_(jlgr_t* jlgr);
+void jlgr_opengl_blend_default_(jlgr_t* jlgr);
 
 const char* JL_EFFECT_ALPHA = 
 	GLSL_HEAD
@@ -133,11 +135,11 @@ const char* JL_EFFECT_LIGHT_AA =
 	"\n"
 	"void main() {\n"
 	// Expansion
-	"	float mdist = length(where - fragpos);\n"
+	"	float mdist = power.z * length(where - fragpos);\n"
 	// Limit
 	"	if(mdist > power.y) discard;\n"
 	// Feather
-	"	float light = power.z / pow(mdist, power.x);\n"
+	"	float light = 1.0 / pow(mdist, power.x);\n"
 	// Output
 	"	gl_FragColor = vec4(min(light, 1.0) * brightness * color, 1.0) * texture2D(texture, texcoord);\n"
 	"}";
@@ -194,6 +196,8 @@ static void jlgr_effects_light_clear__(jl_t* jl) {
 static void jlgr_effects_light_aa__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
+	// Blend Add
+	jlgr_opengl_blend_add_(jlgr);
 	// Bind shader
 	jlgr_opengl_draw1(jlgr, &jlgr->effects.light.aa);
 	// Update uniforms for material.
@@ -205,15 +209,19 @@ static void jlgr_effects_light_aa__(jl_t* jl) {
 		(float*)&jlgr->effects.light.light_power, 3, "power");
 	jlgr_opengl_uniform(jlgr, &jlgr->effects.light.aa,
 		&jlgr->effects.light.material_brightness, 1, "brightness");
+	//
+	jlgr_fill_image_set(jlgr, jlgr->effects.vo->tx, 16, 16, -1);
 	// Translate by offset vector
 	jlgr_opengl_matrix(jlgr, &jlgr->effects.light.aa,
 		(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
-		jlgr->effects.vo->fs, // Translate
+		jlgr->gui.vos.whole_screen.pr.cb.pos, // Translate
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
 		1.f, jl_gl_ar(jlgr), 0.f, 1.f);
 	// Draw on screen
-	jlgr_vo_draw2(jlgr, jlgr->effects.vo, &jlgr->effects.light.aa);
+	jlgr_vo_draw2(jlgr, &jlgr->gui.vos.whole_screen, &jlgr->effects.light.aa);
+	// Blend Default
+	jlgr_opengl_blend_default_(jlgr);
 }
 
 /** @endcond */
@@ -290,10 +298,12 @@ void jlgr_effects_light_aa(jlgr_t* jlgr, jl_vo_t* vo,
 	float material_brightness)
 {
 	jlgr->effects.vo = vo;
+	jlgr_sprite_clamp(light_position, vo->pr.cb,
+		&jlgr->effects.light.light_position);
 	jlgr->effects.light.light_position = (jl_vec3_t) {
-		(light_position.x * 2.f)-1.f,
-		(light_position.y * 2.f)-1.f,
-		(light_position.z * 2.f)
+		(jlgr->effects.light.light_position.x * 2.f)-1.f,
+		(jlgr->effects.light.light_position.y * 2.f)-1.f,
+		(jlgr->effects.light.light_position.z * 2.f)
 	};
 	jlgr->effects.light.light_color = light_color;
 	jlgr->effects.light.light_power = (jl_vec3_t) {
@@ -311,7 +321,7 @@ void jlgr_effects_light_aa(jlgr_t* jlgr, jl_vo_t* vo,
  * @param vo: The vertex object.
 **/
 void jlgr_effects_draw(jlgr_t* jlgr, jl_vo_t* vo) {
-	jlgr_pr_draw(jlgr, &vo->pr, &vo->fs, 0);
+	jlgr_pr_draw(jlgr, &vo->pr, &vo->pr.cb.pos, 0);
 }
 
 /**

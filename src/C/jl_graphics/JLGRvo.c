@@ -54,7 +54,6 @@ static void jlgr_vo_vertices__(jlgr_t* jlgr, jl_vo_t* vo, const float *xyzw,
 		// Set bounding box
 		jlgr_vo_bounding_box(jlgr, vo, xyzw, vertices);
 		// Update pre-renderer
-		jl_print(jlgr->jl, "sizex: %f", vo->pr.cb.ofs.x);
 		jlgr_pr_resize(jlgr, &vo->pr, vo->pr.cb.ofs.x, vo->pr.cb.ofs.y,
 			jlgr->wm.w * vo->pr.cb.ofs.x);
 	}
@@ -110,8 +109,6 @@ void jlgr_vo_init(jlgr_t* jlgr, jl_vo_t* vo) {
 	vo->tx = 0;
 	// Pre-renderer
 	jlgr_pr_init(jlgr, &vo->pr);
-	// Position
-	vo->fs = (jl_vec3_t) { 0.f, 0.f, 0.f };
 }
 
 /**
@@ -250,6 +247,15 @@ void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
 		jl_mem_copyto(rgba, &(rgbav[i * 4]), 4 * sizeof(float));
 	}
 	jlgr_vo_color_buffer__(jlgr, vo, rgbav);
+}
+
+/**
+ * Move a vertex object to a new location.
+ * @param vo: The vertex object.
+ * @param pos: The new position.
+**/
+void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos) {
+	vo->pr.cb.pos = pos;
 }
 
 /**

@@ -190,6 +190,22 @@ uint8_t jlgr_sprite_collide(jlgr_t* jlgr, jl_sprite_t *spr1, jl_sprite_t *spr2){
 	}
 }
 
+/**
+ * Clamp a coordinate to an area.
+ * @param xyz: The vertex to clamp.
+ * @param area: The area to clamp it to.
+ * @param rtn: The return vector.
+**/
+void jlgr_sprite_clamp(jl_vec3_t xyz, jl_area_t area, jl_vec3_t* rtn) {
+	xyz.x -= area.pos.x;
+	if(area.ofs.x != 0.f) xyz.x /= area.ofs.x;
+	xyz.y -= area.pos.y;
+	if(area.ofs.y != 0.f) xyz.y /= area.ofs.y;
+	xyz.z -= area.pos.z;
+	if(area.ofs.z != 0.f) xyz.z /= area.ofs.z;
+	*rtn = xyz;
+}
+
 void* jlgr_sprite_getcontext(jl_sprite_t *sprite) {
 	return sprite->ctx_main;
 }

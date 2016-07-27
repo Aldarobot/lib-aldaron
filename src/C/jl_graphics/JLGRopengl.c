@@ -522,6 +522,17 @@ void jlgr_opengl_draw_arrays_(jlgr_t* jlgr, GLenum mode, uint8_t count) {
 	JL_GL_ERROR(jlgr, 0,"glDrawArrays");
 }
 
+void jlgr_opengl_blend_default_(jlgr_t* jlgr) {
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA,
+		GL_DST_ALPHA);
+	JL_GL_ERROR(jlgr, 0, "glBlendFuncSeparate");
+}
+
+void jlgr_opengl_blend_add_(jlgr_t* jlgr) {
+	glBlendFunc(GL_ONE, GL_ONE);
+	JL_GL_ERROR(jlgr, 0, "glBlendFunc");
+}
+
 static inline void _jl_gl_init_disable_extras(jlgr_t* jlgr) {
 	glDisable(GL_DEPTH_TEST);
 	JL_GL_ERROR(jlgr, 0, "glDisable(GL_DEPTH_TEST)");
@@ -536,9 +547,7 @@ static inline void _jl_gl_init_enable_alpha(jlgr_t* jlgr) {
 	JL_GL_ERROR(jlgr, 0,"glEnable( CULL FACE )");
 	glBlendColor(0.f,0.f,0.f,0.f);
 	JL_GL_ERROR(jlgr, 0,"glBlendColor");
-	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA,
-		GL_DST_ALPHA);
-	JL_GL_ERROR(jlgr, 0,"glBlendFunc");
+	jlgr_opengl_blend_default_(jlgr);
 }
 
 // Copy & Push vertices to a VBO.

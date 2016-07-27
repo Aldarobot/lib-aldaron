@@ -52,8 +52,6 @@ jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 	jlgr_fl_init(jlgr);
 	JL_PRINT_DEBUG(jl, "Initializing file viewer!");
 	jl_print_return(jl, "JL/GR/INIT");
-	// Create mutex for multi-threading
-	jlgr->mutex = jl_thread_mutex_new(jl);
 	// Create communicators for multi-threading
 	jlgr->comm2draw = jl_thread_comm_make(jl,sizeof(jlgr_thread_packet_t));
 	jl_thread_wait_init(jl, &jlgr->wait);

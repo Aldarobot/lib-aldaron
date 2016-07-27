@@ -115,8 +115,7 @@ typedef struct{
 typedef struct{
 	SDL_mutex *lock;	/** The mutex lock on the "data" */
 	void* data;		/** The data attached to the mutex */
-	uint64_t size;		/** Size of "data" */
-	uint8_t acceptable;	/** Accepts push 0/1 **/
+	size_t size;		/** Size of "data" */
 }jl_pvar_t;
 
 // Thread-Wait Variable
@@ -289,7 +288,6 @@ int32_t jl_thread_old(jl_t *jl, uint8_t threadnum);
 SDL_mutex* jl_thread_mutex_new(jl_t *jl);
 void jl_thread_mutex_lock(jl_t *jl, SDL_mutex* mutex);
 void jl_thread_mutex_unlock(jl_t *jl, SDL_mutex* mutex);
-void jl_thread_mutex_use(jl_t *jl, SDL_mutex* mutex, jl_fnct fn_);
 void jl_thread_mutex_cpy(jl_t *jl, SDL_mutex* mutex, void* src,
 	void* dst, uint32_t size);
 void jl_thread_mutex_old(jl_t *jl, SDL_mutex* mutex);
@@ -298,9 +296,8 @@ void jl_thread_comm_send(jl_t* jl, jl_comm_t* comm, const void* src);
 void jl_thread_comm_recv(jl_t* jl, jl_comm_t* comm, jl_data_fnct fn);
 void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm);
 void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size);
-void jl_thread_pvar_push(jl_pvar_t* pvar, void* data, jl_thread_pp_t b);
-void* jl_thread_pvar_edit(jl_pvar_t* pvar, void** data);
-void jl_thread_pvar_pull(jl_pvar_t* pvar, void* data);
+void* jl_thread_pvar_edit(jl_pvar_t* pvar);
+void jl_thread_pvar_drop(jl_pvar_t* pvar, void** data);
 void jl_thread_pvar_free(jl_t* jl, jl_pvar_t* pvar);
 void jl_thread_wait(jl_t* jl, jl_wait_t* wait);
 void jl_thread_wait_init(jl_t* jl, jl_wait_t* wait);

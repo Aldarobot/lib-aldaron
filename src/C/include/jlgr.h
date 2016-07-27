@@ -327,10 +327,9 @@ typedef struct{
 	jl_sprite_t mouse; // Sprite to represent mouse pointer
 
 	uint8_t thread; // Graphical Thread ID.
-	SDL_mutex* mutex; // Mutex to lock wshare structure.
 	jl_comm_t* comm2draw; // thread communication variable.
 	jl_wait_t wait;
-	jl_pvar_t pvar; // Shared context.
+	jl_pvar_t pvar; // Protected context.
 
 	struct{
 		jlgr_input_t input;

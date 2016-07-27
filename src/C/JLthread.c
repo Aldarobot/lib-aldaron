@@ -52,7 +52,7 @@ uint8_t jl_thread_new(jl_t *jl, const char* name, SDL_ThreadFunction fn) {
 		}
 	}
 	if(rtn == -1) {
-		jl_print(jl, "More than 16 threads!");
+		jl_print(jl, "Cannot have more than 16 threads!");
 		exit(-1);
 	}
 	JL_PRINT_DEBUG(jl, "Made thread #%d", rtn);
@@ -128,20 +128,6 @@ void jl_thread_mutex_unlock(jl_t *jl, SDL_mutex* mutex) {
 }
 
 /**
- * Run a function that uses the mutex.
- * @param jl: The library context.
- * @param mutex: The mutex created by jl_thread_mutex_new().
- * @param fn_: The function that uses data locked by the mutex.
-**/
-void jl_thread_mutex_use(jl_t *jl, SDL_mutex* mutex, jl_fnct fn_) {
-	jl_thread_mutex_lock(jl, mutex);
-	// Do stuff while mutex is locked
-	fn_(jl);
-	// Give up for other threads
-	jl_thread_mutex_unlock(jl, mutex);
-}
-
-/**
  * Do a thread-safe copy of data from "src" to "dst".  This function will wait
  *	until no other threads are using the mutex before doing anything.
  * @param jl: The library context.
@@ -161,7 +147,7 @@ void jl_thread_mutex_cpy(jl_t *jl, SDL_mutex* mutex, void* src, void* dst,
 		// Give up for other threads
 		SDL_UnlockMutex(mutex);
 	} else {
-		jl_print(jl, "jl_thread_mutex_use: Couldn't lock mutex");
+		jl_print(jl, "jl_thread_mutex_cpy: Couldn't lock mutex");
 		exit(-1);
 	}
 }
@@ -265,56 +251,25 @@ void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size) {
 }
 
 /**
- * @param jl * @param jl: The library context.
- * @param pvar: The protected variable to initialize.
- * @param data: Data to push to protected variable.
- * @param b: Behavior
- *	JL_THREAD_PP_AA // Push if acceptable
- *	JL_THREAD_PP_UA // Push if acceptable, & make unacceptable until pull. 
- *	JL_THREAD_PP_FF // Push forcefully.
- *	JL_THREAD_PP_UF // Push forcefully, and make unacceptable until pull
-**/
-void jl_thread_pvar_push(jl_pvar_t* pvar, void* data, jl_thread_pp_t b) {
-	SDL_LockMutex(pvar->lock);
-	// If forced or acceptable, push
-	if(b == JL_THREAD_PP_FF || b == JL_THREAD_PP_UF || (pvar->acceptable))
-		jl_mem_copyto(data, pvar->data, pvar->size);
-	// Make unacceptable or not
-	if(b == JL_THREAD_PP_UA || b == JL_THREAD_PP_UF)
-		pvar->acceptable = 0;
-	else
-		pvar->acceptable = 1;
-        SDL_UnlockMutex(pvar->lock);
-}
-
-/**
+ * Get a protected variable's data.
  * @param pvar: The protected variable to lock.
  * @param data: Data.  NULL to get data, pointer to your pointer to data to
  *	unlock data - will be set to NULL so you can't use anymore.
- * @returns: Pointer to data if data == NULL, or NULL if data != NULL.
+ * @returns: Pointer to safe data to edit.
 **/
-void* jl_thread_pvar_edit(jl_pvar_t* pvar, void** data) {
-	if(data == NULL) {
-		SDL_LockMutex(pvar->lock);
-		return pvar->data;
-	}else{
-		*data = NULL;
-	        SDL_UnlockMutex(pvar->lock);
-		return NULL;
-	}
+void* jl_thread_pvar_edit(jl_pvar_t* pvar) {
+	SDL_LockMutex(pvar->lock);
+	return pvar->data;
 }
 
 /**
- * 
- * @param jl * @param jl: The library context.
- * @param pvar: The protected variable to initialize.
- * @param data: Data is copied from protected variable to here.
+ * Drop editing a protected variable so other threads can access.
+ * @param pvar: The protected variable to stop using.
+ * @param data: Pointer to a pointer to pvar's data.
 **/
-void jl_thread_pvar_pull(jl_pvar_t* pvar, void* data) {
-	SDL_LockMutex(pvar->lock);
-	jl_mem_copyto(pvar->data, data, pvar->size);
-	pvar->acceptable = 1;
+void jl_thread_pvar_drop(jl_pvar_t* pvar, void** data) {
         SDL_UnlockMutex(pvar->lock);
+	*data = NULL;
 }
 
 void jl_thread_pvar_free(jl_t* jl, jl_pvar_t* pvar) {

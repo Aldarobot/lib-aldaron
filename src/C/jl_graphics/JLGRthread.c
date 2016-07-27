@@ -132,7 +132,7 @@ int jlgr_thread_draw(void* data) {
 	jlgr_t* jlgr = jl->jlgr;
 
 	// Initialize subsystems
-	jl_thread_mutex_use(jl, jlgr->mutex, jlgr_thread_draw_init__);
+	jlgr_thread_draw_init__(jl);
 	// Redraw loop
 	while(1) {
 		// Check for events.

@@ -512,7 +512,7 @@ void jlgr_gui_textbox_draw(jlgr_t* jlgr, jl_rect_t rc){
  * @param notification: The message to display.
 */
 void jlgr_notify(jlgr_t* jlgr, const char* notification, ...) {
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar, NULL);
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
 	va_list arglist;
 
 	va_start( arglist, notification );
@@ -520,7 +520,7 @@ void jlgr_notify(jlgr_t* jlgr, const char* notification, ...) {
 	va_end( arglist );
 	pjlgr->notification.timeTilVanish = 4.5;
 
-	jl_thread_pvar_edit(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 }
 
 /***      @cond       ***/
@@ -530,7 +530,7 @@ void jlgr_notify(jlgr_t* jlgr, const char* notification, ...) {
 
 void _jlgr_loopb(jlgr_t* jlgr) {
 	//Message Display
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar, NULL);
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
 	if(pjlgr->notification.timeTilVanish > 0.f) {
 		if(pjlgr->notification.timeTilVanish > .5) {
 			float color[] = { 1., 1., 1., 1. };
@@ -544,7 +544,7 @@ void _jlgr_loopb(jlgr_t* jlgr) {
 		}
 		pjlgr->notification.timeTilVanish-=jlgr->psec;
 	}
-	jl_thread_pvar_edit(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 }
 
 void _jlgr_loopa(jlgr_t* jlgr) {
@@ -582,9 +582,9 @@ void jlgr_init__(jlgr_t* jlgr) {
 	// Draw message on the screen
 	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "LOADING JL_LIB....");
 	// Set other variables
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar, NULL);
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
 	pjlgr->notification.timeTilVanish = 0.f;
-	jl_thread_pvar_edit(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 	// Load other images....
 	jlgr->textures.icon = jl_sg_add_image(jlgr, &packagedata,
 		"/images/taskbar_items.png");

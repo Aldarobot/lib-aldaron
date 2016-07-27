@@ -207,8 +207,8 @@ void jlgr_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,int16_t map) {
 	if(map != -1) {
 		float ww = (float)w;
 		float hh = (float)h;
-		float CX = ((float)(map%h))/ww;
-		float CY = ((float)(map/h))/hh;
+		float CX = ((float)(map%w))/ww;
+		float CY = ((float)(map/w))/hh;
 		float tex1[] = {
 			(DEFAULT_TC[0]/ww) + CX, (DEFAULT_TC[1]/hh) + CY,
 			(DEFAULT_TC[2]/ww) + CX, (DEFAULT_TC[3]/hh) + CY,

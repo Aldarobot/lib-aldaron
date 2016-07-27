@@ -1,7 +1,5 @@
 package org.libsdl.app;
 
-import jlw.jeron.example.R;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,14 +24,11 @@ import android.widget.TextView;
 import android.os.*;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.DisplayMetrics;
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import android.media.*;
 import android.hardware.*;
 import android.content.pm.ActivityInfo;
-
-import com.mopub.mobileads.*;
 
 /**
 	SDL Activity
@@ -121,8 +116,6 @@ public class SDLActivity extends Activity {
 		mHasFocus = true;
 	}
 
-	private MoPubView moPubView;
-
 	// Setup
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -170,25 +163,6 @@ public class SDLActivity extends Activity {
 
 		   return;
 		}
-		
-		// Get filename from "Open with" of another application
-		Intent intent = getIntent();
-
-		if (intent != null && intent.getData() != null) {
-			String filename = intent.getData().getPath();
-			if (filename != null) {
-				Log.v(TAG, "Got filename: " + filename);
-				SDLActivity.onNativeDropFile(filename);
-			}
-		}
-
-		mLayout = new AbsoluteLayout(this);
-
-		// mo-pub stuff
-		moPubView = new MoPubView(getApplication());
-		moPubView.setAdUnitId("1af1bc081ac34c31916435db4e372b6e");
-		moPubView.setAutorefreshEnabled(true);
-		moPubView.loadAd();
 
 		// Set up the surface
 		mSurface = new SDLSurface(getApplication());
@@ -200,12 +174,21 @@ public class SDLActivity extends Activity {
 			mJoystickHandler = new SDLJoystickHandler();
 		}
 
-		// Set layout
-		mLayout.addView(mSurface, ViewGroup.LayoutParams.WRAP_CONTENT,
-			ViewGroup.LayoutParams.WRAP_CONTENT);
-		mLayout.addView(moPubView, ViewGroup.LayoutParams.FILL_PARENT,
-			ViewGroup.LayoutParams.WRAP_CONTENT);
+		mLayout = new AbsoluteLayout(this);
+		mLayout.addView(mSurface);
+
 		setContentView(mLayout);
+		
+		// Get filename from "Open with" of another application
+		Intent intent = getIntent();
+
+		if (intent != null && intent.getData() != null) {
+			String filename = intent.getData().getPath();
+			if (filename != null) {
+				Log.v(TAG, "Got filename: " + filename);
+				SDLActivity.onNativeDropFile(filename);
+			}
+		}
 	}
 
 	// Events
@@ -287,8 +270,6 @@ public class SDLActivity extends Activity {
 
 			//Log.v(TAG, "Finished waiting for SDL thread");
 		}
-		// mo-pub stuff
-		moPubView.destroy();
 
 		super.onDestroy();
 		// Reset everything in case the user re opens the app
@@ -428,7 +409,6 @@ public class SDLActivity extends Activity {
 
 	// C functions we call
 	public static native void nativeJlSendData(String data);
-	public static native void nativeJlResize(float shrink_height);
 	public static native int nativeInit(Object arguments);
 	public static native void nativeLowMemory();
 	public static native void nativeQuit();
@@ -1121,18 +1101,6 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 		mHeight = height;
 		SDLActivity.onNativeResize(width, height, sdlFormat, mDisplay.getRefreshRate());
 		Log.v("SDL", "Window size: " + width + "x" + height);
-
-		// jl-lib code
-
-		DisplayMetrics dm = new DisplayMetrics();
-		SDLActivity.mSingleton.getWindowManager().getDefaultDisplay().getMetrics(dm);
-		int dens = dm.densityDpi;
-		float hi = (float)height / (float)dens;
-		float hdp = hi * 160.0f;
-		float shrink_height = 50.0f / hdp;// Fraction of display is 50 dp
-		SDLActivity.nativeJlResize(shrink_height);
-
-		// end jl-lib code
 
 		// Set mIsSurfaceReady to 'true' *before* making a call to handleResume
 		SDLActivity.mIsSurfaceReady = true;

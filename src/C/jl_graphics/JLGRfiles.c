@@ -297,7 +297,7 @@ static void jl_fl_btn_makefile_draw__(jl_t* jl, uint8_t resize, void* ctx) {
 	jl_vec3_t tr = { 0., 0., 0. };
 
 	jlgr_vo_set_image(jlgr, &jlgr->gl.temp_vo, rc, jlgr->textures.icon);
-	jlgr_vo_txmap(jlgr, &jlgr->gl.temp_vo, 16, 16, 9);
+	jlgr_vo_txmap(jlgr, &jlgr->gl.temp_vo, 0, 16, 16, 9);
 	jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo, &tr);
 }
 
@@ -315,7 +315,7 @@ static void jl_fl_btn_makefolder_draw__(jl_t* jl, uint8_t resize, void* ctx) {
 	jl_vec3_t tr = { 0., 0., 0. };
 
 	jlgr_vo_set_image(jlgr, &jlgr->gl.temp_vo, rc, jlgr->textures.icon);
-	jlgr_vo_txmap(jlgr, &jlgr->gl.temp_vo, 16, 16, 10);
+	jlgr_vo_txmap(jlgr, &jlgr->gl.temp_vo, 0, 16, 16, 10);
 	jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo, &tr);
 }
 

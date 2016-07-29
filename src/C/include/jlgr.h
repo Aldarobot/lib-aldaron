@@ -590,7 +590,8 @@ void jlgr_vo_set_rect(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
 	uint8_t multicolor);
 void jlgr_vo_image(jlgr_t* jlgr, jl_vo_t *vo, uint32_t img);
 void jlgr_vo_set_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex);
-void jlgr_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,int16_t map);
+void jlgr_vo_txmap(jlgr_t* jlgr, jl_vo_t* vo, uint8_t orientation,
+	uint8_t w, uint8_t h, int16_t map);
 void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
 void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
 void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos);

@@ -171,7 +171,7 @@ void jlgr_vo_image(jlgr_t* jlgr, jl_vo_t *vo, uint32_t img) {
 		exit(-1);
 	}
 #endif
-	jlgr_vo_txmap(jlgr, vo, 0, 0, -1);
+	jlgr_vo_txmap(jlgr, vo, 0, 0, 0, -1);
 }
 
 /**
@@ -203,21 +203,26 @@ void jlgr_vo_set_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex) {
  * @param h: How many characters high the texture is.
  * @param map: The character value to map.  -1 for full texture.
 **/
-void jlgr_vo_txmap(jlgr_t* jlgr,jl_vo_t* vo,uint8_t w,uint8_t h,int16_t map) {
+void jlgr_vo_txmap(jlgr_t* jlgr, jl_vo_t* vo, uint8_t orientation,
+	uint8_t w, uint8_t h, int16_t map)
+{
+	const float *tc = orientation ?
+		( orientation == 1 ? UPSIDEDOWN_TC : BACKWARD_TC )
+		: DEFAULT_TC;
 	if(map != -1) {
 		float ww = (float)w;
 		float hh = (float)h;
 		float CX = ((float)(map%w))/ww;
 		float CY = ((float)(map/w))/hh;
 		float tex1[] = {
-			(DEFAULT_TC[0]/ww) + CX, (DEFAULT_TC[1]/hh) + CY,
-			(DEFAULT_TC[2]/ww) + CX, (DEFAULT_TC[3]/hh) + CY,
-			(DEFAULT_TC[4]/ww) + CX, (DEFAULT_TC[5]/hh) + CY,
-			(DEFAULT_TC[6]/ww) + CX, (DEFAULT_TC[7]/hh) + CY
+			(tc[0]/ww) + CX, (tc[1]/hh) + CY,
+			(tc[2]/ww) + CX, (tc[3]/hh) + CY,
+			(tc[4]/ww) + CX, (tc[5]/hh) + CY,
+			(tc[6]/ww) + CX, (tc[7]/hh) + CY
 		};
 		jlgr_opengl_buffer_set_(jlgr, &vo->bt, tex1, 8);
 	}else{
-		jlgr_opengl_buffer_set_(jlgr, &vo->bt, DEFAULT_TC, 8);
+		jlgr_opengl_buffer_set_(jlgr, &vo->bt, tc, 8);
 	}
 }
 

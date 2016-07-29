@@ -16,6 +16,13 @@
 	1., 0. \
 }
 
+#define BACKWARD_TC (const float[]) {\
+	1., 1., \
+	1., 0., \
+	0., 0., \
+	0., 1. \
+}
+
 typedef enum{
 	JLGR_ID_NULL,
 	JLGR_ID_UNKNOWN,

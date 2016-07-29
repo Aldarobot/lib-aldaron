@@ -47,7 +47,7 @@ void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
 			continue;
 		}
 		// Set character
-		jlgr_vo_txmap(jlgr, vo, 16, 16, text[i]);
+		jlgr_vo_txmap(jlgr, vo, 0, 16, 16, text[i]);
 		// Special Drawing
 		if(bold) {
 			float x = tr.x; int i;

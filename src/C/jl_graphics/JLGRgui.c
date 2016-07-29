@@ -74,7 +74,7 @@ void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h,
 	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
 
 	jlgr_vo_set_image(jlgr, &jlgr->gui.vos.whole_screen, rc, tex);
-	jlgr_vo_txmap(jlgr, &jlgr->gui.vos.whole_screen, w, h, c);
+	jlgr_vo_txmap(jlgr, &jlgr->gui.vos.whole_screen, 0, w, h, c);
 }
 
 /**
@@ -213,9 +213,9 @@ static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
 
 	jl_gl_clear(jlgr, .01, .08, 0., 1.);
 	jlgr_vo_set_image(jlgr, &(slider->vo[0]), rc, jlgr->textures.font);
-	jlgr_vo_txmap(jlgr, &(slider->vo[0]), 	16, 16, 235);
+	jlgr_vo_txmap(jlgr, &(slider->vo[0]), 0, 16, 16, 235);
 	jlgr_vo_set_image(jlgr, &(slider->vo[1]), rc2, jlgr->textures.game);
-	jlgr_vo_txmap(jlgr, &(slider->vo[1]), 	16, 16, 16);
+	jlgr_vo_txmap(jlgr, &(slider->vo[1]), 0, 16, 16, 16);
 	
 	jlgr_vo_set_rect(jlgr, &(slider->vo[2]), rc1, colors, 0);
 	// Draw Sliders

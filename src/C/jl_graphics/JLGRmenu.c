@@ -116,7 +116,7 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 	jlgr_vo_set_rect(jlgr, &menu.draw.shadow, rc_shadow, shadow_color, 0);
 	// Make the icon vertex object.
 	jlgr_vo_set_image(jlgr, &menu.draw.icon, rc_icon, jlgr->textures.icon);
-	jlgr_vo_txmap(jlgr, &menu.draw.icon, 16, 16, JLGR_ID_UNKNOWN);
+	jlgr_vo_txmap(jlgr, &menu.draw.icon, 0, 16, 16, JLGR_ID_UNKNOWN);
 	// Clear the menubar & make pre-renderer.
 	for( menu.draw.cursor = 0; menu.draw.cursor < 10;
 		menu.draw.cursor++)
@@ -238,7 +238,7 @@ void jlgr_menu_draw_icon(jlgr_t* jlgr, uint32_t tex, uint8_t c) {
 	jl_vec3_t tr = { .9 - (.1 * menu_draw->cursor), 0., 0. };
 
 	jlgr_vo_set_image(jlgr, &menu_draw->icon, rc_icon, tex);
-	jlgr_vo_txmap(jlgr, &menu_draw->icon, 16, 16, c);
+	jlgr_vo_txmap(jlgr, &menu_draw->icon, 0, 16, 16, c);
 	jlgr_vo_draw(jlgr, &menu_draw->icon, &tr);
 }
 

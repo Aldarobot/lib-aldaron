@@ -113,6 +113,7 @@ typedef struct{
 
 // Thread-Protected Variable
 typedef struct{
+	void* jl;
 	SDL_mutex *lock;	/** The mutex lock on the "data" */
 	void* data;		/** The data attached to the mutex */
 	size_t size;		/** Size of "data" */
@@ -298,7 +299,7 @@ void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm);
 void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size);
 void* jl_thread_pvar_edit(jl_pvar_t* pvar);
 void jl_thread_pvar_drop(jl_pvar_t* pvar, void** data);
-void jl_thread_pvar_free(jl_t* jl, jl_pvar_t* pvar);
+void jl_thread_pvar_free(jl_pvar_t* pvar);
 void jl_thread_wait(jl_t* jl, jl_wait_t* wait);
 void jl_thread_wait_init(jl_t* jl, jl_wait_t* wait);
 void jl_thread_wait_stop(jl_t* jl, jl_wait_t* wait);

@@ -141,15 +141,12 @@ void jl_thread_mutex_unlock(jl_t *jl, SDL_mutex* mutex) {
 void jl_thread_mutex_cpy(jl_t *jl, SDL_mutex* mutex, void* src, void* dst,
 	uint32_t size)
 {
-	if (SDL_LockMutex(mutex) == 0) {
-		// Copy data.
-		jl_mem_copyto(src, dst, size);
-		// Give up for other threads
-		SDL_UnlockMutex(mutex);
-	} else {
-		jl_print(jl, "jl_thread_mutex_cpy: Couldn't lock mutex");
-		exit(-1);
-	}
+	// Lock mutex
+	jl_thread_mutex_lock(jl, mutex);
+	// Copy data.
+	jl_mem_copyto(src, dst, size);
+	// Give up for other threads
+	jl_thread_mutex_unlock(jl, mutex);
 }
 
 /**
@@ -192,7 +189,7 @@ jl_comm_t* jl_thread_comm_make(jl_t* jl, uint32_t size) {
  *	jl_thread_comm_new().
 **/
 void jl_thread_comm_send(jl_t* jl, jl_comm_t* comm, const void* src) {
-	SDL_LockMutex(comm->lock);
+	jl_thread_mutex_lock(jl, comm->lock);
 	// Copy to next packet location
 	jl_mem_copyto(src, comm->data[comm->pnum], comm->size);
 	// Advance number of packets.
@@ -202,7 +199,7 @@ void jl_thread_comm_send(jl_t* jl, jl_comm_t* comm, const void* src) {
 		jl_print(jl, "Error: Other thread wouldn't respond!");
 		exit(-1);
 	}
-	SDL_UnlockMutex(comm->lock);
+	jl_thread_mutex_unlock(jl, comm->lock);
 }
 
 /**
@@ -214,12 +211,12 @@ void jl_thread_comm_send(jl_t* jl, jl_comm_t* comm, const void* src) {
  *	void*, returns void).
 **/
 void jl_thread_comm_recv(jl_t* jl, jl_comm_t* comm, jl_data_fnct fn) {
-	SDL_LockMutex(comm->lock);
+	jl_thread_mutex_lock(jl, comm->lock);
 	while(comm->pnum != 0) {
 		fn(jl, comm->data[comm->pnum - 1]);
 		comm->pnum--;
 	}
-        SDL_UnlockMutex(comm->lock);
+        jl_thread_mutex_unlock(jl, comm->lock);
 }
 
 /**
@@ -245,6 +242,7 @@ void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm) {
  * @param size: Size to allocate for pvar's data
 **/
 void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size) {
+	pvar->jl = jl;
 	pvar->lock = SDL_CreateMutex();
 	pvar->data = data ? jl_mem_copy(jl, data, size) : jl_memi(jl, size);
 	pvar->size = size;
@@ -258,7 +256,7 @@ void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size) {
  * @returns: Pointer to safe data to edit.
 **/
 void* jl_thread_pvar_edit(jl_pvar_t* pvar) {
-	SDL_LockMutex(pvar->lock);
+	jl_thread_mutex_lock(pvar->jl, pvar->lock);
 	return pvar->data;
 }
 
@@ -268,13 +266,13 @@ void* jl_thread_pvar_edit(jl_pvar_t* pvar) {
  * @param data: Pointer to a pointer to pvar's data.
 **/
 void jl_thread_pvar_drop(jl_pvar_t* pvar, void** data) {
-        SDL_UnlockMutex(pvar->lock);
+        jl_thread_mutex_unlock(pvar->jl, pvar->lock);
 	*data = NULL;
 }
 
-void jl_thread_pvar_free(jl_t* jl, jl_pvar_t* pvar) {
+void jl_thread_pvar_free(jl_pvar_t* pvar) {
 	SDL_DestroyMutex(pvar->lock);
-	pvar->data = jl_mem(jl, pvar->data, 0);
+	pvar->data = jl_mem(pvar->jl, pvar->data, 0);
 	pvar->size = 0;
 }
 

@@ -32,7 +32,7 @@ static inline void jlgr_sprite_redraw__(jlgr_t* jlgr, jl_sprite_t *spr) {
 }
 
 static inline void jlgr_sprite_sync__(jl_t* jl, jl_sprite_t *spr, void* ctx) {
-	jl_thread_mutex_cpy(jl, spr->mutex, ctx, spr->ctx_draw,
+	jl_thread_mutex_cpy(jl, &spr->mutex, ctx, spr->ctx_draw,
 		spr->ctx_draw_size);
 }
 
@@ -58,9 +58,9 @@ void jlgr_sprite_dont(jl_t* jl, jl_sprite_t* sprite) { }
 **/
 void jlgr_sprite_redraw(jlgr_t* jlgr, jl_sprite_t *spr, void* ctx) {
 	// Tell drawing thread to redraw.
-	jl_thread_mutex_lock(jlgr->jl, spr->mutex);
+	jl_thread_mutex_lock(&spr->mutex);
 	spr->update = 1;
-	jl_thread_mutex_unlock(jlgr->jl, spr->mutex);
+	jl_thread_mutex_unlock(&spr->mutex);
 	// Copy drawing context up to drawing thread.
 	if(ctx) jlgr_sprite_sync__(jlgr->jl, spr, ctx);
 }
@@ -74,12 +74,12 @@ void jlgr_sprite_redraw(jlgr_t* jlgr, jl_sprite_t *spr, void* ctx) {
 **/
 void jlgr_sprite_draw(jlgr_t* jlgr, jl_sprite_t *spr) {
 	jl_print_function(jlgr->jl, "Sprite Draw!");
-	jl_thread_mutex_lock(jlgr->jl, spr->mutex);
+	jl_thread_mutex_lock(&spr->mutex);
 
 	// Redraw if needed.
 	if(spr->update) jlgr_sprite_redraw__(jlgr, spr);
 	jlgr_pr_draw(jlgr, &spr->pr, &spr->pr.cb.pos, spr->rs);
-	jl_thread_mutex_unlock(jlgr->jl, spr->mutex);
+	jl_thread_mutex_unlock(&spr->mutex);
 	jl_print_return(jlgr->jl, "Sprite Draw!");
 }
 
@@ -103,7 +103,7 @@ void jlgr_sprite_resize(jlgr_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc) {
 	// Redraw
 	jlgr_sprite_redraw_tex__(jlgr, spr);
 	//
-	jl_thread_mutex_unlock(jlgr->jl, spr->mutex);
+	jl_thread_mutex_unlock(&spr->mutex);
 }
 
 /**
@@ -149,7 +149,7 @@ void jlgr_sprite_init(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	// Set loop
 	sprite->loop = loopfn;
 	// Make mutex
-	sprite->mutex = jl_thread_mutex_new(jlgr->jl);
+	jl_thread_mutex_new(jlgr->jl, &sprite->mutex);
 	// Create main context.
 	if(main_ctx_size)
 		sprite->ctx_main = jl_mem_copy(jlgr->jl, main_ctx, main_ctx_size);
@@ -164,7 +164,6 @@ void jlgr_sprite_init(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
  * THREAD: Main thread only.
 **/
 void jlgr_sprite_free(jlgr_t* jlgr, jl_sprite_t* sprite) {
-	jl_thread_mutex_old(jlgr->jl, sprite->mutex);
 }
 
 /**

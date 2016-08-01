@@ -22,7 +22,7 @@ static void jlgr_thread_resize(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	// Taskbar resize.
 	jlgr_menu_resize_(jlgr);
 	// Mouse resize
-	if(jlgr->mouse.mutex) jlgr_sprite_resize(jlgr, &jlgr->mouse, NULL);
+	if(jlgr->mouse.mutex.init) jlgr_sprite_resize(jlgr, &jlgr->mouse, NULL);
 }
 
 static void jlgr_thread_event(jl_t* jl, void* data) {
@@ -42,12 +42,15 @@ static void jlgr_thread_event(jl_t* jl, void* data) {
 			jlgr->draw.rtn = 1;
 			break;
 		} case JLGR_COMM_SEND: {
+			jl_print(jl, "send update\n");
 			if(packet->x==0) jlgr->draw.redraw.single = packet->fn;
 			if(packet->x==1) jlgr->draw.redraw.upper = packet->fn;
 			if(packet->x==2) jlgr->draw.redraw.lower = packet->fn;
 			if(packet->x==3) {
+				jl_print(jl, "true update\n");
 				jlgr->draw.fn = packet->fn;
 				packet->fn(jl);
+				jl_print(jl, "we update\n");
 			}
 			break;
 		} default: {

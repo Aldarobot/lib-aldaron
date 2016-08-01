@@ -105,7 +105,16 @@ typedef struct{
 }data_t;
 
 typedef struct{
-	SDL_mutex *lock;	/** The mutex lock on the "data" */
+	/** Init'd **/
+	uint8_t init;
+	/** Library Context **/
+	void* jl;
+	/** Which thread is locked **/
+	SDL_atomic_t status;
+}jl_mutex_t;
+
+typedef struct{
+	jl_mutex_t lock;	/** The mutex lock on the "data" */
 	uint8_t pnum;		/** Number of packets in structure (upto 16 ) */
 	uint32_t size;		/** Size of "data" */
 	void* data[32];		/** The data attached to the mutex */
@@ -114,7 +123,7 @@ typedef struct{
 // Thread-Protected Variable
 typedef struct{
 	void* jl;
-	SDL_mutex *lock;	/** The mutex lock on the "data" */
+	jl_mutex_t lock;	/** The mutex lock on the "data" */
 	void* data;		/** The data attached to the mutex */
 	size_t size;		/** Size of "data" */
 }jl_pvar_t;
@@ -156,7 +165,7 @@ typedef struct{
 	struct{
 		void* printfn; // Function for printing
 		uint8_t bkspc; // Backspace.
-		SDL_mutex* mutex; // Mutex for printing to terminal
+		jl_mutex_t mutex; // Mutex for printing to terminal
 	}print;
 	struct{
 		double psec; // Seconds since last frame.
@@ -286,12 +295,11 @@ char* jl_file_get_resloc(jl_t* jl, const char* prg_folder, const char* fname);
 uint8_t jl_thread_new(jl_t *jl, const char* name, SDL_ThreadFunction fn);
 uint8_t jl_thread_current(jl_t *jl);
 int32_t jl_thread_old(jl_t *jl, uint8_t threadnum);
-SDL_mutex* jl_thread_mutex_new(jl_t *jl);
-void jl_thread_mutex_lock(jl_t *jl, SDL_mutex* mutex);
-void jl_thread_mutex_unlock(jl_t *jl, SDL_mutex* mutex);
-void jl_thread_mutex_cpy(jl_t *jl, SDL_mutex* mutex, void* src,
+void jl_thread_mutex_new(jl_t *jl, jl_mutex_t* mutex);
+void jl_thread_mutex_lock(jl_mutex_t* mutex);
+void jl_thread_mutex_unlock(jl_mutex_t* mutex);
+void jl_thread_mutex_cpy(jl_t *jl, jl_mutex_t* mutex, void* src,
 	void* dst, uint32_t size);
-void jl_thread_mutex_old(jl_t *jl, SDL_mutex* mutex);
 jl_comm_t* jl_thread_comm_make(jl_t* jl, uint32_t size);
 void jl_thread_comm_send(jl_t* jl, jl_comm_t* comm, const void* src);
 void jl_thread_comm_recv(jl_t* jl, jl_comm_t* comm, jl_data_fnct fn);

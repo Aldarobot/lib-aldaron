@@ -548,7 +548,7 @@ void _jlgr_loopb(jlgr_t* jlgr) {
 }
 
 void _jlgr_loopa(jlgr_t* jlgr) {
-	if(!jlgr->menubar.menubar.mutex) return;
+	if(!jlgr->menubar.menubar.mutex.init) return;
 	jl_print_function(jlgr->jl, "GR_LP");
 	// Draw the pre-rendered Menubar.
 	if(!jlgr->fl.inloop) jlgr_sprite_draw(jlgr, &jlgr->menubar.menubar);
@@ -556,7 +556,7 @@ void _jlgr_loopa(jlgr_t* jlgr) {
 	_jlgr_loopb(jlgr);
 	jl_print_return(jlgr->jl, "GR_LP");
 	// Draw mouse
-	if(jlgr->mouse.mutex) jlgr_sprite_draw(jlgr, &jlgr->mouse);
+	if(jlgr->mouse.mutex.init) jlgr_sprite_draw(jlgr, &jlgr->mouse);
 }
 
 void jlgr_init__(jlgr_t* jlgr) {

@@ -263,7 +263,7 @@ typedef struct {
 }jl_font_t;
 
 typedef struct{
-	SDL_mutex* mutex;	// The mutex for writing/reading ctx_draw.
+	jl_mutex_t mutex;	// The mutex for writing/reading ctx_draw.
 	float rh, rw;		// Real Height & Width
 	void* ctx_main;		// The sprite's context.
 	void* ctx_draw;		// Information required for drawing.

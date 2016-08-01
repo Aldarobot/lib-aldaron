@@ -158,7 +158,7 @@ static void jl_print_function__(jl_t* jl,const char* fn_name,uint8_t thread_id){
 */
 void jl_print(jl_t* jl, const char* format, ... ) {
 	char temp[256];
-	jl_thread_mutex_lock(jl, jl->print.mutex);
+	jl_thread_mutex_lock(&jl->print.mutex);
 
 	uint8_t thread_id = jl_thread_current(jl);
 	jl_print_fnt print_out_ = jl->print.printfn;
@@ -175,13 +175,13 @@ void jl_print(jl_t* jl, const char* format, ... ) {
 		"                                         \r");
 	print_out_(jl, temp);
 	jl->print.bkspc = 0;
-	jl_thread_mutex_unlock(jl, jl->print.mutex);
+	jl_thread_mutex_unlock(&jl->print.mutex);
 }
 
 void jl_print_rewrite(jl_t* jl, const char* format, ... ) {
 	char temp[256];
 	char print[80];
-	jl_thread_mutex_lock(jl, jl->print.mutex);
+	jl_thread_mutex_lock(&jl->print.mutex);
 
 	uint8_t thread_id = jl_thread_current(jl);
 	va_list arglist;
@@ -199,7 +199,7 @@ void jl_print_rewrite(jl_t* jl, const char* format, ... ) {
 	print[79] = '\0';
 	JL_PRINT("%s", temp);
 	jl->print.bkspc = strlen(temp);
-	jl_thread_mutex_unlock(jl, jl->print.mutex);
+	jl_thread_mutex_unlock(&jl->print.mutex);
 }
 
 /**
@@ -210,9 +210,9 @@ void jl_print_rewrite(jl_t* jl, const char* format, ... ) {
 void jl_print_function(jl_t* jl, const char* fn_name) {
 	uint8_t thread_id = jl_thread_current(jl);
 
-	jl_thread_mutex_lock(jl, jl->print.mutex);
+	jl_thread_mutex_lock(&jl->print.mutex);
 	jl_print_function__(jl, fn_name, thread_id);
-	jl_thread_mutex_unlock(jl, jl->print.mutex);
+	jl_thread_mutex_unlock(&jl->print.mutex);
 }
 
 /**
@@ -223,7 +223,7 @@ void jl_print_function(jl_t* jl, const char* fn_name) {
 void jl_print_return(jl_t* jl, const char* fn_name) {
 	uint8_t thread_id = jl_thread_current(jl);
 
-	jl_thread_mutex_lock(jl, jl->print.mutex);
+	jl_thread_mutex_lock(&jl->print.mutex);
 	if(strcmp(fn_name, jl->jl_ctx[thread_id].print.stack
 		[jl->jl_ctx[thread_id].print.level]))
 	{
@@ -243,7 +243,7 @@ void jl_print_return(jl_t* jl, const char* fn_name) {
 		exit(-1);
 	}
 	jl->jl_ctx[thread_id].print.ofs2 -= 1;
-	jl_thread_mutex_unlock(jl, jl->print.mutex);
+	jl_thread_mutex_unlock(&jl->print.mutex);
 }
 
 /**
@@ -256,13 +256,13 @@ void jl_print_stacktrace(jl_t* jl) {
 
 	jl_print(jl, "Stacktrace for thread #%d (Most Recent Call Last):",
 		thread_id);
-	jl_thread_mutex_lock(jl, jl->print.mutex);
+	jl_thread_mutex_lock(&jl->print.mutex);
 	for(i = 0; i <= jl->jl_ctx[thread_id].print.level; i++) {
-		jl_thread_mutex_unlock(jl, jl->print.mutex);
+		jl_thread_mutex_unlock(&jl->print.mutex);
 		jl_print(jl, jl->jl_ctx[thread_id].print.stack[i]);
-		jl_thread_mutex_lock(jl, jl->print.mutex);
+		jl_thread_mutex_lock(&jl->print.mutex);
 	}
-	jl_thread_mutex_unlock(jl, jl->print.mutex);
+	jl_thread_mutex_unlock(&jl->print.mutex);
 }
 
 void jl_print_init_thread__(jl_t* jl, uint8_t thread_id) {
@@ -277,7 +277,7 @@ void jl_print_init_thread__(jl_t* jl, uint8_t thread_id) {
 }
 
 void jl_print_init__(jl_t* jl) {
-	jl->print.mutex = jl_thread_mutex_new(jl);
+	jl_thread_mutex_new(jl, &jl->print.mutex);
 	jl_print_set(jl, NULL);
 	jl_print_init_thread__(jl, 0);
 }
@@ -286,5 +286,4 @@ void jl_print_kill__(jl_t * jl) {
 	JL_PRINT_DEBUG(jl, "Killing printing....");
 	jl_print_return(jl, "JL_Lib");
 	JL_PRINT_DEBUG(jl, "Killed Printing!");
-	jl_thread_mutex_old(jl, jl->print.mutex);
 }

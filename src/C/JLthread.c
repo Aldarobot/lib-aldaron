@@ -8,6 +8,8 @@
 **/
 #include "JLprivate.h"
 
+#define JL_THREAD_MUTEX_UNLOCKED 255
+
 //
 // Static Functions
 //
@@ -95,15 +97,12 @@ int32_t jl_thread_old(jl_t *jl, uint8_t threadnum) {
 /**
  * Create a mutex ( lock for a thread's access to data )
  * @param jl: The library context.
- * @returns: An SDL mutex
+ * @param mutex: Output mutex.
 **/
-SDL_mutex* jl_thread_mutex_new(jl_t *jl) {
-	SDL_mutex* mutex = SDL_CreateMutex();
-	if (!mutex) {
-		jl_print(jl, "jl_thread_mutex_new: Couldn't create mutex");
-		exit(-1);
-	}
-	return mutex;
+void jl_thread_mutex_new(jl_t *jl, jl_mutex_t* mutex) {
+	mutex->init = 1;
+	mutex->jl = jl;
+	SDL_AtomicSet(&mutex->status, JL_THREAD_MUTEX_UNLOCKED);
 }
 
 /**
@@ -111,11 +110,17 @@ SDL_mutex* jl_thread_mutex_new(jl_t *jl) {
  * @param jl: The library context.
  * @param mutex: The mutex created by jl_thread_mutex_new().
 **/
-void jl_thread_mutex_lock(jl_t *jl, SDL_mutex* mutex) {
-	if (SDL_LockMutex(mutex) != 0) {
-		jl_print(jl, "jl_thread_mutex_use: Couldn't lock mutex");
+void jl_thread_mutex_lock(jl_mutex_t* mutex) {
+	uint8_t current_thread = jl_thread_current(mutex->jl);
+	// Check for redundancy
+	if(SDL_AtomicGet(&mutex->status) == current_thread) {
+		jl_print(mutex->jl, "jl_thread_mutex_lock redundant");
 		exit(-1);
 	}
+	// Wait for mutex to be unlocked
+	while(SDL_AtomicGet(&mutex->status) != JL_THREAD_MUTEX_UNLOCKED);
+	// Lock mutex
+	SDL_AtomicSet(&mutex->status, current_thread);
 }
 
 /**
@@ -123,8 +128,8 @@ void jl_thread_mutex_lock(jl_t *jl, SDL_mutex* mutex) {
  * @param jl: The library context.
  * @param mutex: The mutex created by jl_thread_mutex_new().
 **/
-void jl_thread_mutex_unlock(jl_t *jl, SDL_mutex* mutex) {
-	SDL_UnlockMutex(mutex);
+void jl_thread_mutex_unlock(jl_mutex_t* mutex) {
+	SDL_AtomicSet(&mutex->status, JL_THREAD_MUTEX_UNLOCKED);
 }
 
 /**
@@ -138,24 +143,15 @@ void jl_thread_mutex_unlock(jl_t *jl, SDL_mutex* mutex) {
  * @param size: The size of the data pointed to by "src" and "dst" ( must be the
  *	same)
 **/
-void jl_thread_mutex_cpy(jl_t *jl, SDL_mutex* mutex, void* src, void* dst,
+void jl_thread_mutex_cpy(jl_t *jl, jl_mutex_t* mutex, void* src, void* dst,
 	uint32_t size)
 {
 	// Lock mutex
-	jl_thread_mutex_lock(jl, mutex);
+	jl_thread_mutex_lock(mutex);
 	// Copy data.
 	jl_mem_copyto(src, dst, size);
 	// Give up for other threads
-	jl_thread_mutex_unlock(jl, mutex);
-}
-
-/**
- * Free a mutex from memory.
- * @param jl: The library context.
- * @param mutex: The mutex to free (created by jl_thread_mutex_new())
-**/
-void jl_thread_mutex_old(jl_t* jl, SDL_mutex* mutex) {
-	SDL_DestroyMutex(mutex);
+	jl_thread_mutex_unlock(mutex);
 }
 
 /**
@@ -168,7 +164,7 @@ jl_comm_t* jl_thread_comm_make(jl_t* jl, uint32_t size) {
 	jl_comm_t* comm = jl_memi(jl, sizeof(jl_comm_t));
 	uint8_t i;
 
-	comm->lock = SDL_CreateMutex();
+	jl_thread_mutex_new(jl, &comm->lock);
 	comm->size = size;
 	comm->pnum = 0;
 	for(i = 0; i < 32; i++) {
@@ -189,7 +185,7 @@ jl_comm_t* jl_thread_comm_make(jl_t* jl, uint32_t size) {
  *	jl_thread_comm_new().
 **/
 void jl_thread_comm_send(jl_t* jl, jl_comm_t* comm, const void* src) {
-	jl_thread_mutex_lock(jl, comm->lock);
+	jl_thread_mutex_lock(&comm->lock);
 	// Copy to next packet location
 	jl_mem_copyto(src, comm->data[comm->pnum], comm->size);
 	// Advance number of packets.
@@ -199,7 +195,8 @@ void jl_thread_comm_send(jl_t* jl, jl_comm_t* comm, const void* src) {
 		jl_print(jl, "Error: Other thread wouldn't respond!");
 		exit(-1);
 	}
-	jl_thread_mutex_unlock(jl, comm->lock);
+	jl_print(jl, "comm->pnum %d", comm->pnum);
+	jl_thread_mutex_unlock(&comm->lock);
 }
 
 /**
@@ -211,12 +208,13 @@ void jl_thread_comm_send(jl_t* jl, jl_comm_t* comm, const void* src) {
  *	void*, returns void).
 **/
 void jl_thread_comm_recv(jl_t* jl, jl_comm_t* comm, jl_data_fnct fn) {
-	jl_thread_mutex_lock(jl, comm->lock);
+	jl_thread_mutex_lock(&comm->lock);
 	while(comm->pnum != 0) {
+		jl_print(jl, "PNUM%d", comm->pnum);
 		fn(jl, comm->data[comm->pnum - 1]);
 		comm->pnum--;
 	}
-        jl_thread_mutex_unlock(jl, comm->lock);
+        jl_thread_mutex_unlock(&comm->lock);
 }
 
 /**
@@ -227,8 +225,6 @@ void jl_thread_comm_recv(jl_t* jl, jl_comm_t* comm, jl_data_fnct fn) {
 void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm) {
 	uint8_t i;
 
-	// Free the lock.
-	SDL_DestroyMutex(comm->lock);
 	// Free 16 packets.
 	for(i = 0; i < 32; i++) jl_mem(jl, comm->data[i], 0);
 	// Free main data structure.
@@ -243,7 +239,7 @@ void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm) {
 **/
 void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size) {
 	pvar->jl = jl;
-	pvar->lock = SDL_CreateMutex();
+	jl_thread_mutex_new(jl, &pvar->lock);
 	pvar->data = data ? jl_mem_copy(jl, data, size) : jl_memi(jl, size);
 	pvar->size = size;
 }
@@ -256,7 +252,7 @@ void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size) {
  * @returns: Pointer to safe data to edit.
 **/
 void* jl_thread_pvar_edit(jl_pvar_t* pvar) {
-	jl_thread_mutex_lock(pvar->jl, pvar->lock);
+	jl_thread_mutex_lock(&pvar->lock);
 	return pvar->data;
 }
 
@@ -266,12 +262,11 @@ void* jl_thread_pvar_edit(jl_pvar_t* pvar) {
  * @param data: Pointer to a pointer to pvar's data.
 **/
 void jl_thread_pvar_drop(jl_pvar_t* pvar, void** data) {
-        jl_thread_mutex_unlock(pvar->jl, pvar->lock);
+        jl_thread_mutex_unlock(&pvar->lock);
 	*data = NULL;
 }
 
 void jl_thread_pvar_free(jl_pvar_t* pvar) {
-	SDL_DestroyMutex(pvar->lock);
 	pvar->data = jl_mem(pvar->jl, pvar->data, 0);
 	pvar->size = 0;
 }

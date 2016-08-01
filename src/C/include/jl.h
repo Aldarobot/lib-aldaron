@@ -105,12 +105,12 @@ typedef struct{
 }data_t;
 
 typedef struct{
-	/** Init'd **/
-	uint8_t init;
 	/** Library Context **/
 	void* jl;
 	/** Which thread is locked **/
 	SDL_atomic_t status;
+	/** Test **/
+	uint8_t test;
 }jl_mutex_t;
 
 typedef struct{
@@ -194,6 +194,7 @@ typedef struct{
 	uint8_t mode_switch_skip;
 	//
 	jl_ctx_t jl_ctx[16];
+	jl_wait_t wait;
 	// Program's context.
 	void* prg_context;
 	// Built-in library pointers.
@@ -205,6 +206,7 @@ typedef void(*jl_fnct)(jl_t* jl);
 typedef void(*jl_data_fnct)(jl_t* jl, void* data);
 typedef void(*jl_print_fnt)(jl_t* jl, const char * print);
 
+void jl_exit(jl_t* jl, const char* format, ...);
 void jl_dont(jl_t* jl);
 void* jl_get_context(jl_t* jl);
 int jl_start(jl_fnct fnc_init_, const char* name, uint64_t ctx_size);

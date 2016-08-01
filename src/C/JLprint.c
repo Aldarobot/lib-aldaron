@@ -254,15 +254,15 @@ void jl_print_stacktrace(jl_t* jl) {
 	uint8_t thread_id = jl_thread_current(jl);
 	int i;
 
-	jl_print(jl, "Stacktrace for thread #%d (Most Recent Call Last):",
+	printf("\nStacktrace for thread #%d (Most Recent Call Last):\n",
 		thread_id);
-	jl_thread_mutex_lock(&jl->print.mutex);
+//	jl_thread_mutex_lock(&jl->print.mutex);
 	for(i = 0; i <= jl->jl_ctx[thread_id].print.level; i++) {
-		jl_thread_mutex_unlock(&jl->print.mutex);
-		jl_print(jl, jl->jl_ctx[thread_id].print.stack[i]);
-		jl_thread_mutex_lock(&jl->print.mutex);
+//		jl_thread_mutex_unlock(&jl->print.mutex);
+		printf("\t\"%s\"\n", jl->jl_ctx[thread_id].print.stack[i]);
+//		jl_thread_mutex_lock(&jl->print.mutex);
 	}
-	jl_thread_mutex_unlock(&jl->print.mutex);
+//	jl_thread_mutex_unlock(&jl->print.mutex);
 }
 
 void jl_print_init_thread__(jl_t* jl, uint8_t thread_id) {

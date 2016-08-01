@@ -17,7 +17,7 @@ static void jlgr_loop_(jl_t* jl) {
 	// Run any selected menubar items.
 	jlgr_sprite_loop(jlgr, &jlgr->menubar.menubar);
 	// Update mouse
-	if(jlgr->mouse.mutex.init) jlgr_sprite_loop(jlgr, &jlgr->mouse);
+	if(jlgr->mouse.mutex.jl) jlgr_sprite_loop(jlgr, &jlgr->mouse);
 	// Run Main Loop
 	main_loop_(jl);
 }
@@ -37,7 +37,7 @@ jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 	jlgr_t* jlgr = jl_memi(jl, sizeof(jlgr_t));
 	jlgr_thread_packet_t packet = { JLGR_COMM_INIT, 0, 0, fn_ };
 
-	jl_print_function(jl, "JL/GR/INIT");
+	jl_print_function(jl, "jlgr-init");
 	jl->jlgr = jlgr;
 	jl->loop = jlgr_loop_;
 #if JL_PLAT == JL_PLAT_COMPUTER
@@ -51,14 +51,16 @@ jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 	JL_PRINT_DEBUG(jl, "Initialized CT! / Initializing file viewer....");
 	jlgr_fl_init(jlgr);
 	JL_PRINT_DEBUG(jl, "Initializing file viewer!");
-	jl_print_return(jl, "JL/GR/INIT");
+	jl_print_return(jl, "jlgr-init");
+	jl_print_function(jl, "jlgr-init2");
 	// Create communicators for multi-threading
-	jlgr->comm2draw = jl_thread_comm_make(jl,sizeof(jlgr_thread_packet_t));
+	jlgr->comm2draw = jl_thread_comm_make(jl, sizeof(jlgr_thread_packet_t));
 	jl_thread_wait_init(jl, &jlgr->wait);
 	// Start Drawing thread.
 	jlgr_thread_init(jlgr);
 	// Send graphical Init function
 	jl_thread_comm_send(jl, jlgr->comm2draw, &packet);
+	jl_print_return(jl, "jlgr-init2");
 	return jlgr;
 }
 

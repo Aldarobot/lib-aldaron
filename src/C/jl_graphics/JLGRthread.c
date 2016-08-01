@@ -22,7 +22,7 @@ static void jlgr_thread_resize(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	// Taskbar resize.
 	jlgr_menu_resize_(jlgr);
 	// Mouse resize
-	if(jlgr->mouse.mutex.init) jlgr_sprite_resize(jlgr, &jlgr->mouse, NULL);
+	if(jlgr->mouse.mutex.jl) jlgr_sprite_resize(jlgr, &jlgr->mouse, NULL);
 }
 
 static void jlgr_thread_event(jl_t* jl, void* data) {
@@ -42,16 +42,17 @@ static void jlgr_thread_event(jl_t* jl, void* data) {
 			jlgr->draw.rtn = 1;
 			break;
 		} case JLGR_COMM_SEND: {
-			jl_print(jl, "send update\n");
+			JL_PRINT_DEBUG(jl, "send update");
 			if(packet->x==0) jlgr->draw.redraw.single = packet->fn;
 			if(packet->x==1) jlgr->draw.redraw.upper = packet->fn;
 			if(packet->x==2) jlgr->draw.redraw.lower = packet->fn;
 			if(packet->x==3) {
-				jl_print(jl, "true update\n");
+				JL_PRINT_DEBUG(jl, "true update");
 				jlgr->draw.fn = packet->fn;
 				packet->fn(jl);
-				jl_print(jl, "we update\n");
+				JL_PRINT_DEBUG(jl, "we update");
 			}
+			JL_PRINT_DEBUG(jl, "sent update");
 			break;
 		} default: {
 			break;
@@ -92,6 +93,7 @@ static uint8_t jlgr_thread_draw_event__(jl_t* jl) {
 static void jlgr_thread_draw_init__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
+	jl_print_function(jl, "thead-draw-init");
 	// Initialize subsystems
 	JL_PRINT_DEBUG(jl, "Creating the window....");
 	jl_wm_init__(jlgr);
@@ -121,6 +123,7 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	JL_PRINT_DEBUG(jl, "Sending finish packet....");
 	// Tell main thread to stop waiting.
 	jl_thread_wait_stop(jl, &jlgr->wait);
+	jl_print_return(jl, "thead-draw-init");
 }
 
 void jlgr_thread_send(jlgr_t* jlgr,uint8_t id,uint16_t x,uint16_t y,jl_fnct fn){
@@ -133,6 +136,10 @@ void jlgr_thread_send(jlgr_t* jlgr,uint8_t id,uint16_t x,uint16_t y,jl_fnct fn){
 int jlgr_thread_draw(void* data) {
 	jl_t* jl = data;
 	jlgr_t* jlgr = jl->jlgr;
+
+	jl_thread_wait(jl, &jl->wait);
+
+	jl_print(jl, "THREAD#1=#%d", jl_thread_current(jl));
 
 	// Initialize subsystems
 	jlgr_thread_draw_init__(jl);
@@ -154,9 +161,13 @@ int jlgr_thread_draw(void* data) {
 }
 
 void jlgr_thread_init(jlgr_t* jlgr) {
-	jl_thread_pvar_init(jlgr->jl, &jlgr->pvar, NULL, sizeof(jlgr_pvar_t));
-	jlgr->thread = jl_thread_new(jlgr->jl, "JL_Lib/Graphics",
+	jl_t* jl = jlgr->jl;
+
+	jl_print_function(jl, "jl-thread-init");
+	jl_thread_pvar_init(jl, &jlgr->pvar, NULL, sizeof(jlgr_pvar_t));
+	jlgr->thread = jl_thread_new(jl, "JL_Lib/Graphics",
 		jlgr_thread_draw);
+	jl_print_return(jl, "jl-thread-init");
 }
 
 void jlgr_thread_kill(jlgr_t* jlgr) {

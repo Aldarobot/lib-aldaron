@@ -91,6 +91,20 @@ void main_loop_(jl_t* jl) {
 // EXPORT FUNCTIONS
 
 /**
+ * Exit The program on an error.
+**/
+void jl_exit(jl_t* jl, const char* format, ...) {
+	va_list arglist;
+
+	va_start( arglist, format );
+	printf( format, arglist );
+	va_end( arglist );
+
+	jl_print_stacktrace(jl);
+	exit(-1);
+}
+
+/**
  * Do Nothing
  * @param jl: The library's context.
 **/

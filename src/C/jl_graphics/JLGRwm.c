@@ -141,12 +141,14 @@ void jl_wm_resz__(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 }
 
 void jl_wm_init__(jlgr_t* jlgr) {
+	jl_print_function(jlgr->jl, "wm-init");
 	// Create Window
 	jlgr_wm_create__(jlgr);
 	// Get Resize Event
 	jl_ct_quickloop_(jlgr);
 	// Get Window Size
 	jl_wm_updatewh_(jlgr);
+	jl_print_return(jlgr->jl, "wm-init");
 }
 
 void jl_wm_kill__(jlgr_t* jlgr) {

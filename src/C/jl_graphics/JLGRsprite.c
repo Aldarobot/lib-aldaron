@@ -11,24 +11,34 @@
 static void jlgr_sprite_draw_to_pr__(jl_t *jl) {
 	jl_sprite_t *sprite = jl_mem_temp(jl, NULL);
 
+	jl_print_function(jl, "sprite->draw");
 	((jlgr_sprite_draw_fnt)sprite->draw)(jl, 1, sprite->ctx_draw);
+	jl_print_return(jl, "sprite->draw");
 }
 
 static void jlgr_sprite_redraw_tex__(jlgr_t* jlgr, jl_sprite_t *spr) {
+	jl_print_function(jlgr->jl, "RedrawSpriteTex");
+	jl_thread_mutex_lock(&spr->mutex);
 	jl_mem_temp(jlgr->jl, spr);
 	jlgr_pr(jlgr, &spr->pr, jlgr_sprite_draw_to_pr__);
+	jl_thread_mutex_unlock(&spr->mutex);
+	jl_print_return(jlgr->jl, "RedrawSpriteTex");
 }
 
 // Redraw a sprite
 static inline void jlgr_sprite_redraw__(jlgr_t* jlgr, jl_sprite_t *spr) {
-	jl_print_function(jlgr->jl, "Sprite Redraw!");
+	jl_print_function(jlgr->jl, "RedrawSprite");
 	// If pre-renderer hasn't been intialized, initialize & redraw.
 	if(!spr->pr.tx) jlgr_sprite_resize(jlgr, spr, NULL);
 	// Else, Redraw texture.
 	else jlgr_sprite_redraw_tex__(jlgr, spr);
+	jl_print_return(jlgr->jl, "RedrawSprite");
+	jl_print_function(jlgr->jl, "redraw-update");
 	// Don't Redraw Again.
+	jl_thread_mutex_lock(&spr->mutex);
 	spr->update = 0;
-	jl_print_return(jlgr->jl, "Sprite Redraw!");
+	jl_thread_mutex_unlock(&spr->mutex);
+	jl_print_return(jlgr->jl, "redraw-update");
 }
 
 static inline void jlgr_sprite_sync__(jl_t* jl, jl_sprite_t *spr, void* ctx) {
@@ -73,14 +83,14 @@ void jlgr_sprite_redraw(jlgr_t* jlgr, jl_sprite_t *spr, void* ctx) {
  * @param spr: The sprite.
 **/
 void jlgr_sprite_draw(jlgr_t* jlgr, jl_sprite_t *spr) {
-	jl_print_function(jlgr->jl, "Sprite Draw!");
-	jl_thread_mutex_lock(&spr->mutex);
-
 	// Redraw if needed.
 	if(spr->update) jlgr_sprite_redraw__(jlgr, spr);
+	// Draw onto screen
+	jl_print_function(jlgr->jl, "sprite-draw");
+	jl_thread_mutex_lock(&spr->mutex);
 	jlgr_pr_draw(jlgr, &spr->pr, &spr->pr.cb.pos, spr->rs);
 	jl_thread_mutex_unlock(&spr->mutex);
-	jl_print_return(jlgr->jl, "Sprite Draw!");
+	jl_print_return(jlgr->jl, "sprite-draw");
 }
 
 /**
@@ -90,6 +100,8 @@ void jlgr_sprite_draw(jlgr_t* jlgr, jl_sprite_t *spr) {
  * @param spr: The sprite to use.
 **/
 void jlgr_sprite_resize(jlgr_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc) {
+	jl_print_function(jlgr->jl, "sprite-resize");
+	jl_thread_mutex_lock(&spr->mutex);
 	if(rc) {
 		// Set collision box.
 		spr->pr.cb.pos.x = rc->x; spr->pr.cb.pos.y = rc->y;
@@ -100,10 +112,12 @@ void jlgr_sprite_resize(jlgr_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc) {
 	}
 	// Resize
 	jlgr_pr_resize(jlgr, &spr->pr, spr->rw, spr->rh, jl_gl_w(jlgr) * spr->rw);
+	//
+	jl_thread_mutex_unlock(&spr->mutex);
 	// Redraw
 	jlgr_sprite_redraw_tex__(jlgr, spr);
 	//
-	jl_thread_mutex_unlock(&spr->mutex);
+	jl_print_return(jlgr->jl, "sprite-resize");
 }
 
 /**
@@ -136,6 +150,9 @@ void jlgr_sprite_init(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	void* main_ctx, uint32_t main_ctx_size,
 	void* draw_ctx, uint32_t draw_ctx_size)
 {
+	jl_t* jl = jlgr->jl;
+
+	jl_print_function(jl, "sprite-init");
 	// Set real dimensions
 	sprite->rw = rc.w;
 	sprite->rh = rc.h;
@@ -149,15 +166,16 @@ void jlgr_sprite_init(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	// Set loop
 	sprite->loop = loopfn;
 	// Make mutex
-	jl_thread_mutex_new(jlgr->jl, &sprite->mutex);
+	jl_thread_mutex_new(jl, &sprite->mutex);
 	// Create main context.
 	if(main_ctx_size)
-		sprite->ctx_main = jl_mem_copy(jlgr->jl, main_ctx, main_ctx_size);
+		sprite->ctx_main = jl_mem_copy(jl, main_ctx, main_ctx_size);
 	// Create draw context
 	if(draw_ctx_size)
-		sprite->ctx_draw = jl_mem_copy(jlgr->jl, draw_ctx, draw_ctx_size);
+		sprite->ctx_draw = jl_mem_copy(jl, draw_ctx, draw_ctx_size);
 	sprite->ctx_draw_size = draw_ctx_size;
 	sprite->rs = 0;
+	jl_print_return(jl, "sprite-init");
 }
 
 /**

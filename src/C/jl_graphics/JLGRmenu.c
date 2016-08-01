@@ -208,7 +208,7 @@ static void jlgr_menu_slow_loop__(jlgr_t* jlgr, jlgr_input_t input) {
 }
 
 void jlgr_menu_resize_(jlgr_t* jlgr) {
-	if(jlgr->menubar.menubar.mutex.init) {
+	if(jlgr->menubar.menubar.mutex.jl) {
 		jl_menu_draw_t* menu_draw =
 			jlgr_sprite_getdrawctx(&jlgr->menubar.menubar);
 		menu_draw->cursor = -1;

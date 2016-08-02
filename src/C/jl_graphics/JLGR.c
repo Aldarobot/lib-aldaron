@@ -73,15 +73,20 @@ void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 	jl_fnct downscreen, jl_fnct resize)
 {
 	// Wait for drawing thread to initialize, if not initialized already.
+	printf("THREAD-WAIT\n");
 	jl_thread_wait(jlgr->jl, &jlgr->wait);
 
+	printf("THREAD-EDIT\n");
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+	printf("THREAD-EDIT'ing\n");
 	pjlgr->functions.redraw.single = onescreen;
 	pjlgr->functions.redraw.upper = upscreen;
 	pjlgr->functions.redraw.lower = downscreen;
 	pjlgr->functions.redraw.resize = resize;
 	pjlgr->needs_resize = 1;
+	printf("THREAD-DROP\n");
 	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	printf("THREAD-DROP'ing\n");
 }
 
 /**

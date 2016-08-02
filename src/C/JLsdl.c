@@ -9,7 +9,7 @@
  * Time things up to a second.
  * @param jl: The library context.
  * @param timer: Pointer to timer variable.
- * @returns: Seconds passed.
+ * @returns: Seconds passed since last call.
 **/
 double jl_sdl_timer(jl_t* jl, double* timer) {
 	double prev_tick = *timer; // Temporarily Save Old Value

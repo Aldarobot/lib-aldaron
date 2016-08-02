@@ -88,6 +88,7 @@ void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 		packet = (jlgr_thread_packet_t) {
 			JLGR_COMM_SEND, i, 0, redraw[i]
 		};
+		jl_print(jlgr->jl, "send mode update");
 		jl_thread_comm_send(jlgr->jl, jlgr->comm2draw, &packet);
 	}
 }

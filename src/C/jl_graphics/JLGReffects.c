@@ -190,7 +190,7 @@ static void jlgr_effect_pr_light__(jl_t* jl) {
 }
 
 static void jlgr_effects_light_clear__(jl_t* jl) {
-	jl_gl_clear(jl->jlgr, 0.f, 0.f, 0.f, 1.f);
+	jl_gl_clear(jl->jlgr, 0.f, 0.f, 0.f, 0.f);
 }
 
 static void jlgr_effects_light_aa__(jl_t* jl) {

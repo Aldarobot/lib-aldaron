@@ -312,6 +312,11 @@ typedef struct{
 		float timeTilVanish;
 		char message[256];
 	} notification;
+
+	struct {
+		jl_fnct fn;
+		jlgr_redraw_t redraw;
+	} functions;
 }jlgr_pvar_t;
 
 // jlgr_effects/types
@@ -378,8 +383,6 @@ typedef struct{
 
 	struct {
 		uint8_t rtn;
-		jl_fnct fn;
-		jlgr_redraw_t redraw;
 	}draw;
 
 	// Window Info

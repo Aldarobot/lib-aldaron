@@ -143,8 +143,10 @@ static void jl_sg_draw_up(jl_t* jl, uint8_t resize, void* data) {
 	// Clear the screen.
 	jl_gl_clear(jl->jlgr, 0., .5, .66, 1.);
 	// Run the screen's redraw function
-	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)jlgr->draw.redraw.lower)(jl) :
-		((jl_fnct)jlgr->draw.redraw.upper)(jl);
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)pjlgr->functions.redraw.lower)(jl) :
+		((jl_fnct)pjlgr->functions.redraw.upper)(jl);
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 	jl_print_return(jlgr->jl, "sg-draw-up");
 }
 
@@ -156,8 +158,10 @@ static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
 	jl_gl_clear(jlgr, 1., .5, 0., 1.);
 	// Run the screen's redraw function
 	JL_PRINT_DEBUG(jlgr->jl, "Screen's Redraw Function");
-	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)jlgr->draw.redraw.upper)(jl) :
-		((jl_fnct)jlgr->draw.redraw.lower)(jl);
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)pjlgr->functions.redraw.upper)(jl) :
+		((jl_fnct)pjlgr->functions.redraw.lower)(jl);
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 	JL_PRINT_DEBUG(jlgr->jl, "Menubar & Mouse");
 	// Draw Menu Bar & Mouse
 	_jlgr_loopa(jl->jlgr);
@@ -239,7 +243,9 @@ void jl_sg_init__(jlgr_t* jlgr) {
 
 	jl_print_function(jl, "sg-init");
 	// Initialize redraw routines to do nothing.
-	jlgr->draw.redraw = (jlgr_redraw_t){jl_dont, jl_dont, jl_dont, jl_dont};
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+	pjlgr->functions.redraw = (jlgr_redraw_t){jl_dont, jl_dont, jl_dont, jl_dont};
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 	// Create upper and lower screens
 	jlgr_sprite_init(jlgr, &jlgr->sg.bg.up, rc,
 		jlgr_sprite_dont, jl_sg_draw_up, NULL, 0, NULL, 0);

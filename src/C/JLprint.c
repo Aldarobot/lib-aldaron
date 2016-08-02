@@ -9,6 +9,7 @@
 **/
 
 #include "JLprivate.h"
+#include <assert.h>
 
 static void _jl_print_current(jl_t *jl, uint8_t thread_id) {
 	int i;
@@ -248,7 +249,7 @@ void jl_print_return(jl_t* jl, const char* fn_name) {
 }
 
 /**
- * Print out a stacktrace.
+ * Print out a stacktrace & Quit.
  * @param jl: The libary context.
 **/
 void jl_print_stacktrace(jl_t* jl) {
@@ -260,7 +261,7 @@ void jl_print_stacktrace(jl_t* jl) {
 	for(i = 0; i <= jl->jl_ctx[thread_id].print.level; i++) {
 		printf("\t\"%s\"\n", jl->jl_ctx[thread_id].print.stack[i]);
 	}
-	exit(-1);
+	assert(0);
 }
 
 void jl_print_init_thread__(jl_t* jl, uint8_t thread_id) {

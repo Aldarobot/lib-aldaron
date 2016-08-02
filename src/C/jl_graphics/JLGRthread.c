@@ -9,7 +9,9 @@
 #include "JLGRprivate.h"
 
 static void jlgr_thread_programsresize(jlgr_t* jlgr) {
-	jl_fnct resize_ = jlgr->draw.redraw.resize;
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+	jl_fnct resize_ = pjlgr->functions.redraw.resize;
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 	resize_(jlgr->jl);
 }
 
@@ -43,15 +45,17 @@ static void jlgr_thread_event(jl_t* jl, void* data) {
 			break;
 		} case JLGR_COMM_SEND: {
 			JL_PRINT_DEBUG(jl, "send update");
-			if(packet->x==0) jlgr->draw.redraw.single = packet->fn;
-			if(packet->x==1) jlgr->draw.redraw.upper = packet->fn;
-			if(packet->x==2) jlgr->draw.redraw.lower = packet->fn;
+			jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+			if(packet->x==0) pjlgr->functions.redraw.single = packet->fn;
+			if(packet->x==1) pjlgr->functions.redraw.upper = packet->fn;
+			if(packet->x==2) pjlgr->functions.redraw.lower = packet->fn;
 			if(packet->x==3) {
 				JL_PRINT_DEBUG(jl, "true update");
-				jlgr->draw.fn = packet->fn;
-				packet->fn(jl);
+				pjlgr->functions.fn = packet->fn;
 				JL_PRINT_DEBUG(jl, "we update");
 			}
+			jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+			if(packet->x==3) packet->fn(jl);
 			JL_PRINT_DEBUG(jl, "sent update");
 			break;
 		} default: {
@@ -73,7 +77,9 @@ static void jlgr_thread_resize_event(jl_t* jl, void* data) {
 			jl_wm_resz__(jlgr, w, h);
 			break;
 		} case JLGR_COMM_INIT: {
-			jlgr->draw.fn = packet->fn;
+			jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+			pjlgr->functions.fn = packet->fn;
+			jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 			jlgr->draw.rtn = 2;
 			break;
 		} default: {
@@ -117,7 +123,11 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 		jl_thread_comm_recv(jl, jlgr->comm2draw,
 			jlgr_thread_resize_event);
 	}
-	jlgr->draw.fn(jl);
+	jl_fnct program_init_;
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+	program_init_ =  pjlgr->functions.fn;
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	program_init_(jl);
 	jlgr_thread_resize(jlgr, jlgr_wm_getw(jlgr), jlgr_wm_geth(jlgr));
 	jlgr_wm_setwindowname(jlgr, jl->name);
 	JL_PRINT_DEBUG(jl, "Sending finish packet....");

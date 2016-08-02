@@ -158,7 +158,6 @@ static void jl_print_function__(jl_t* jl,const char* fn_name,uint8_t thread_id){
 */
 void jl_print(jl_t* jl, const char* format, ... ) {
 	char temp[256];
-	jl_thread_mutex_lock(&jl->print.mutex);
 
 	uint8_t thread_id = jl_thread_current(jl);
 	jl_print_fnt print_out_ = jl->print.printfn;
@@ -168,7 +167,9 @@ void jl_print(jl_t* jl, const char* format, ... ) {
 	va_start( arglist, format );
 	vsprintf( temp, format, arglist );
 	va_end( arglist );
+
 	// Check to see if too many blocks are open.
+	jl_thread_mutex_lock(&jl->print.mutex);
 	jl_print_test_overreach(jl, thread_id);
 	// Print out.
 	if(jl->print.bkspc) JL_PRINT("\r                                       "
@@ -181,7 +182,6 @@ void jl_print(jl_t* jl, const char* format, ... ) {
 void jl_print_rewrite(jl_t* jl, const char* format, ... ) {
 	char temp[256];
 	char print[80];
-	jl_thread_mutex_lock(&jl->print.mutex);
 
 	uint8_t thread_id = jl_thread_current(jl);
 	va_list arglist;
@@ -191,6 +191,7 @@ void jl_print_rewrite(jl_t* jl, const char* format, ... ) {
 	vsprintf( temp, format, arglist );
 	va_end( arglist );
 	// Check to see if too many blocks are open.
+	jl_thread_mutex_lock(&jl->print.mutex);
 	jl_print_test_overreach(jl, thread_id);
 	// Print out.
 	if(jl->print.bkspc) JL_PRINT("\r");
@@ -256,13 +257,10 @@ void jl_print_stacktrace(jl_t* jl) {
 
 	printf("\nStacktrace for thread #%d (Most Recent Call Last):\n",
 		thread_id);
-//	jl_thread_mutex_lock(&jl->print.mutex);
 	for(i = 0; i <= jl->jl_ctx[thread_id].print.level; i++) {
-//		jl_thread_mutex_unlock(&jl->print.mutex);
 		printf("\t\"%s\"\n", jl->jl_ctx[thread_id].print.stack[i]);
-//		jl_thread_mutex_lock(&jl->print.mutex);
 	}
-//	jl_thread_mutex_unlock(&jl->print.mutex);
+	exit(-1);
 }
 
 void jl_print_init_thread__(jl_t* jl, uint8_t thread_id) {

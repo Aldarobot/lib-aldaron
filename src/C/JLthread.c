@@ -116,10 +116,9 @@ int32_t jl_thread_old(jl_t *jl, uint8_t threadnum) {
  * @param mutex: Output mutex.
 **/
 void jl_thread_mutex_new(jl_t *jl, jl_mutex_t* mutex) {
-	printf("jl_thread_mutex_new %p\n", jl);
 	mutex->jl = jl;
-	mutex->test = 123;
-	SDL_AtomicSet(&mutex->status, JL_THREAD_MUTEX_UNLOCKED);
+	mutex->mutex = SDL_CreateMutex();
+	mutex->thread_id = JL_THREAD_MUTEX_UNLOCKED;
 }
 
 /**
@@ -128,24 +127,19 @@ void jl_thread_mutex_new(jl_t *jl, jl_mutex_t* mutex) {
  * @param mutex: The mutex created by jl_thread_mutex_new().
 **/
 void jl_thread_mutex_lock(jl_mutex_t* mutex) {
+	uint8_t current_thread = jl_thread_current(mutex->jl);
+
 	// Test if mutex is uninit'd
 #if JL_DEBUG
-	if(!mutex || !mutex->jl || mutex->test != 123) {
+	if(!mutex || !mutex->jl) {
 		jl_exit(mutex->jl, "Mutex is uninit'd\n");
 	}
 #endif
-	uint8_t current_thread = jl_thread_current(mutex->jl);
-#if JL_DEBUG
-//	printf("%d jl_thread_mutex_lock %p\n", current_thread, mutex);
-#endif
-	// Check for redundancy
-	if(SDL_AtomicGet(&mutex->status) == current_thread) {
+	SDL_LockMutex(mutex->mutex);
+	if(mutex->thread_id == current_thread) {
 		jl_exit(mutex->jl, "jl_thread_mutex_lock redundant\n");
 	}
-	// Wait for mutex to be unlocked
-	while(SDL_AtomicGet(&mutex->status) != JL_THREAD_MUTEX_UNLOCKED);
-	// Lock mutex
-	SDL_AtomicSet(&mutex->status, current_thread);
+	mutex->thread_id = current_thread;
 }
 
 /**
@@ -160,16 +154,11 @@ void jl_thread_mutex_unlock(jl_mutex_t* mutex) {
 		jl_exit(mutex->jl, "Mutex is uninit'd\n");
 	}
 #endif
-#if JL_DEBUG
-//	printf("%d jl_thread_mutex_unlock %p\n",
-//		jl_thread_current(mutex->jl), mutex);
-#endif
-	// Check for redundancy
-//	if(SDL_AtomicGet(&mutex->status) == JL_THREAD_MUTEX_UNLOCKED) {
-//		jl_exit(mutex->jl, "jl_thread_mutex_unlock redundant\n");
-//	}
-	// Unlock mutex
-	SDL_AtomicSet(&mutex->status, JL_THREAD_MUTEX_UNLOCKED);
+	if(mutex->thread_id == JL_THREAD_MUTEX_UNLOCKED) {
+		jl_exit(mutex->jl, "jl_thread_mutex_unlock redundant\n");
+	}
+	mutex->thread_id = JL_THREAD_MUTEX_UNLOCKED;
+	SDL_UnlockMutex(mutex->mutex);
 }
 
 /**
@@ -189,8 +178,7 @@ void jl_thread_mutex_cpy(jl_t *jl, jl_mutex_t* mutex, void* src, void* dst,
 	// Test if mutex is uninit'd
 #if JL_DEBUG
 	if(!mutex || !mutex->jl) {
-		printf("Mutex is uninit'd\n");
-		exit(-1);
+		jl_exit(mutex->jl, "Mutex is uninit'd\n");
 	}
 #endif
 	// Lock mutex

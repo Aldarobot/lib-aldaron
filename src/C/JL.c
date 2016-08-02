@@ -1,4 +1,5 @@
 #include "JLprivate.h"
+#include <assert.h>
 
 #if JL_PLAT == JL_PLAT_PHONE
 	#include <jni.h>
@@ -101,7 +102,7 @@ void jl_exit(jl_t* jl, const char* format, ...) {
 	va_end( arglist );
 
 	jl_print_stacktrace(jl);
-	exit(-1);
+	assert(0);
 }
 
 /**

@@ -18,11 +18,15 @@ static void jlgr_sprite_draw_to_pr__(jl_t *jl) {
 
 static void jlgr_sprite_redraw_tex__(jlgr_t* jlgr, jl_sprite_t *spr) {
 	jl_print_function(jlgr->jl, "RedrawSpriteTex");
-	jl_thread_mutex_lock(&spr->mutex);
 	jl_mem_temp(jlgr->jl, spr);
+	JL_PRINT_DEBUG(jlgr->jl, "lock");
+	jl_thread_mutex_lock(&spr->mutex);
+	JL_PRINT_DEBUG(jlgr->jl, "lock'd");
 	jlgr_pr(jlgr, &spr->pr, jlgr_sprite_draw_to_pr__);
+	JL_PRINT_DEBUG(jlgr->jl, "Unlock");
 	jl_thread_mutex_unlock(&spr->mutex);
 	jl_print_return(jlgr->jl, "RedrawSpriteTex");
+	JL_PRINT_DEBUG(jlgr->jl, "Unlock'd");
 }
 
 // Redraw a sprite

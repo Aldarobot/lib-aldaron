@@ -107,10 +107,10 @@ typedef struct{
 typedef struct{
 	/** Library Context **/
 	void* jl;
-	/** Which thread is locked **/
-	SDL_atomic_t status;
-	/** Test **/
-	uint8_t test;
+	/** Mutex **/
+	SDL_mutex* mutex;
+	/** Thread **/
+	uint8_t thread_id;
 }jl_mutex_t;
 
 typedef struct{

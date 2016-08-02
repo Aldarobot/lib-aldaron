@@ -155,8 +155,10 @@ static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
 	// Clear the screen.
 	jl_gl_clear(jlgr, 1., .5, 0., 1.);
 	// Run the screen's redraw function
+	JL_PRINT_DEBUG(jlgr->jl, "Screen's Redraw Function");
 	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)jlgr->draw.redraw.upper)(jl) :
 		((jl_fnct)jlgr->draw.redraw.lower)(jl);
+	JL_PRINT_DEBUG(jlgr->jl, "Menubar & Mouse");
 	// Draw Menu Bar & Mouse
 	_jlgr_loopa(jl->jlgr);
 	jl_print_return(jlgr->jl, "sg-draw-dn");

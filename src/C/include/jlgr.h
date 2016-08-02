@@ -317,6 +317,10 @@ typedef struct{
 		jl_fnct fn;
 		jlgr_redraw_t redraw;
 	} functions;
+
+	uint8_t needs_resize;
+	uint16_t set_width;
+	uint16_t set_height;
 }jlgr_pvar_t;
 
 // jlgr_effects/types
@@ -332,9 +336,10 @@ typedef struct{
 	jl_sprite_t mouse; // Sprite to represent mouse pointer
 
 	uint8_t thread; // Graphical Thread ID.
-	jl_comm_t* comm2draw; // thread communication variable.
 	jl_wait_t wait;
 	jl_pvar_t pvar; // Protected context.
+
+	SDL_atomic_t running;
 
 	struct{
 		jlgr_input_t input;
@@ -380,10 +385,6 @@ typedef struct{
 			uint8_t current_event;
 		}ct;
 	}main;
-
-	struct {
-		uint8_t rtn;
-	}draw;
 
 	// Window Info
 	struct {

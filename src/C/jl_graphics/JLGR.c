@@ -35,7 +35,6 @@ static void jlgr_loop_(jl_t* jl) {
 **/
 jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 	jlgr_t* jlgr = jl_memi(jl, sizeof(jlgr_t));
-	jlgr_thread_packet_t packet = { JLGR_COMM_INIT, 0, 0, fn_ };
 
 	jl_print_function(jl, "jlgr-init");
 	jl->jlgr = jlgr;
@@ -54,12 +53,9 @@ jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 	jl_print_return(jl, "jlgr-init");
 	jl_print_function(jl, "jlgr-init2");
 	// Create communicators for multi-threading
-	jlgr->comm2draw = jl_thread_comm_make(jl, sizeof(jlgr_thread_packet_t));
 	jl_thread_wait_init(jl, &jlgr->wait);
 	// Start Drawing thread.
-	jlgr_thread_init(jlgr);
-	// Send graphical Init function
-	jl_thread_comm_send(jl, jlgr->comm2draw, &packet);
+	jlgr_thread_init(jlgr, fn_);
 	jl_print_return(jl, "jlgr-init2");
 	return jlgr;
 }
@@ -78,19 +74,14 @@ void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 {
 	// Wait for drawing thread to initialize, if not initialized already.
 	jl_thread_wait(jlgr->jl, &jlgr->wait);
-	//
-	jl_fnct redraw[4] = { onescreen, upscreen, downscreen, resize };
-	jlgr_thread_packet_t packet;
-	int i;
 
-	// 
-	for(i = 0; i < 4; i++) {
-		packet = (jlgr_thread_packet_t) {
-			JLGR_COMM_SEND, i, 0, redraw[i]
-		};
-		jl_print(jlgr->jl, "send mode update");
-		jl_thread_comm_send(jlgr->jl, jlgr->comm2draw, &packet);
-	}
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+	pjlgr->functions.redraw.single = onescreen;
+	pjlgr->functions.redraw.upper = upscreen;
+	pjlgr->functions.redraw.lower = downscreen;
+	pjlgr->functions.redraw.resize = resize;
+	pjlgr->needs_resize = 1;
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 }
 
 /**
@@ -98,7 +89,11 @@ void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
  * @param jlgr: The library context.
 **/
 void jlgr_resz(jlgr_t* jlgr, uint16_t w, uint16_t h) {
-	jlgr_thread_send(jlgr, JLGR_COMM_RESIZE, w, h, NULL);
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+	pjlgr->needs_resize = 2;
+	pjlgr->set_width = w;
+	pjlgr->set_height = h;
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 }
 
 /**
@@ -106,10 +101,8 @@ void jlgr_resz(jlgr_t* jlgr, uint16_t w, uint16_t h) {
  * @param jlgr: The jlgr library context.
 **/
 void jlgr_kill(jlgr_t* jlgr) {
-	jlgr_thread_packet_t packet = { JLGR_COMM_KILL, 0, 0, NULL };
-
 	JL_PRINT_DEBUG(jlgr->jl, "Sending Kill to threads....");
-	jl_thread_comm_send(jlgr->jl, jlgr->comm2draw, &packet);
+	SDL_AtomicSet(&jlgr->running, 0);
 	JL_PRINT_DEBUG(jlgr->jl, "Waiting on threads....");
 	jlgr_thread_kill(jlgr); // Shut down thread.
 	JL_PRINT_DEBUG(jlgr->jl, "Threads are dead....");

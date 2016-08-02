@@ -27,73 +27,17 @@ static void jlgr_thread_resize(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	if(jlgr->mouse.mutex.jl) jlgr_sprite_resize(jlgr, &jlgr->mouse, NULL);
 }
 
-static void jlgr_thread_event(jl_t* jl, void* data) {
-	jlgr_t* jlgr = jl->jlgr;
-	jlgr_thread_packet_t* packet = data;
+static void jlgr_thread_windowresize(jlgr_t* jlgr) {
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+	uint16_t w = pjlgr->set_width;
+	uint16_t h = pjlgr->set_height;
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 
-	switch(packet->id) {
-		case JLGR_COMM_RESIZE: {
-			jl_wm_updatewh_(jlgr);
-			if(packet->x == 0) packet->x = jlgr_wm_getw(jlgr);
-			if(packet->y == 0) packet->y = jlgr_wm_geth(jlgr);
-			jlgr_thread_resize(jlgr, packet->x, packet->y);
-			jlgr_thread_programsresize(jlgr);
-			break;
-		} case JLGR_COMM_KILL: {
-			JL_PRINT_DEBUG(jl, "Thread exiting....");
-			jlgr->draw.rtn = 1;
-			break;
-		} case JLGR_COMM_SEND: {
-			JL_PRINT_DEBUG(jl, "send update");
-			jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-			if(packet->x==0) pjlgr->functions.redraw.single = packet->fn;
-			if(packet->x==1) pjlgr->functions.redraw.upper = packet->fn;
-			if(packet->x==2) pjlgr->functions.redraw.lower = packet->fn;
-			if(packet->x==3) {
-				JL_PRINT_DEBUG(jl, "true update");
-				pjlgr->functions.fn = packet->fn;
-				JL_PRINT_DEBUG(jl, "we update");
-			}
-			jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
-			if(packet->x==3) packet->fn(jl);
-			JL_PRINT_DEBUG(jl, "sent update");
-			break;
-		} default: {
-			break;
-		}
-	}
-}
-
-static void jlgr_thread_resize_event(jl_t* jl, void* data) {
-	jlgr_t* jlgr = jl->jlgr;
-	jlgr_thread_packet_t* packet = data;
-
-	switch(packet->id) {
-		case JLGR_COMM_RESIZE: {
-			uint16_t w = packet->x;
-			uint16_t h = packet->y;
-			JL_PRINT_DEBUG(jlgr->jl, "Resizing to %dx%d....", w, h);
-			// Set window size & aspect ratio stuff.
-			jl_wm_resz__(jlgr, w, h);
-			break;
-		} case JLGR_COMM_INIT: {
-			jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-			pjlgr->functions.fn = packet->fn;
-			jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
-			jlgr->draw.rtn = 2;
-			break;
-		} default: {
-			break;
-		}
-	}
-}
-
-static uint8_t jlgr_thread_draw_event__(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
-	jlgr->draw.rtn = 0;
-
-	jl_thread_comm_recv(jl, jlgr->comm2draw, jlgr_thread_event);
-	return jlgr->draw.rtn;
+	jl_wm_updatewh_(jlgr);
+	if(w == 0) w = jlgr_wm_getw(jlgr);
+	if(h == 0) h = jlgr_wm_geth(jlgr);
+	jlgr_thread_resize(jlgr, w, h);
+	jlgr_thread_programsresize(jlgr);
 }
 
 static void jlgr_thread_draw_init__(jl_t* jl) {
@@ -118,14 +62,11 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	JL_PRINT_DEBUG(jl, "Creating Mouse sprite....");
 	jlgr_mouse_init__(jlgr);
 	JL_PRINT_DEBUG(jl, "User's Init....");
-	jlgr->draw.rtn = 0;
-	while(jlgr->draw.rtn != 2) {
-		jl_thread_comm_recv(jl, jlgr->comm2draw,
-			jlgr_thread_resize_event);
-	}
+	SDL_AtomicSet(&jlgr->running, 1);
 	jl_fnct program_init_;
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	program_init_ =  pjlgr->functions.fn;
+	pjlgr->needs_resize = 1;
+	program_init_ = pjlgr->functions.fn;
 	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 	program_init_(jl);
 	jlgr_thread_resize(jlgr, jlgr_wm_getw(jlgr), jlgr_wm_geth(jlgr));
@@ -136,11 +77,17 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	jl_print_return(jl, "thead-draw-init");
 }
 
-void jlgr_thread_send(jlgr_t* jlgr,uint8_t id,uint16_t x,uint16_t y,jl_fnct fn){
-	jlgr_thread_packet_t packet = { id, x, y, fn };
+void jlgr_thead_check_resize(jlgr_t* jlgr) {
+	uint8_t should_resize;
+	jlgr_pvar_t* pjlgr;
 
-	// Send resize packet.
-	jl_thread_comm_send(jlgr->jl, jlgr->comm2draw, &packet);
+	pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+	should_resize = pjlgr->needs_resize;
+	pjlgr->needs_resize = 0;
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+
+	if(should_resize == 1) jlgr_thread_programsresize(jlgr);
+	if(should_resize == 2) jlgr_thread_windowresize(jlgr);
 }
 
 int jlgr_thread_draw(void* data) {
@@ -154,9 +101,9 @@ int jlgr_thread_draw(void* data) {
 	// Initialize subsystems
 	jlgr_thread_draw_init__(jl);
 	// Redraw loop
-	while(1) {
-		// Check for events.
-		if(jlgr_thread_draw_event__(jl)) break;
+	while(SDL_AtomicGet(&jlgr->running)) {
+		// Check for resize
+		jlgr_thead_check_resize(jlgr);
 		// Deselect any pre-renderer.
 		jlgr->gl.cp = NULL;
 		//Redraw screen.
@@ -170,11 +117,16 @@ int jlgr_thread_draw(void* data) {
 	return 0;
 }
 
-void jlgr_thread_init(jlgr_t* jlgr) {
+void jlgr_thread_init(jlgr_t* jlgr, jl_fnct fn_) {
 	jl_t* jl = jlgr->jl;
 
 	jl_print_function(jl, "jl-thread-init");
 	jl_thread_pvar_init(jl, &jlgr->pvar, NULL, sizeof(jlgr_pvar_t));
+	// Set init function
+	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+	pjlgr->functions.fn = fn_;
+	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	// Start thread
 	jlgr->thread = jl_thread_new(jl, "JL_Lib/Graphics",
 		jlgr_thread_draw);
 	jl_print_return(jl, "jl-thread-init");

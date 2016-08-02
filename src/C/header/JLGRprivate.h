@@ -32,15 +32,6 @@ typedef enum{
 	JLGR_ID_TASK_MAX //how many taskbuttons
 }jlgr_id_t;
 
-typedef enum{
-	JLGR_COMM_NONE,		/** Does nothing */
-	JLGR_COMM_RESIZE,	/** main --> draw: Resize the drawing screen */
-	JLGR_COMM_KILL,		/** main --> draw: Close the window*/
-	JLGR_COMM_INIT,		/** main --> draw: Send program's init func. */
-	JLGR_COMM_SEND,		/** main --> draw: Send redraw func.'s */
-	JLGR_COMM_NOTIFY,	/** main --> draw: Draw a notification */
-}jlgr_thread_asdf_t;
-
 typedef struct{
 	uint8_t id;
 	char string[256];
@@ -83,7 +74,7 @@ void jl_ct_init__(jlgr_t* jlgr);
 void jlgr_fl_init(jlgr_t* jlgr);
 void jlgr_menubar_init__(jlgr_t* jlgr);
 void jlgr_mouse_init__(jlgr_t* jlgr);
-void jlgr_thread_init(jlgr_t* jlgr);
+void jlgr_thread_init(jlgr_t* jlgr, jl_fnct fn_);
 void jlgr_effects_init__(jlgr_t* jlgr);
 // loop
 void jl_ct_loop__(jlgr_t* jlgr);
@@ -93,8 +84,6 @@ void _jlgr_loopa(jlgr_t* jlgr);
 void jl_wm_kill__(jlgr_t* jlgr);
 void jlgr_thread_kill(jlgr_t* jlgr);
 void jlgr_file_kill_(jlgr_t* jlgr);
-//
-void jlgr_thread_send(jlgr_t* jlgr,uint8_t id,uint16_t x,uint16_t y,jl_fnct fn);
 
 //
 void jl_wm_updatewh_(jlgr_t* jlgr);

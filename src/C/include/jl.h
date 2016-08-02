@@ -113,13 +113,6 @@ typedef struct{
 	uint8_t thread_id;
 }jl_mutex_t;
 
-typedef struct{
-	jl_mutex_t lock;	/** The mutex lock on the "data" */
-	uint8_t pnum;		/** Number of packets in structure (upto 16 ) */
-	uint32_t size;		/** Size of "data" */
-	void* data[32];		/** The data attached to the mutex */
-}jl_comm_t;
-
 // Thread-Protected Variable
 typedef struct{
 	void* jl;
@@ -302,10 +295,6 @@ void jl_thread_mutex_lock(jl_mutex_t* mutex);
 void jl_thread_mutex_unlock(jl_mutex_t* mutex);
 void jl_thread_mutex_cpy(jl_t *jl, jl_mutex_t* mutex, void* src,
 	void* dst, uint32_t size);
-jl_comm_t* jl_thread_comm_make(jl_t* jl, uint32_t size);
-void jl_thread_comm_send(jl_t* jl, jl_comm_t* comm, const void* src);
-void jl_thread_comm_recv(jl_t* jl, jl_comm_t* comm, jl_data_fnct fn);
-void jl_thread_comm_kill(jl_t* jl, jl_comm_t* comm);
 void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size);
 void* jl_thread_pvar_edit(jl_pvar_t* pvar);
 void jl_thread_pvar_drop(jl_pvar_t* pvar, void** data);

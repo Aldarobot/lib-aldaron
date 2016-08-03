@@ -408,6 +408,10 @@ typedef struct{
 	struct {
 		struct {
 			jlgr_glsl_t shader;
+		}shadow;
+
+		struct {
+			jlgr_glsl_t shader;
 			int32_t fade;
 		}alpha;
 

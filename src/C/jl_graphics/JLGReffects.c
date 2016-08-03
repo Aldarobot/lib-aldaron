@@ -8,6 +8,16 @@ void jlgr_opengl_framebuffer_addtx_(jlgr_t* jlgr, uint32_t tx);
 void jlgr_opengl_blend_add_(jlgr_t* jlgr);
 void jlgr_opengl_blend_default_(jlgr_t* jlgr);
 
+const char *JL_EFFECT_SHADOW = 
+	GLSL_HEAD
+	"uniform sampler2D texture;\n"
+	"\n"
+	"varying vec2 texcoord;\n"
+	"\n"
+	"void main() {\n"
+	"	gl_FragColor = vec4(0., 0., 0., texture2D(texture, texcoord).a);\n"
+	"}";
+
 const char* JL_EFFECT_ALPHA = 
 	GLSL_HEAD
 	"uniform sampler2D texture;\n"
@@ -189,10 +199,6 @@ static void jlgr_effect_pr_light__(jl_t* jl) {
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, jlgr->effects.vec3);
 }
 
-static void jlgr_effects_light_clear__(jl_t* jl) {
-	jl_gl_clear(jl->jlgr, 0.f, 0.f, 0.f, 0.f);
-}
-
 static void jlgr_effects_light_aa__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
@@ -224,7 +230,38 @@ static void jlgr_effects_light_aa__(jl_t* jl) {
 	jlgr_opengl_blend_default_(jlgr);
 }
 
+static void jlgr_effects_shadow__(jl_t* jl) {
+	jlgr_t* jlgr = jl->jlgr;
+
+	// Bind shader
+	jlgr_opengl_draw1(jlgr, &jlgr->effects.shadow.shader);
+	//
+	jlgr_fill_image_set(jlgr, jlgr->effects.vo->tx, 16, 16, -1);
+	// Translate by offset vector
+	jlgr_opengl_matrix(jlgr, &jlgr->effects.shadow.shader,
+		(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
+		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
+		jlgr->gui.vos.whole_screen.pr.cb.pos, // Translate
+		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
+		1.f, jl_gl_ar(jlgr), 0.f, 1.f);
+	// Draw on screen
+	jlgr_vo_draw2(jlgr, &jlgr->gui.vos.whole_screen, &jlgr->effects.shadow.shader);
+}
+
+static void jlgr_effects_clear__(jl_t* jl) {
+	jl_gl_clear(jl->jlgr, 0.f, 0.f, 0.f, 0.f);
+}
+
 /** @endcond */
+
+void jlgr_effects_clear(jlgr_t* jlgr, jl_vo_t* vo) {
+	jlgr_pr(jlgr, &vo->pr, jlgr_effects_clear__);
+}
+
+void jlgr_effects_shadow(jlgr_t* jlgr, jl_vo_t* vo) {
+	jlgr->effects.vo = vo;
+	jlgr_pr(jlgr, &vo->pr, jlgr_effects_shadow__);
+}
 
 /**
  * Draw a vertex object with alpha effect.
@@ -280,7 +317,9 @@ void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]) {
  * @param vo: The vertex object.
 **/
 void jlgr_effects_light_reset(jlgr_t* jlgr, jl_vo_t* vo) {
-	jlgr_pr(jlgr, &vo->pr, jlgr_effects_light_clear__);
+	// Transparency except for where shadow
+	jlgr_effects_clear(jlgr, vo);
+	jlgr_effects_shadow(jlgr, vo);
 }
 
 /**
@@ -480,6 +519,10 @@ void jlgr_effects_init__(jlgr_t* jlgr) {
 	JL_PRINT_DEBUG(jlgr->jl, "MAKING EFFECT: LIGHT/AA");
 	jlgr_opengl_shader_init(jlgr, &jlgr->effects.light.aa,
 		JL_EFFECT_LIGHTV, JL_EFFECT_LIGHT_AA, 1);
+
+	JL_PRINT_DEBUG(jlgr->jl, "MAKING EFFECT: SHADOW");
+	jlgr_opengl_shader_init(jlgr, &jlgr->effects.shadow.shader,
+		NULL, JL_EFFECT_SHADOW, 1);
 
 	JL_PRINT_DEBUG(jlgr->jl, "MADE EFFECTS!");
 	jlgr->effects.lights.lights = cl_array_create(

@@ -96,8 +96,6 @@ int jlgr_thread_draw(void* data) {
 
 	jl_thread_wait(jl, &jl->wait);
 
-	jl_print(jl, "THREAD#1=#%d", jl_thread_current(jl));
-
 	// Initialize subsystems
 	jlgr_thread_draw_init__(jl);
 	// Redraw loop

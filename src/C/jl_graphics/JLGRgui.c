@@ -304,9 +304,7 @@ void jlgr_draw_msge__(jl_t* jl) {
 void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine) {
 	uint8_t inloop = jlgr->fl.inloop;
 
-	printf("edit 1\n");
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	printf("edit 1 complet\n");
 	jlgr_redraw_t old_redrawfns = pjlgr->functions.redraw;
 
 	// Set Graphical loops.
@@ -314,7 +312,6 @@ void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine) {
 		draw_routine, draw_routine,
 		draw_routine, jl_dont };
 
-	printf("drop 1\n");
 	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 
 	jlgr->fl.inloop = 1;
@@ -325,10 +322,8 @@ void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine) {
 	// Update Screen.
 	jl_wm_loop__(jlgr);
 	//
-	printf("edit 2\n");
 	pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
 	pjlgr->functions.redraw = old_redrawfns;
-	printf("drop 2\n");
 	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 
 	jlgr->fl.inloop = inloop;

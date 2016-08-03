@@ -166,9 +166,11 @@ typedef struct{
 	}time;
 	struct {
 		jl_mode_t *mdes; // Array Sizof Number Of Modes
+		jl_mode_t prev; // Previous Mode Data
 		jl_mode_t mode; // Current Mode Data
 		uint16_t which;
 		uint16_t count;
+		uint8_t changed;
 	}mode;
 	struct {
 		struct{

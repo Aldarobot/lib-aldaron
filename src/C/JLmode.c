@@ -64,6 +64,7 @@ void jl_mode_override(jl_t* jl, jl_mode_t loops) {
  * @param jl: The library context.
  */
 void jl_mode_reset(jl_t* jl) {
+	jl->mode.prev = jl->mode.mode;
 	jl->mode.mode = jl->mode.mdes[jl->mode.which];
 }
 
@@ -75,20 +76,12 @@ void jl_mode_reset(jl_t* jl) {
 void jl_mode_switch(jl_t* jl, uint16_t mode) {
 	if(jl->mode_switch_skip) return;
 
-	jl_fnct kill_ = jl->mode.mode.kill;
-	jl_fnct init_;
-
-	// Run the previous mode's kill function
-	jl->mode_switch_skip = 1;
-	kill_(jl);
-	jl->mode_switch_skip = 0;
+	jl->mode.changed = 1;
 	// Switch mode
 	jl->mode.which = mode;
 	// Update mode functions
 	jl_mode_reset(jl);
-	// Run the new mode's init functions.
-	init_ = jl->mode.mode.init;
-	init_(jl);
+
 }
 
 /**
@@ -97,17 +90,36 @@ void jl_mode_switch(jl_t* jl, uint16_t mode) {
  * @param jl: The library context.
  */
 void jl_mode_exit(jl_t* jl) {
-	uint16_t which = jl->mode.which;
-	jl_fnct kill_ = jl->mode.mode.kill;
-
-	jl_print(jl, "which = %d", which);
-	// Run exit routine.
-	kill_(jl);
-	// If mode is same as before, then quit.
-	if(which == jl->mode.which) jl->mode.count = 0;
+	jl->mode.changed = 2;
 }
 
 // Internal functions
+
+void jl_mode_loop__(jl_t* jl) {
+	if(jl->mode.changed == 1) {
+		jl_fnct kill_ = jl->mode.prev.kill;
+		jl_fnct init_ = jl->mode.mode.init;
+
+		// Run the previous mode's kill function
+		jl->mode_switch_skip = 1;
+		kill_(jl);
+		jl->mode_switch_skip = 0;
+		// Run the new mode's init functions.
+		init_(jl);
+
+		jl->mode.changed = 0;
+	}else if(jl->mode.changed == 2) {
+		uint16_t which = jl->mode.which;
+		jl_fnct kill_ = jl->mode.mode.kill;
+
+		// Run exit routine.
+		kill_(jl);
+		// If mode is same as before, then quit.
+		if(which == jl->mode.which) jl->mode.count = 0;
+
+		jl->mode.changed = 0;
+	}
+}
 
 void jl_mode_init__(jl_t* jl) {
 	// Set up modes:

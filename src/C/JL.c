@@ -1,5 +1,7 @@
 #include "JLprivate.h"
 
+void jl_mode_loop__(jl_t* jl);
+
 #if JL_PLAT == JL_PLAT_PHONE
 	#include <jni.h>
 	#include "SDL_log.h"
@@ -43,6 +45,8 @@ static inline void jl_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 	jl->name = jl_mem_copy(jl, nm, strlen(nm) + 1);
 	// Run the program's init function.
 	_fnc_init_(jl);
+	// Run the mode loop
+	jl_mode_loop__(jl);
 	JL_PRINT_DEBUG(jl, "Started JL_Lib!");
 }
 
@@ -86,6 +90,8 @@ void main_loop_(jl_t* jl) {
 	jl_seconds_passed__(jl);
 	// Run the user's mode loop.
 	loop_(jl);
+	// Run the mode loop
+	jl_mode_loop__(jl);
 }
 
 // EXPORT FUNCTIONS

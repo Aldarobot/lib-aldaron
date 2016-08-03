@@ -1,5 +1,4 @@
 TODO:
-	* Remove old thread API ( communicators - use pvar's instead )
 	* Fix Documentation problems
 	* Add wi-fi communications
 	* Make a VM option for running over wi-fi

@@ -118,7 +118,9 @@ int32_t jl_thread_old(jl_t *jl, uint8_t threadnum) {
 void jl_thread_mutex_new(jl_t *jl, jl_mutex_t* mutex) {
 	mutex->jl = jl;
 	mutex->mutex = SDL_CreateMutex();
+#if JL_DEBUG
 	mutex->thread_id = JL_THREAD_MUTEX_UNLOCKED;
+#endif
 }
 
 /**
@@ -128,31 +130,31 @@ void jl_thread_mutex_new(jl_t *jl, jl_mutex_t* mutex) {
 **/
 void jl_thread_mutex_lock(jl_mutex_t* mutex) {
 	jl_t* jl = mutex->jl;
-	jlgr_t* jlgr = jl->jlgr;
-	if(jlgr) {
-		if(mutex->mutex == jlgr->pvar.lock.mutex) printf("lock\n");
-	}
-	uint8_t current_thread = jl_thread_current(mutex->jl);
+#if JL_DEBUG
+	uint8_t current_thread = jl_thread_current(jl);
+#endif
 	double timer = 0.f;
 	double timepass = 0.f;
 
-	jl_sdl_timer(mutex->jl, &timer);
+	jl_sdl_timer(jl, &timer);
 	// Test if mutex is uninit'd
 #if JL_DEBUG
-	if(!mutex || !mutex->jl) {
-		jl_exit(mutex->jl, "Mutex is uninit'd\n");
+	if(!mutex || !jl) {
+		jl_exit(jl, "Mutex is uninit'd\n");
 	}
 #endif
 	int error;
 	while((error = SDL_TryLockMutex(mutex->mutex))) {
-		timepass += jl_sdl_timer(mutex->jl, &timer);
+		timepass += jl_sdl_timer(jl, &timer);
 		if(timepass > 1.f)
-			jl_exit(mutex->jl, "jl_thread_mutex_lock timeout %s\n",
+			jl_exit(jl, "jl_thread_mutex_lock timeout %s\n",
 				SDL_GetError());
 	}
+#if JL_DEBUG
 	if(mutex->thread_id == current_thread)
-		jl_exit(mutex->jl, "jl_thread_mutex_lock redundant\n");
+		jl_exit(jl, "jl_thread_mutex_lock redundant\n");
 	mutex->thread_id = current_thread;
+#endif
 }
 
 /**
@@ -161,23 +163,21 @@ void jl_thread_mutex_lock(jl_mutex_t* mutex) {
  * @param mutex: The mutex created by jl_thread_mutex_new().
 **/
 void jl_thread_mutex_unlock(jl_mutex_t* mutex) {
-	jl_t* jl = mutex->jl;
-	jlgr_t* jlgr = jl->jlgr;
-	if(jlgr) {
-		if(mutex->mutex == jlgr->pvar.lock.mutex) printf("unlock\n");
-	}
-	// Test if mutex is uninit'd
 #if JL_DEBUG
-	if(!mutex || !mutex->jl) {
-		jl_exit(mutex->jl, "Mutex is uninit'd\n");
+	jl_t* jl = mutex->jl;
+	// Test if mutex is uninit'd
+	if(!mutex || !jl) {
+		jl_exit(jl, "Mutex is uninit'd\n");
 	}
-#endif
 	if(mutex->thread_id == JL_THREAD_MUTEX_UNLOCKED) {
-		jl_exit(mutex->jl, "jl_thread_mutex_unlock redundant\n");
+		jl_exit(jl, "jl_thread_mutex_unlock redundant\n");
 	}
 	mutex->thread_id = JL_THREAD_MUTEX_UNLOCKED;
 	if(SDL_UnlockMutex(mutex->mutex))
-		jl_exit(mutex->jl, "SDL_UnlockMutex failed: %s\n", SDL_GetError());
+		jl_exit(jl, "SDL_UnlockMutex failed: %s\n", SDL_GetError());
+#else
+	SDL_UnlockMutex(mutex->mutex);
+#endif
 }
 
 /**
@@ -197,7 +197,7 @@ void jl_thread_mutex_cpy(jl_t *jl, jl_mutex_t* mutex, void* src, void* dst,
 	// Test if mutex is uninit'd
 #if JL_DEBUG
 	if(!mutex || !mutex->jl) {
-		jl_exit(mutex->jl, "Mutex is uninit'd\n");
+		jl_exit(jl, "Mutex is uninit'd\n");
 	}
 #endif
 	// Lock mutex

@@ -109,8 +109,10 @@ typedef struct{
 	void* jl;
 	/** Mutex **/
 	SDL_mutex* mutex;
+#if JL_DEBUG
 	/** Thread **/
 	uint8_t thread_id;
+#endif
 }jl_mutex_t;
 
 // Thread-Protected Variable

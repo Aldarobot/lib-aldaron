@@ -7,6 +7,7 @@ void jlgr_opengl_framebuffer_subtx_(jlgr_t* jlgr);
 void jlgr_opengl_framebuffer_addtx_(jlgr_t* jlgr, uint32_t tx);
 void jlgr_opengl_blend_add_(jlgr_t* jlgr);
 void jlgr_opengl_blend_default_(jlgr_t* jlgr);
+void jlgr_opengl_blend_none_(jlgr_t* jlgr);
 
 const char *JL_EFFECT_SHADOW = 
 	GLSL_HEAD
@@ -233,6 +234,8 @@ static void jlgr_effects_light_aa__(jl_t* jl) {
 static void jlgr_effects_shadow__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
+	// No Blending
+	jlgr_opengl_blend_none_(jlgr);
 	// Bind shader
 	jlgr_opengl_draw1(jlgr, &jlgr->effects.shadow.shader);
 	//
@@ -246,6 +249,8 @@ static void jlgr_effects_shadow__(jl_t* jl) {
 		1.f, jl_gl_ar(jlgr), 0.f, 1.f);
 	// Draw on screen
 	jlgr_vo_draw2(jlgr, &jlgr->gui.vos.whole_screen, &jlgr->effects.shadow.shader);
+	// Blend Default
+	jlgr_opengl_blend_default_(jlgr);
 }
 
 static void jlgr_effects_clear__(jl_t* jl) {
@@ -318,7 +323,6 @@ void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]) {
 **/
 void jlgr_effects_light_reset(jlgr_t* jlgr, jl_vo_t* vo) {
 	// Transparency except for where shadow
-	jlgr_effects_clear(jlgr, vo);
 	jlgr_effects_shadow(jlgr, vo);
 }
 

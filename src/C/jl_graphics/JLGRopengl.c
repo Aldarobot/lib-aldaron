@@ -523,14 +523,23 @@ void jlgr_opengl_draw_arrays_(jlgr_t* jlgr, GLenum mode, uint8_t count) {
 }
 
 void jlgr_opengl_blend_default_(jlgr_t* jlgr) {
+	glEnable(GL_BLEND);
+	JL_GL_ERROR(jlgr, 0,"glEnable( BLEND )");
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA,
 		GL_DST_ALPHA);
 	JL_GL_ERROR(jlgr, 0, "glBlendFuncSeparate");
 }
 
 void jlgr_opengl_blend_add_(jlgr_t* jlgr) {
+	glEnable(GL_BLEND);
+	JL_GL_ERROR(jlgr, 0,"glEnable( BLEND )");
 	glBlendFunc(GL_ONE, GL_ONE);
 	JL_GL_ERROR(jlgr, 0, "glBlendFunc");
+}
+
+void jlgr_opengl_blend_none_(jlgr_t* jlgr) {
+	glDisable(GL_BLEND);
+	JL_GL_ERROR(jlgr, 0,"glDisable( BLEND )");
 }
 
 static inline void _jl_gl_init_disable_extras(jlgr_t* jlgr) {
@@ -541,8 +550,6 @@ static inline void _jl_gl_init_disable_extras(jlgr_t* jlgr) {
 }
 
 static inline void _jl_gl_init_enable_alpha(jlgr_t* jlgr) {
-	glEnable(GL_BLEND);
-	JL_GL_ERROR(jlgr, 0,"glEnable( BLEND )");
 	glEnable(GL_CULL_FACE);
 	JL_GL_ERROR(jlgr, 0,"glEnable( CULL FACE )");
 	glBlendColor(0.f,0.f,0.f,0.f);

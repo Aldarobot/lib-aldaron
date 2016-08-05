@@ -92,15 +92,15 @@ android: -android-sdl-mods
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-ndk-r11c && \
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/tools && \
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/platform-tools && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/build-tools/23.0.3 && \
+	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/build-tools/24.0.1 && \
 	sh $(shell echo $(JLL_HOME))/android-build-mods/androidbuild.sh\
 		jlw.$(USERNAME).$(PACKNAME)\
 		$(shell echo $(JLL_HOME))/src/C/ $(CURDIR)/$(SRC)/
 
 android-with-ads: -android-sdl-mods
-	cp $(shell echo $(JLL_HOME))/android-build-mods/AndroidManifest-mopub.xml\
+	cp $(shell echo $(JLL_HOME))/android-build-mods/AndroidManifest-mm.xml\
 	 $(shell echo $(JLL_HOME))/android-build-mods/update/AndroidManifest.xml
-	cp $(shell echo $(JLL_HOME))/android-build-mods/SDLActivity-ad.java\
+	cp $(shell echo $(JLL_HOME))/android-build-mods/SDLActivity-ad-mm.java\
 	 $(shell echo $(JLL_HOME))/android-build-mods/update/src/org/libsdl/app/SDLActivity.java
 #	cp -ur $(shell echo $(JLL_HOME))/deps/mopub-sdk/src/main/\
 #	 build/android/src/
@@ -108,7 +108,7 @@ android-with-ads: -android-sdl-mods
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-ndk-r11c && \
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/tools && \
 	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/platform-tools && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/build-tools/23.0.3 && \
+	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/build-tools/24.0.1 && \
 	sh $(shell echo $(JLL_HOME))/android-build-mods/androidbuild.sh\
 		jlw.$(USERNAME).$(PACKNAME)\
 		$(shell echo $(JLL_HOME))/src/C/ $(CURDIR)/$(SRC)/
@@ -190,3 +190,4 @@ src/:
 	mkdir -p src/include/ # Where your program's header files are stored.
 	mkdir -p src/lib/ # Where the dependencies for your project are stored (.c*)
 #end#
+#https://codeload.github.com/google/gumbo-parser/zip/v0.10.1

@@ -234,6 +234,7 @@ typedef struct{
 
 //Vertex Object
 typedef struct{
+	jl_t* jl;	// The library context.
 	// Basic:
 	uint8_t rs;	// Rendering Style 0=GL_TRIANGLE_FAN 1=GL_TRIANGLES
 	uint32_t gl;	// GL Vertex Buffer Object [ 0 = Not Enabled ]
@@ -459,7 +460,8 @@ typedef struct{
 	}gl;
 
 	struct {
-		jl_sprite_t menubar;
+		jl_vo_t menubar;
+		jl_pvar_t pvar;
 	}menubar;
 
 	// Gui
@@ -530,6 +532,21 @@ typedef struct{
 
 typedef void(*jlgr_fnct)(jlgr_t* jlgr);
 typedef void(*jlgr_input_fnct)(jlgr_t* jlgr, jlgr_input_t input);
+typedef void(*jlgr_menu_fnct)(jlgr_t* jlgr, void* menu);
+
+typedef struct{
+	// Used for all icons on the menubar.
+	jl_vo_t icon;
+	jl_vo_t shadow;
+	// Redraw Functions for 10 icons.
+	jlgr_menu_fnct redrawfn[10];
+	// Pressed & Not Pressed Functions for 10 icons.
+	jlgr_input_fnct inputfn[10];
+	// Cursor
+	int8_t cursor;
+	// What needs redrawing - -1 nothing -2 all
+	int8_t redraw;
+}jl_menu_t;
 
 // JLGR.c:
 jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_);
@@ -553,9 +570,10 @@ void* jlgr_sprite_getcontext(jl_sprite_t *sprite);
 void* jlgr_sprite_getdrawctx(jl_sprite_t *sprite);
 
 // JLGRmenu.c
-void jlgr_menu_toggle(jlgr_t* jlgr);
-void jlgr_menu_draw_icon(jlgr_t* jlgr, uint32_t tex, uint8_t c);
-void jlgr_menu_addicon(jlgr_t* jlgr, jlgr_input_fnct inputfn, jlgr_fnct rdr);
+void jlgr_menu_draw(jlgr_t* jlgr, uint8_t resize);
+void jlgr_menu_loop(jlgr_t* jlgr);
+void jlgr_menu_draw_icon(jlgr_t* jlgr,uint32_t tex,uint8_t c,jl_menu_t* menu);
+void jlgr_menu_addicon(jlgr_t* jlgr, jlgr_input_fnct inputfn, jlgr_menu_fnct rdr);
 void jlgr_menu_addicon_flip(jlgr_t* jlgr);
 void jlgr_menu_addicon_slow(jlgr_t* jlgr);
 void jlgr_menu_addicon_name(jlgr_t* jlgr);
@@ -592,6 +610,7 @@ void jlgr_notify(jlgr_t* jlgr, const char* notification, ...);
 
 // JLGRvo.c
 void jlgr_vo_init(jlgr_t* jlgr, jl_vo_t* vo);
+void jlgr_vo_rect(jlgr_t* jlgr, jl_vo_t* vo, jl_rect_t* rc);
 void jlgr_vo_set_vg(jlgr_t* jlgr, jl_vo_t *vo, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor);
 void jlgr_vo_set_rect(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
@@ -605,6 +624,7 @@ void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
 void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos);
 void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh);
 void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t* vec);
+void jlgr_vo_draw_pr(jlgr_t* jlgr, jl_vo_t* vo);
 void jlgr_vo_free(jlgr_t* jlgr, jl_vo_t *vo);
 
 // JLGRpr.c

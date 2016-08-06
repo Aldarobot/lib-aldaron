@@ -93,6 +93,8 @@ static void jlgr_vo_poly__(jlgr_t* jlgr, jl_vo_t* vo, uint32_t vertices,
  * @param vo: A uninitialized vertex object - to initailize with 0 vertices.
 **/
 void jlgr_vo_init(jlgr_t* jlgr, jl_vo_t* vo) {
+	//
+	vo->jl = jlgr->jl;
 	// GL VBO
 	vo->gl = 0;
 	// GL Texture Coordinate Buffer
@@ -109,6 +111,25 @@ void jlgr_vo_init(jlgr_t* jlgr, jl_vo_t* vo) {
 	vo->tx = 0;
 	// Pre-renderer
 	jlgr_pr_init(jlgr, &vo->pr);
+}
+
+/**
+ * Resize a vertex object to a rectangle.
+ * @param jlgr: The library context.
+ * @param vo: The vertex object.
+ * @param rc: Rectangle to set it to.
+**/
+void jlgr_vo_rect(jlgr_t* jlgr, jl_vo_t* vo, jl_rect_t* rc) {
+	if(rc) {
+		float rectangle_coords[] = {
+			rc->x,		rc->y + rc->h,	0.f,
+			rc->x,		rc->y,		0.f,
+			rc->x + rc->w,	rc->y,		0.f,
+			rc->x + rc->w,	rc->y + rc->h,	0.f };
+
+		// Overwrite the vertex object
+		jlgr_vo_poly__(jlgr, vo, 4, rectangle_coords);
+	}
 }
 
 /**
@@ -141,14 +162,7 @@ void jlgr_vo_set_vg(jlgr_t* jlgr, jl_vo_t *vo, uint16_t tricount,
 void jlgr_vo_set_rect(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
 	uint8_t multicolor)
 {
-	float rectangle_coords[] = {
-		rc.x,		rc.y + rc.h,	0.f,
-		rc.x,		rc.y,		0.f,
-		rc.x + rc.w,	rc.y,		0.f,
-		rc.x + rc.w,	rc.y + rc.h,	0.f };
-
-	// Overwrite the vertex object
-	jlgr_vo_poly__(jlgr, vo, 4, rectangle_coords);
+	jlgr_vo_rect(jlgr, vo, &rc);
 	// Texture the vertex object
 	if(multicolor) jlgr_vo_color_gradient(jlgr, vo, colors);
 	else jlgr_vo_color_solid(jlgr, vo, colors);
@@ -320,6 +334,15 @@ void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t* vec) {
 			1.f, jl_gl_ar(jlgr), 0.f, 1.f);
 	}
 	jlgr_vo_draw2(jlgr, vo, shader);
+}
+
+/**
+ * Draw a vertex object with effects.
+ * @param jlgr: The library context.
+ * @param vo: The vertex object.
+**/
+void jlgr_vo_draw_pr(jlgr_t* jlgr, jl_vo_t* vo) {
+	jlgr_pr_draw(jlgr, &vo->pr, &vo->pr.cb.pos, 0);
 }
 
 /**

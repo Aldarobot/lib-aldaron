@@ -14,8 +14,6 @@ static void jlgr_loop_(jl_t* jl) {
 
 	// Update events.
 	jl_ct_loop__(jlgr);
-	// Run any selected menubar items.
-	jlgr_sprite_loop(jlgr, &jlgr->menubar.menubar);
 	// Update mouse
 	if(jlgr->mouse.mutex.jl) jlgr_sprite_loop(jlgr, &jlgr->mouse);
 	// Run Main Loop

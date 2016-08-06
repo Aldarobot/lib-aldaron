@@ -71,6 +71,8 @@ void jlgr_dont(jlgr_t* jlgr) { }
 void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, 
 	int16_t c)
 {
+	if(!tex) jl_exit(jlgr->jl, "jlgr_fill_image_set:"
+		"Texture Must Be Nonzero!\n");
 	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
 
 	jlgr_vo_set_image(jlgr, &jlgr->gui.vos.whole_screen, rc, tex);
@@ -556,20 +558,12 @@ void _jlgr_loopb(jlgr_t* jlgr) {
 }
 
 void _jlgr_loopa(jlgr_t* jlgr) {
-	JL_PRINT_DEBUG(jlgr->jl, "loopa");
-	if(!jlgr->menubar.menubar.mutex.jl) return;
-	JL_PRINT_DEBUG(jlgr->jl, "loop2");
-	jl_print_function(jlgr->jl, "menubar");
-	// Draw the pre-rendered Menubar.
-	if(!jlgr->fl.inloop) jlgr_sprite_draw(jlgr, &jlgr->menubar.menubar);
-	jl_print_return(jlgr->jl, "menubar");
 	// Update messages.
 	jl_print_function(jlgr->jl, "message");
 	_jlgr_loopb(jlgr);
 	jl_print_return(jlgr->jl, "message");
 	// Draw mouse
 	if(jlgr->mouse.mutex.jl) jlgr_sprite_draw(jlgr, &jlgr->mouse);
-	JL_PRINT_DEBUG(jlgr->jl, "loopa-complete");
 }
 
 void jlgr_init__(jlgr_t* jlgr) {

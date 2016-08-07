@@ -12,7 +12,7 @@ static void jlgr_sprite_draw_to_pr__(jl_t *jl) {
 	jl_sprite_t *sprite = jl_mem_temp(jl, NULL);
 
 	jl_print_function(jl, "sprite->draw");
-	((jlgr_sprite_draw_fnt)sprite->draw)(jl, 1, sprite->ctx_draw);
+	((jlgr_sprite_draw_fnt)sprite->draw)(jl, sprite->resize, sprite->ctx_draw);
 	jl_print_return(jl, "sprite->draw");
 }
 
@@ -27,6 +27,7 @@ static void jlgr_sprite_redraw_tex__(jlgr_t* jlgr, jl_sprite_t *spr) {
 
 // Redraw a sprite
 static inline void jlgr_sprite_redraw__(jlgr_t* jlgr, jl_sprite_t *spr) {
+	spr->resize = 0;
 	jl_print_function(jlgr->jl, "RedrawSprite");
 	// If pre-renderer hasn't been intialized, initialize & redraw.
 	if(!spr->pr.tx) jlgr_sprite_resize(jlgr, spr, NULL);
@@ -115,6 +116,7 @@ void jlgr_sprite_resize(jlgr_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc) {
 	//
 	jl_thread_mutex_unlock(&spr->mutex);
 	// Redraw
+	spr->resize = 1;
 	jlgr_sprite_redraw_tex__(jlgr, spr);
 	//
 	jl_print_return(jlgr->jl, "sprite-resize");
@@ -194,12 +196,12 @@ void jlgr_sprite_free(jlgr_t* jlgr, jl_sprite_t* sprite) {
  * @return 0: if the sprites don't collide in their bounding boxes.
  * @return 1: if the sprites do collide in their bounding boxes.
 **/
-uint8_t jlgr_sprite_collide(jlgr_t* jlgr, jl_sprite_t *spr1, jl_sprite_t *spr2){
+uint8_t jlgr_sprite_collide(jlgr_t* jlgr, jl_pr_t *pr1, jl_pr_t *pr2) {
 	if (
-		(spr1->pr.cb.pos.y >= (spr2->pr.cb.pos.y+spr2->pr.cb.ofs.y)) ||
-		(spr1->pr.cb.pos.x >= (spr2->pr.cb.pos.x+spr2->pr.cb.ofs.x)) ||
-		(spr2->pr.cb.pos.y >= (spr1->pr.cb.pos.y+spr1->pr.cb.ofs.y)) ||
-		(spr2->pr.cb.pos.x >= (spr1->pr.cb.pos.x+spr1->pr.cb.ofs.x)) )
+		(pr1->cb.pos.y >= (pr2->cb.pos.y+pr2->cb.ofs.y)) ||
+		(pr1->cb.pos.x >= (pr2->cb.pos.x+pr2->cb.ofs.x)) ||
+		(pr2->cb.pos.y >= (pr1->cb.pos.y+pr1->cb.ofs.y)) ||
+		(pr2->cb.pos.x >= (pr1->cb.pos.x+pr1->cb.ofs.x)) )
 	{
 		return 0;
 	}else{

@@ -275,6 +275,7 @@ typedef struct{
 	uint8_t update;		// Whether sprite should redraw or not.
 	jl_pr_t pr;		// Pre-renderer / collision box.
 	uint8_t rs;		// Render style.
+	uint8_t resize;
 }jl_sprite_t;
 
 typedef void (*jlgr_sprite_draw_fnt)(jl_t* jl, uint8_t resize, void* ctx_draw);
@@ -334,7 +335,9 @@ typedef struct{
 	// For Programer's Use
 	float fontcolor[4];
 	jl_font_t font;
-	jl_sprite_t mouse; // Sprite to represent mouse pointer
+#if JL_PLAT == JL_PLAT_COMPUTER
+	jl_vo_t mouse;
+#endif
 
 	uint8_t thread; // Graphical Thread ID.
 	jl_wait_t wait;
@@ -564,7 +567,7 @@ void jlgr_sprite_init(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	void* main_ctx, uint32_t main_ctx_size,
 	void* draw_ctx, uint32_t draw_ctx_size);
 void jlgr_sprite_free(jlgr_t* jlgr, jl_sprite_t* sprite);
-uint8_t jlgr_sprite_collide(jlgr_t* jlgr, jl_sprite_t *spr1, jl_sprite_t *spr2);
+uint8_t jlgr_sprite_collide(jlgr_t* jlgr, jl_pr_t *pr1, jl_pr_t *pr2);
 void jlgr_sprite_clamp(jl_vec3_t xyz, jl_area_t area, jl_vec3_t* rtn);
 void* jlgr_sprite_getcontext(jl_sprite_t *sprite);
 void* jlgr_sprite_getdrawctx(jl_sprite_t *sprite);
@@ -623,7 +626,7 @@ void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
 void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
 void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos);
 void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh);
-void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t* vec);
+void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo);
 void jlgr_vo_draw_pr(jlgr_t* jlgr, jl_vo_t* vo);
 void jlgr_vo_free(jlgr_t* jlgr, jl_vo_t *vo);
 

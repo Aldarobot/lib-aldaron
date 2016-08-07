@@ -8,6 +8,8 @@
 **/
 #include "JLGRprivate.h"
 
+void jlgr_mouse_resize__(jlgr_t* jlgr);
+
 static void jlgr_thread_programsresize(jlgr_t* jlgr) {
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
 	jl_fnct resize_ = pjlgr->functions.redraw.resize;
@@ -24,7 +26,7 @@ static void jlgr_thread_resize(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	// Taskbar resize.
 	jlgr_menu_resize_(jlgr);
 	// Mouse resize
-	if(jlgr->mouse.mutex.jl) jlgr_sprite_resize(jlgr, &jlgr->mouse, NULL);
+	jlgr_mouse_resize__(jlgr);
 }
 
 static void jlgr_thread_windowresize(jlgr_t* jlgr) {

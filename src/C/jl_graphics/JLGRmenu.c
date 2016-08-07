@@ -42,7 +42,8 @@ static inline void jlgr_menubar_shadow__(jlgr_t* jlgr, jl_menu_t* menu) {
 
 		if(_draw_icon_ == NULL) break;
 		// Draw shadow
-		jlgr_vo_draw(jlgr, &menu->shadow, &tr);
+		jlgr_vo_move(&menu->shadow, tr); 
+		jlgr_vo_draw(jlgr, &menu->shadow);
 		// Draw Icon
 		_draw_icon_(jlgr, menu);
 	}
@@ -54,15 +55,12 @@ static void jlgr_menubar_draw_(jl_t* jl) {
 	jl_menu_t* menu = jl_thread_pvar_edit(&jlgr->menubar.pvar);
 
 	if(menu->redraw == MENU_REDRAW_ALL) {
-		jl_print(jl, "MENU REDRAW ALL");
 		// If needed, draw shadow.
 		jlgr_menubar_shadow__(jlgr, menu);
 	}else if(menu->redraw != MENU_REDRAW_NONE) {
-		jl_print(jl, "RE-DRAW SINGLE %d", menu->redraw);
 		// Redraw only the selected icon.
-		if(menu->redrawfn[menu->redraw]) {
+		if(menu->redrawfn[menu->redraw])
 			menu->redrawfn[menu->redraw](jlgr, menu);
-		}
 	}
 	// Done.
 	menu->redraw = MENU_REDRAW_NONE;
@@ -158,7 +156,6 @@ static void jlgr_menu_slow_draw__(jlgr_t* jlgr, void* menu) {
 	float color[] = { .5, .5, 1., 1. };
 	char formated[80];
 
-	jl_print(jl, "slow draw %d", ((jl_menu_t*)menu)->redraw);
 	// Draw the icon based on whether on time or not.
 	jlgr_menu_draw_icon(jlgr, jlgr->textures.icon, jlgr->sg.on_time ?
 		JLGR_ID_GOOD_IMAGE : JLGR_ID_SLOW_IMAGE, menu);
@@ -223,7 +220,8 @@ void jlgr_menu_draw_icon(jlgr_t* jlgr,uint32_t tex,uint8_t c,jl_menu_t* menu) {
 
 	jlgr_vo_set_image(jlgr, &menu->icon, rc_icon, tex);
 	jlgr_vo_txmap(jlgr, &menu->icon, 0, 16, 16, c);
-	jlgr_vo_draw(jlgr, &menu->icon, &tr);
+	jlgr_vo_move(&menu->icon, tr);
+	jlgr_vo_draw(jlgr, &menu->icon);
 }
 
 /**

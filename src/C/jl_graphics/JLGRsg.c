@@ -153,6 +153,7 @@ static void jl_sg_draw_up(jl_t* jl, uint8_t resize, void* data) {
 static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
 	jlgr_t* jlgr = jl->jlgr;
 
+	printf("resize=%d\n", resize);
 	jl_print_function(jlgr->jl, "sg-draw-dn");
 	// Clear the screen.
 	jl_gl_clear(jlgr, 1., .5, 0., 1.);
@@ -162,7 +163,7 @@ static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
 		((jl_fnct)pjlgr->functions.redraw.lower)(jl);
 	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 	// Draw Menu Bar & Mouse
-	_jlgr_loopa(jl->jlgr);
+	if(!resize) _jlgr_loopa(jl->jlgr);
 	jl_print_return(jlgr->jl, "sg-draw-dn");
 }
 
@@ -182,6 +183,7 @@ static void _jl_sg_loop_ds(jlgr_t* jlgr) {
 static void _jl_sg_loop_ss(jlgr_t* jlgr) {
 	jl_print_function(jlgr->jl, "sg-loop-ss");
 	// Draw lower screen - default screen
+	printf("REDRAW\n");
 	jlgr_sprite_redraw(jlgr, &jlgr->sg.bg.dn, NULL);
 	jlgr_sprite_draw(jlgr, &jlgr->sg.bg.dn);
 	jl_print_return(jlgr->jl, "sg-loop-ss");

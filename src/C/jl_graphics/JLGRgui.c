@@ -23,6 +23,8 @@ typedef struct {
 
 /** @cond */
 
+void jlgr_mouse_draw__(jlgr_t* jlgr);
+
 static inline void _jlgr_init_vos(jlgr_t* jlgr) {
 	jlgr_vo_init(jlgr, &jlgr->gui.vos.whole_screen);
 }
@@ -84,7 +86,7 @@ void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h,
  * @param jl: The library context.
 **/
 void jlgr_fill_image_draw(jlgr_t* jlgr) {
-	jlgr_vo_draw(jlgr, &jlgr->gui.vos.whole_screen, NULL);
+	jlgr_vo_draw(jlgr, &jlgr->gui.vos.whole_screen);
 }
 
 /**
@@ -164,7 +166,7 @@ static void jlgr_gui_slider_touch(jlgr_t* jlgr, jlgr_input_t input) {
 	jl_sprite_t* spr = input.data;
 	jl_gui_slider_main* slider = jlgr_sprite_getcontext(spr);
 
-	if(jlgr_sprite_collide(jlgr, spr, &jlgr->mouse) == 0 ||
+	if(jlgr_sprite_collide(jlgr, &spr->pr, &jlgr->mouse.pr) == 0 ||
 	 input.h == 0)
 		return;
 	float x = jlgr->main.ct.msx - (jl_gl_ar(jlgr) * .05 * spr->pr.cb.ofs.x);
@@ -221,13 +223,17 @@ static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
 	
 	jlgr_vo_set_rect(jlgr, &(slider->vo[2]), rc1, colors, 0);
 	// Draw Sliders
-	jlgr_vo_draw(jlgr, &(slider->vo[0]), NULL);
+	jlgr_vo_draw(jlgr, &(slider->vo[0]));
 	// Draw Slide 1
-	jlgr_vo_draw(jlgr, &(slider->vo[2]), &slider->where[0]);
-	jlgr_vo_draw(jlgr, &(slider->vo[1]), &slider->where[0]);
+	jlgr_vo_move(&slider->vo[2], slider->where[0]);
+	jlgr_vo_draw(jlgr, &slider->vo[2]);
+	jlgr_vo_move(&slider->vo[1], slider->where[0]);
+	jlgr_vo_draw(jlgr, &slider->vo[1]);
 	// Draw Slide 2
-	jlgr_vo_draw(jlgr, &(slider->vo[2]), &slider->where[1]);
-	jlgr_vo_draw(jlgr, &(slider->vo[1]), &slider->where[1]);
+	jlgr_vo_move(&slider->vo[2], slider->where[1]);
+	jlgr_vo_draw(jlgr, &slider->vo[2]);
+	jlgr_vo_move(&slider->vo[1], slider->where[1]);
+	jlgr_vo_draw(jlgr, &slider->vo[1]);
 }
 
 /**
@@ -407,7 +413,7 @@ void jlgr_slidebtn_loop(jlgr_t* jlgr, jl_sprite_t * spr, float defaultx,
 	float slidex, jlgr_input_fnct prun)
 {
 	spr->pr.cb.pos.x = defaultx;
-	if(jlgr_sprite_collide(jlgr, &jlgr->mouse, spr)) {
+	if(jlgr_sprite_collide(jlgr, &jlgr->mouse.pr, &spr->pr)) {
 		jlgr_input_do(jlgr, JL_INPUT_PRESS, prun, NULL);
 		spr->pr.cb.pos.x = defaultx + slidex;
 	}
@@ -426,14 +432,14 @@ void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
 {
 //		jlgr_sprite_redraw(jlgr, spr);
 	jlgr_sprite_draw(jlgr, spr);
-	if(jlgr_sprite_collide(jlgr, &jlgr->mouse, spr)) {
+	if(jlgr_sprite_collide(jlgr, &jlgr->mouse.pr, &spr->pr)) {
 		jl_rect_t rc = { spr->pr.cb.pos.x, spr->pr.cb.pos.y,
 			spr->pr.cb.ofs.x, spr->pr.cb.ofs.y };
 		float glow_color[] = { 1., 1., 1., .25 };
 
 		// Draw glow
 		jlgr_vo_set_rect(jlgr, &jlgr->gl.temp_vo, rc, glow_color, 0);
-		jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo, NULL);
+		jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo);
 		// Description
 		jlgr_text_draw(jlgr, txt,
 			(jl_vec3_t)
@@ -505,7 +511,7 @@ void jlgr_gui_textbox_draw(jlgr_t* jlgr, jl_rect_t rc){
 		jlgr_vo_set_rect(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
 			rc.x + (jlgr->gui.textbox.string->curs * rc.h * .75),
 			rc.y, rc.h * .05, rc.h }, cursor_color, 0);
-		jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo, NULL);
+		jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo);
 	}
 	jlgr_text_draw(jlgr, (char*)(jlgr->gui.textbox.string->data),
 		(jl_vec3_t) {rc.x, rc.y, 0.},
@@ -558,12 +564,15 @@ void _jlgr_loopb(jlgr_t* jlgr) {
 }
 
 void _jlgr_loopa(jlgr_t* jlgr) {
+	printf("LOOPA!\n");
 	// Update messages.
 	jl_print_function(jlgr->jl, "message");
 	_jlgr_loopb(jlgr);
 	jl_print_return(jlgr->jl, "message");
+#if JL_PLAT == JL_PLAT_COMPUTER
 	// Draw mouse
-	if(jlgr->mouse.mutex.jl) jlgr_sprite_draw(jlgr, &jlgr->mouse);
+	jlgr_mouse_draw__(jlgr);
+#endif
 }
 
 void jlgr_init__(jlgr_t* jlgr) {

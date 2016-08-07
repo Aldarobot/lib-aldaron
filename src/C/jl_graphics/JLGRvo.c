@@ -309,30 +309,20 @@ void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
 
 /**
  * Draw a vertex object with offset by translation.
- * @param jl: The library context.
+ * @param jlgr: The library context.
  * @param vo: The vertex object to draw.
- * @param vec: The vector of offset/translation.
 **/
-void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t* vec) {
+void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo) {
 	jlgr_glsl_t* shader = vo->tx ?
 		&jlgr->gl.prg.texture : &jlgr->gl.prg.color;
 
 	jlgr_opengl_draw1(jlgr, shader);
-	if(vec == NULL) {
-		jlgr_opengl_matrix(jlgr, shader,
-			(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
-			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
-			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Translate
-			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
-			1.f, jl_gl_ar(jlgr), 0.f, 1.f); 
-	}else{
-		jlgr_opengl_matrix(jlgr, shader,
-			(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
-			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
-			(jl_vec3_t) { vec->x, vec->y, vec->z }, // Translate
-			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
-			1.f, jl_gl_ar(jlgr), 0.f, 1.f);
-	}
+	jlgr_opengl_matrix(jlgr, shader,
+		(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
+		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
+		vo->pr.cb.pos, // Translate
+		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
+		1.f, jl_gl_ar(jlgr), 0.f, 1.f);
 	jlgr_vo_draw2(jlgr, vo, shader);
 }
 

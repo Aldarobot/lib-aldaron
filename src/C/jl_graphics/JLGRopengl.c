@@ -343,10 +343,8 @@ uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 //Lower Level Stuff
 static inline void jl_gl_usep__(jlgr_t* jlgr, GLuint prg) {
 #ifdef JL_DEBUG
-	if(!prg) {
-		jl_print(jlgr->jl, "shader program uninit'd!");
-		exit(-1);
-	}
+	if(!prg)
+		jl_exit(jlgr->jl, "shader program uninit'd!");
 #endif
 	glUseProgram(prg);
 	JL_GL_ERROR(jlgr, prg, "glUseProgram");

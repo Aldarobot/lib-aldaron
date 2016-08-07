@@ -564,11 +564,8 @@ void _jlgr_loopb(jlgr_t* jlgr) {
 }
 
 void _jlgr_loopa(jlgr_t* jlgr) {
-	printf("LOOPA!\n");
 	// Update messages.
-	jl_print_function(jlgr->jl, "message");
 	_jlgr_loopb(jlgr);
-	jl_print_return(jlgr->jl, "message");
 #if JL_PLAT == JL_PLAT_COMPUTER
 	// Draw mouse
 	jlgr_mouse_draw__(jlgr);

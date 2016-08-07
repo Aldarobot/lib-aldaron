@@ -276,6 +276,8 @@ void jlgr_effects_shadow(jlgr_t* jlgr, jl_vo_t* vo) {
  * @param a: The alpha value to multiply each pixel by. [ 0.f - 1.f ]
 **/
 void jlgr_effects_vo_alpha(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a) {
+	if(a < 0.f) a = 0.f;
+	if(a > 1.f) a = 1.f;
 	// Bind shader
 	jlgr_opengl_draw1(jlgr, &jlgr->effects.alpha.shader);
 	// Translate by offset vector

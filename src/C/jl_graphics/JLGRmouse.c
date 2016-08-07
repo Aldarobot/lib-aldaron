@@ -19,7 +19,6 @@ void jlgr_mouse_resize__(jlgr_t* jlgr) {
 }
 
 void jlgr_mouse_draw__(jlgr_t* jlgr) {
-	jl_print(jlgr->jl, "drawing mouse....");
 	jlgr_vo_draw(jlgr, &jlgr->mouse);
 }
 

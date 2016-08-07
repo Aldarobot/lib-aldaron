@@ -261,7 +261,6 @@ static void jl_ct_handle_resize__(jlgr_t* jlgr) {
 	if(jlgr->main.ct.event.type==SDL_WINDOWEVENT) { //Resize
 		switch(jlgr->main.ct.event.window.event) {
 			case SDL_WINDOWEVENT_RESIZED: {
-				JL_PRINT_DEBUG(jlgr->jl, "INPUT/RESIZE");
 				jlgr_resz(jlgr,
 					jlgr->main.ct.event.window.data1,
 					jlgr->main.ct.event.window.data2);
@@ -269,7 +268,6 @@ static void jl_ct_handle_resize__(jlgr_t* jlgr) {
 			}
 #if JL_PLAT == JL_PLAT_COMPUTER
 			case SDL_WINDOWEVENT_CLOSE: {
-				jl_print(jlgr->jl, "CLOSE");
 				jlgr->main.ct.back = 1;
 				break;
 			}

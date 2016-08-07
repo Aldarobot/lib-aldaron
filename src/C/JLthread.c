@@ -146,7 +146,7 @@ void jl_thread_mutex_lock(jl_mutex_t* mutex) {
 	int error;
 	while((error = SDL_TryLockMutex(mutex->mutex))) {
 		timepass += jl_sdl_timer(jl, &timer);
-		if(timepass > 1.f)
+		if(timepass > 2.f)
 			jl_exit(jl, "jl_thread_mutex_lock timeout %s\n",
 				SDL_GetError());
 	}

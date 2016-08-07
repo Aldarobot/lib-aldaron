@@ -25,10 +25,6 @@ typedef struct {
 
 void jlgr_mouse_draw__(jlgr_t* jlgr);
 
-static inline void _jlgr_init_vos(jlgr_t* jlgr) {
-	jlgr_vo_init(jlgr, &jlgr->gui.vos.whole_screen);
-}
-
 static void _jlgr_popup_loop(jl_t *jl) {
 }
 
@@ -169,7 +165,7 @@ static void jlgr_gui_slider_touch(jlgr_t* jlgr, jlgr_input_t input) {
 	if(jlgr_sprite_collide(jlgr, &spr->pr, &jlgr->mouse.pr) == 0 ||
 	 input.h == 0)
 		return;
-	float x = jlgr->main.ct.msx - (jl_gl_ar(jlgr) * .05 * spr->pr.cb.ofs.x);
+	float x = al_safe_get_float(&jlgr->main.ct.msx) - (jl_gl_ar(jlgr) * .05 * spr->pr.cb.ofs.x);
 	x -= spr->pr.cb.pos.x;
 	x /= spr->pr.cb.ofs.x;
 //		x += 1.5;// - (jl_gl_ar(jl->jlgr) * .1);
@@ -267,9 +263,6 @@ void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 	slider.x1 = x1, slider.x2 = x2;
 	(*slider.x1) = 0.;
 	(*slider.x2) = 1.;
-	jlgr_vo_init(jlgr, &slider.draw.vo[0]);
-	jlgr_vo_init(jlgr, &slider.draw.vo[1]);
-	jlgr_vo_init(jlgr, &slider.draw.vo[2]);
 	slider.isRange = isdouble;
 
 	jlgr_sprite_init(jlgr, sprite, rectangle,
@@ -576,7 +569,6 @@ void jlgr_init__(jlgr_t* jlgr) {
 	data_t packagedata;
 
 	jl_data_mkfrom_data(jlgr->jl, &packagedata, jl_gem_size(), jl_gem());
-	_jlgr_init_vos(jlgr);
 	jlgr->textures.logo = jl_sg_add_image(jlgr, &packagedata,
 		"/images/JL_Lib.png");
 	JL_PRINT_DEBUG(jlgr->jl, "Draw Loading Screen");

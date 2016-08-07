@@ -85,16 +85,11 @@ static void jlgr_vo_poly__(jlgr_t* jlgr, jl_vo_t* vo, uint32_t vertices,
 	jlgr_vo_vertices__(jlgr, vo, xyzw, vertices);
 }
 
-/** @endcond */
-
-/**
- * Create an empty vertex object.
- * @param jl: The library context.
- * @param vo: A uninitialized vertex object - to initailize with 0 vertices.
-**/
-void jlgr_vo_init(jlgr_t* jlgr, jl_vo_t* vo) {
+void jlgr_vo_init__(jl_t* jl, jl_vo_t* vo) {
+	// Don't do anything if already init'd
+	if(vo->jl) return;
 	//
-	vo->jl = jlgr->jl;
+	vo->jl = jl;
 	// GL VBO
 	vo->gl = 0;
 	// GL Texture Coordinate Buffer
@@ -109,9 +104,16 @@ void jlgr_vo_init(jlgr_t* jlgr, jl_vo_t* vo) {
 	vo->rs = 0;
 	// Texture
 	vo->tx = 0;
-	// Pre-renderer
-	jlgr_pr_init(jlgr, &vo->pr);
 }
+
+void jlgr_vo_exit__(jl_vo_t* vo, const char* error) {
+	if(vo->jl == NULL) {
+		JL_PRINT("Vertex object uninit'd: %s\n", error);
+		exit(-1);
+	}
+}
+
+/** @endcond */
 
 /**
  * Resize a vertex object to a rectangle.
@@ -120,6 +122,7 @@ void jlgr_vo_init(jlgr_t* jlgr, jl_vo_t* vo) {
  * @param rc: Rectangle to set it to.
 **/
 void jlgr_vo_rect(jlgr_t* jlgr, jl_vo_t* vo, jl_rect_t* rc) {
+	jlgr_vo_init__(jlgr->jl, vo);
 	if(rc) {
 		float rectangle_coords[] = {
 			rc->x,		rc->y + rc->h,	0.f,
@@ -140,6 +143,7 @@ void jlgr_vo_rect(jlgr_t* jlgr, jl_vo_t* vo, jl_rect_t* rc) {
 void jlgr_vo_set_vg(jlgr_t* jlgr, jl_vo_t *vo, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor)
 {
+	jlgr_vo_init__(jlgr->jl, vo);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	// Rendering Style = triangles
 	vo->rs = 1;
@@ -162,6 +166,7 @@ void jlgr_vo_set_vg(jlgr_t* jlgr, jl_vo_t *vo, uint16_t tricount,
 void jlgr_vo_set_rect(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
 	uint8_t multicolor)
 {
+	jlgr_vo_init__(jlgr->jl, vo);
 	jlgr_vo_rect(jlgr, vo, &rc);
 	// Texture the vertex object
 	if(multicolor) jlgr_vo_color_gradient(jlgr, vo, colors);
@@ -175,6 +180,7 @@ void jlgr_vo_set_rect(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
  * @param img: The image to display on the vertex object.
 **/
 void jlgr_vo_image(jlgr_t* jlgr, jl_vo_t *vo, uint32_t img) {
+	jlgr_vo_init__(jlgr->jl, vo);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	// Make sure non-textured colors aren't attempted
 	vo->tx = img;
@@ -197,6 +203,7 @@ void jlgr_vo_image(jlgr_t* jlgr, jl_vo_t *vo, uint32_t img) {
  * @param tex:  the ID of the image.
 **/
 void jlgr_vo_set_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex) {
+	jlgr_vo_init__(jlgr->jl, vo);
 	//From bottom left & clockwise
 	float Oone[] = {
 		rc.x,		rc.y + rc.h,	0.f,
@@ -220,6 +227,7 @@ void jlgr_vo_set_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex) {
 void jlgr_vo_txmap(jlgr_t* jlgr, jl_vo_t* vo, uint8_t orientation,
 	uint8_t w, uint8_t h, int16_t map)
 {
+	jlgr_vo_init__(jlgr->jl, vo);
 	const float *tc = orientation ?
 		( orientation == 1 ? UPSIDEDOWN_TC : BACKWARD_TC )
 		: DEFAULT_TC;
@@ -247,6 +255,7 @@ void jlgr_vo_txmap(jlgr_t* jlgr, jl_vo_t* vo, uint8_t orientation,
  * @param rgba: { (4 * vertex count) values }
 **/
 void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
+	jlgr_vo_init__(jlgr->jl, vo);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	jlgr_vo_color_buffer__(jlgr, vo, rgba);
 }
@@ -258,6 +267,7 @@ void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
  * @param rgba: { 4 values }
 **/
 void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
+	jlgr_vo_init__(jlgr->jl, vo);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	float rgbav[4 * vo->vc];
 	uint32_t i;
@@ -274,6 +284,7 @@ void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
  * @param pos: The new position.
 **/
 void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos) {
+	jlgr_vo_exit__(vo, "Can't Move!");
 	vo->pr.cb.pos = pos;
 }
 
@@ -285,6 +296,7 @@ void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos) {
  *	jlgr_opengl_draw1(). )
 **/
 void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
+	jlgr_vo_exit__(vo, "Can't Draw2!");
 	jl_print_function(jlgr->jl, "GL/Draw");
 	// Use Temporary Vertex Object If no vertex object.
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
@@ -313,6 +325,8 @@ void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
  * @param vo: The vertex object to draw.
 **/
 void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo) {
+	if(vo->jl == NULL) jl_exit(jlgr->jl, "Can't Draw");
+	jlgr_vo_exit__(vo, "Can't Draw!");
 	jlgr_glsl_t* shader = vo->tx ?
 		&jlgr->gl.prg.texture : &jlgr->gl.prg.color;
 
@@ -332,6 +346,7 @@ void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo) {
  * @param vo: The vertex object.
 **/
 void jlgr_vo_draw_pr(jlgr_t* jlgr, jl_vo_t* vo) {
+	jlgr_vo_exit__(vo, "Can't Draw Pre-Rendered!");
 	jlgr_pr_draw(jlgr, &vo->pr, &vo->pr.cb.pos, 0);
 }
 
@@ -341,6 +356,7 @@ void jlgr_vo_draw_pr(jlgr_t* jlgr, jl_vo_t* vo) {
  * @param vo: The vertex object to free
 **/
 void jlgr_vo_free(jlgr_t* jlgr, jl_vo_t *vo) {
+	jlgr_vo_exit__(vo, "Can't Free!");
 	// Free GL VBO
 	jlgr_opengl_buffer_old_(jlgr, &vo->gl);
 	// Free GL Texture Buffer

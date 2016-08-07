@@ -1,4 +1,9 @@
 #include "JLprivate.h"
+#include "jlau.h"
+#include "jlgr.h"
+
+void jlau_kill(jlau_t* jlau);
+void jlgr_kill(jlgr_t* jlgr);
 
 void jl_mode_loop__(jl_t* jl);
 

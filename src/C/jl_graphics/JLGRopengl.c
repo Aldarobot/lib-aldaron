@@ -833,10 +833,6 @@ static inline void _jl_gl_make_res(jlgr_t* jlgr) {
 	_jl_gl_init_setup_gl(jlgr);
 	// Create shaders and set up attribute/uniform variable communication
 	_jl_gl_init_shaders(jlgr);
-	//
-	JL_PRINT_DEBUG(jlgr->jl, "making temporary vertex object....");
-	jlgr_vo_init(jlgr, &jlgr->gl.temp_vo);
-	JL_PRINT_DEBUG(jlgr->jl, "making default texc buff!");
 	// Default GL Texture Coordinate Buffer
 	jlgr_opengl_buffer_set_(jlgr, &jlgr->gl.default_tc, DEFAULT_TC, 8);
 	jlgr_opengl_buffer_set_(jlgr, &jlgr->gl.upsidedown_tc, UPSIDEDOWN_TC, 8);

@@ -19,17 +19,14 @@ void jlgr_mouse_resize__(jlgr_t* jlgr) {
 }
 
 void jlgr_mouse_draw__(jlgr_t* jlgr) {
+	if(jlgr->mouse.jl == NULL) return;
+	jlgr_vo_move(&jlgr->mouse, (jl_vec3_t) {
+		al_safe_get_float(&jlgr->main.ct.msx),
+		al_safe_get_float(&jlgr->main.ct.msy), 0.f});
 	jlgr_vo_draw(jlgr, &jlgr->mouse);
 }
 
-// Run every frame for mouse
-void jlgr_mouse_loop__(jlgr_t* jlgr) {
-	jlgr_vo_move(&jlgr->mouse, (jl_vec3_t) {
-		jlgr->main.ct.msx, jlgr->main.ct.msy, 0.f});
-}
-
 void jlgr_mouse_init__(jlgr_t* jlgr) {
-	jlgr_vo_init(jlgr, &jlgr->mouse);
 	jlgr_mouse_resize__(jlgr);
 }
 #endif

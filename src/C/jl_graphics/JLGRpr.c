@@ -111,7 +111,7 @@ void jlgr_pr_off(jlgr_t* jlgr) {
 /**
  * THREAD: Draw thread only.
  * Resize a prerenderer.
- * @param jl: The library context.
+ * @param jlgr: The library context.
  * @param pr: The pre-renderer to resize.
  * @param w: The display width. [ 0. - 1. ]
  * @param h: The display height. [ 0. - 1. ]
@@ -135,29 +135,6 @@ void jlgr_pr_resize(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px){
 	jlgr_opengl_vertices_(jlgr, xyzw, 4, pr->cv, &pr->gl);
 	// Set width, height and aspect ratio.
 	jlgr_pr_set__(pr, w, h, w_px);
-}
-
-/**
- * THREAD: any
- * Make a new pre-renderer.  Call to jlgr_pr_resize(); is necessary after this.
- * @param jlgr: The library context.
- * @param w: The display width. [ 0. - 1. ]
- * @param h: The display height. [ 0. - 1. ]
- * @param w_px: The resolution in pixels along the x axis [ 1- ]
-**/
-void jlgr_pr_init(jlgr_t* jlgr, jl_pr_t* pr) {
-	jl_t* jl = jlgr->jl;
-
-	jl_print_function(jl, "GL_PR_NEW");
-	// Set the initial pr structure values - Nothings made yet.
-	pr->tx = 0;
-	pr->fb = 0;
-	pr->gl = 0;
-	// Clear pr->cv
-	jl_mem_clr(pr->cv, 4*sizeof(float)*3);
-	// Set width, height and aspect ratio.
-	jlgr_pr_set__(pr, 1.f, 1.f, 1);
-	jl_print_return(jl, "GL_PR_NEW");
 }
 
 /**

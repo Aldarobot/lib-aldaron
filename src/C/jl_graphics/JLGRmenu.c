@@ -21,13 +21,13 @@ char *GMessage[3] = {
 static void jlgr_menu_loop_press__(jlgr_t* jlgr, jlgr_input_t input) {
 	jl_menu_t* menu = input.data;
 	// Figure out what's selected.
-	const uint8_t selected = (uint8_t)((1. - jlgr->main.ct.msx) / .1);
+	const uint8_t selected = (uint8_t)((1. - al_safe_get_float(&jlgr->main.ct.msx)) / .1);
 
 	for(menu->cursor = 0; menu->cursor < 10; menu->cursor++){
 		// If A NULL function then, stop looping menubar.
 		if( !(menu->inputfn[menu->cursor]) ) break;
 		// Run the input loop.
-		if(menu->cursor == selected && jlgr->main.ct.msy < .1)
+		if(menu->cursor == selected && al_safe_get_float(&jlgr->main.ct.msy) < .1)
 			menu->inputfn[menu->cursor](jlgr, input);
 	}
 }
@@ -78,9 +78,6 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 		sizeof(jl_menu_t));
 	menu = jl_thread_pvar_edit(&jlgr->menubar.pvar);
 
-	jlgr_vo_init(jlgr, &menu->icon);
-	jlgr_vo_init(jlgr, &menu->shadow);
-
 	// Make the shadow vertex object.
 	jlgr_vo_set_rect(jlgr, &menu->shadow, rc_shadow, shadow_color, 0);
 	// Make the icon vertex object.
@@ -95,7 +92,6 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 	}
 	menu->cursor = -1;
 	// Make the menubar.
-	jlgr_vo_init(jlgr, &jlgr->menubar.menubar);
 	jlgr_vo_rect(jlgr, &jlgr->menubar.menubar, &rc);
 	jl_thread_pvar_drop(&jlgr->menubar.pvar, (void**)&menu);
 

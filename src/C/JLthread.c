@@ -7,6 +7,7 @@
  *	This file handles a separate thread for drawing graphics.
 **/
 #include "JLprivate.h"
+#include "al_safe.h"
 
 #define JL_THREAD_MUTEX_UNLOCKED 255
 
@@ -260,6 +261,31 @@ void jl_thread_wait_init(jl_t* jl, jl_wait_t* wait) {
 
 void jl_thread_wait_stop(jl_t* jl, jl_wait_t* wait) {
 	SDL_AtomicSet(&wait->wait, 0);
+}
+
+/**
+ * Set a thread safe variable
+**/
+void al_safe_set(void* var, void* set, size_t size) {
+	SDL_AtomicLock(var);
+	jl_mem_copyto(set, var + sizeof(SDL_SpinLock), size);
+	SDL_AtomicUnlock(var);
+}
+
+void al_safe_get(void* var, void* set, size_t size) {
+	SDL_AtomicLock(var);
+	jl_mem_copyto(var + sizeof(SDL_SpinLock), set, size);
+	SDL_AtomicUnlock(var);
+}
+
+void al_safe_set_float(safe_float_t* var, float value) {
+	al_safe_set(var, &value, sizeof(float));
+}
+
+float al_safe_get_float(safe_float_t* var) {
+	float value;
+	al_safe_get(var, &value, sizeof(float));
+	return value;
 }
 
 //

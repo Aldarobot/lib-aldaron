@@ -9,15 +9,11 @@
  */
 #include "JLGRprivate.h"
 
-void jlgr_mouse_loop__(jlgr_t* jlgr);
-
 static void jlgr_loop_(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
 	// Update events.
 	jl_ct_loop__(jlgr);
-	// Update mouse
-	jlgr_mouse_loop__(jlgr);
 	// Run Main Loop
 	main_loop_(jl);
 }

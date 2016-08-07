@@ -2,6 +2,7 @@
 #define JLGR
 
 #include "jl.h"
+#include "al_safe.h"
 
 #include "SDL_events.h"
 
@@ -356,8 +357,8 @@ typedef struct{
 		struct {
 			void* getEvents[JLGR_INPUT_NONE];
 
-			float msx, msy;
-			int msxi, msyi;
+			safe_float_t msx, msy;
+			int32_t msxi, msyi;
 
 			SDL_Event event;
 		
@@ -612,7 +613,6 @@ void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 void jlgr_notify(jlgr_t* jlgr, const char* notification, ...);
 
 // JLGRvo.c
-void jlgr_vo_init(jlgr_t* jlgr, jl_vo_t* vo);
 void jlgr_vo_rect(jlgr_t* jlgr, jl_vo_t* vo, jl_rect_t* rc);
 void jlgr_vo_set_vg(jlgr_t* jlgr, jl_vo_t *vo, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor);
@@ -633,7 +633,6 @@ void jlgr_vo_free(jlgr_t* jlgr, jl_vo_t *vo);
 // JLGRpr.c
 void jlgr_pr_off(jlgr_t* jlgr);
 void jlgr_pr_resize(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
-void jlgr_pr_init(jlgr_t* jlgr, jl_pr_t* pr);
 void jlgr_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, uint8_t orient);
 void jlgr_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
 

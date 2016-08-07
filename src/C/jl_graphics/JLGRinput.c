@@ -65,8 +65,8 @@ static void jlgr_input_press2__(jlgr_t* jlgr, uint8_t countit) {
 	//hrxypk
 	jlgr->input.input.h = jlgr->input.states[jlgr->main.ct.current_event];
 	jlgr->input.input.r = 0.;
-	jlgr->input.input.x = jlgr->main.ct.msx;
-	jlgr->input.input.y = jlgr->main.ct.msy;
+	jlgr->input.input.x = al_safe_get_float(&jlgr->main.ct.msx);
+	jlgr->input.input.y = al_safe_get_float(&jlgr->main.ct.msy);
 	if(countit) {
 		jlgr->input.input.k = 1;
 		jlgr->input.input.p = 1.;
@@ -158,39 +158,39 @@ static void jlgr_input_wasd__(jlgr_t *jlgr, jlgr_input_fnct inputfn) {
 }*/
 
 void jlgr_input_dirnear__(jlgr_t *jlgr, jlgr_input_fnct inputfn) {
+	float msx = al_safe_get_float(&jlgr->main.ct.msx);
+	float msy = al_safe_get_float(&jlgr->main.ct.msy);
 	uint8_t near_right = jlgr->main.ct.input.click &&
-		(jlgr->main.ct.msx > .6f) &&
-		(jlgr->main.ct.msx < .8f) &&
-		(jlgr->main.ct.msy > .2f * jlgr->wm.ar) &&
-		(jlgr->main.ct.msy < .8f * jlgr->wm.ar);
+		(msx > .6f) &&
+		(msx < .8f) &&
+		(msy > .2f * jlgr->wm.ar) &&
+		(msy < .8f * jlgr->wm.ar);
 	uint8_t near_left = jlgr->main.ct.input.click &&
-		(jlgr->main.ct.msx < .4f) &&
-		(jlgr->main.ct.msx > .2f) &&
-		(jlgr->main.ct.msy > .2f * jlgr->wm.ar) &&
-		(jlgr->main.ct.msy < .8f * jlgr->wm.ar);
+		(msx < .4f) &&
+		(msx > .2f) &&
+		(msy > .2f * jlgr->wm.ar) &&
+		(msy < .8f * jlgr->wm.ar);
 	uint8_t near_up = jlgr->main.ct.input.click &&
-		(jlgr->main.ct.msy < .4f * jlgr->wm.ar) &&
-		(jlgr->main.ct.msy > .2f * jlgr->wm.ar) &&
-		(jlgr->main.ct.msx >.2f) &&
-		(jlgr->main.ct.msx <.8f);
+		(msy < .4f * jlgr->wm.ar) &&
+		(msy > .2f * jlgr->wm.ar) &&
+		(msx >.2f) &&
+		(msx <.8f);
 	uint8_t near_down = jlgr->main.ct.input.click &&
-		(jlgr->main.ct.msy > .6f * jlgr->wm.ar) &&
-		(jlgr->main.ct.msy < .8f * jlgr->wm.ar) &&
-		(jlgr->main.ct.msx > .2f) &&
-		(jlgr->main.ct.msx < .8f);
+		(msy > .6f * jlgr->wm.ar) &&
+		(msy < .8f * jlgr->wm.ar) &&
+		(msx > .2f) &&
+		(msx < .8f);
 
 	jlgr_input_fourdir(jlgr,inputfn,near_up,near_down,near_left,near_right);
 }
 
 void jlgr_input_dirfar__(jlgr_t *jlgr, jlgr_input_fnct inputfn) {
-	uint8_t far_right = jlgr->main.ct.input.click &&
-		(jlgr->main.ct.msx>.8f);
-	uint8_t far_left = jlgr->main.ct.input.click &&
-		(jlgr->main.ct.msx<.2f);
-	uint8_t far_up = jlgr->main.ct.input.click &&
-		(jlgr->main.ct.msy<.2f * jlgr->wm.ar);
-	uint8_t far_down = jlgr->main.ct.input.click &&
-		(jlgr->main.ct.msy>.8f * jlgr->wm.ar);
+	float msx = al_safe_get_float(&jlgr->main.ct.msx);
+	float msy = al_safe_get_float(&jlgr->main.ct.msy);
+	uint8_t far_right = jlgr->main.ct.input.click && (msx>.8f);
+	uint8_t far_left = jlgr->main.ct.input.click && (msx<.2f);
+	uint8_t far_up = jlgr->main.ct.input.click && (msy<.2f * jlgr->wm.ar);
+	uint8_t far_down = jlgr->main.ct.input.click && (msy>.8f * jlgr->wm.ar);
 
 	jlgr_input_fourdir(jlgr,inputfn, far_up, far_down, far_left, far_right);
 }
@@ -211,11 +211,15 @@ void jl_ct_key_menu(jlgr_t *jlgr, jlgr_input_fnct inputfn) {
 static inline void jlgr_input_handle_events_platform_dependant__(jlgr_t* jlgr) {
 #if JL_PLAT == JL_PLAT_PHONE
 	if( jlgr->main.ct.event.type==SDL_FINGERDOWN ) {
-		jlgr->main.ct.msx = jlgr->main.ct.event.tfinger.x;
+		float msy;
+
 		jlgr->main.ct.input.click = 1;
-		jlgr->main.ct.msy = jlgr->main.ct.event.tfinger.y * jlgr->wm.ar;
-		jlgr->main.ct.msy -= JL_SHRINK_HEIGHT;
-		jlgr->main.ct.msy /= (1.f - JL_SHRINK_HEIGHT);
+		msy = jlgr->main.ct.event.tfinger.y * jlgr->wm.ar;
+		msy -= JL_SHRINK_HEIGHT;
+		msy /= (1.f - JL_SHRINK_HEIGHT);
+		al_safe_set_float(&jlgr->main.ct.msx,
+			jlgr->main.ct.event.tfinger.x);
+		al_safe_set_float(&jlgr->main.ct.msy, msy);
 		if(jlgr->sg.cs != JL_SCR_SS) {
 			jlgr->main.ct.msy = jlgr->main.ct.msy * 2.;
 			jlgr->main.ct.msy -= jlgr->wm.ar;
@@ -388,14 +392,13 @@ void jl_ct_loop__(jlgr_t* jlgr) {
 		int32_t mousex = jlgr->main.ct.msxi;
 		int32_t mousey = jlgr->main.ct.msyi;
 		//translate integer into float by clipping [0-1]
-		jlgr->main.ct.msx = ((float)mousex) / jlgr_wm_getw(jlgr);
-		jlgr->main.ct.msy = ((float)mousey) / jlgr_wm_geth(jlgr);
-		if(jlgr->sg.cs != JL_SCR_SS) jlgr->main.ct.msy -= .5;
-		jlgr->main.ct.msy *= jlgr->wm.ar;
+		float msy = ((float)mousey) / jlgr_wm_geth(jlgr);
+		if(jlgr->sg.cs != JL_SCR_SS) msy -= .5;
+		msy *= jlgr->wm.ar;
 
 		// Ignore mouse input on upper screen.
-		if(jlgr->sg.cs != JL_SCR_SS && jlgr->main.ct.msy < 0.) {
-			jlgr->main.ct.msy = 0.;
+		if(jlgr->sg.cs != JL_SCR_SS && msy < 0.) {
+			msy = 0.;
 			// Show native cursor.
 			if(!jlgr->main.ct.sc) {
 				SDL_ShowCursor(SDL_ENABLE);
@@ -408,6 +411,9 @@ void jl_ct_loop__(jlgr_t* jlgr) {
 				jlgr->main.ct.sc = 0;
 			}
 		}
+		al_safe_set_float(&jlgr->main.ct.msy, msy);
+		al_safe_set_float(&jlgr->main.ct.msx,
+			((float)mousex) / jlgr_wm_getw(jlgr));
 		// F11 toggle fullscreen.
 		if(jl_ct_key_pressed__(jlgr, SDL_SCANCODE_F11) == 1)
 			jlgr_wm_togglefullscreen(jlgr);

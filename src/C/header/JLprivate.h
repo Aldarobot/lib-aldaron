@@ -1,7 +1,5 @@
 // JL_LIB
 	#include "jl.h"
-	#include "jlau.h"
-	#include "jlgr.h"
 // Standard Libraries
 	#include <stdio.h>
 	#include <dirent.h>
@@ -59,8 +57,6 @@ uint32_t jl_gem_size(void);
 	void jl_mem_kill_(jl_t* jl);
 	void jl_print_kill__(jl_t* jl);
 	void jl_sdl_kill__(jl_t* jl);
-	void jlau_kill(jlau_t* jlau);
-	void jlgr_kill(jlgr_t* jlgr);
 
 	// LIB THREAD INITS
 	void jl_print_init_thread__(jl_t* jl, uint8_t thread_id);

@@ -9,6 +9,7 @@
 #include "JLGRprivate.h"
 
 void jlgr_mouse_resize__(jlgr_t* jlgr);
+void jl_mode_loop__(jl_t* jl);
 
 static void jlgr_thread_programsresize(jlgr_t* jlgr) {
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
@@ -100,6 +101,8 @@ int jlgr_thread_draw(void* data) {
 
 	// Initialize subsystems
 	jlgr_thread_draw_init__(jl);
+	// Update Modes
+	jl_mode_loop__(jl);
 	// Redraw loop
 	while(SDL_AtomicGet(&jlgr->running)) {
 		// Check for resize

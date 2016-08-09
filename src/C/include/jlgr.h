@@ -439,6 +439,7 @@ typedef struct{
 			jl_vec3_t light_color;
 			jl_vec3_t light_power;
 			float material_brightness;
+			int32_t light_texture;
 		}light;
 
 		float colors[4];
@@ -669,10 +670,12 @@ void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
 	jl_vec3_t* material);
 void jlgr_effects_hue(jlgr_t* jlgr, float c[]);
 
+uint32_t jlgr_effects_light_generate(jlgr_t* jlgr, float feathering,
+	jl_vec3_t color);
 void jlgr_effects_light_reset(jlgr_t* jlgr, jl_vo_t* vo);
 void jlgr_effects_light_aa(jlgr_t* jlgr, jl_vo_t* vo,
 	jl_vec3_t light_position, jl_vec3_t light_color, jl_vec3_t light_power,
-	float material_brightness);
+	float material_brightness, uint32_t texture);
 void jlgr_effects_draw(jlgr_t* jlgr, jl_vo_t* vo);
 
 void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t* material);

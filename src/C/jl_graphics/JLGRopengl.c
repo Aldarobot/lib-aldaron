@@ -333,7 +333,7 @@ uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 		jl_print(jlgr->jl, "null pixels");
 		exit(-1);
 	}
-	JL_PRINT_DEBUG(jlgr->jl, "generating texture (%d,%d)",width,height);
+	JL_PRINT_DEBUG(jlgr->jl, "generating texture (%d,%d)", width, height);
 	// Make the texture.
 	jlgr_opengl_texture_new_(jlgr, &texture, pixels, width, height, bytepp);
 	jl_print_return(jlgr->jl, "GL_MkTex");

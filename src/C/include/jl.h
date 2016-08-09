@@ -308,6 +308,8 @@ void jl_thread_wait_init(jl_t* jl, jl_wait_t* wait);
 void jl_thread_wait_stop(jl_t* jl, jl_wait_t* wait);
 
 // "JLsdl.c"
+double jl_time_get(jl_t* jl);
 double jl_sdl_timer(jl_t* jl, double* timer);
+double jl_time_regulatefps(jl_t* jl, double* timer, uint8_t* on_time);
 
 #endif

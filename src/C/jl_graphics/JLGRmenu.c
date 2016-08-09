@@ -156,9 +156,9 @@ static void jlgr_menu_slow_draw__(jlgr_t* jlgr, void* menu) {
 	jlgr_menu_draw_icon(jlgr, jlgr->textures.icon, jlgr->sg.on_time ?
 		JLGR_ID_GOOD_IMAGE : JLGR_ID_SLOW_IMAGE, menu);
 	// Report the seconds that passed.
-	jl_mem_format(formated, "DrawFPS:%d", (int)(1. / jlgr->psec));
+	jl_mem_format(formated, "DrawFPS:%d", (int)(round(1. / jlgr->psec)));
 	jlgr_menubar_text__(jlgr, color, 0., formated, menu);
-	jl_mem_format(formated, "MainFPS:%d", (int)(1. / jl->time.psec));
+	jl_mem_format(formated, "MainFPS:%d", (int)(round(1. / jl->time.psec)));
 	jlgr_menubar_text__(jlgr, color, .05, formated, menu);
 }
 

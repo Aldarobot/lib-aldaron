@@ -52,6 +52,8 @@ static inline void jl_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 	_fnc_init_(jl);
 	// Run the mode loop
 	jl_mode_loop__(jl);
+	//
+	jl->time.timer = jl_time_get(jl);
 	JL_PRINT_DEBUG(jl, "Started JL_Lib!");
 }
 
@@ -66,12 +68,10 @@ static void jl_time_reset__(jl_t* jl, uint8_t on_time) {
 
 //return how many seconds passed since last call
 static inline void jl_seconds_passed__(jl_t* jl) {
-	uint16_t fps;
+	uint8_t isOnTime;
 
-	jl->time.psec = jl_sdl_timer(jl, &jl->time.timer);
-	fps = (uint16_t)(1. / jl->time.psec);
-	// Tell if fps is 60 fps or better
-	jl_time_reset__(jl, fps >= JL_FPS);
+	jl->time.psec = jl_time_regulatefps(jl, &jl->time.timer, &isOnTime);
+	jl_time_reset__(jl, isOnTime);
 }
 
 static inline int jl_kill__(jl_t* jl, int32_t rc) {

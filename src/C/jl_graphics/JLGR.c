@@ -52,6 +52,8 @@ jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 	jl_thread_wait_init(jl, &jlgr->wait);
 	// Start Drawing thread.
 	jlgr_thread_init(jlgr, fn_);
+	// Wait for drawing thread to initialize, if not initialized already.
+	jl_thread_wait(jlgr->jl, &jlgr->wait);
 	jl_print_return(jl, "jlgr-init2");
 	return jlgr;
 }
@@ -68,9 +70,6 @@ jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 	jl_fnct downscreen, jl_fnct resize)
 {
-	// Wait for drawing thread to initialize, if not initialized already.
-	jl_thread_wait(jlgr->jl, &jlgr->wait);
-
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
 	pjlgr->functions.redraw.single = onescreen;
 	pjlgr->functions.redraw.upper = upscreen;

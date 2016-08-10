@@ -10,13 +10,13 @@
 #include "JLprivate.h"
 #include "jlau.h"
 
-#define JLAU_DEBUG_CHECK(jlau) jlau_checkthread__(jlau)
+#define JLAU_DEBUG_CHECK(jlau)// jlau_checkthread__(jlau)
 #define JLAU_CHANNEL_MUSIC -2
 #define JLAU_CHANNEL_SOUND -3
 #define JLAU_CHANNEL_LOCK -4
 
 /** @cond **/
-static void jlau_checkthread__(jlau_t* jlau) {
+/*static void jlau_checkthread__(jlau_t* jlau) {
 	uint8_t thread = jl_thread_current(jlau->jl);
 	if(thread != 0) {
 		jl_print(jlau->jl, "Audio fn is on the Wrong Thread: %d",
@@ -25,7 +25,7 @@ static void jlau_checkthread__(jlau_t* jlau) {
 			jl_print_stacktrace(jlau->jl);
 		exit(-1);
 	}
-}
+}*/
 
 static inline int32_t jlau_sec2ms__(float sec) {
 	int32_t ms = ((int32_t)(sec * 1000.f));

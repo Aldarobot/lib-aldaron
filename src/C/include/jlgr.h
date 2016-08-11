@@ -336,9 +336,7 @@ typedef struct{
 	// For Programer's Use
 	float fontcolor[4];
 	jl_font_t font;
-#if JL_PLAT == JL_PLAT_COMPUTER
 	jl_vo_t mouse;
-#endif
 
 	uint8_t thread; // Graphical Thread ID.
 	jl_wait_t wait;

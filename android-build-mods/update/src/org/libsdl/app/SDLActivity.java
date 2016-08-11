@@ -32,8 +32,8 @@ import android.hardware.*;
 import android.content.pm.ActivityInfo;
 
 import com.millennialmedia.MMSDK;
-//import com.millennialmedia.InlineAd;
-//import com.millennialmedia.MMException;
+import com.millennialmedia.InlineAd;
+import com.millennialmedia.MMException;
 
 /**
 	SDL Activity
@@ -123,7 +123,7 @@ public class SDLActivity extends Activity {
 
 	// Ad Variable
 //	public static final String PLACEMENT_ID = "230261";
-//	private InlineAd inlineAd;
+	private InlineAd inlineAd = null;
 
 	// Setup
 	@Override
@@ -189,6 +189,81 @@ public class SDLActivity extends Activity {
 
 		mLayout = new AbsoluteLayout(this);
 
+		try {
+			inlineAd = InlineAd.createInstance(
+				"230261", (ViewGroup) mLayout);
+
+			inlineAd.setListener(new InlineAd.InlineListener() {
+				@Override
+				public void onRequestSucceeded(InlineAd inlineAd) {
+					System.out.println(":I/SDL/APP: " +
+						"Inline Ad loaded.");
+				}
+
+				@Override
+				public void onRequestFailed(InlineAd inlineAd,
+					InlineAd.InlineErrorStatus errorStatus)
+				{
+					System.out.println(":I/SDL/APP: " +
+						errorStatus.toString());
+				}
+
+				@Override
+				public void onClicked(InlineAd inlineAd) {
+					System.out.println(":I/SDL/APP: " +
+						"Inline Ad clicked.");
+				}
+
+				@Override
+				public void onResize(InlineAd inlineAd,
+					int width, int height)
+				{
+					System.out.println(":I/SDL/APP: " +
+						"Inline Ad starting resize.");
+				}
+
+				@Override
+				public void onResized(InlineAd inlineAd,
+					int width, int height,
+					boolean toOriginalSize)
+				{
+					System.out.println(":I/SDL/APP: " +
+						"Inline Ad resized.");
+				}
+
+				@Override
+				public void onExpanded(InlineAd inlineAd) {
+					System.out.println(":I/SDL/APP: " +
+						"Inline Ad expanded.");
+				}
+
+				@Override
+				public void onCollapsed(InlineAd inlineAd) {
+					System.out.println(":I/SDL/APP: " +
+						"Inline Ad collapsed.");
+				}
+
+				@Override
+				public void onAdLeftApplication(InlineAd inlineAd) {
+					System.out.println(":I/SDL/APP: " +
+						"Inline Ad left application.");
+				}
+
+			});
+		} catch (MMException e) {
+			System.out.println(":I/SDL/APP: Error creating inline ad");
+			Log.e(TAG, ":I/SDL/APP: Error creating inline ad", e);
+		}
+
+		if (inlineAd != null) {
+			// set refresh rate to 30 seconds.
+		//	inlineAd.setRefreshInterval(30000);
+
+			final InlineAd.InlineAdMetadata inlineAdMetadata = new InlineAd.InlineAdMetadata().setAdSize(InlineAd.AdSize.BANNER);
+
+			inlineAd.request(inlineAdMetadata);
+		}
+
 		// ad stuff
 /*		adView = new MMAdView(this);
 		adView.setApid("230261");
@@ -210,8 +285,7 @@ public class SDLActivity extends Activity {
 
 		if(Build.VERSION.SDK_INT >= 12) {
 			mJoystickHandler = new SDLJoystickHandler_API12();
-		}
-		else {
+		} else {
 			mJoystickHandler = new SDLJoystickHandler();
 		}
 

@@ -217,15 +217,16 @@ static inline void jlgr_input_handle_events_platform_dependant__(jlgr_t* jlgr) {
 		msy = jlgr->main.ct.event.tfinger.y * jlgr->wm.ar;
 		msy -= JL_SHRINK_HEIGHT;
 		msy /= (1.f - JL_SHRINK_HEIGHT);
+
+		if(jlgr->sg.cs != JL_SCR_SS) {
+			msy = msy * 2.;
+			msy -= jlgr->wm.ar;
+			if(msy < 0.) jlgr->main.ct.input.click = 0;
+		}
+
 		al_safe_set_float(&jlgr->main.ct.msx,
 			jlgr->main.ct.event.tfinger.x);
 		al_safe_set_float(&jlgr->main.ct.msy, msy);
-		if(jlgr->sg.cs != JL_SCR_SS) {
-			jlgr->main.ct.msy = jlgr->main.ct.msy * 2.;
-			jlgr->main.ct.msy -= jlgr->wm.ar;
-			if(jlgr->main.ct.msy < 0.) jlgr->main.ct.input.click = 0;
-		}
-
 	}else if( jlgr->main.ct.event.type==SDL_FINGERUP ) {
 		jlgr->main.ct.input.click = 0;
 	}else if( jlgr->main.ct.event.type==SDL_KEYDOWN || jlgr->main.ct.event.type==SDL_KEYUP) {

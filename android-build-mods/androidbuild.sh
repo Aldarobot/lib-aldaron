@@ -198,8 +198,8 @@ $ZIPALIGN -v 4 bin/$APP-release-unsigned.apk $APK
 if [ -f "$APK" ]; then
 	$ADB install -r $APK
 	$ADB shell am start -a android.intent.action.MAIN -n $APP/.$ACTIVITY
-	$ADB logcat "*:E" | grep E\/AndroidRuntime
-#	$ADB logcat | grep SDL\/APP
+#	$ADB logcat "*:E" | grep E\/AndroidRuntime
+	$ADB logcat | grep SDL\/APP
 	exit 0
 fi
 

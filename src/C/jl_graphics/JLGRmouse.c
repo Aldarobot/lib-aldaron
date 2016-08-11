@@ -8,7 +8,7 @@
 **/
 #include "JLGRprivate.h"
 
-#if JL_PLAT == JL_PLAT_COMPUTER // show mouse if computer
+//#if JL_PLAT == JL_PLAT_COMPUTER // show mouse if computer
 void jlgr_mouse_resize__(jlgr_t* jlgr) {
 	jl_rect_t rc = { 0.f, 0.f, .05f, .05f };
 
@@ -29,4 +29,4 @@ void jlgr_mouse_draw__(jlgr_t* jlgr) {
 void jlgr_mouse_init__(jlgr_t* jlgr) {
 	jlgr_mouse_resize__(jlgr);
 }
-#endif
+//#endif

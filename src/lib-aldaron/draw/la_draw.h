@@ -2,7 +2,7 @@
 #define JLGR
 
 #include "jl.h"
-#include "al_safe.h"
+#include "la_safe.h"
 
 #include "SDL_events.h"
 

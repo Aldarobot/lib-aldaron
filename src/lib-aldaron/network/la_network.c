@@ -4,7 +4,7 @@
  * It lets you send network packets.  It uses SDL_net.
 */
 
-#include "aldc.h"
+#include "la_network.h"
 
 /**
  * Initialize Lib-Aldaron-Comm

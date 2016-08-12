@@ -1,0 +1,8 @@
+	## user-name ##
+jeron
+	## package-name (program-name without spaces) ##
+example
+	## program-name ##
+example
+	## orientation? ##
+portrait

@@ -7,7 +7,7 @@
  *	This file handles a separate thread for drawing graphics.
 **/
 #include "JLprivate.h"
-#include "al_safe.h"
+#include "la_safe.h"
 
 #define JL_THREAD_MUTEX_UNLOCKED 255
 

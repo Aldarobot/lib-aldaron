@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
-#include "gen/JLmedia.h"
+#include "la_media.h"
 
 // Get Embeded Media
 void *jl_gem(void) {

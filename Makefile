@@ -20,11 +20,15 @@ OBJ_SDL_NET = build/deps/sdl-net.o
 OBJ_LIBZIP = build/deps/libzip.o
 
 # Default target
-build: build/ $(OBJ_CLUMP) $(OBJ_SDL) $(OBJ_SDL_IMAGE) $(OBJ_SDL_MIXER) $(OBJ_SDL_NET) $(OBJ_LIBZIP)
-	rm build/deps.o
+build: build/ $(OBJ_CLUMP) $(OBJ_SDL) $(OBJ_SDL_IMAGE) $(OBJ_SDL_MIXER) $(OBJ_SDL_NET) $(OBJ_LIBZIP) ~/.libaldaron
+	rm -f build/deps.o
 	# Linking library dependencies....
 	ar csr build/deps.o build/deps/*.o
 	# Built library dependencies!
+
+~/.libaldaron:
+	echo `pwd` >> ~/.libaldaron
+	echo /bin >> ~/.libaldaron
 
 documentation:
 	doxygen compile-scripts/doxygen

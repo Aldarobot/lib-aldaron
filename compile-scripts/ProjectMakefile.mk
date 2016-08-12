@@ -1,10 +1,16 @@
 ################################################################################
 
-# Figure out which platform.
-include $(shell echo $(JLL_HOME))/compile-scripts/platform.mk
+help: src/lib-aldaron/
+	# Hi!  Welcome to lib-aldaron!
+	#	________________________________________________________________
+	#	make release --silent	|	Make maximum optimized output.
+	#	make test --silent	|	Leave in debug symbols.
+	#	make debug --silent	|	Run in GDB.
+	#	make android --silent	|	Make for android.
+	#	make clean --silent	|	Clean builds.
 
-JLL_DEPS = $(shell echo $(JLL_HOME))/deps
-include $(shell echo $(JLL_HOME))/compile-scripts/mopub-sdk.mk
+# Figure out which platform.
+include $(shell sed '1q;d' ~/.libaldaron)/compile-scripts/platform.mk
 
 CURDIR=`pwd -P`
 
@@ -21,10 +27,10 @@ USERNAME="`sed '2q;d' data.txt`"
 # C & C++ Modules
 MODULES = \
 	$(subst .c,, $(subst .cpp,, $(shell basename -a \
-	$(shell find $(SRC)/ -type f -name '*.c') \
-	$(shell find $(SRC)/ -type f -name '*.cpp') \
+	$(shell find -L $(SRC)/ -type f -name '*.c') \
+	$(shell find -L $(SRC)/ -type f -name '*.cpp') \
 )))
-HEADERS = $(shell find $(SRC)/ -type f -name '*.h')
+HEADERS = $(shell find -L $(SRC)/ -type f -name '*.h')
 
 # Test & Release
 OBJS_PROF = $(addprefix $(BUILD_OBJ_PROF)/, $(addsuffix .o,$(MODULES)))
@@ -32,14 +38,14 @@ OBJS_TEST = $(addprefix $(BUILD_OBJ_TEST)/, $(addsuffix .o,$(MODULES)))
 OBJS_RELEASE = $(addprefix $(BUILD_OBJ_RELEASE)/, $(addsuffix .o,$(MODULES)))
 
 # Special MAKE variable - do not rename.
-VPATH = $(shell find $(SRC)/ -type d)
+VPATH = $(shell find -L $(SRC)/ -type d)
 # target: init
 FOLDERS = build/ src/
 
 ################################################################################
-jl-lib: $(shell echo $(JLL_HOME))/src/C/
-	mkdir -p src/lib/jl-lib/
-	cp -ur $(shell echo $(JLL_HOME))/src/C/* src/lib/jl-lib/
+src/lib-aldaron/:
+	# linking lib-aldaron
+	ln -s $(LA_HOME)/src/lib-aldaron src/
 
 -release: build-notify $(FOLDERS) -publish $(OBJS_RELEASE) -link
 -test: build-notify $(FOLDERS) -test1 $(OBJS_TEST) -link
@@ -68,50 +74,50 @@ install: -release
 	cp -u --recursive -t $$JLL_PATH/ build/bin/*; \
 	printf "Done!\n"
 
--android-sdl-mods: $(shell echo $(JLL_HOME))/android-build-mods/*
+-android-sdl-mods: $(LA_HOME)/android-build-mods/*
 	# Apply SDL mods.
-	cp -u $(shell echo $(JLL_HOME))/android-build-mods/Android.mk\
-	 $(shell echo $(JLL_HOME))/src/lib/sdl/android-project/jni/src/
-	cp -u $(shell echo $(JLL_HOME))/android-build-mods/Android_static.mk\
-	 $(shell echo $(JLL_HOME))/src/lib/sdl/android-project/jni/src/
-	cp -u $(shell echo $(JLL_HOME))/android-build-mods/SDL_image-Android.mk\
-	 $(shell echo $(JLL_HOME))/src/lib/sdl-image/Android.mk
-	cp -u $(shell echo $(JLL_HOME))/android-build-mods/jconfig.h\
-	 $(shell echo $(JLL_HOME))/src/lib/sdl-image/external/jpeg-9/jconfig.h
-	cp -u $(shell echo $(JLL_HOME))/android-build-mods/libzip-Android.mk\
-	 $(shell echo $(JLL_HOME))/src/lib/libzip/lib/Android.mk
-	cp -u $(shell echo $(JLL_HOME))/android-build-mods/SDL_config_android.h\
-	 $(shell echo $(JLL_HOME))/src/lib/sdl/include/SDL_config.h
+	cp -u $(LA_HOME)/android-build-mods/Android.mk\
+	 $(LA_HOME)/src/lib/sdl/android-project/jni/src/
+	cp -u $(LA_HOME)/android-build-mods/Android_static.mk\
+	 $(LA_HOME)/src/lib/sdl/android-project/jni/src/
+	cp -u $(LA_HOME)/android-build-mods/SDL_image-Android.mk\
+	 $(LA_HOME)/src/lib/sdl-image/Android.mk
+	cp -u $(LA_HOME)/android-build-mods/jconfig.h\
+	 $(LA_HOME)/src/lib/sdl-image/external/jpeg-9/jconfig.h
+	cp -u $(LA_HOME)/android-build-mods/libzip-Android.mk\
+	 $(LA_HOME)/src/lib/libzip/lib/Android.mk
+	cp -u $(LA_HOME)/android-build-mods/SDL_config_android.h\
+	 $(LA_HOME)/src/lib/sdl/include/SDL_config.h
 
 android: -android-sdl-mods
-	cp $(shell echo $(JLL_HOME))/android-build-mods/AndroidManifest.xml\
-	 $(shell echo $(JLL_HOME))/android-build-mods/update/AndroidManifest.xml
-	cp $(shell echo $(JLL_HOME))/android-build-mods/SDLActivity.java\
-	 $(shell echo $(JLL_HOME))/android-build-mods/update/src/org/libsdl/app/SDLActivity.java
+	cp $(LA_HOME)/android-build-mods/AndroidManifest.xml\
+	 $(LA_HOME)/android-build-mods/update/AndroidManifest.xml
+	cp $(LA_HOME)/android-build-mods/SDLActivity.java\
+	 $(LA_HOME)/android-build-mods/update/src/org/libsdl/app/SDLActivity.java
 	# Run Install Script
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-ndk-r11c && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/tools && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/platform-tools && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/build-tools/24.0.1 && \
-	sh $(shell echo $(JLL_HOME))/android-build-mods/androidbuild.sh\
+	export PATH=$$PATH:$(LA_HOME)/deps/android-ndk-r11c && \
+	export PATH=$$PATH:$(LA_HOME)/deps/android-sdk-linux/tools && \
+	export PATH=$$PATH:$(LA_HOME)/deps/android-sdk-linux/platform-tools && \
+	export PATH=$$PATH:$(LA_HOME)/deps/android-sdk-linux/build-tools/24.0.1 && \
+	sh $(LA_HOME)/android-build-mods/androidbuild.sh\
 		jlw.$(USERNAME).$(PACKNAME)\
-		$(shell echo $(JLL_HOME))/src/C/ $(CURDIR)/$(SRC)/
+		$(LA_HOME)/src/C/ $(CURDIR)/$(SRC)/
 
 android-with-ads: -android-sdl-mods
-	cp $(shell echo $(JLL_HOME))/android-build-mods/AndroidManifest-mm.xml\
-	 $(shell echo $(JLL_HOME))/android-build-mods/update/AndroidManifest.xml
-	cp $(shell echo $(JLL_HOME))/android-build-mods/SDLActivity-ad-mm.java\
-	 $(shell echo $(JLL_HOME))/android-build-mods/update/src/org/libsdl/app/SDLActivity.java
-#	cp -ur $(shell echo $(JLL_HOME))/deps/mopub-sdk/src/main/\
+	cp $(LA_HOME)/android-build-mods/AndroidManifest-mm.xml\
+	 $(LA_HOME)/android-build-mods/update/AndroidManifest.xml
+	cp $(LA_HOME)/android-build-mods/SDLActivity-ad-mm.java\
+	 $(LA_HOME)/android-build-mods/update/src/org/libsdl/app/SDLActivity.java
+#	cp -ur $(LA_HOME)/deps/mopub-sdk/src/main/\
 #	 build/android/src/
 	# Run Install Script
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-ndk-r11c && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/tools && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/platform-tools && \
-	export PATH=$$PATH:$(shell echo $(JLL_HOME))/deps/android-sdk-linux/build-tools/24.0.1 && \
-	sh $(shell echo $(JLL_HOME))/android-build-mods/androidbuild.sh\
+	export PATH=$$PATH:$(LA_HOME)/deps/android-ndk-r11c && \
+	export PATH=$$PATH:$(LA_HOME)/deps/android-sdk-linux/tools && \
+	export PATH=$$PATH:$(LA_HOME)/deps/android-sdk-linux/platform-tools && \
+	export PATH=$$PATH:$(LA_HOME)/deps/android-sdk-linux/build-tools/24.0.1 && \
+	sh $(LA_HOME)/android-build-mods/androidbuild.sh\
 		jlw.$(USERNAME).$(PACKNAME)\
-		$(shell echo $(JLL_HOME))/src/C/ $(CURDIR)/$(SRC)/
+		$(LA_HOME)/src/C/ $(CURDIR)/$(SRC)/
 
 init: $(FOLDERS)
 	printf "[COMPILE] Done!\n"
@@ -144,13 +150,13 @@ $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 -init-vars:
 	# Build Project
 	$(eval CFLAGS_INCLUDES=\
-		-I$(shell echo $(JLL_HOME))/src/lib/clump/\
-		-I$(shell echo $(JLL_HOME))/src/lib/libzip/lib\
-		-I$(shell echo $(JLL_HOME))/src/lib/sdl/include/\
-		-I$(shell echo $(JLL_HOME))/src/lib/sdl-image/\
-		-I$(shell echo $(JLL_HOME))/src/lib/sdl-mixer/\
-		-I$(shell echo $(JLL_HOME))/src/lib/sdl-net/\
-		-iquote $(addprefix -I, $(shell find src/ -type d ))\
+		-I$(LA_HOME)/src/lib/clump/\
+		-I$(LA_HOME)/src/lib/libzip/lib\
+		-I$(LA_HOME)/src/lib/sdl/include/\
+		-I$(LA_HOME)/src/lib/sdl-image/\
+		-I$(LA_HOME)/src/lib/sdl-mixer/\
+		-I$(LA_HOME)/src/lib/sdl-net/\
+		-iquote $(addprefix -I, $(shell find -L src/ -type d ))\
 		$(PLATFORM_INCLUDES))
 	$(eval CFLAGS=$(CFLAGS_INCLUDES) -Wall)
 
@@ -174,7 +180,7 @@ $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 	$(eval OBJS=$(OBJS_RELEASE))
 -link:
 	echo Linking....
-	$(CC) $(OBJS) $(shell echo $(JLL_HOME))/build/deps.o \
+	$(CC) $(OBJS) $(LA_HOME)/build/deps.o \
 		-o $(JL_OUT) $(CFLAGS) \
 		-lm -lz -ldl -lpthread -lstdc++ -ljpeg \
 		$(LINKER_LIBS) $(PLATFORM_CFLAGS) \

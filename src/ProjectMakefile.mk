@@ -77,7 +77,7 @@ install: -release
 	cp -u --recursive -t $$JLL_PATH/ build/bin/*; \
 	printf "Done!\n"
 
--android-sdl-mods: $(LA_HOME)/android-build-mods/*
+-android-sdl-mods:
 	# Apply SDL mods.
 	cp -u $(LA_HOME)/android-build-mods/Android.mk\
 	 $(LA_HOME)/src/lib/sdl/android-project/jni/src/
@@ -98,10 +98,10 @@ android: -android-sdl-mods
 	cp $(LA_HOME)/android-build-mods/SDLActivity.java\
 	 $(LA_HOME)/android-build-mods/update/src/org/libsdl/app/SDLActivity.java
 	# Run Install Script
-	export PATH=$$PATH:$(LA_HOME)/deps/android-ndk-r11c && \
-	export PATH=$$PATH:$(LA_HOME)/deps/android-sdk-linux/tools && \
-	export PATH=$$PATH:$(LA_HOME)/deps/android-sdk-linux/platform-tools && \
-	export PATH=$$PATH:$(LA_HOME)/deps/android-sdk-linux/build-tools/24.0.1 && \
+	export PATH=$$PATH:$(LA_HOME)/src/android-ndk && \
+	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/tools && \
+	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/platform-tools && \
+	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/build-tools/24.0.1 && \
 	sh $(LA_HOME)/android-build-mods/androidbuild.sh\
 		jlw.$(USERNAME).$(PACKNAME)\
 		$(LA_HOME)/src/C/ $(CURDIR)/$(SRC)/
@@ -114,10 +114,10 @@ android-with-ads: -android-sdl-mods
 #	cp -ur $(LA_HOME)/deps/mopub-sdk/src/main/\
 #	 build/android/src/
 	# Run Install Script
-	export PATH=$$PATH:$(LA_HOME)/deps/android-ndk-r11c && \
-	export PATH=$$PATH:$(LA_HOME)/deps/android-sdk-linux/tools && \
-	export PATH=$$PATH:$(LA_HOME)/deps/android-sdk-linux/platform-tools && \
-	export PATH=$$PATH:$(LA_HOME)/deps/android-sdk-linux/build-tools/24.0.1 && \
+	export PATH=$$PATH:$(LA_HOME)/src/android-ndk && \
+	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/tools && \
+	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/platform-tools && \
+	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/build-tools/24.0.1 && \
 	sh $(LA_HOME)/android-build-mods/androidbuild.sh\
 		jlw.$(USERNAME).$(PACKNAME)\
 		$(LA_HOME)/src/C/ $(CURDIR)/$(SRC)/
@@ -199,4 +199,3 @@ src/:
 	mkdir -p src/include/ # Where your program's header files are stored.
 	mkdir -p src/lib/ # Where the dependencies for your project are stored (.c*)
 #end#
-#https://codeload.github.com/google/gumbo-parser/zip/v0.10.1

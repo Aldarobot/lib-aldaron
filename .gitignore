@@ -1,6 +1,6 @@
 build
-deps
-src/lib/include/
+src/android-sdk
+src/android-ndk
 src/lib/libzip/
 src/lib/sdl/
 src/lib/sdl-mixer/

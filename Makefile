@@ -5,7 +5,6 @@ DEPS_VER_SDL_MIXER = SDL2_mixer-2.0.1
 DEPS_VER_SDL_NET = SDL2_net-2.0.1
 DEPS_VER_ZIP = libzip-1.1.2
 
-SRC_NDK = android-ndk-r11c
 SRC_SDL = src/lib/sdl
 SRC_SDL_IMAGE = src/lib/sdl-image
 SRC_SDL_MIXER = src/lib/sdl-mixer
@@ -44,12 +43,9 @@ else
 endif
 #TODO: Darwin is mac OS for uname
 
-# The Set-Up Options.
-init-all: init-build deps-all
-init-most: init-build deps-most
-
 # The Clean Options.
-clean-all: clean-build clean-deps
+clean-all:
+	rm -r build/
 clean-build:
 	# Empty directory: build/obj/
 	printf "[COMP] Cleaning up....\n"
@@ -57,13 +53,6 @@ clean-build:
 	mkdir -p build/obj/
 	rm -f build/*.o
 	printf "[COMP] Done!\n"
-clean-build-all:
-	rm -r build/
-
-# Lower Level
-deps-all: deps-most download-ndk
-deps-most: deps/ src/lib/include/ deps-sdl deps-libzip deps-sdl-net\
-	deps-sdl-image deps-sdl-mixer deps-clump
 
 build/:
 	mkdir -p build/deps/
@@ -84,25 +73,6 @@ download-ems:
 	wget https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-portable.tar.gz && \
 	tar -xzf emsdk-portable.tar.gz && \
 	rm emsdk-portable.tar.gz
-
-download-ndk:
-	cd deps/ && \
-	wget https://dl.google.com/android/repository/$(SRC_NDK)-linux-x86_64.zip &&\
-	unzip $(SRC_NDK)-linux-x86_64.zip && \
-	rm $(SRC_NDK)-linux-x86_64.zip
-#	wget http://dl.google.com/android/ndk/$SRC_NDK-linux-x86_64.bin\
-#	 --progress=bar && \
-#	chmod a+x $SRC_NDK-linux-x86_64.bin && \
-#	./$SRC_NDK-linux-x86_64.bin && \
-#	rm $SRC_NDK-linux-x86_64.bin
-
-download-sdk:
-	cd deps/ && \
-	wget https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz && \
-	tar -zxvf android-sdk_r24.4.1-linux.tgz && \
-	rm android-sdk_r24.4.1-linux.tgz && \
-	cd android-sdk-linux/ && \
-	./tools/android
 
 # Low Level / Build
 build-emscripten:

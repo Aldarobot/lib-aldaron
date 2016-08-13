@@ -531,6 +531,7 @@ typedef struct{
 
 	double timer;
 	double psec;
+	uint8_t on_time;
 }jlgr_t;
 
 typedef void(*jlgr_fnct)(jlgr_t* jlgr);

@@ -97,6 +97,7 @@ void jl_mode_exit(jl_t* jl) {
 
 void jl_mode_loop__(jl_t* jl) {
 	if(jl->mode.changed == 1) {
+LA_CHANGE_MODE:;
 		jl_fnct kill_ = jl->mode.prev.kill;
 		jl_fnct init_ = jl->mode.mode.init;
 
@@ -116,6 +117,7 @@ void jl_mode_loop__(jl_t* jl) {
 		kill_(jl);
 		// If mode is same as before, then quit.
 		if(which == jl->mode.which) jl->mode.count = 0;
+		else goto LA_CHANGE_MODE;
 
 		jl->mode.changed = 0;
 	}

@@ -129,7 +129,7 @@ void jl_wm_loop__(jlgr_t* jlgr) {
 	//Update Screen
 	SDL_GL_SwapWindow(jlgr->wm.window); //end current draw
 	// milliseconds / 1000 to get seconds
-	jlgr->psec = jl_sdl_timer(jlgr->jl, &jlgr->timer);
+	jlgr->psec=jl_time_regulatefps(jlgr->jl, &jlgr->timer, &jlgr->on_time);
 }
 
 void jl_wm_resz__(jlgr_t* jlgr, uint16_t w, uint16_t h) {

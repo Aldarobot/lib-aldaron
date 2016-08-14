@@ -1,25 +1,13 @@
 /*
- * JL_lib(c) Jeron A. Lau
- * The header to be included within your programs you make with JL_lib.
+ * Lib Aldaron(c) Jeron A. Lau
 */
 
-#ifndef JLL
-#define JLL
+#ifndef LIB_ALDARON_H
+#define LIB_ALDARON_H
 
 #include <stdint.h>
 #include "clump.h" // LibClump
 #include "SDL_thread.h"
-
-/**
- * Version System:
- * 	major version "." minor version "." debug version "."
- *
- *	A new major version is made every time your code will break.
- *	A new minor version is made every time new features are added.
- *	A new debug version is made for every debug.
- *	A new -x version is made for every commit with alpha/beta extension.
- */
-#define JL_VERSION "6.0.0 beta"
 
 //Platform Declarations
 #define JL_PLAT_COMPUTER 0 //PC/MAC
@@ -63,16 +51,6 @@
 #else
 	#error "NO OpenGL support for this platform!"
 #endif
-
-// Return Values
-enum {
-	JL_RTN_SUCCESS, // 0
-	JL_RTN_FAIL, // 1
-	JL_RTN_IMPOSSIBLE, // 2
-	JL_RTN_SUPER_IMPOSSIBLE, // 3
-	JL_RTN_COMPLETE_IMPOSSIBLE, // 4
-	JL_RTN_FAIL_IN_FAIL_EXIT, // 5
-} JL_RTN;
 
 //ERROR MESSAGES
 typedef enum{
@@ -203,10 +181,10 @@ typedef void(*jl_fnct)(jl_t* jl);
 typedef void(*jl_data_fnct)(jl_t* jl, void* data);
 typedef void(*jl_print_fnt)(jl_t* jl, const char * print);
 
-void jl_exit(jl_t* jl, const char* format, ...);
-void jl_dont(jl_t* jl);
-void* jl_get_context(jl_t* jl);
-int jl_start(jl_fnct fnc_init_, const char* name, uint64_t ctx_size);
+void la_panic(jl_t* jl, const char* format, ...);
+void la_dont(jl_t* jl);
+void* la_context(jl_t* jl);
+int32_t la_start(jl_fnct fnc_init_, const char* name, size_t ctx_size);
 
 // "JLmem.c"
 void *jl_mem(jl_t* jl, void *a, uint32_t size);

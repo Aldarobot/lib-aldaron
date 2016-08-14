@@ -3,7 +3,7 @@
 LA_HOME="`sed '1q;d' ~/.libaldaron`"
 LA_BIN="`sed '2q;d' ~/.libaldaron`"
 
-help: src/lib-aldaron/
+help: src/lib-aldaron/ $(FOLDERS) la_config
 	# Hi!  Welcome to lib-aldaron!
 	#	________________________________________________________________
 	#	make release --silent	|	Make maximum optimized output.
@@ -23,9 +23,9 @@ BUILD_OBJ_RELEASE = build/objs
 BUILD_OBJ_TEST = build/test
 BUILD_OBJ_PROF = build/prof
 
-PROGNAME="`sed '6q;d' data.txt`"
-PACKNAME="`sed '4q;d' data.txt`"
-USERNAME="`sed '2q;d' data.txt`"
+USERNAME="`sed '1q;d' la_config`"
+PACKNAME="`sed '2q;d' la_config`"
+PROGNAME="`sed '3q;d' la_config`"
 
 # C & C++ Modules
 MODULES = \
@@ -46,6 +46,24 @@ VPATH = $(shell find -L $(SRC)/ -type d)
 FOLDERS = build/ src/
 
 ################################################################################
+la_config:
+	make la_config2 --silent
+
+la_config2:
+	echo
+	: > la_config
+	echo "Name or company name ( No Uppercase, No spaces ):"
+	read -p \ \ \ \ \ \ \ \ \  -r line && echo $$line >> la_config
+	echo "Package Name ( No Uppercase, No spaces )"
+	read -p \ \ \ \ \ \ \ \ \  -r line && echo $$line >> la_config
+	echo "Program Name ( Package Name with Uppercase and Spaces )"
+	read -p \ \ \ \ \ \ \ \ \  -r line && echo $$line >> la_config
+	echo "Orientation ( Portrait / Landscape / None )"
+	read -p \ \ \ \ \ \ \ \ \  -r line && echo $$line >> la_config
+	echo
+	echo "`cat la_config`"
+	echo
+
 src/lib-aldaron/:
 	# linking lib-aldaron
 	ln -s $(LA_HOME)/src/lib-aldaron src/
@@ -122,9 +140,6 @@ android-with-ads: -android-sdl-mods
 		jlw.$(USERNAME).$(PACKNAME)\
 		$(LA_HOME)/src/C/ $(CURDIR)/$(SRC)/
 
-init: $(FOLDERS)
-	printf "[COMPILE] Done!\n"
-
 build-notify:
 	# Building program for target=$(PLATFORM)....
 
@@ -196,6 +211,5 @@ build/:
 	mkdir -p build/test/ # Unoptimized version of build/objs/
 src/:
 	# Where your program's code files are stored (.c*)
-	mkdir -p src/include/ # Where your program's header files are stored.
-	mkdir -p src/lib/ # Where the dependencies for your project are stored (.c*)
+	mkdir -p src/
 #end#

@@ -32,8 +32,6 @@
 
 // Replacement for NULL
 #define STRT_NULL "(NULL)"
-// target frames per second
-#define JL_FPS 60
 
 // Media To Include
 void *jl_gem(void);
@@ -56,7 +54,6 @@ uint32_t jl_gem_size(void);
 	// LIB KILLS
 	void jl_mem_kill_(jl_t* jl);
 	void jl_print_kill__(jl_t* jl);
-	void jl_sdl_kill__(jl_t* jl);
 
 	// LIB THREAD INITS
 	void jl_print_init_thread__(jl_t* jl, uint8_t thread_id);

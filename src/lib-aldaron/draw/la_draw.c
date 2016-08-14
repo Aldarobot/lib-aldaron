@@ -41,6 +41,7 @@ jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 	jlgr->jl = jl;
 	jlgr->fl.inloop = 1;
 	// Initialize Subsystem
+	SDL_VideoInit(NULL);
 	JL_PRINT_DEBUG(jl, "Initializing Input....");
 	jl_ct_init__(jlgr); // Prepare to read input.
 	JL_PRINT_DEBUG(jl, "Initialized CT! / Initializing file viewer....");
@@ -96,13 +97,18 @@ void jlgr_resz(jlgr_t* jlgr, uint16_t w, uint16_t h) {
  * @param jlgr: The jlgr library context.
 **/
 void jlgr_kill(jlgr_t* jlgr) {
-	JL_PRINT_DEBUG(jlgr->jl, "Sending Kill to threads....");
+#ifdef JL_DEBUG
+	jl_t* jl = jlgr->jl;
+#endif
+	JL_PRINT_DEBUG(jl, "Sending Kill to threads....");
 	SDL_AtomicSet(&jlgr->running, 0);
-	JL_PRINT_DEBUG(jlgr->jl, "Waiting on threads....");
+	JL_PRINT_DEBUG(jl, "Waiting on threads....");
 	jlgr_thread_kill(jlgr); // Shut down thread.
-	JL_PRINT_DEBUG(jlgr->jl, "Threads are dead....");
+	JL_PRINT_DEBUG(jl, "Threads are dead....");
 	jlgr_file_kill_(jlgr); // Remove clump filelist for fileviewer.
-	JL_PRINT_DEBUG(jlgr->jl, "Fileviewer is dead....");
+	JL_PRINT_DEBUG(jl, "Fileviewer is dead....");
+	SDL_VideoQuit();
+	JL_PRINT_DEBUG(jl, "Killed SDL/VIDEO Subsystem!");
 }
 
 // End of file.

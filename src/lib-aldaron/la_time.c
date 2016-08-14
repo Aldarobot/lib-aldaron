@@ -1,9 +1,5 @@
 #include "JLprivate.h"
-#include "SDL.h"
-
 #include <time.h>
-
-#define JL_SDL_SUBSYSTEMS SDL_INIT_AUDIO|SDL_INIT_VIDEO
 
 /**
  * Sleep for specified number of seconds.
@@ -57,16 +53,10 @@ double jl_time_regulatefps(jl_t* jl, double* timer, uint8_t* on_time) {
 // internal functions:
 
 void jl_sdl_init__(jl_t* jl) {
-	SDL_Init(JL_SDL_SUBSYSTEMS);
 	jl->time.psec = 0.f;
 	// Reset time.
 	struct timespec time;
 	time.tv_sec = 0;
 	time.tv_nsec = 0l;
 	clock_settime(CLOCK_MONOTONIC, &time);
-}
-
-void jl_sdl_kill__(jl_t* jl) {
-	SDL_QuitSubSystem(JL_SDL_SUBSYSTEMS);
-	SDL_Quit();
 }

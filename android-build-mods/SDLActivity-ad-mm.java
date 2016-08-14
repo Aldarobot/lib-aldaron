@@ -20,6 +20,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsoluteLayout;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.os.*;
 import android.util.Log;
@@ -34,6 +35,8 @@ import android.content.pm.ActivityInfo;
 import com.millennialmedia.MMSDK;
 import com.millennialmedia.InlineAd;
 import com.millennialmedia.MMException;
+import com.millennialmedia.UserData;
+import com.millennialmedia.AppInfo;
 
 /**
 	SDL Activity
@@ -124,6 +127,8 @@ public class SDLActivity extends Activity {
 	// Ad Variable
 //	public static final String PLACEMENT_ID = "230261";
 	private InlineAd inlineAd = null;
+	UserData userData = null;
+	AppInfo appInfo = null;
 
 	// Setup
 	@Override
@@ -186,18 +191,38 @@ public class SDLActivity extends Activity {
 
 		// Ad Init
 		MMSDK.initialize(this);
+		// User Data
+		try{
+			userData = new UserData();
+			MMSDK.setUserData(userData);
+		}catch(MMException e){
+			System.out.println(":I/SDL/APP: " + "Ads couldn't set" +
+				" user data.");
+		}
+		// App Info
+		try{
+			appInfo = new AppInfo();
+			MMSDK.setAppInfo(appInfo);
+		}catch(MMException e){
+			System.out.println(":I/SDL/APP: " + "Ads couldn't set" +
+				" app data.");
+		}
 
-		mLayout = new AbsoluteLayout(this);
+		mLayout = new LinearLayout(this);
+		final View adContainer = new RelativeLayout(this);
+//		final View adContainer = findViewById(R.id.ad_container);
 
+		// Create inline ad
 		try {
-			inlineAd = InlineAd.createInstance(
-				"230261", (ViewGroup) mLayout);
+			inlineAd = InlineAd.createInstance("230261",
+				(ViewGroup) adContainer);
 
 			inlineAd.setListener(new InlineAd.InlineListener() {
 				@Override
 				public void onRequestSucceeded(InlineAd inlineAd) {
 					System.out.println(":I/SDL/APP: " +
 						"Inline Ad loaded.");
+//					adContainer.setVisibility(View.VISIBLE);
 				}
 
 				@Override
@@ -292,6 +317,7 @@ public class SDLActivity extends Activity {
 		// Set layout
 		mLayout.addView(mSurface, ViewGroup.LayoutParams.WRAP_CONTENT,
 			ViewGroup.LayoutParams.WRAP_CONTENT);
+		mLayout.addView(adContainer, 200, 50);
 
 /*		try{
 			inlineAd = InlineAd.createInstance(PLACEMENT_ID, (ViewGroup) mLayout);

@@ -6,3 +6,5 @@ src/lib/sdl/
 src/lib/sdl-mixer/
 src/lib/sdl-image/
 src/lib/sdl-net/
+src/test/src/lib-aldaron
+src/test-*/src/lib-aldaron

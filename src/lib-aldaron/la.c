@@ -1,6 +1,7 @@
 #include "JLprivate.h"
 #include "jlau.h"
 #include "jlgr.h"
+#include "SDL.h"
 
 void jlau_kill(jlau_t* jlau);
 void jlgr_kill(jlgr_t* jlgr);
@@ -16,7 +17,7 @@ void jl_mode_loop__(jl_t* jl);
 #endif
 
 //Initialize The Libraries Needed At Very Beginning: The Base Of It All
-static inline jl_t* jl_init_essential__(void) {
+static inline jl_t* la_init_essential__(void) {
 	// Memory
 	jl_t* jl = jl_mem_init_(); // Create The Library Context
 	// Printing to terminal
@@ -33,11 +34,12 @@ static inline void jl_init_libs__(jl_t* jl) {
 	jl_mode_init__(jl);
 	JL_PRINT_DEBUG(jl, "Initializing time....");
 	jl_sdl_init__(jl);
+	JL_PRINT_DEBUG(jl, "Initializing SDL....");
+	SDL_Init(0);
 	JL_PRINT_DEBUG(jl, "Initialized!");
-//	jlgr_draw_msge(_jl->jl, 0, 0, 0, "INITIALIZATION COMPLETE!");
 }
 
-static inline void jl_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
+static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 	uint64_t ctx1s)
 {
 	//
@@ -74,11 +76,11 @@ static inline void jl_seconds_passed__(jl_t* jl) {
 	jl_time_reset__(jl, isOnTime);
 }
 
-static inline int jl_kill__(jl_t* jl, int32_t rc) {
+static inline int la_kill__(jl_t* jl, int32_t rc) {
 	if(jl->jlgr) jlgr_kill(jl->jlgr);
 	if(jl->jlau) jlau_kill(jl->jlau);
 	JL_PRINT_DEBUG(jl, "Killing SDL....");
-	jl_sdl_kill__(jl);
+	SDL_Quit();
 	JL_PRINT_DEBUG(jl, "Killing Printing....");
 	jl_print_kill__(jl);
 	jl_mem_kill_(jl);
@@ -104,7 +106,7 @@ void main_loop_(jl_t* jl) {
 /**
  * Exit The program on an error.
 **/
-void jl_exit(jl_t* jl, const char* format, ...) {
+void la_panic(jl_t* jl, const char* format, ...) {
 	va_list arglist;
 
 	va_start( arglist, format );
@@ -118,13 +120,13 @@ void jl_exit(jl_t* jl, const char* format, ...) {
  * Do Nothing
  * @param jl: The library's context.
 **/
-void jl_dont(jl_t* jl) { }
+void la_dont(jl_t* jl) { }
 
 /**
  * Get the program's context.
  * @param jl: The library's context.
 **/
-void* jl_get_context(jl_t* jl) {
+void* la_context(jl_t* jl) {
 	return jl->prg_context;
 }
 
@@ -134,16 +136,16 @@ void* jl_get_context(jl_t* jl) {
  * @param name: The name of the program, used for storage / window name etc.
  * @param ctx_size: The size of the program context.
 **/
-int jl_start(jl_fnct fnc_init_, const char* name, uint64_t ctx_size) {
+int32_t la_start(jl_fnct fnc_init_, const char* name, size_t ctx_size) {
 	//Set Up Memory And Logging
-	jl_t* jl = jl_init_essential__();
+	jl_t* jl = la_init_essential__();
 
 	// Initialize JL_lib!
-	jl_init__(jl, fnc_init_, name, ctx_size);
+	la_init__(jl, fnc_init_, name, ctx_size);
 	// Run the Loop
 	while(jl->mode.count) ((jl_fnct)jl->loop)(jl);
 	// Kill the program
-	return jl_kill__(jl, JL_RTN_SUCCESS);
+	return la_kill__(jl, 0);
 }
 
 #if JL_PLAT == JL_PLAT_PHONE

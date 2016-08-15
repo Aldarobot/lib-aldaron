@@ -76,9 +76,10 @@ static inline void jl_seconds_passed__(jl_t* jl) {
 	jl_time_reset__(jl, isOnTime);
 }
 
-static inline int la_kill__(jl_t* jl, int32_t rc) {
+static inline int la_kill__(jl_t* jl, jl_fnct _fnc_kill_, int32_t rc) {
 	if(jl->jlgr) jlgr_kill(jl->jlgr);
 	if(jl->jlau) jlau_kill(jl->jlau);
+	_fnc_kill_(jl);
 	JL_PRINT_DEBUG(jl, "Killing SDL....");
 	SDL_Quit();
 	JL_PRINT_DEBUG(jl, "Killing Printing....");
@@ -132,20 +133,23 @@ void* la_context(jl_t* jl) {
 
 /**
  * Start JL_Lib.  Returns when program is closed.
- * @param fnc_init_: The function initialize the program.
+ * @param fnc_init: The function initialize the program.
+ * @param fnc_kill: The function to free anything that needs to be freed.
  * @param name: The name of the program, used for storage / window name etc.
  * @param ctx_size: The size of the program context.
 **/
-int32_t la_start(jl_fnct fnc_init_, const char* name, size_t ctx_size) {
+int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, const char* name,
+	size_t ctx_size)
+{
 	//Set Up Memory And Logging
 	jl_t* jl = la_init_essential__();
 
 	// Initialize JL_lib!
-	la_init__(jl, fnc_init_, name, ctx_size);
+	la_init__(jl, fnc_init, name, ctx_size);
 	// Run the Loop
 	while(jl->mode.count) ((jl_fnct)jl->loop)(jl);
 	// Kill the program
-	return la_kill__(jl, 0);
+	return la_kill__(jl, fnc_kill, 0);
 }
 
 #if JL_PLAT == JL_PLAT_PHONE

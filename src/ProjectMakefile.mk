@@ -3,7 +3,8 @@
 LA_HOME="`sed '1q;d' ~/.libaldaron`"
 LA_BIN="`sed '2q;d' ~/.libaldaron`"
 
-help: src/lib-aldaron/ $(FOLDERS) la_config
+help: src/lib-aldaron/ $(FOLDERS) la_config .gitignore
+	#
 	# Hi!  Welcome to lib-aldaron!
 	#	________________________________________________________________
 	#	make release --silent	|	Make maximum optimized output.
@@ -46,6 +47,9 @@ VPATH = $(shell find -L $(SRC)/ -type d)
 FOLDERS = build/ src/
 
 ################################################################################
+.gitignore:
+	cp $(LA_HOME)/src/test/.gitignore .gitignore
+
 la_config:
 	make la_config2 --silent
 

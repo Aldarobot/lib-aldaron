@@ -11,7 +11,7 @@ static inline void la_deprecated(const char* a, const char* b) {
 
 static inline int32_t jl_start(jl_fnct a, const char* b, uint64_t c) {
 	la_deprecated("jl_start", "la_start");
-	return la_start(a, b, c);
+	return la_start(a, la_dont, b, c);
 }
 
 static inline void* jl_get_context(jl_t* jl) {

@@ -129,54 +129,38 @@ void jlvi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
 /**
  * Load an image from data.
  * @param jl: The library context.
- * @param data: The data to read.
+ * @param output: The data output (unencoded).
+ * @param data: The data to read (encoded).
+ * @param size: size of data.
  * @param w: Pointer to the width variable.
  * @param h: Pointer to the height variable.
- * @returns: Raw pixel data.
 **/
-uint8_t* jlvi_load_image(jl_t* jl, data_t* data, uint16_t* w, uint16_t* h) {
+void la_video_load_jpeg(jl_t* jl, void* output, void* data, size_t size,
+	uint16_t* w, uint16_t* h)
+{
 	SDL_Surface *image; //  Free'd by SDL_free(image);
 	SDL_RWops *rw; // Free'd by SDL_RWFromMem
-	void* img_file; // Free'd by jl_mem
 	data_t pixel_data; // Free'd by jl_mem_string_fstrt
-	void* rtn_pixels; // Returned so not free'd.
 	uint32_t color = 0;
-	uint32_t FSIZE = data->size;
 	int i, j;
-	uint32_t rgba = 3;
 
-//	memtester(jl, "LoadImg/Start0");
-	img_file = jl_memi(jl, FSIZE);
-//	memtester(jl, "LoadImg/Start1");
-	jl_data_loadto(data, FSIZE, img_file);
-//	memtester(jl, "LoadImg/Start2");
-	rw = SDL_RWFromMem(img_file, FSIZE);
-//	memtester(jl, "LoadImg/Start3");
-	if ((image = IMG_Load_RW(rw, 0)) == NULL) {
-		jl_print(jl, "Couldn't load image: %s", IMG_GetError());
-		exit(-1);
-	}
-//	memtester(jl, "LoadImg/Start4");
+	rw = SDL_RWFromMem(data, size);
+	if ((image = IMG_Load_RW(rw, 0)) == NULL)
+		la_panic(jl, "Couldn't load image: %s", IMG_GetError());
 	// Covert SDL_Surface.
-	jl_data_init(jl, &pixel_data, image->w * image->h * rgba);
+	jl_data_init(jl, &pixel_data, image->w * image->h * 3);
 	for(i = 0; i < image->h; i++) {
 		for(j = 0; j < image->w; j++) {
 			color = _jl_sg_gpix(image, j, i);
-			jl_data_saveto(&pixel_data, rgba, &color);
+			jl_data_saveto(&pixel_data, 3, &color);
 		}
 	}
-//	memtester(jl, "LoadImg/Start5");
 	//Set Return values
-	rtn_pixels = jl_data_tostring(jl, &pixel_data);
-//	memtester(jl, "LoadImg/End6");
+	jl_mem_copyto(pixel_data.data, output, pixel_data.size);
+	jl_data_free(&pixel_data);
 	*w = image->w;
 	*h = image->h;
 	// Clean-up
 	SDL_FreeSurface(image);
-//	memtester(jl, "LoadImg/End4");
 	SDL_free(rw);
-//	memtester(jl, "LoadImg/End3");
-	jl_mem(jl, &img_file, 0);
-//	memtester(jl, "LoadImg/End1");
-	return rtn_pixels;
 }

@@ -195,12 +195,6 @@ typedef struct{
 
 // Graphical stuff
 
-typedef struct {
-	uint32_t gl_texture;
-	uint16_t w, h;
-	void* pixels; // BGRA
-}jl_tex_t;
-
 // Pre-renderer
 typedef struct {
 	// What to render
@@ -637,9 +631,9 @@ void jlgr_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, uint8_t orient);
 void jlgr_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
 
 // OpenGL
-void jl_gl_pbo_new(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
-	uint16_t w, uint16_t h, uint8_t bpp);
-void jl_gl_pbo_set(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
+uint32_t la_texture_new(jlgr_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,
+	uint8_t bpp);
+void la_texture_set(jlgr_t* jlgr, uint32_t texture, uint8_t* pixels,
 	uint16_t w, uint16_t h, uint8_t bpp);
 uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 	uint32_t width, uint32_t height, uint8_t bytepp);

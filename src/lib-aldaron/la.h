@@ -184,7 +184,8 @@ typedef void(*jl_print_fnt)(jl_t* jl, const char * print);
 void la_panic(jl_t* jl, const char* format, ...);
 void la_dont(jl_t* jl);
 void* la_context(jl_t* jl);
-int32_t la_start(jl_fnct fnc_init_, const char* name, size_t ctx_size);
+int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, const char* name,
+	size_t ctx_size);
 
 // "JLmem.c"
 void *jl_mem(jl_t* jl, void *a, uint32_t size);

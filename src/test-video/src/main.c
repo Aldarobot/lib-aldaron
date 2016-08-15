@@ -1,22 +1,25 @@
 #include "main.h"
+#include "la_video.h"
 
-static void ex_redraw(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+static void tv_exit(jl_t* jl) {
 	ctx_t* ctx = jl_get_context(jl);
+	const char* error;
 
-// Draw
-	jlgr_vo_draw(jlgr, &ctx->vo1);
-// Light
-	jlgr_effects_light_begin(jlgr, &ctx->vo1);
-	jlgr_effects_light_aa(jlgr, &ctx->vo1,
-		(jl_vec3_t) { al_safe_get_float(&jlgr->main.ct.msx),
-			al_safe_get_float(&jlgr->main.ct.msy), 0.f },
-		(jl_vec3_t) { 1.f, 1.f, 1.f }, .5f, 1.f);
-	jlgr_effects_light_end(jlgr);
-	jlgr_effects_draw(jlgr, &ctx->vo1);
+	if((error = car_camera_kill(&ctx->camera)))
+		la_panic(jl, "car_camera_kill error %s:", error);
 }
 
-void ex_down(jlgr_t* jlgr, jlgr_input_t input) {
+static void tv_panic(jl_t* jl, const char* format, ...) {
+	va_list arglist;
+
+	tv_exit(jl);
+
+	va_start( arglist, format );
+	la_panic( jl, format, arglist );
+	va_end( arglist );
+}
+
+void tv_down(jlgr_t* jlgr, jlgr_input_t input) {
 	if(input.h == 1) {
 		ctx_t* ctx = jl_get_context(jlgr->jl);
 
@@ -28,44 +31,29 @@ void ex_down(jlgr_t* jlgr, jlgr_input_t input) {
 	}
 }
 
-void ex_edit_loop(jl_t* jl) {
-//	ctx_t* ctx = jl_get_context(jl);
-//	int i;
-
-	jlgr_input_do(jl->jlgr, JL_INPUT_MENU, ex_down, NULL);
+void tv_edit_loop(jl_t* jl) {
+	jlgr_input_do(jl->jlgr, JL_INPUT_MENU, tv_down, NULL);
 //	for(i = 0; i < 3; i++)
 //		jlgr_sprite_loop(jl->jlgr, &ctx->slider[i]);
 
 	jlgr_menu_loop(jl->jlgr);
 }
 
-void ex_wdns(jl_t* jl) {
+static void tv_wdns(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
+	ctx_t* ctx = jl_get_context(jl);
+	const char* error;
+	uint16_t w, h;
 
-	jl_print_function(jl, "wdns");
-	jlgr_text_draw(jlgr, "testing""\xCA""1234567890",
-		(jl_vec3_t) { 0., 0., 0. },
-		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, .0625f });
-	ex_redraw(jl);
-	jl_print_return(jl, "wdns");
-	jlgr_menu_draw(jlgr, 0);
-}
-
-void ex_wups(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
-
-	jl_print_function(jl, "wups");
-	float fontcolor[] = { 0.f, 0.f, 0.f, 1.f };
-
-	jl_gl_clear(jlgr, 1., 1., 1., 1.);
-	jlgr_text_draw(jlgr, "this IS upper",
-		(jl_vec3_t) { 0., 0., 0. },
-		(jl_font_t) { jlgr->textures.icon, 0, fontcolor, .0625f});
-	jl_print_return(jl, "wups");
+	if((error = car_camera_loop(&ctx->camera)))
+		tv_panic(jl, "camera loop error: %s", error);
+	la_video_load_jpeg(jl, ctx->pixels, ctx->video_stream, ctx->camera.size, &w, &h);
+	la_texture_set(jlgr, ctx->video_stream_texture, ctx->pixels, 640, 480, 3);
+	jlgr_draw_bg(jlgr, ctx->video_stream_texture, 0, 0, -1);
 }
 
 // Called when window is made/resized.
-static void ex_edit_resz(jl_t* jl) {
+static void tv_edit_resz(jl_t* jl) {
 	jl_print(jl, "Resizing Window....");
 
 	ctx_t* ctx = jl_get_context(jl);
@@ -90,63 +78,48 @@ static void ex_edit_resz(jl_t* jl) {
 	jl_print(jl, "Resize'd Window....");
 }
 
-void ex_edit_init(jl_t* jl) {
-	jlgr_loop_set(jl->jlgr, ex_wdns, ex_wups, ex_wdns, ex_edit_resz);
+void tv_edit_init(jl_t* jl) {
+	jlgr_loop_set(jl->jlgr, tv_wdns, la_dont, tv_wdns, tv_edit_resz);
 }
 
-static inline void ex_init_modes(jl_t* jl) {
+static inline void tv_init_modes(jl_t* jl) {
 	//Set mode data
-	jl_mode_set(jl, EX_MODE_EDIT,
-		(jl_mode_t) { ex_edit_init, ex_edit_loop, jl_dont });
+	jl_mode_set(jl, MODE_EDIT,
+		(jl_mode_t) { tv_edit_init, tv_edit_loop, jl_dont });
 //Leave terminal mode
-	jl_mode_switch(jl, EX_MODE_EDIT);
+	jl_mode_switch(jl, MODE_EDIT);
 }
 
-static inline void ex_init_tasks(jlgr_t* jlgr) {
+static inline void tv_init_tasks(jlgr_t* jlgr) {
 	jlgr_menu_addicon_flip(jlgr);
 	jlgr_menu_addicon_slow(jlgr);
 //	jlgr_menu_addicon_name(jl);
 }
 
-static inline void ex_init_objs(jlgr_t* jlgr) {
-//	ctx_t* ctx = jl_get_context(jlgr->jl);
-//	float ar = jl_gl_ar(jlgr);
-//	jl_rect_t rect[] = {
-//		{ 0., ar - .1, .5, .1 }, { .5, ar - .1, .5, .1 },
-//		{ 0., ar - .2, .5, .1 }, { .5, ar - .2, .5, .1 },
-//		{ 0., ar - .3, .5, .1 }, { .5, ar - .3, .5, .1 }};
-//	uint8_t i;
-
-//	for(i = 0; i < 3; i++)
-//		jlgr_gui_slider(jlgr, &ctx->slider[i],
-//			rect[i], 2, &ctx->s1[i], &ctx->s2[i]);
+static inline void tv_init_camera(jlgr_t* jlgr, ctx_t* ctx) {
+	const char* error;
+	if((error = car_camera_init(&ctx->camera, 0, 640, 480, &ctx->video_stream)))
+		tv_panic(jlgr->jl, "car_camera_init error %s:", error);
+	ctx->video_stream_texture = la_texture_new(jlgr, NULL, 640, 480, 3);
 }
 
-static void ex_graphical_init(jl_t* jl) {
+static void tv_init(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
-	jl_print_function(jl, "Example");
 	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "Initializing");
 	jl_print(jl, "Initializing Graphics....");
-	ex_init_tasks(jlgr);
-	ex_init_objs(jlgr);
-
+	tv_init_tasks(jlgr);
+	tv_init_camera(jlgr, jl_get_context(jl));
 	jl_print(jl, "Initialize'd Graphics....");
 
 	// Create the modes & initialize one.
-	ex_init_modes(jl);
-
-	jl_print_return(jl, "Example");
+	tv_init_modes(jl);
 }
 
-void ex_init(jl_t* jl) {
-	jl_print_function(jl, "Example");
-	jl_print(jl,"Initializing....");
-	// Open Window
-	jlgr_init(jl, 0, ex_graphical_init);
-	jl_print_return(jl, "Example");
+static void tv_main(jl_t* jl) {
+	jlgr_init(jl, 0, tv_init); // Open Window
 }
 
 int main(int argc, char* argv[]) {
-	return jl_start(ex_init, "Test-Video!", sizeof(ctx_t));
+	return la_start(tv_main, tv_exit, "Test-Video!", sizeof(ctx_t));
 }

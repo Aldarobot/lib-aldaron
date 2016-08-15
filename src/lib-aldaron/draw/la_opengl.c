@@ -253,7 +253,7 @@ static void jl_gl_texture_make__(jlgr_t* jlgr, uint32_t *tex) {
 #endif
 }
 
-// Set the bound texture.  pm is the pixels 0 - blank texture.
+// Set the bound texture.  px is the pixels 0 - blank texture.
 static void jl_gl_texture_set__(jlgr_t* jlgr, uint8_t* px, uint16_t w, uint16_t h,
 	uint8_t bytepp)
 {
@@ -568,19 +568,32 @@ void jlgr_opengl_vertices_(jlgr_t* jlgr, const float *xyzw, uint8_t vertices,
 }
 
 // TODO: MOVE
-void jl_gl_pbo_new(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
-	uint16_t w, uint16_t h, uint8_t bpp)
+/**
+ * Create a new texture object.
+ * @param jlgr: The library context.
+**/
+uint32_t la_texture_new(jlgr_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,
+	uint8_t bpp)
 {
-	jl_print_function(jlgr->jl, "GL_PBO_NEW");
-	jl_gl_texture_make__(jlgr, &(texture->gl_texture));
-	jl_gl_texture__bind__(jlgr, texture->gl_texture);
+	uint32_t texture;
+
+	jl_gl_texture_make__(jlgr, &texture);
+	jl_gl_texture__bind__(jlgr, texture);
 	jl_gl_texpar_set__(jlgr);
 	jl_gl_texture_set__(jlgr, pixels, w, h, bpp);
-	jl_print_return(jlgr->jl, "GL_PBO_NEW");
+	return texture;
 }
 
 // TODO: MOVE
-void jl_gl_pbo_set(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
+/**
+ * Set a texture object.
+ * @param jlgr: The library context.
+ * @param texture: The texture to modify.
+ * @param pixels: The pixels to set the texture to.
+ * @param w, h: The dimensions
+ * @param bpp: The bytes per pixel.  Must be 3 or 4.
+**/
+void la_texture_set(jlgr_t* jlgr, uint32_t texture, uint8_t* pixels,
 	uint16_t w, uint16_t h, uint8_t bpp)
 {
 	GLenum format = GL_RGBA;
@@ -588,7 +601,7 @@ void jl_gl_pbo_set(jlgr_t* jlgr, jl_tex_t* texture, uint8_t* pixels,
 	if(bpp == 3) format = GL_RGB;
 
 	// Bind Texture
-	jl_gl_texture__bind__(jlgr, texture->gl_texture);
+	jl_gl_texture__bind__(jlgr, texture);
 	// Copy to texture.
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, format, GL_UNSIGNED_BYTE,
 		pixels);

@@ -227,6 +227,10 @@ typedef struct{
 	uint32_t program;
 }jlgr_glsl_t;
 
+// jlgr_effects/types
+#define JLGR_EFFECTS_TYPES
+#include "la_effects.h"
+
 //Vertex Object
 typedef struct{
 	jl_t* jl;	// The library context.
@@ -319,10 +323,6 @@ typedef struct{
 	uint16_t set_width;
 	uint16_t set_height;
 }jlgr_pvar_t;
-
-// jlgr_effects/types
-#define JLGR_EFFECTS_TYPES
-#include "jlgr_effects.h"
 
 typedef struct{
 	jl_t* jl;
@@ -430,7 +430,7 @@ typedef struct{
 			jl_vec3_t light_position;
 			jl_vec3_t light_color;
 			float light_power;
-			float material_brightness;
+			jl_vec3_t material_brightness;
 			int32_t light_texture;
 		}light;
 
@@ -440,6 +440,11 @@ typedef struct{
 
 		jlgr_effects_light_t lights;
 	}effects;
+
+	struct {
+		jlgr_glsl_t shader_laa[32]; // Light Ambient Attenuation
+		uint8_t shader_laa_init[32];
+	} effect;
 	
 	//Opengl Data
 	struct {
@@ -665,7 +670,7 @@ void jlgr_effects_hue(jlgr_t* jlgr, float c[]);
 void jlgr_effects_light_begin(jlgr_t* jlgr, jl_vo_t* vo);
 void jlgr_effects_light_aa(jlgr_t* jlgr, jl_vo_t* vo,
 	jl_vec3_t light_position, jl_vec3_t light_color, float light_power,
-	float material_brightness);
+	jl_vec3_t material_brightness);
 void jlgr_effects_light_end(jlgr_t* jlgr);
 void jlgr_effects_draw(jlgr_t* jlgr, jl_vo_t* vo);
 

@@ -202,7 +202,7 @@ $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 	$(eval OBJS=$(OBJS_RELEASE))
 -link:
 	echo Linking....
-	$(CC) $(OBJS) $(LA_HOME)/build/deps.o \
+	$(CC) $(OBJS) $(LA_HOME)/build/deps.o $(LA_DEPS) \
 		-o $(JL_OUT) $(CFLAGS) \
 		-lm -lz -ldl -lpthread -lstdc++ -ljpeg \
 		$(LINKER_LIBS) $(PLATFORM_CFLAGS) \

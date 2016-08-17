@@ -336,7 +336,7 @@ void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo) {
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
 		vo->pr.cb.pos, // Translate
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
-		1.f, jl_gl_ar(jlgr), 0.f, 1.f);
+		jl_gl_ar(jlgr));
 	jlgr_vo_draw2(jlgr, vo, shader);
 }
 

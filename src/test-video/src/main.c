@@ -19,24 +19,7 @@ static void tv_panic(jl_t* jl, const char* format, ...) {
 	va_end( arglist );
 }
 
-void tv_down(jlgr_t* jlgr, jlgr_input_t input) {
-	if(input.h == 1) {
-		ctx_t* ctx = jl_get_context(jlgr->jl);
-
-		if(ctx->hasMenu) {
-			ctx->hasMenu = 0;
-		}else{
-			ctx->hasMenu = 1;
-		}
-	}
-}
-
 void tv_edit_loop(jl_t* jl) {
-	jlgr_input_do(jl->jlgr, JL_INPUT_MENU, tv_down, NULL);
-//	for(i = 0; i < 3; i++)
-//		jlgr_sprite_loop(jl->jlgr, &ctx->slider[i]);
-
-	jlgr_menu_loop(jl->jlgr);
 }
 
 static void tv_wdns(jl_t* jl) {
@@ -52,48 +35,14 @@ static void tv_wdns(jl_t* jl) {
 	jlgr_draw_bg(jlgr, ctx->video_stream_texture, 0, 0, -1);
 }
 
-// Called when window is made/resized.
-static void tv_edit_resz(jl_t* jl) {
-	jl_print(jl, "Resizing Window....");
-
-	ctx_t* ctx = jl_get_context(jl);
-	jlgr_t* jlgr = jl->jlgr;
-	jl_rect_t rc1 = { 0.2f, 0.2f, .1f, .1f };
-	jl_rect_t rc2 = { 0.f, 0.f, 2.f, 1.f };
-	float colors[] = { 1.f, 1.f, 1.f, 1.f };
-//	float ar = jl_gl_ar(jlgr);
-//	jl_rect_t rect[] = {
-//		{ 0., ar - .05, 1./3., .05 },
-//		{ 1./3., ar - .05, 1./3., .05 },
-//		{ 2./3., ar - .05, 1./3., .05 }};
-//	int i;
-
-	jlgr_vo_set_image(jlgr, &(ctx->vo1), rc1, jlgr->textures.game);
-	jlgr_vo_set_rect(jlgr, &(ctx->vo2), rc2, colors, 0);
-//	for(i = 0; i < 3; i++)
-//		jlgr_sprite_resize(jlgr, &ctx->slider[i], &rect[i]);
-
-	jlgr_menu_draw(jlgr, 1);
-
-	jl_print(jl, "Resize'd Window....");
-}
-
 void tv_edit_init(jl_t* jl) {
-	jlgr_loop_set(jl->jlgr, tv_wdns, la_dont, tv_wdns, tv_edit_resz);
+	jlgr_loop_set(jl->jlgr, tv_wdns, la_dont, tv_wdns, la_dont);
 }
 
 static inline void tv_init_modes(jl_t* jl) {
-	//Set mode data
-	jl_mode_set(jl, MODE_EDIT,
-		(jl_mode_t) { tv_edit_init, tv_edit_loop, jl_dont });
-//Leave terminal mode
-	jl_mode_switch(jl, MODE_EDIT);
-}
-
-static inline void tv_init_tasks(jlgr_t* jlgr) {
-	jlgr_menu_addicon_flip(jlgr);
-	jlgr_menu_addicon_slow(jlgr);
-//	jlgr_menu_addicon_name(jl);
+	jl_mode_set(jl, MODE_EDIT, (jl_mode_t) {
+		tv_edit_init, tv_edit_loop, jl_dont
+	});
 }
 
 static inline void tv_init_camera(jlgr_t* jlgr, ctx_t* ctx) {
@@ -106,14 +55,14 @@ static inline void tv_init_camera(jlgr_t* jlgr, ctx_t* ctx) {
 static void tv_init(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
-	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "Initializing");
-	jl_print(jl, "Initializing Graphics....");
-	tv_init_tasks(jlgr);
+	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "Loading Camera....");
 	tv_init_camera(jlgr, jl_get_context(jl));
-	jl_print(jl, "Initialize'd Graphics....");
+	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "Loaded Camera!");
 
 	// Create the modes & initialize one.
 	tv_init_modes(jl);
+	//Set mode
+	jl_mode_switch(jl, MODE_EDIT);
 }
 
 static void tv_main(jl_t* jl) {

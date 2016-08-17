@@ -1,19 +1,27 @@
 #include "main.h"
+#include "la_effect.h"
 
 static void ex_redraw(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 	ctx_t* ctx = jl_get_context(jl);
+	la_light_t light = {
+		(jl_vec3_t) { al_safe_get_float(&jlgr->main.ct.msx),
+			al_safe_get_float(&jlgr->main.ct.msy) },
+		(jl_vec3_t) { 1.f, 1.f, 1.f },
+		.25f
+	};
 
 // Draw
 	jlgr_vo_draw(jlgr, &ctx->vo1);
 // Light
-	jlgr_effects_light_begin(jlgr, &ctx->vo1);
+	la_effect_light(&ctx->vo1, &light, 1, (jl_vec3_t) { 1.f, 1.f, 1.f });
+/*	jlgr_effects_light_begin(jlgr, &ctx->vo1);
 	jlgr_effects_light_aa(jlgr, &ctx->vo1,
 		(jl_vec3_t) { al_safe_get_float(&jlgr->main.ct.msx),
 			al_safe_get_float(&jlgr->main.ct.msy), 0.f },
 		(jl_vec3_t) { 1.f, 1.f, 1.f }, .5f, 1.f);
 	jlgr_effects_light_end(jlgr);
-	jlgr_effects_draw(jlgr, &ctx->vo1);
+	jlgr_effects_draw(jlgr, &ctx->vo1);*/
 }
 
 void ex_down(jlgr_t* jlgr, jlgr_input_t input) {
@@ -70,7 +78,7 @@ static void ex_edit_resz(jl_t* jl) {
 
 	ctx_t* ctx = jl_get_context(jl);
 	jlgr_t* jlgr = jl->jlgr;
-	jl_rect_t rc1 = { 0.2f, 0.2f, .1f, .1f };
+	jl_rect_t rc1 = { 0.f, 0.f, 1.f, jl_gl_ar(jl->jlgr) };
 	jl_rect_t rc2 = { 0.f, 0.f, 2.f, 1.f };
 	float colors[] = { 1.f, 1.f, 1.f, 1.f };
 //	float ar = jl_gl_ar(jlgr);

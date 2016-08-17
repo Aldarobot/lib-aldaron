@@ -670,14 +670,12 @@ void jl_gl_viewport_screen(jlgr_t* jlgr) {
  * Set Camera's Rotation
  * @param jlgr: The library context.
  * @param 
- * @param fov: Field of View.
  * @param ar: Aspect ratio
  * @param near: The near clipping pane.
  * @param far: The far clipping pane.
 **/
 void jlgr_opengl_matrix(jlgr_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
-	jl_vec3_t rotatev, jl_vec3_t translatev, jl_vec3_t lookv,
-	float fov, float ar, float near, float far)
+	jl_vec3_t rotatev, jl_vec3_t translatev, jl_vec3_t lookv, float ar)
 {
 	float scale[] = {
 		2. * scalev.x, 0.f, 0.f, 0.f,
@@ -705,8 +703,6 @@ void jlgr_opengl_matrix(jlgr_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
 		0.f, 0.f, 0.f, 1.f
 	};
 	// Projection Matrix
-	near = 0.1f;
-	far = 100.f;
 	float angleOfView = 90.f;
 	float do_scale = 1.f / tan(angleOfView * 0.5f * M_PI / 180.f);
 

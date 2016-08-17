@@ -197,55 +197,6 @@ static void jlgr_effect_pr_light__(jl_t* jl) {
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, jlgr->effects.vec3);
 }
 
-static void jlgr_effects_light_aa__(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
-
-	// Bind shader
-	jlgr_opengl_draw1(jlgr, &jlgr->effects.light.aa);
-	// Update uniforms for material.
-	jlgr_opengl_uniform(jlgr, &jlgr->effects.light.aa,
-		(float*)&jlgr->effects.light.light_position, 3, "where");
-	jlgr_opengl_uniform(jlgr, &jlgr->effects.light.aa,
-		(float*)&jlgr->effects.light.light_color, 3, "color");
-	jlgr_opengl_uniform(jlgr, &jlgr->effects.light.aa,
-		(float*)&jlgr->effects.light.light_power, 1, "power");
-	jlgr_opengl_uniform(jlgr, &jlgr->effects.light.aa,
-		(float*)&jlgr->effects.light.material_brightness, 3, "brightness");
-
-	jlgr_fill_image_set(jlgr, jlgr->effects.vo->tx, 16, 16, -1);
-	// Translate by offset vector
-	jlgr_opengl_matrix(jlgr, &jlgr->effects.light.aa,
-		(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
-		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
-		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Translate
-		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
-		jl_gl_ar(jlgr));
-	// Draw on screen
-	jlgr_vo_draw2(jlgr, &jlgr->gui.vos.whole_screen, &jlgr->effects.light.aa);
-}
-
-static void jlgr_effects_shadow__(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
-
-	// No Blending
-	jlgr_opengl_blend_none_(jlgr);
-	// Bind shader
-	jlgr_opengl_draw1(jlgr, &jlgr->effects.shadow.shader);
-	//
-	jlgr_fill_image_set(jlgr, jlgr->effects.vo->tx, 16, 16, -1);
-	// Translate by offset vector
-	jlgr_opengl_matrix(jlgr, &jlgr->effects.shadow.shader,
-		(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
-		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
-		jlgr->gui.vos.whole_screen.pr.cb.pos, // Translate
-		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
-		jl_gl_ar(jlgr));
-	// Draw on screen
-	jlgr_vo_draw2(jlgr, &jlgr->gui.vos.whole_screen, &jlgr->effects.shadow.shader);
-	// Blend Add
-	jlgr_opengl_blend_add_(jlgr);
-}
-
 static void jlgr_effects_clear__(jl_t* jl) {
 	jl_gl_clear(jl->jlgr, 0.f, 0.f, 0.f, 0.f);
 }
@@ -302,49 +253,6 @@ void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]) {
 	jlgr_opengl_uniform4(jlgr, 1, jlgr->effects.hue.new_color, c);
 	// Draw on screen
 	jlgr_vo_draw2(jlgr, vo, &jlgr->effects.hue.shader);
-}
-
-/**
- * Clear pre-rendered light for a vertex object.
- * Must be called before
- *	* jlgr_effects_vo_light_aa()
- * @param jlgr: The library context.
- * @param vo: The vertex object.
-**/
-void jlgr_effects_light_begin(jlgr_t* jlgr, jl_vo_t* vo) {
-	jlgr->effects.vo = vo;
-	jlgr_pr(jlgr, &vo->pr, jlgr_effects_shadow__);
-}
-
-/**
- * Render light for a vertex object.  Type: ambient attenuation light.
- * Must call jlgr_effects_light_end() after adding all lights.
- *
- * @param jlgr: The library context.
- * @param vo: The vertex object.
- * @param light_power: Make light brighter longer with smaller values.
-**/
-void jlgr_effects_light_aa(jlgr_t* jlgr, jl_vo_t* vo,
-	jl_vec3_t light_position, jl_vec3_t light_color, float light_power,
-	jl_vec3_t material_brightness)
-{
-	jlgr->effects.vo = vo;
-	jlgr_sprite_clamp(light_position, vo->pr.cb,
-		&light_position);
-	jlgr->effects.light.light_position = (jl_vec3_t) {
-		(light_position.x * 2.f)-1.f,
-		(light_position.y * 2.f)-1.f,
-		(light_position.z * 2.f)
-	};
-	jlgr->effects.light.light_color = light_color;
-	jlgr->effects.light.light_power = light_power;
-	jlgr->effects.light.material_brightness = material_brightness;
-	jlgr_pr(jlgr, &vo->pr, jlgr_effects_light_aa__);
-}
-
-void jlgr_effects_light_end(jlgr_t* jlgr) {
-	// Blend Default
-	jlgr_opengl_blend_default_(jlgr);
 }
 
 /**

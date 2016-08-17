@@ -667,11 +667,6 @@ void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]);
 void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
 	jl_vec3_t* material);
 void jlgr_effects_hue(jlgr_t* jlgr, float c[]);
-void jlgr_effects_light_begin(jlgr_t* jlgr, jl_vo_t* vo);
-void jlgr_effects_light_aa(jlgr_t* jlgr, jl_vo_t* vo,
-	jl_vec3_t light_position, jl_vec3_t light_color, float light_power,
-	jl_vec3_t material_brightness);
-void jlgr_effects_light_end(jlgr_t* jlgr);
 void jlgr_effects_draw(jlgr_t* jlgr, jl_vo_t* vo);
 
 void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t* material);

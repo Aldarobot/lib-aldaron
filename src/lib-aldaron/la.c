@@ -1,7 +1,11 @@
 #include "JLprivate.h"
 #include "jlau.h"
 #include "jlgr.h"
+#if JL_PLAT == JL_PLAT_PHONE
+#include "SDL_system.h"
+#else
 #include "SDL.h"
+#endif
 
 void jlau_kill(jlau_t* jlau);
 void jlgr_kill(jlgr_t* jlgr);

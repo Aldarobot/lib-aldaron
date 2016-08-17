@@ -148,11 +148,6 @@ const char* JL_EFFECT_LIGHT_AA =
 	"\n"
 	"void main() {\n"
 	"	vec3 light = vec3(0.0, 0.0, 0.0);\n"
-/*	"	for(int i = 0; i < NUM_LIGHTS; i++) {\n"
-	"		float mdist = power[i] * length(where[i] - fragpos);\n"
-	"		float light2 = mdist * mdist;\n"
-	"		light += vec3(min(1.0 / light2, 1.0) * brightness * color[i]);\n"
-	"	}\n"*/
 	"	for(int i = 0; i < NUM_LIGHTS; i++) light += vec3(min(pow(power[i] * length(where[i] - fragpos), -2.0), 1.0) * brightness * color[i]);\n"
 	"	gl_FragColor = vec4(light, 1.0) * texture2D(texture, texcoord);\n"
 	"}";
@@ -164,6 +159,7 @@ const char* JL_EFFECT_LIGHTV =
 	"uniform mat4 translate_object;\n"
 	"uniform mat4 rotate_camera;\n"
 	"uniform mat4 project_scene;\n"
+	"uniform vec3 offset;\n"
 	"\n"
 	"attribute vec4 position;\n"
 	"attribute vec2 texpos;\n"
@@ -175,7 +171,7 @@ const char* JL_EFFECT_LIGHTV =
 	"	texcoord = texpos;\n"
 	"	vec4 pos = translate_object * rotate_object * scale_object *\n"
 	"		position;\n"
-	"	fragpos = pos.xyz;\n"
+	"	fragpos = offset + position.xyz;\n"
 	"	gl_Position = project_scene * rotate_camera * pos;\n"
 	"}";
 
@@ -373,6 +369,7 @@ void la_effect_light(jl_vo_t* vo, la_light_t* lights, uint8_t light_count,
 	jlgr_t* jlgr = vo->jl->jlgr;
 	int i;
 	jlgr_glsl_t* shader = &jlgr->effect.shader_laa[light_count];
+	float ar = jl_gl_ar(jlgr);
 
 	// Create a shader if doesn't exist.
 	if(!jlgr->effect.shader_laa_init[light_count]) {
@@ -394,14 +391,14 @@ void la_effect_light(jl_vo_t* vo, la_light_t* lights, uint8_t light_count,
 	// Update uniforms for material.
 	for(i = 0; i < light_count; i++) {
 		// Need to do some math.
-		jl_vec3_t light_position = (jl_vec3_t) {
-			(lights[i].position.x * 2.f)-1.f,
-			(lights[i].position.y * 2.f/jl_gl_ar(jlgr))-1.f,
-			(lights[i].position.z * 2.f),
-		};
+//		jl_vec3_t light_position = (jl_vec3_t) {
+//			(lights[i].position.x * 2.f)-1.f,
+//			(lights[i].position.y * 2.f)-.5f,
+//			(lights[i].position.z * 2.f),
+//		};
 		float power = 1.f / lights[i].power;
 		// Push the uniform
-		jlgr_opengl_uniform(jlgr, shader, (float*)&light_position,
+		jlgr_opengl_uniform(jlgr, shader, (float*)&lights[i].position,
 			3, "where[%d]", i);
 		jlgr_opengl_uniform(jlgr, shader, (float*)&lights[i].color,
 			3, "color[%d]", i);
@@ -410,13 +407,14 @@ void la_effect_light(jl_vo_t* vo, la_light_t* lights, uint8_t light_count,
 	}
 	jlgr_opengl_uniform(jlgr, shader, (float*)&material_brightness,
 		3, "brightness");
+	jlgr_opengl_uniform(jlgr, shader, (float*)&vo->pr.cb.pos, 3, "offset");
 	// Translate by offset vector
 	jlgr_opengl_matrix(jlgr, shader,
 		(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
 		vo->pr.cb.pos, // Translate
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
-		jl_gl_ar(jlgr));
+		ar);
 	// Draw on screen
 	jlgr_vo_draw2(jlgr, vo, shader);
 }

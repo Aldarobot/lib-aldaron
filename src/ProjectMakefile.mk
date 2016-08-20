@@ -144,6 +144,13 @@ android-deploy:
 	scp -P 2222 build/com.$(USERNAME).$(PACKNAME).apk\
 	 $(shell echo $(IP)):la_test/com.$(USERNAME).$(PACKNAME).apk
 
+android-debug:
+	# Requires a USB cable
+	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/platform-tools && \
+	`which adb` install -r build/com.$(USERNAME).$(PACKNAME).apk && \
+	echo "Logcat is starting ( You can open your app now )...." && \
+	`which adb` logcat | grep SDL
+
 build-notify:
 	# Building program for target=$(PLATFORM)....
 

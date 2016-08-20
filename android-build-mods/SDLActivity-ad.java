@@ -77,13 +77,13 @@ public class SDLActivity extends Activity {
 		return new String[] {
 			"SDL2",
 			"SDL2_image",
+			"mikmod",
+			"smpeg2",
 			"SDL2_mixer",
 			"SDL2_net",
 			"clump",
-			"main",
-			"mikmod",
-			"smpeg2",
 			"zip"
+			"main",
 		};
 	}
 

@@ -81,13 +81,13 @@ public class SDLActivity extends Activity {
 		return new String[] {
 			"SDL2",
 			"SDL2_image",
+			"mikmod",
+			"smpeg2",
 			"SDL2_mixer",
 			"SDL2_net",
 			"clump",
-			"main",
-			"mikmod",
-			"smpeg2",
-			"zip"
+			"zip",
+			"main"
 		};
 	}
 
@@ -210,7 +210,7 @@ public class SDLActivity extends Activity {
 				" app data.");
 		}
 
-		mLayout = new LinearLayout(this);
+		mLayout = new RelativeLayout(this);
 		final View adContainer = new RelativeLayout(this);
 //		final View adContainer = findViewById(R.id.ad_container);
 
@@ -317,9 +317,17 @@ public class SDLActivity extends Activity {
 		}
 
 		// Set layout
-		mLayout.addView(mSurface, ViewGroup.LayoutParams.WRAP_CONTENT,
-			ViewGroup.LayoutParams.WRAP_CONTENT);
-		mLayout.addView(adContainer, 200, 50);
+
+		// Display Metrics
+		DisplayMetrics dm = new DisplayMetrics();
+		SDLActivity.mSingleton.getWindowManager().getDefaultDisplay().getMetrics(dm);
+		int dens = dm.densityDpi;
+		float hi = dm.heightPixels / (float)dens;
+		float hdp = hi * 160.0f;
+		int shrink_height = (int)(50.0f / hdp);// Fraction of display is 50 dp
+
+		mLayout.addView(mSurface);
+		mLayout.addView(adContainer, ViewGroup.LayoutParams.WRAP_CONTENT, 50);
 
 /*		try{
 			inlineAd = InlineAd.createInstance(PLACEMENT_ID, (ViewGroup) mLayout);
@@ -1192,8 +1200,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 
 	// Called when the surface is resized
 	@Override
-	public void surfaceChanged(SurfaceHolder holder,
-							   int format, int width, int height) {
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 		Log.v("SDL", "surfaceChanged()");
 
 		int sdlFormat = 0x15151002; // SDL_PIXELFORMAT_RGB565 by default
@@ -1246,7 +1253,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 		SDLActivity.onNativeResize(width, height, sdlFormat, mDisplay.getRefreshRate());
 		Log.v("SDL", "Window size: " + width + "x" + height);
 
-		// jl-lib code
+		// lib-aldaron code
 
 		DisplayMetrics dm = new DisplayMetrics();
 		SDLActivity.mSingleton.getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -1256,7 +1263,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 		float shrink_height = 50.0f / hdp;// Fraction of display is 50 dp
 		SDLActivity.nativeJlResize(shrink_height);
 
-		// end jl-lib code
+		// lib-aldaron code
 
 		// Set mIsSurfaceReady to 'true' *before* making a call to handleResume
 		SDLActivity.mIsSurfaceReady = true;

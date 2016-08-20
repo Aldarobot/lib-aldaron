@@ -186,7 +186,7 @@ if [ ! -e $CURDIR/build/android-release-key.keystore ];then
 fi
 
 # Build and install
-APK="$BUILDPATH/bin/$APP-release.apk"
+APK="$CURDIR/build/$APP.apk"
 
 $ANT release
 
@@ -196,12 +196,9 @@ rm -f $APK
 $ZIPALIGN -v 4 bin/$APP-release-unsigned.apk $APK
 
 if [ -f "$APK" ]; then
-	$ADB install -r $APK
-	$ADB shell am start -a android.intent.action.MAIN -n $APP/.$ACTIVITY
-#	$ADB logcat "*:E" | grep E\/AndroidRuntime
-	$ADB logcat | grep SDL\/APP
+	echo "Built APK successfully."
 	exit 0
+else
+	echo "Failed building APK."
+	exit 1
 fi
-
-echo "There was an error building the APK"
-exit 1

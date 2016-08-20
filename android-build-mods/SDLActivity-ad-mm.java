@@ -33,6 +33,7 @@ import android.hardware.*;
 import android.content.pm.ActivityInfo;
 
 import com.millennialmedia.MMSDK;
+import com.millennialmedia.MMLog;
 import com.millennialmedia.InlineAd;
 import com.millennialmedia.MMException;
 import com.millennialmedia.UserData;
@@ -125,7 +126,6 @@ public class SDLActivity extends Activity {
 	}
 
 	// Ad Variable
-//	public static final String PLACEMENT_ID = "230261";
 	private InlineAd inlineAd = null;
 	UserData userData = null;
 	AppInfo appInfo = null;
@@ -191,6 +191,8 @@ public class SDLActivity extends Activity {
 
 		// Ad Init
 		MMSDK.initialize(this);
+		// Verbose Log
+		MMLog.setLogLevel(Log.VERBOSE);
 		// User Data
 		try{
 			userData = new UserData();
@@ -214,7 +216,7 @@ public class SDLActivity extends Activity {
 
 		// Create inline ad
 		try {
-			inlineAd = InlineAd.createInstance("230261",
+			inlineAd = InlineAd.createInstance("203888",
 				(ViewGroup) adContainer);
 
 			inlineAd.setListener(new InlineAd.InlineListener() {
@@ -222,7 +224,7 @@ public class SDLActivity extends Activity {
 				public void onRequestSucceeded(InlineAd inlineAd) {
 					System.out.println(":I/SDL/APP: " +
 						"Inline Ad loaded.");
-//					adContainer.setVisibility(View.VISIBLE);
+					adContainer.setVisibility(View.VISIBLE);
 				}
 
 				@Override

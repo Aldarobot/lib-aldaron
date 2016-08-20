@@ -1,4 +1,4 @@
-#include "jl.h"
+#include <jl.h>
 #include "jlgr.h"
 
 #define EX_MODE_EDIT 0

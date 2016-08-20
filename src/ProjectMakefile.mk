@@ -125,24 +125,24 @@ android: -android-sdl-mods
 	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/platform-tools && \
 	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/build-tools/24.0.1 && \
 	sh $(LA_HOME)/android-build-mods/androidbuild.sh\
-		jlw.$(USERNAME).$(PACKNAME)\
-		$(LA_HOME)/src/C/ $(CURDIR)/$(SRC)/
+		com.$(USERNAME).$(PACKNAME) $(LA_HOME)/src/C/ $(CURDIR)/$(SRC)/
 
 android-with-ads: -android-sdl-mods
 	cp $(LA_HOME)/android-build-mods/AndroidManifest-mm.xml\
 	 $(LA_HOME)/android-build-mods/update/AndroidManifest.xml
 	cp $(LA_HOME)/android-build-mods/SDLActivity-ad-mm.java\
 	 $(LA_HOME)/android-build-mods/update/src/org/libsdl/app/SDLActivity.java
-#	cp -ur $(LA_HOME)/deps/mopub-sdk/src/main/\
-#	 build/android/src/
 	# Run Install Script
 	export PATH=$$PATH:$(LA_HOME)/src/android-ndk && \
 	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/tools && \
 	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/platform-tools && \
 	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/build-tools/24.0.1 && \
 	sh $(LA_HOME)/android-build-mods/androidbuild.sh\
-		jlw.$(USERNAME).$(PACKNAME)\
-		$(LA_HOME)/src/C/ $(CURDIR)/$(SRC)/
+		com.$(USERNAME).$(PACKNAME) $(LA_HOME)/src/C/ $(CURDIR)/$(SRC)/
+
+android-deploy:
+	scp -P 2222 build/com.$(USERNAME).$(PACKNAME).apk\
+	 $(shell echo $(IP)):la_test/com.$(USERNAME).$(PACKNAME).apk
 
 build-notify:
 	# Building program for target=$(PLATFORM)....

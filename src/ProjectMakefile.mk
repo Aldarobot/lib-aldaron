@@ -102,49 +102,23 @@ install: -release
 
 -android-sdl-mods:
 	# Apply SDL mods.
-	cp -u $(LA_HOME)/android-build-mods/Android.mk\
+	cp -u $(LA_HOME)/src/android/Android.mk\
 	 $(LA_HOME)/src/lib/sdl/android-project/jni/src/
-	cp -u $(LA_HOME)/android-build-mods/Android_static.mk\
+	cp -u $(LA_HOME)/src/android/Android_static.mk\
 	 $(LA_HOME)/src/lib/sdl/android-project/jni/src/
-	cp -u $(LA_HOME)/android-build-mods/SDL_image-Android.mk\
+	cp -u $(LA_HOME)/src/android/SDL_image-Android.mk\
 	 $(LA_HOME)/src/lib/sdl-image/Android.mk
-	cp -u $(LA_HOME)/android-build-mods/jconfig.h\
+	cp -u $(LA_HOME)/src/android/jconfig.h\
 	 $(LA_HOME)/src/lib/sdl-image/external/jpeg-9/jconfig.h
-	cp -u $(LA_HOME)/android-build-mods/libzip-Android.mk\
+	cp -u $(LA_HOME)/src/android/libzip-Android.mk\
 	 $(LA_HOME)/src/lib/libzip/lib/Android.mk
-	cp -u $(LA_HOME)/android-build-mods/SDL_config_android.h\
+	cp -u $(LA_HOME)/src/android/SDL_config_android.h\
 	 $(LA_HOME)/src/lib/sdl/include/SDL_config.h
-
-android: -android-sdl-mods
-	cp $(LA_HOME)/android-build-mods/AndroidManifest.xml\
-	 $(LA_HOME)/android-build-mods/update/AndroidManifest.xml
-	cp $(LA_HOME)/android-build-mods/SDLActivity.java\
-	 $(LA_HOME)/android-build-mods/update/src/org/libsdl/app/SDLActivity.java
-	# Run Install Script
-	export PATH=$$PATH:$(LA_HOME)/src/android-ndk && \
-	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/tools && \
-	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/platform-tools && \
-	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/build-tools/24.0.1 && \
-	sh $(LA_HOME)/android-build-mods/androidbuild.sh\
-		com.$(USERNAME).$(PACKNAME) $(LA_HOME)/src/C/ $(CURDIR)/$(SRC)/
-
-android-with-ads: -android-sdl-mods
-	cp $(LA_HOME)/android-build-mods/AndroidManifest-mm.xml\
-	 $(LA_HOME)/android-build-mods/update/AndroidManifest.xml
-	cp $(LA_HOME)/android-build-mods/SDLActivity-ad-mm.java\
-	 $(LA_HOME)/android-build-mods/update/src/org/libsdl/app/SDLActivity.java
-	# Run Install Script
-	export PATH=$$PATH:$(LA_HOME)/src/android-ndk && \
-	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/tools && \
-	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/platform-tools && \
-	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/build-tools/24.0.1 && \
-	sh $(LA_HOME)/android-build-mods/androidbuild.sh\
-		com.$(USERNAME).$(PACKNAME) $(LA_HOME)/src/C/ $(CURDIR)/$(SRC)/
 
 build/android-release-key.keystore:
 	keytool -sigalg SHA1withRSA -keyalg RSA -keysize 1024 -genkey -keystore build/android-release-key.keystore -alias daliasle -validity 3650
 
-android-gradle: build/android-release-key.keystore
+android-gradle: build/android-release-key.keystore -android-sdl-mods
 	# Copy Gradle android project
 	cp -ur $(LA_HOME)/src/android-project/ build/
 	# build.gradle

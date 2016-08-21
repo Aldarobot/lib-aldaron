@@ -28,6 +28,7 @@ USERNAME="`sed '1q;d' la_config`"
 PACKNAME="`sed '2q;d' la_config`"
 PROGNAME="`sed '3q;d' la_config`"
 ORIENT="`sed '4q;d' la_config`"
+AD_ID="`sed '5q;d' la_config`"
 
 # C & C++ Modules
 MODULES = \
@@ -65,6 +66,7 @@ la_config2:
 	read -p \ \ \ \ \ \ \ \ \  -r line && echo $$line >> la_config
 	echo "Orientation ( Portrait / Landscape / None )"
 	read -p \ \ \ \ \ \ \ \ \  -r line && echo $$line >> la_config
+	echo "203888" >> la_config
 	echo
 	echo "`cat la_config`"
 	echo
@@ -136,6 +138,7 @@ android-gradle: build/android-release-key.keystore -android-sdl-mods
 	# SDLActivity.java
 	mkdir -p build/android-project/app/src/main/java/org/libsdl/app/
 	cp $(LA_HOME)/src/android/SDLActivity.java build/android-project/app/src/main/java/org/libsdl/app/SDLActivity.java
+	sed -i "s|203888|$(AD_ID)|g" build/android-project/app/src/main/java/org/libsdl/app/SDLActivity.java
 	# SDLActivity.java #2
 	mkdir -p build/android-project/app/src/main/java/com/$(USERNAME)/$(PACKNAME)/
 	echo "package com.$(USERNAME).$(PACKNAME);" > build/android-project/app/src/main/java/com/$(USERNAME)/$(PACKNAME)/AldaronActivity.java

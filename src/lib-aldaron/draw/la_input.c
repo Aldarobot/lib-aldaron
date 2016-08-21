@@ -14,12 +14,6 @@
 	#define SDL_MENU_KEY SDL_SCANCODE_MENU
 #endif
 
-#if JL_PLAT == JL_PLAT_PHONE
-	extern float JL_SHRINK_HEIGHT;
-#else
-	#define JL_SHRINK_HEIGHT 0.1f
-#endif
-
 /*
  * "Preval" is a pointer to previous key pressed value.
  *	 0 if key isn't pressed
@@ -208,21 +202,24 @@ void jl_ct_key_menu(jlgr_t *jlgr, jlgr_input_fnct inputfn) {
 	jl_ct_key(jlgr, inputfn, SDL_MENU_KEY); //xyrhpk
 }
 
+static inline void la_input_clamp_msy(jlgr_t* jlgr, float* msy) {
+	if(jlgr->sg.cs != JL_SCR_SS) {
+		*msy -= .5;
+		*msy *= 2.;
+	}
+	*msy *= jlgr->wm.ar;
+}
+
 static inline void jlgr_input_handle_events_platform_dependant__(jlgr_t* jlgr) {
 #if JL_PLAT == JL_PLAT_PHONE
 	if( jlgr->main.ct.event.type==SDL_FINGERDOWN ) {
 		float msy;
 
 		jlgr->main.ct.input.click = 1;
-		msy = jlgr->main.ct.event.tfinger.y * jlgr->wm.ar;
-		msy -= JL_SHRINK_HEIGHT;
-		msy /= (1.f - JL_SHRINK_HEIGHT);
+		msy = jlgr->main.ct.event.tfinger.y;
 
-		if(jlgr->sg.cs != JL_SCR_SS) {
-			msy = msy * 2.;
-			msy -= jlgr->wm.ar;
-			if(msy < 0.) jlgr->main.ct.input.click = 0;
-		}
+		la_input_clamp_msy(jlgr, &msy);
+		if(msy < 0.) jlgr->main.ct.input.click = 0;
 
 		al_safe_set_float(&jlgr->main.ct.msx,
 			jlgr->main.ct.event.tfinger.x);
@@ -394,11 +391,11 @@ void jl_ct_loop__(jlgr_t* jlgr) {
 		int32_t mousey = jlgr->main.ct.msyi;
 		//translate integer into float by clipping [0-1]
 		float msy = ((float)mousey) / jlgr_wm_geth(jlgr);
-		if(jlgr->sg.cs != JL_SCR_SS) msy -= .5;
-		msy *= jlgr->wm.ar;
+
+		la_input_clamp_msy(jlgr, &msy);
 
 		// Ignore mouse input on upper screen.
-		if(jlgr->sg.cs != JL_SCR_SS && msy < 0.) {
+		if(msy < 0.) {
 			msy = 0.;
 			// Show native cursor.
 			if(!jlgr->main.ct.sc) {
@@ -406,7 +403,7 @@ void jl_ct_loop__(jlgr_t* jlgr) {
 				jlgr->main.ct.sc = 1;
 			}
 		}else{
-			// Show JL_Lib cursor
+			// Show lib-aldaron cursor
 			if(jlgr->main.ct.sc) {
 				SDL_ShowCursor(SDL_DISABLE);
 				jlgr->main.ct.sc = 0;

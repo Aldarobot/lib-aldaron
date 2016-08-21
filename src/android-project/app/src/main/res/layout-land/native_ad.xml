@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+	android:id="@+id/native_ad"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:background="@android:color/darker_gray"
+	android:padding="@dimen/native_ad_shadow">
+
+	<RelativeLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:background="@android:color/white">
+
+		<RelativeLayout
+			android:id="@+id/header"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_alignParentTop="true"
+			android:paddingLeft="@dimen/native_ad_padding"
+			android:paddingRight="@dimen/native_ad_padding">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="@dimen/native_title_left_margin"
+				android:layout_marginTop="@dimen/native_title_top_margin"
+				android:layout_toRightOf="@+id/iconImage"
+				android:tag="title_1"
+				android:textSize="@dimen/title_text_size"/>
+
+			<ImageView
+				android:id="@+id/iconImage"
+				android:layout_width="@dimen/native_icon_size"
+				android:layout_height="@dimen/native_icon_size"
+				android:layout_marginTop="@dimen/native_icon_top_margin"
+				android:tag="iconImage_1"/>
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentRight="true"
+				android:layout_alignParentTop="true"
+				android:layout_marginTop="@dimen/native_disclaimer_top_margin"
+				android:tag="disclaimer_1"
+				android:textSize="@dimen/disclaimer_text_size"/>
+		</RelativeLayout>
+
+
+		<TextView
+			android:id="@+id/bodyText"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/header"
+			android:layout_marginTop="@dimen/native_section_top_margin"
+			android:paddingLeft="@dimen/native_ad_padding"
+			android:paddingRight="@dimen/native_ad_padding"
+			android:tag="body_1"
+			android:textSize="@dimen/body_text_size"/>
+
+		<RelativeLayout
+			android:id="@+id/footer"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/bodyText"
+			android:background="@color/seashell"
+			android:paddingBottom="@dimen/native_ad_padding"
+			android:paddingLeft="@dimen/native_ad_padding"
+			android:paddingRight="@dimen/native_ad_padding"
+			android:paddingTop="@dimen/native_footer_top_padding">
+
+			<Button
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentRight="true"
+				android:tag="callToAction_1"
+				android:textAllCaps="true"
+				android:textSize="@dimen/cta_text_size"/>
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentLeft="true"
+				android:layout_centerVertical="true"
+				android:tag="rating_1"
+				android:textSize="@dimen/rating_text_size"/>
+		</RelativeLayout>
+
+	</RelativeLayout>
+</FrameLayout>

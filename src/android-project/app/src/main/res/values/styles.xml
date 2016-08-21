@@ -1,0 +1,15 @@
+<resources>
+
+	<!-- Base application theme. -->
+	<style name="AppTheme" parent="Theme.AppCompat.Light">
+		<item name="colorPrimary">@color/primary</item>
+		<item name="colorPrimaryDark">@color/primary_dark</item>
+	</style>
+
+	<color name="overflow">#ffffff</color>
+	<color name="primary">#559cbe</color>
+	<color name="primary_dark">#4885a2</color>
+	<color name="tab_indicator">#559CBE</color>
+	<color name="linen">#FAF0E6</color>
+	<color name="seashell">#FFF5EE</color>
+</resources>

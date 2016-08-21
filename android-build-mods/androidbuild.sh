@@ -168,7 +168,6 @@ sed -i "s|SDLActivity|$APP|g" $BUILDPATH/build.xml
 # Fill in a default Activity
 echo "package $APP;" >  "$ACTIVITY.java"
 echo "import org.libsdl.app.SDLActivity;" >> "$ACTIVITY.java"
-#echo "import com.mopub.mobileads;" >> "$ACTIVITY.java"
 echo "public class $ACTIVITY extends SDLActivity {}" >> "$ACTIVITY.java"
 
 # Update project and build

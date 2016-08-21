@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<string name="action_settings">Settings</string>
+	<string name="load_inline">Load inline</string>
+	<string name="load_interstitial">Load interstitial</string>
+	<string name="display_interstitial">Display interstitial</string>
+	<string name="display_native">Display native</string>
+
+	<string name="inline_title">Inline</string>
+	<string name="interstitial_title">Interstitial</string>
+	<string name="native_title">Native</string>
+	<string name="native_xml_title">Native XML</string>
+
+	<string name="native_loaded">Native Ad loaded</string>
+	<string name="native_load_failed">Failed to load a Native Ad.</string>
+
+	<!-- Interstitials -->
+	<string name="load">Load</string>
+	<string name="show">Show</string>
+
+	<!-- Inline -->
+	<string name="refresh">Refresh</string>
+
+	<string-array name="ad_formats">
+		<item>Inline Banner</item>
+		<item>Inline Rectangle</item>
+		<item>Interstitial</item>
+		<item>Native</item>
+		<item>Native XML</item>
+	</string-array>
+	<string name="title_activity_native">MMSDK Native</string>
+	<string name="title_activity_native_xml">MMSDK Native XML</string>
+	<string name="title_activity_inline_banner">MMSDK Inline Banner</string>
+	<string name="title_activity_inline_rectangle">MMSDK Inline Rectangle</string>
+	<string name="title_activity_interstitial">MMSDK Interstitial</string>
+
+</resources>

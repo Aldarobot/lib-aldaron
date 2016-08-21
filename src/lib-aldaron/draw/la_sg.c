@@ -9,12 +9,6 @@
 #include "JLGRprivate.h"
 #include "SDL_image.h"
 
-#if JL_PLAT == JL_PLAT_PHONE
-	extern float JL_SHRINK_HEIGHT;
-#else
-	#define JL_SHRINK_HEIGHT 0.f
-#endif
-
 // SG Prototypes
 void jl_gl_draw_prendered(jlgr_t* jlgr, jl_vo_t* pv);
 
@@ -199,11 +193,11 @@ static void jl_sg_init_ds_(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 	jl_rect_t rcrd = {
 		0.f, 0.f,
-		1.f, .5f * (1.f - JL_SHRINK_HEIGHT) * jlgr->wm.ar
+		1.f, .5f * jlgr->wm.ar
 	};
 
 	jlgr_sprite_resize(jlgr, &jlgr->sg.bg.dn, &rcrd);
-	rcrd.y = .5f * (1.f - JL_SHRINK_HEIGHT) * jlgr->wm.ar;
+	rcrd.y = .5f * jlgr->wm.ar;
 	jlgr_sprite_resize(jlgr, &jlgr->sg.bg.up, &rcrd);
 	// Set double screen loop.
 	jlgr->sg.loop = _jl_sg_loop_ds;
@@ -214,7 +208,7 @@ static void jl_sg_init_ss_(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 	jl_rect_t rcrd = {
 		0.f, 0.f,
-		1.f, jlgr->wm.ar * (1.f - JL_SHRINK_HEIGHT)
+		1.f, jlgr->wm.ar
 	};
 
 	jlgr_sprite_resize(jlgr, &jlgr->sg.bg.dn, &rcrd);

@@ -59,7 +59,6 @@ void _jl_sg_loop(jlgr_t* jlgr);
 float jl_sg_seconds_past_(jl_t* jlc);
 
 // Resize function
-void jl_wm_resz__(jlgr_t* jlgr, uint16_t x, uint16_t y);
 void jl_sg_resz__(jl_t* jlc);
 void jlgr_resz(jlgr_t* jlgr, uint16_t x, uint16_t y);
 void jlgr_menu_resize_(jlgr_t* jlgr);

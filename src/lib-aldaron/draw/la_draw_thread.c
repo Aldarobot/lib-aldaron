@@ -10,6 +10,7 @@
 
 void jlgr_mouse_resize__(jlgr_t* jlgr);
 void jl_mode_loop__(jl_t* jl);
+void jl_wm_resz__(jlgr_t* jlgr, uint16_t w, uint16_t h);
 
 static void jlgr_thread_programsresize(jlgr_t* jlgr) {
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);

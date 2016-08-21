@@ -1,0 +1,32 @@
+<RelativeLayout
+	android:id="@+id/native_container"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/linen"
+	tools:context="com.millennialmedia.sampleapp.NativeActivity">
+
+	<ScrollView
+		android:id="@+id/scroll_view"
+		android:layout_marginTop="@dimen/native_ad_top_margin"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_above="@+id/toolbar">
+		<LinearLayout
+			android:id="@+id/ad_container"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:orientation="vertical"
+			android:gravity="center">
+		</LinearLayout>
+	</ScrollView>
+
+	<android.support.v7.widget.Toolbar
+		android:id="@+id/toolbar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:background="@color/primary"
+		android:minHeight="?attr/actionBarSize"/>
+</RelativeLayout>

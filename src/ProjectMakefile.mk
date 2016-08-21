@@ -27,6 +27,7 @@ BUILD_OBJ_PROF = build/prof
 USERNAME="`sed '1q;d' la_config`"
 PACKNAME="`sed '2q;d' la_config`"
 PROGNAME="`sed '3q;d' la_config`"
+ORIENT="`sed '4q;d' la_config`"
 
 # C & C++ Modules
 MODULES = \
@@ -140,6 +141,66 @@ android-with-ads: -android-sdl-mods
 	sh $(LA_HOME)/android-build-mods/androidbuild.sh\
 		com.$(USERNAME).$(PACKNAME) $(LA_HOME)/src/C/ $(CURDIR)/$(SRC)/
 
+build/android-release-key.keystore:
+	keytool -sigalg SHA1withRSA -keyalg RSA -keysize 1024 -genkey -keystore build/android-release-key.keystore -alias daliasle -validity 3650
+
+android-gradle: build/android-release-key.keystore
+	# Copy Gradle android project
+	cp -ur $(LA_HOME)/src/android-project/ build/
+	# build.gradle
+	cp $(LA_HOME)/src/android/build.gradle build/android-project/app/build.gradle
+	sed -i "s|USERNAME|$(USERNAME)|g" build/android-project/app/build.gradle
+	sed -i "s|PACKNAME|$(PACKNAME)|g" build/android-project/app/build.gradle
+	# AndroidManifest.xml
+	cp $(LA_HOME)/src/android/AndroidManifest.xml build/android-project/app/src/main/AndroidManifest.xml
+	sed -i "s|USERNAME|$(USERNAME)|g" build/android-project/app/src/main/AndroidManifest.xml
+	sed -i "s|PACKNAME|$(PACKNAME)|g" build/android-project/app/src/main/AndroidManifest.xml
+	PROGNAME=$(PROGNAME) && sed -i "s|PROGNAME|$$PROGNAME|g" build/android-project/app/src/main/AndroidManifest.xml
+	sed -i "s|ORIENT|$(ORIENT)|g" build/android-project/app/src/main/AndroidManifest.xml
+	# ic_launcher.png
+	cp resources/icon.png build/android-project/app/src/main/res/drawable/ic_launcher.png
+	# SDLActivity.java
+	mkdir -p build/android-project/app/src/main/java/org/libsdl/app/
+	cp $(LA_HOME)/src/android/SDLActivity.java build/android-project/app/src/main/java/org/libsdl/app/SDLActivity.java
+	# SDLActivity.java #2
+	mkdir -p build/android-project/app/src/main/java/com/$(USERNAME)/$(PACKNAME)/
+	echo "package com.$(USERNAME).$(PACKNAME);" > build/android-project/app/src/main/java/com/$(USERNAME)/$(PACKNAME)/AldaronActivity.java
+	echo "import org.libsdl.app.SDLActivity;" >> build/android-project/app/src/main/java/com/$(USERNAME)/$(PACKNAME)/AldaronActivity.java
+	echo "public class AldaronActivity extends SDLActivity {}" >> build/android-project/app/src/main/java/com/$(USERNAME)/$(PACKNAME)/AldaronActivity.java
+	# Link SDL sources
+	mkdir -p build/android-project/app/src/main/jni/SDL
+	ln -sf $(LA_HOME)/src/lib/sdl/src build/android-project/app/src/main/jni/SDL
+	ln -sf $(LA_HOME)/src/lib/sdl/include build/android-project/app/src/main/jni/SDL
+	cp -u $(LA_HOME)/src/lib/sdl/Android.mk build/android-project/app/src/main/jni/SDL
+	# Link SDL_image sources
+	ln -sTf $(LA_HOME)/src/lib/sdl-image/ build/android-project/app/src/main/jni/SDL_image
+	# Link SDL_mixer sources
+	ln -sTf $(LA_HOME)/src/lib/sdl-mixer/ build/android-project/app/src/main/jni/SDL_mixer
+	ln -sTf $(LA_HOME)/src/lib/sdl-mixer/external/libmikmod-3.1.12/ build/android-project/app/src/main/jni/mikmod
+	ln -sTf $(LA_HOME)/src/lib/sdl-mixer/external/smpeg2-2.0.0/ build/android-project/app/src/main/jni/smpeg2
+	# Link SDL_net sources
+	ln -sTf $(LA_HOME)/src/lib/sdl-net/ build/android-project/app/src/main/jni/SDL_net
+	# Link Lib Zip sources
+	cp -u $(LA_HOME)/src/lib/libzip/config.h $(LA_HOME)/src/lib/libzip/lib/config.h
+	ln -sTf $(LA_HOME)/src/lib/libzip/lib/ build/android-project/app/src/main/jni/libzip
+	# Link Clump sources
+	ln -sTf $(LA_HOME)/src/lib/clump/ build/android-project/app/src/main/jni/clump
+	# Link User sources
+	cp -u $(LA_HOME)/src/lib/sdl/android-project/jni/src/Android.mk build/android-project/app/src/main/jni/src/
+	ln -fs $(CURDIR)/src/ build/android-project/app/src/main/jni/src/
+	# NDK
+	mkdir -p build/android-project/app/src/main/jniLibs/
+	cd build/android-project/app/src/main/jni/ && $(LA_HOME)/src/android-ndk/ndk-build -j `nproc`
+	# Gradle
+	cd build/android-project/ && \
+#	ANDROID_HOME=$(LA_HOME)/src/android-sdk ./gradlew && \
+	ANDROID_HOME=$(LA_HOME)/src/android-sdk ./gradlew assembleRelease
+	# Sign
+	jarsigner -verbose -tsa http://timestamp.digicert.com -sigalg SHA1withRSA -digestalg SHA1 -keystore $(CURDIR)/build/android-release-key.keystore build/android-project/app/build/outputs/apk/app-release-unsigned.apk daliasle
+	# Zipalign & Rename
+	rm -f build/com.$(USERNAME).$(PACKNAME).apk
+	$(LA_HOME)/src/android-sdk/build-tools/23.0.3/zipalign -v 4 build/android-project/app/build/outputs/apk/app-release-unsigned.apk build/com.$(USERNAME).$(PACKNAME).apk
+
 android-deploy:
 	scp -P 2222 build/com.$(USERNAME).$(PACKNAME).apk\
 	 $(shell echo $(IP)):la_test/com.$(USERNAME).$(PACKNAME).apk
@@ -149,7 +210,7 @@ android-debug:
 	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/platform-tools && \
 	`which adb` install -r build/com.$(USERNAME).$(PACKNAME).apk && \
 	echo "Logcat is starting ( You can open your app now )...." && \
-	`which adb` logcat | grep SDL
+	`which adb` logcat | grep $(PACKNAME)
 
 build-notify:
 	# Building program for target=$(PLATFORM)....

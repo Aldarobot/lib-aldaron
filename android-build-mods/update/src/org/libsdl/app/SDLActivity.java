@@ -31,6 +31,7 @@ import android.graphics.drawable.Drawable;
 import android.media.*;
 import android.hardware.*;
 import android.content.pm.ActivityInfo;
+import android.text.style.TtsSpan; //TEST
 
 import com.millennialmedia.MMSDK;
 import com.millennialmedia.MMLog;
@@ -212,7 +213,6 @@ public class SDLActivity extends Activity {
 
 		mLayout = new RelativeLayout(this);
 		final View adContainer = new RelativeLayout(this);
-//		final View adContainer = findViewById(R.id.ad_container);
 
 		// Create inline ad
 		try {
@@ -284,28 +284,12 @@ public class SDLActivity extends Activity {
 
 		if (inlineAd != null) {
 			// set refresh rate to 30 seconds.
-		//	inlineAd.setRefreshInterval(30000);
+//			inlineAd.setRefreshInterval(30000);
 
 			final InlineAd.InlineAdMetadata inlineAdMetadata = new InlineAd.InlineAdMetadata().setAdSize(InlineAd.AdSize.BANNER);
 
 			inlineAd.request(inlineAdMetadata);
 		}
-
-		// ad stuff
-/*		adView = new MMAdView(this);
-		adView.setApid("230261");
-		//Set your metadata in the MMRequest object
-		MMRequest request = new MMRequest();
-		//Add metadata here.
-		//Add the MMRequest object to your MMAdView.
-		adView.setMMRequest(request);
-		//Sets the id to preserve your ad on configuration changes.
-		adView.setId(MMSDK.getDefaultAdId());*/
-
-//		RelativeLayout adRelativeLayout = (RelativeLayout) findViewById(R.id.adBannerRelativeLayout);
-//		adRelativeLayout.addView(adView, new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-
-		// ad stuff end
 
 		// Set up the surface
 		mSurface = new SDLSurface(getApplication());
@@ -317,28 +301,8 @@ public class SDLActivity extends Activity {
 		}
 
 		// Set layout
-
-		// Display Metrics
-		DisplayMetrics dm = new DisplayMetrics();
-		SDLActivity.mSingleton.getWindowManager().getDefaultDisplay().getMetrics(dm);
-		int dens = dm.densityDpi;
-		float hi = dm.heightPixels / (float)dens;
-		float hdp = hi * 160.0f;
-		int shrink_height = (int)(50.0f / hdp);// Fraction of display is 50 dp
-
 		mLayout.addView(mSurface);
 		mLayout.addView(adContainer, ViewGroup.LayoutParams.WRAP_CONTENT, 50);
-
-/*		try{
-			inlineAd = InlineAd.createInstance(PLACEMENT_ID, (ViewGroup) mLayout);
-		}catch (MMException e) {
-			Log.e(TAG, "Error creating inline banner ad", e);
-		}*/
-//		mLayout.addView(adView,
-//			new RelativeLayout.LayoutParams(
-//				LayoutParams.FILL_PARENT,
-//				LayoutParams.WRAP_CONTENT));
-//		adView.getAd();
 		setContentView(mLayout);
 	}
 
@@ -560,7 +524,6 @@ public class SDLActivity extends Activity {
 
 	// C functions we call
 	public static native void nativeJlSendData(String data);
-	public static native void nativeJlResize(float shrink_height);
 	public static native int nativeInit(Object arguments);
 	public static native void nativeLowMemory();
 	public static native void nativeQuit();
@@ -1253,22 +1216,9 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 		SDLActivity.onNativeResize(width, height, sdlFormat, mDisplay.getRefreshRate());
 		Log.v("SDL", "Window size: " + width + "x" + height);
 
-		// lib-aldaron code
-
-		DisplayMetrics dm = new DisplayMetrics();
-		SDLActivity.mSingleton.getWindowManager().getDefaultDisplay().getMetrics(dm);
-		int dens = dm.densityDpi;
-		float hi = (float)height / (float)dens;
-		float hdp = hi * 160.0f;
-		float shrink_height = 50.0f / hdp;// Fraction of display is 50 dp
-		SDLActivity.nativeJlResize(shrink_height);
-
-		// lib-aldaron code
-
 		// Set mIsSurfaceReady to 'true' *before* making a call to handleResume
 		SDLActivity.mIsSurfaceReady = true;
 		SDLActivity.onNativeSurfaceChanged();
-
 
 		if (SDLActivity.mSDLThread == null) {
 			// This is the entry point to the C app.

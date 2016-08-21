@@ -17,7 +17,6 @@ void jl_mode_loop__(jl_t* jl);
 	#include "SDL_log.h"
 
 	const char* JL_FL_BASE;
-	float JL_SHRINK_HEIGHT = 0.f;
 #endif
 
 //Initialize The Libraries Needed At Very Beginning: The Base Of It All
@@ -168,15 +167,6 @@ Java_org_libsdl_app_SDLActivity_nativeJlSendData( JNIEnv *env, jobject obj,
 	SDL_Log("nativeJlSendData\n");
 	JL_FL_BASE = (*env)->GetStringUTFChars(env, data, 0);
 	SDL_Log("nativeJlSendData \"%s\"\n", JL_FL_BASE);
-}
-
-JNIEXPORT void JNICALL
-Java_org_libsdl_app_SDLActivity_nativeJlResize( JNIEnv *env, jobject obj,
-	float shrink_height)
-{
-	SDL_Log("shrink height\n");
-	JL_SHRINK_HEIGHT = shrink_height;
-	SDL_Log("shrink height %f\n", JL_SHRINK_HEIGHT);
 }
 
 int SDL_main(char* argv[], int argc) {

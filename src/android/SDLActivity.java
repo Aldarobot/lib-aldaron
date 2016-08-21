@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 
 import android.app.*;
 import android.content.*;
+import android.content.pm.PackageManager;
 import android.text.InputType;
 import android.view.*;
 import android.view.inputmethod.BaseInputConnection;
@@ -31,7 +32,6 @@ import android.graphics.drawable.Drawable;
 import android.media.*;
 import android.hardware.*;
 import android.content.pm.ActivityInfo;
-import android.text.style.TtsSpan; //TEST
 
 import com.millennialmedia.MMSDK;
 import com.millennialmedia.MMLog;
@@ -69,6 +69,12 @@ public class SDLActivity extends Activity {
 
 	// Audio
 	protected static AudioTrack mAudioTrack;
+
+	// Ads
+	protected static InlineAd inlineAd;
+	protected static UserData userData;
+	protected static AppInfo appInfo;
+	protected static View adContainer;
 
 	/**
 	 * This method is called by SDL before loading the native shared libraries.
@@ -124,19 +130,16 @@ public class SDLActivity extends Activity {
 		mIsPaused = false;
 		mIsSurfaceReady = false;
 		mHasFocus = true;
+		inlineAd = null;
+		userData = null;
+		appInfo = null;
+		adContainer = null;
 	}
-
-	// Ad Variable
-	private InlineAd inlineAd = null;
-	UserData userData = null;
-	AppInfo appInfo = null;
 
 	// Setup
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Log.v(TAG, "Device: " + android.os.Build.DEVICE);
-		Log.v(TAG, "Model: " + android.os.Build.MODEL);
-		Log.v(TAG, "onCreate(): " + mSingleton);
+		System.out.println("LA_EVENT: onCreate(): " + mSingleton);
 		super.onCreate(savedInstanceState);
 
 		SDLActivity.initialize();
@@ -157,8 +160,7 @@ public class SDLActivity extends Activity {
 			errorMsgBrokenLib = e.getMessage();
 		}
 
-		if (mBrokenLibraries)
-		{
+		if (mBrokenLibraries) {
 			AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
 			dlgAlert.setMessage("An error occurred while trying to start the application. Please try again and/or reinstall."
 				  + System.getProperty("line.separator")
@@ -211,9 +213,7 @@ public class SDLActivity extends Activity {
 				" app data.");
 		}
 
-		mLayout = new RelativeLayout(this);
-		final View adContainer = new RelativeLayout(this);
-
+		adContainer = new RelativeLayout(this);
 		// Create inline ad
 		try {
 			inlineAd = InlineAd.createInstance("203888",
@@ -294,48 +294,46 @@ public class SDLActivity extends Activity {
 		// Set up the surface
 		mSurface = new SDLSurface(getApplication());
 
-		if(Build.VERSION.SDK_INT >= 12) {
-			mJoystickHandler = new SDLJoystickHandler_API12();
-		} else {
-			mJoystickHandler = new SDLJoystickHandler();
-		}
+		mJoystickHandler = new SDLJoystickHandler();
 
 		// Set layout
+		mLayout = new RelativeLayout(this);
 		mLayout.addView(mSurface);
-		mLayout.addView(adContainer, ViewGroup.LayoutParams.WRAP_CONTENT, 50);
+		mLayout.addView(adContainer,
+			ViewGroup.LayoutParams.WRAP_CONTENT, 50);
 		setContentView(mLayout);
 	}
 
 	// Events
 	@Override
 	protected void onPause() {
-		Log.v(TAG, "onPause()");
+		System.out.println("LA_EVENT: onPause()");
 		super.onPause();
 
-		if (SDLActivity.mBrokenLibraries) {
-		   return;
-		}
+		if (SDLActivity.mBrokenLibraries) return;
 
+		// SDL Pause
 		SDLActivity.handlePause();
+		// Lib Aldaron Pause
+		SDLActivity.nativeLaExit();
 	}
 
 	@Override
 	protected void onResume() {
-		Log.v(TAG, "onResume()");
+		System.out.println("LA_EVENT: onResume()");
+
 		super.onResume();
 
-		if (SDLActivity.mBrokenLibraries) {
-		   return;
-		}
+		if (SDLActivity.mBrokenLibraries) return;
 
+		// Resume
 		SDLActivity.handleResume();
 	}
-
 
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
-		Log.v(TAG, "onWindowFocusChanged(): " + hasFocus);
+		System.out.println("LA_EVENT: onWindowFocusChanged(): " + hasFocus);
 
 		if (SDLActivity.mBrokenLibraries) {
 		   return;
@@ -349,7 +347,7 @@ public class SDLActivity extends Activity {
 
 	@Override
 	public void onLowMemory() {
-		Log.v(TAG, "onLowMemory()");
+		System.out.println("LA_EVENT: onLowMemory()");
 		super.onLowMemory();
 
 		if (SDLActivity.mBrokenLibraries) {
@@ -361,7 +359,7 @@ public class SDLActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		Log.v(TAG, "onDestroy()");
+		System.out.println("LA_EVENT: onDestroy()");
 
 		if (SDLActivity.mBrokenLibraries) {
 		   super.onDestroy();
@@ -382,8 +380,6 @@ public class SDLActivity extends Activity {
 				Log.v(TAG, "Problem stopping thread: " + e);
 			}
 			SDLActivity.mSDLThread = null;
-
-			//Log.v(TAG, "Finished waiting for SDL thread");
 		}
 
 		super.onDestroy();
@@ -403,9 +399,8 @@ public class SDLActivity extends Activity {
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
 			keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
 			keyCode == KeyEvent.KEYCODE_CAMERA ||
-			keyCode == 168 || /* API 11: KeyEvent.KEYCODE_ZOOM_IN */
-			keyCode == 169 /* API 11: KeyEvent.KEYCODE_ZOOM_OUT */
-			) {
+			keyCode == 168 || keyCode == 169)
+		{
 			return false;
 		}
 		return super.dispatchKeyEvent(event);
@@ -524,6 +519,7 @@ public class SDLActivity extends Activity {
 
 	// C functions we call
 	public static native void nativeJlSendData(String data);
+	public static native void nativeLaExit();
 	public static native int nativeInit(Object arguments);
 	public static native void nativeLowMemory();
 	public static native void nativeQuit();
@@ -1009,7 +1005,7 @@ public class SDLActivity extends Activity {
 					mapping.put(KeyEvent.KEYCODE_ENTER, button);
 				}
 				if ((buttonFlags[i] & 0x00000002) != 0) {
-					mapping.put(111, button); /* API 11: KeyEvent.KEYCODE_ESCAPE */
+					mapping.put(111, button);
 				}
 			}
 			button.setText(buttonTexts[i]);
@@ -1118,9 +1114,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 		mDisplay = ((WindowManager)context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 		mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
 
-		if(Build.VERSION.SDK_INT >= 12) {
-			setOnGenericMotionListener(new SDLGenericMotionListener_API12());
-		}
+		setOnGenericMotionListener(new SDLGenericMotionListener());
 
 		// Some arbitrary defaults to avoid a potential division by zero
 		mWidth = 1.0f;
@@ -1274,12 +1268,9 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 
 		if( (event.getSource() & InputDevice.SOURCE_KEYBOARD) != 0) {
 			if (event.getAction() == KeyEvent.ACTION_DOWN) {
-				//Log.v("SDL", "key down: " + keyCode);
 				SDLActivity.onNativeKeyDown(keyCode);
 				return true;
-			}
-			else if (event.getAction() == KeyEvent.ACTION_UP) {
-				//Log.v("SDL", "key up: " + keyCode);
+			} else if (event.getAction() == KeyEvent.ACTION_UP) {
 				SDLActivity.onNativeKeyUp(keyCode);
 				return true;
 			}
@@ -1300,18 +1291,18 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 		int i = -1;
 		float x,y,p;
 
-		// !!! FIXME: dump this SDK check after 2.0.4 ships and require API14.
-		if (event.getSource() == InputDevice.SOURCE_MOUSE && SDLActivity.mSeparateMouseAndTouch) {
-			if (Build.VERSION.SDK_INT < 14) {
-				mouseButton = 1;	// For Android==12 all mouse buttons are the left button
-			} else {
-				try {
-					mouseButton = (Integer) event.getClass().getMethod("getButtonState").invoke(event);
-				} catch(Exception e) {
-					mouseButton = 1;	// oh well.
-				}
+		if (event.getSource() == InputDevice.SOURCE_MOUSE &&
+			SDLActivity.mSeparateMouseAndTouch)
+		{
+			try {
+				mouseButton = (Integer) event.getClass()
+					.getMethod("getButtonState")
+					.invoke(event);
+			} catch(Exception e) {
+				mouseButton = 1;
 			}
-			SDLActivity.onNativeMouse(mouseButton, action, event.getX(0), event.getY(0));
+			SDLActivity.onNativeMouse(mouseButton, action,
+				event.getX(0), event.getY(0));
 		} else {
 			switch(action) {
 				case MotionEvent.ACTION_MOVE:
@@ -1363,7 +1354,11 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 							// see the documentation of getPressure(i)
 							p = 1.0f;
 						}
-						SDLActivity.onNativeTouch(touchDevId, pointerFingerId, MotionEvent.ACTION_UP, x, y, p);
+						SDLActivity.onNativeTouch(
+							touchDevId,
+							pointerFingerId,
+							MotionEvent.ACTION_UP,
+							x, y, p);
 					}
 					break;
 
@@ -1373,7 +1368,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 		}
 
 		return true;
-   }
+	}
 
 	// Sensor events
 	public void enableSensor(int sensortype, boolean enabled) {
@@ -1465,12 +1460,7 @@ class DummyEdit extends View implements View.OnKeyListener {
 	//
 	@Override
 	public boolean onKeyPreIme (int keyCode, KeyEvent event) {
-		// As seen on StackOverflow: http://stackoverflow.com/questions/7634346/keyboard-hide-event
-		// FIXME: Discussion at http://bugzilla.libsdl.org/show_bug.cgi?id=1639
-		// FIXME: This is not a 100% effective solution to the problem of detecting if the keyboard is showing or not
-		// FIXME: A more effective solution would be to change our Layout from AbsoluteLayout to Relative or Linear
-		// FIXME: And determine the keyboard presence doing this: http://stackoverflow.com/questions/2150078/how-to-check-visibility-of-software-keyboard-in-android
-		// FIXME: An even more effective way would be if Android provided this out of the box, but where would the fun be in that :)
+		// FIXME: Write native code to detect keyboard.
 		if (event.getAction()==KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
 			if (SDLActivity.mTextEdit != null && SDLActivity.mTextEdit.getVisibility() == View.VISIBLE) {
 				SDLActivity.onNativeKeyboardFocusLost();
@@ -1484,9 +1474,7 @@ class DummyEdit extends View implements View.OnKeyListener {
 		ic = new SDLInputConnection(this, true);
 
 		outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
-		outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
-				| 33554432 /* API 11: EditorInfo.IME_FLAG_NO_FULLSCREEN */;
-
+		outAttrs.imeOptions=EditorInfo.IME_FLAG_NO_EXTRACT_UI|33554432;
 		return ic;
 	}
 }
@@ -1553,27 +1541,7 @@ class SDLInputConnection extends BaseInputConnection {
 	}
 }
 
-/* A null joystick handler for API level < 12 devices (the accelerometer is handled separately) */
 class SDLJoystickHandler {
-
-	/**
-	 * Handles given MotionEvent.
-	 * @param event the event to be handled.
-	 * @return if given event was processed.
-	 */
-	public boolean handleMotionEvent(MotionEvent event) {
-		return false;
-	}
-
-	/**
-	 * Handles adding and removing of input devices.
-	 */
-	public void pollInputDevices() {
-	}
-}
-
-/* Actual joystick functionality available for API >= 12 devices */
-class SDLJoystickHandler_API12 extends SDLJoystickHandler {
 
 	static class SDLJoystick {
 		public int device_id;
@@ -1590,12 +1558,11 @@ class SDLJoystickHandler_API12 extends SDLJoystickHandler {
 
 	private ArrayList<SDLJoystick> mJoysticks;
 
-	public SDLJoystickHandler_API12() {
+	public SDLJoystickHandler() {
 
 		mJoysticks = new ArrayList<SDLJoystick>();
 	}
 
-	@Override
 	public void pollInputDevices() {
 		int[] deviceIds = InputDevice.getDeviceIds();
 		// It helps processing the device ids in reverse order
@@ -1675,7 +1642,6 @@ class SDLJoystickHandler_API12 extends SDLJoystickHandler {
 		return null;
 	}
 
-	@Override
 	public boolean handleMotionEvent(MotionEvent event) {
 		if ( (event.getSource() & InputDevice.SOURCE_JOYSTICK) != 0) {
 			int actionPointerIndex = event.getActionIndex();
@@ -1705,7 +1671,7 @@ class SDLJoystickHandler_API12 extends SDLJoystickHandler {
 	}
 }
 
-class SDLGenericMotionListener_API12 implements View.OnGenericMotionListener {
+class SDLGenericMotionListener implements View.OnGenericMotionListener {
 	// Generic Motion (mouse hover, joystick...) events go here
 	@Override
 	public boolean onGenericMotion(View v, MotionEvent event) {

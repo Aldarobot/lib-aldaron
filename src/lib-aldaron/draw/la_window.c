@@ -119,7 +119,7 @@ static inline void jlgr_wm_create__(jlgr_t* jlgr) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 	// Create window.
 	jlgr->wm.window = jlgr_wm_mkwindow__(jlgr);
-	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
+	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 0);
 	jlgr->wm.glcontext = jl_wm_gl_context(jlgr);
 }
 

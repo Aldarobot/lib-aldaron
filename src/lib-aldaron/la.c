@@ -19,6 +19,8 @@ void jl_mode_loop__(jl_t* jl);
 	const char* JL_FL_BASE;
 #endif
 
+SDL_atomic_t la_running;
+
 //Initialize The Libraries Needed At Very Beginning: The Base Of It All
 static inline jl_t* la_init_essential__(void) {
 	// Memory
@@ -60,6 +62,7 @@ static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 	//
 	jl->time.timer = jl_time_get(jl);
 	JL_PRINT_DEBUG(jl, "Started JL_Lib!");
+	SDL_AtomicSet(&la_running, 1);
 }
 
 static void jl_time_reset__(jl_t* jl, uint8_t on_time) {
@@ -150,7 +153,8 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, const char* name,
 	// Initialize JL_lib!
 	la_init__(jl, fnc_init, name, ctx_size);
 	// Run the Loop
-	while(jl->mode.count) ((jl_fnct)jl->loop)(jl);
+	while(jl->mode.count && SDL_AtomicGet(&la_running))
+		((jl_fnct)jl->loop)(jl);
 	// Kill the program
 	return la_kill__(jl, fnc_kill, 0);
 }
@@ -167,6 +171,11 @@ Java_org_libsdl_app_SDLActivity_nativeJlSendData( JNIEnv *env, jobject obj,
 	SDL_Log("nativeJlSendData\n");
 	JL_FL_BASE = (*env)->GetStringUTFChars(env, data, 0);
 	SDL_Log("nativeJlSendData \"%s\"\n", JL_FL_BASE);
+}
+
+JNIEXPORT void JNICALL
+Java_org_libsdl_app_SDLActivity_nativeLaExit( JNIEnv *env, jobject obj) {
+	SDL_AtomicSet(&la_running, 0);
 }
 
 int SDL_main(char* argv[], int argc) {

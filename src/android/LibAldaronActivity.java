@@ -9,6 +9,8 @@ import android.util.Log;
 
 import android.app.NativeActivity;
 
+import java.lang.reflect.Field;
+
 import com.millennialmedia.MMSDK;
 import com.millennialmedia.MMLog;
 import com.millennialmedia.InlineAd;
@@ -19,6 +21,7 @@ import com.millennialmedia.AppInfo;
 public class LibAldaronActivity extends NativeActivity {
 
 	// Layout
+	private static View nativeLayout;
 	protected static ViewGroup layout;
 
 	// Ad Variables
@@ -159,12 +162,25 @@ public class LibAldaronActivity extends NativeActivity {
 		float ad_height = 50.0f / hdp;
 		nativeLaFraction(ad_height);
 
+		try {
+			Field field = NativeActivity.class
+				.getDeclaredField("mNativeContentView");
+			field.setAccessible(true);
+			nativeLayout = (View) field.get(this);
+			field.setAccessible(false);
+		} catch (NoSuchFieldException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+
+
 		// Set layout
-//		layout = new RelativeLayout(this);
-//		layout.addView(View.getRootView());
-//		layout.addView(adContainer,
-//			ViewGroup.LayoutParams.WRAP_CONTENT,
-//			(int) (dm.heightPixels * ad_height) );
-//		setContentView(layout);
+		layout = new RelativeLayout(this);
+		setContentView(layout);
+		layout.addView(nativeLayout);
+		layout.addView(adContainer,
+			ViewGroup.LayoutParams.WRAP_CONTENT,
+			(int) (dm.heightPixels * ad_height) );
 	}
 }

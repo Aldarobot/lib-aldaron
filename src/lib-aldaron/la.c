@@ -16,8 +16,8 @@ void jl_mode_loop__(jl_t* jl);
 	#include <jni.h>
 	#include "SDL_log.h"
 
-	const char* JL_FL_BASE;
-	const char* LA_FILE_LOG;
+	const char* LA_FILE_ROOT = NULL;
+	const char* LA_FILE_LOG = NULL;
 	char la_keyboard_press = 0;
 #endif
 
@@ -164,7 +164,7 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, const char* name,
 
 #if JL_PLAT == JL_PLAT_PHONE
 
-#include "la_file.h" // Needed for printing to file
+/*#include "la_file.h" // Needed for printing to file
 
 JNIEXPORT void JNICALL
 Java_org_libsdl_app_SDLActivity_nativeLaSetFiles(JNIEnv *env, jobject obj,
@@ -206,7 +206,7 @@ Java_org_libsdl_app_SDLInputConnection_nativeLaType(JNIEnv *env, jobject obj,
 	jstring data)
 {
 	la_keyboard_press = *((*env)->GetStringUTFChars(env, data, 0));
-}
+}*/
 
 int SDL_main(char* argv[], int argc) {
 	main(argv, argc);

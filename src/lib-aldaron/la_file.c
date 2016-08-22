@@ -25,7 +25,7 @@
 #define JL_FL_PERMISSIONS ( S_IRWXU | S_IRWXG | S_IRWXO )
 
 #if JL_PLAT == JL_PLAT_PHONE
-	extern const char* JL_FL_BASE;
+	extern const char* LA_FILE_ROOT;
 #endif
 
 // This function converts linux filenames to native filnames
@@ -108,7 +108,7 @@ static inline void jl_file_get_root__(jl_t * jl) {
 	data_t root_dir;
 
 	JL_PRINT_DEBUG(jl, "Get external storage directory.");
-	jl_data_mkfrom_str(&root_path, JL_FL_BASE);
+	jl_data_mkfrom_str(&root_path, LA_FILE_ROOT);
 	JL_PRINT_DEBUG(jl, "Append JL_ROOT_DIR.");
 	jl_data_mkfrom_str(&root_dir, JL_ROOT_DIR);
 	JL_PRINT_DEBUG(jl, "Merging root_path and root_dir.");

@@ -527,9 +527,10 @@ public class SDLActivity extends Activity {
 	}
 
 	// C functions we call
-	public static native void nativeJlSendData(String data);
+	public static native void nativeLaSetFiles(String data, String logfile);
 	public static native void nativeLaExit();
 	public static native void nativeLaFraction(float fraction);
+	public static native void nativeLaPrint(String data);
 	public static native int nativeInit(Object arguments);
 	public static native void nativeLowMemory();
 	public static native void nativeQuit();
@@ -558,6 +559,11 @@ public class SDLActivity extends Activity {
 											   int naxes, int nhats, int nballs);
 	public static native int nativeRemoveJoystick(int device_id);
 	public static native String nativeGetHint(String name);
+
+	public static void laPrintLog(String whatToPrint) {
+		Log.i("Aldaron", whatToPrint);
+		nativeLaPrint(whatToPrint);
+	}
 
 	/**
 	 * This method is called by SDL using JNI.
@@ -1084,10 +1090,11 @@ class SDLMain implements Runnable {
 			System.out.println(":I/SDL/APP: Mount your media.");
 			return;
 		}
-		SDLActivity.nativeJlSendData(Environment.
-			getExternalStorageDirectory().getAbsolutePath() + "/");
+		String base_dir = Environment.getExternalStorageDirectory()
+			.getAbsolutePath() + "/lib-aldaron/";
+		SDLActivity.nativeLaSetFiles(base_dir, base_dir + "log.txt");
 		// Runs SDL_main()
-		System.out.println(":I/SDL/APP: Running SDL's nativeInit....");
+		SDLActivity.laPrintLog(":I/SDL/APP: Running SDL's nativeInit....");
 		SDLActivity.nativeInit(SDLActivity.mSingleton.getArguments());
 		System.out.println(":I/SDL/APP: SDL thread terminated");
 	}
@@ -1447,19 +1454,27 @@ class DummyEdit extends View implements View.OnKeyListener {
 		if(keyCode != 0) System.out.println("r SDL KEY" + keyCode);
 
 		// This handles the hardware keyboard input
-		if (event.isPrintingKey()) {
-			if (event.getAction() == KeyEvent.ACTION_DOWN) {
-				ic.commitText(String.valueOf((char) event.getUnicodeChar()), 1);
+		if (event.getAction() == KeyEvent.ACTION_DOWN) {
+			char keyPressed = (char) event.getUnicodeChar();
+			String input = String.valueOf(keyPressed);
+			if (keyPressed == KeyEvent.KEYCODE_ENTER) {
+				System.out.println("Enter!");
+				ic.commitText(String.valueOf('\n'), 1);
+			} else if (keyPressed == KeyEvent.KEYCODE_DEL) {
+				System.out.println("BackSpace!");
+				ic.commitText(String.valueOf('\b'), 1);
+			} else if (event.isPrintingKey()) {
+				ic.commitText(input, 1);
 			}
 			return true;
 		}
 
-		if (event.getAction() == KeyEvent.ACTION_DOWN) {
 
+
+		if (event.getAction() == KeyEvent.ACTION_DOWN) {
 			SDLActivity.onNativeKeyDown(keyCode);
 			return true;
 		} else if (event.getAction() == KeyEvent.ACTION_UP) {
-			System.out.println("SDL KEYUPUP" + keyCode);
 			SDLActivity.onNativeKeyUp(keyCode);
 			return true;
 		}
@@ -1504,9 +1519,13 @@ class SDLInputConnection extends BaseInputConnection {
 		 */
 		int keyCode = event.getKeyCode();
 		if (event.getAction() == KeyEvent.ACTION_DOWN) {
-			if (event.isPrintingKey()) {
-				commitText(String.valueOf((char) event.getUnicodeChar()), 1);
-			}
+			char keyPressed = (char) event.getUnicodeChar();
+
+			System.out.println("SDL TRY WE TRIES " + (int)keyPressed);
+			if (event.isPrintingKey() || keyPressed == '\n')
+				commitText(String.valueOf(keyPressed), 1);
+			if(keyPressed == 0)
+				commitText(String.valueOf('\b'), 1);
 			SDLActivity.onNativeKeyDown(keyCode);
 			return true;
 		} else if (event.getAction() == KeyEvent.ACTION_UP) {
@@ -1519,7 +1538,7 @@ class SDLInputConnection extends BaseInputConnection {
 
 	@Override
 	public boolean commitText(CharSequence text, int newCursorPosition) {
-		System.out.println("SDL text: " + text.toString());
+		System.out.println("SDL text: ");
 		nativeLaType(text.toString());
 
 		return super.commitText(text, newCursorPosition);
@@ -1536,18 +1555,6 @@ class SDLInputConnection extends BaseInputConnection {
 	public native void nativeLaType(String text);
 
 	public native void nativeSetComposingText(String text, int newCursorPosition);
-
-	@Override
-	public boolean deleteSurroundingText(int beforeLength, int afterLength) {
-		// Workaround to capture backspace key. Ref: http://stackoverflow.com/questions/14560344/android-backspace-in-webview-baseinputconnection
-		if (beforeLength == 1 && afterLength == 0) {
-			// backspace
-			return super.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL))
-				&& super.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DEL));
-		}
-
-		return super.deleteSurroundingText(beforeLength, afterLength);
-	}
 }
 
 class SDLJoystickHandler {

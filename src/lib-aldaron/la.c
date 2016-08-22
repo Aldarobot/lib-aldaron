@@ -17,6 +17,7 @@ void jl_mode_loop__(jl_t* jl);
 	#include "SDL_log.h"
 
 	const char* JL_FL_BASE;
+	const char* LA_FILE_LOG;
 	char la_keyboard_press = 0;
 #endif
 
@@ -163,15 +164,18 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, const char* name,
 
 #if JL_PLAT == JL_PLAT_PHONE
 
+#include "la_file.h" // Needed for printing to file
+
 JNIEXPORT void JNICALL
-Java_org_libsdl_app_SDLActivity_nativeJlSendData(JNIEnv *env, jobject obj,
-	jstring data)
+Java_org_libsdl_app_SDLActivity_nativeLaSetFiles(JNIEnv *env, jobject obj,
+	jstring data, jstring logfile)
 {
 	// Enable SDL standard application logging
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 	//
 	SDL_Log("nativeJlSendData\n");
 	JL_FL_BASE = (*env)->GetStringUTFChars(env, data, 0);
+	LA_FILE_LOG = (*env)->GetStringUTFChars(env, logfile, 0);
 	SDL_Log("nativeJlSendData \"%s\"\n", JL_FL_BASE);
 }
 
@@ -188,6 +192,16 @@ Java_org_libsdl_app_SDLActivity_nativeLaFraction(JNIEnv *env, jobject obj,
 }
 
 JNIEXPORT void JNICALL
+Java_org_libsdl_app_SDLActivity_nativeLaPrint(JNIEnv *env, jobject obj,
+	jstring data)
+{
+	const char* string_data = (*env)->GetStringUTFChars(env, data, 0);
+	la_file_append(LA_FILE_LOG, string_data, strlen(string_data));
+}
+
+//
+
+JNIEXPORT void JNICALL
 Java_org_libsdl_app_SDLInputConnection_nativeLaType(JNIEnv *env, jobject obj,
 	jstring data)
 {
@@ -199,9 +213,3 @@ int SDL_main(char* argv[], int argc) {
 }
 
 #endif
-
-/**
- * @mainpage
- * @section Library Description
- * 
-*/

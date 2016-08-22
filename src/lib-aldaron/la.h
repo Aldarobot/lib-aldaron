@@ -265,7 +265,6 @@ void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 	const char* file_name);
 void jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
 	const char *filename);
-uint8_t jl_file_dir_mk(jl_t* jl, const char* path);
 struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive);
 char* jl_file_get_resloc(jl_t* jl, const char* prg_folder, const char* fname);
 

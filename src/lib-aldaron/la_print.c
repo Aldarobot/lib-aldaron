@@ -3,9 +3,8 @@
  * Copyright (c) 2015 Jeron A. Lau 
 */
 /** \file
- * JLprint.c
- *	is a library for printing to various terminals and creating a stack
- *	trace.
+ * la_print.c
+ *	print to various terminals and creating a stacktrace.
 **/
 
 #include "JLprivate.h"

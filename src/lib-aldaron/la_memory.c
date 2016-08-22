@@ -75,6 +75,36 @@ void *jl_mem(jl_t* jl, void *a, uint32_t size) {
 	return a;
 }
 
+void* la_memory_clear(void* data, size_t size) {
+	memset(data, 0, size);
+	return data;
+}
+
+void* la_memory_copy(const void* src, void* dst, size_t size) {
+	memcpy(dst, src, size);
+	return dst;
+}
+
+void* la_memory_stringcopy(const char* src, char* dst, size_t size) {
+	dst[size] = '\0';
+	return la_memory_copy(src, dst, size);
+}
+
+void* la_memory_makecopy(void* data, size_t size) {
+	void* dest = malloc(size);
+	return la_memory_copy(data, dest, size);
+}
+
+void* la_memory(size_t size) {
+	void* data = malloc(size);
+	return la_memory_clear(data, size);
+}
+
+void* la_memory_free(void* data) {
+	free(data);
+	return NULL;
+}
+
 /**
  * Allocate & Initialize Dynamic Memory.  All memory allocated by this function
  * is initialized as 0.

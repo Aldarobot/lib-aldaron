@@ -18,6 +18,9 @@
 #define ZIP_DISABLE_DEPRECATED //Don't allow the old functions.
 #include "zip.h"
 
+#include "la_file.h"
+#include "la_memory.h"
+
 #define PKFMAX 10000000
 #define JL_FL_PERMISSIONS ( S_IRWXU | S_IRWXG | S_IRWXO )
 
@@ -139,9 +142,10 @@ static inline void jl_file_get_root__(jl_t * jl) {
 	SDL_free(pref_path);
 #endif
 	// Make "-- JL_ROOT_DIR"
-	if(jl_file_dir_mk(jl, (char*) root_path.data) == 2) {
+	const char* error = NULL;
+	if((error = la_file_mkdir((char*) root_path.data))) {
 		jl_print(jl, (char*) root_path.data);
-		jl_print(jl, ": mkdir : Permission Denied");
+		jl_print(jl, ": mkdir : %s", error);
 		exit(-1);
 	}
 	// Set paths.root & free root_path
@@ -165,6 +169,41 @@ static inline void jl_file_get_errf__(jl_t * jl) {
 // NON-STATIC Library Dependent Functions
 
 /** @endcond **/
+
+const char* la_file_basename(char* base, const char* filename) {
+	int i;
+
+	for(i = strlen(filename) - 1; i > 0; i--) {
+		if(filename[i] == '/') break;
+	}
+	la_memory_stringcopy(filename, base, i);
+	return NULL;
+}
+
+const char* la_file_append(const char* filename, const void* data, size_t size){
+	int fd;
+	const char* error = NULL;
+	char directory[strlen(filename)];
+
+	// If parent directory doesn't exist, make it.
+	la_file_basename(directory, filename);
+	if((error = la_file_mkdir(directory))) return error;
+	// Open, and write out.
+	if((fd = open(filename, O_RDWR | O_CREAT, JL_FL_PERMISSIONS)) <= 0) {
+		JL_PRINT("la_file_append fail open \"%s\" because\"%s\"",
+			filename, strerror(errno));
+		error = strerror(errno);
+		return error;
+	}
+	lseek(fd, 0, SEEK_END);
+	if(write(fd, data, size) <= 0) {
+		JL_PRINT("la_file_append fail write \"%s\" because\"%s\"",
+			filename, strerror(errno));
+		error = strerror(errno);
+	}
+	close(fd);
+	return error;
+}
 
 /**
  * Print text to a file.
@@ -500,31 +539,24 @@ void jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
  * Create a folder (directory)
  * @param jl: library context
  * @param pfilebase: name of directory to create
- * @returns 0: Success
- * @returns 1: If the directory already exists.
- * @returns 2: Permission Error
- * @returns 255: Never.
+ * @returns NULL: Either made directory, or it exists already.
+ * @returns error: If there was an error.
 */
-uint8_t jl_file_dir_mk(jl_t* jl, const char* path) {
-	uint8_t rtn = 255;
-
-	jl_print_function(jl, "FL_MkDir");
+const char* la_file_mkdir(const char* path) {
 	if(mkdir(path, JL_FL_PERMISSIONS)) {
 		int errsv = errno;
 		if(errsv == EEXIST) {
-			rtn = 1;
+			return NULL;
 		}else if((errsv == EACCES) || (errsv == EROFS)) {
-			rtn = 2;
+			return strerror(errsv); // Permission error
 		}else{
-			jl_print(jl, "couldn't mkdir:%s", strerror(errsv));
-			exit(-1);
+			JL_PRINT("Couldn't mkdir %s because:%s", path,
+				strerror(errsv));
+			return strerror(errsv);
 		}
 	}else{
-		rtn = 0;
+		return NULL;
 	}
-	jl_print_return(jl, "FL_MkDir");
-	// Return
-	return rtn;
 }
 
 static int8_t jl_file_dirls__(jl_t* jl,const char* filename,uint8_t recursive,
@@ -629,10 +661,11 @@ char* jl_file_get_resloc(jl_t* jl, const char* prg_folder, const char* fname) {
 	// Append 'filesr' onto 'resloc'
 	jl_data_merg(jl, &resloc, &filesr);
 	// Make 'prg_folder' if it doesn't already exist.
-	if( jl_file_dir_mk(jl, (char*) resloc.data) == 2 ) {
+	const char* error = NULL;
+	if( ( error = la_file_mkdir((char*) resloc.data) ) ) {
 		jl_print(jl, "jl_file_get_resloc: couldn't make \"%s\"",
 			(char*) resloc.data);
-		jl_print(jl, "mkdir : Permission Denied");
+		jl_print(jl, "mkdir: %s", error);
 		exit(-1);
 	}
 	// Append 'fname' onto 'resloc'

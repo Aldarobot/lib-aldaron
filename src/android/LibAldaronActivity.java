@@ -1,5 +1,12 @@
 package com.libaldaron;
 
+import android.app.*;
+import android.os.*;
+import android.widget.RelativeLayout;
+import android.util.DisplayMetrics;
+import android.view.*;
+import android.util.Log;
+
 import android.app.NativeActivity;
 
 import com.millennialmedia.MMSDK;
@@ -9,7 +16,7 @@ import com.millennialmedia.MMException;
 import com.millennialmedia.UserData;
 import com.millennialmedia.AppInfo;
 
-public class AldaronActivity extends NativeActivity {
+public class LibAldaronActivity extends NativeActivity {
 
 	// Layout
 	protected static ViewGroup layout;
@@ -32,6 +39,21 @@ public class AldaronActivity extends NativeActivity {
 	// Overridden to create ads and send external storage directory.
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		try {
+			System.loadLibrary("SDL2");
+			System.loadLibrary("SDL2_image");
+			System.loadLibrary("smpeg2");
+			System.loadLibrary("SDL2_mixer");
+			System.loadLibrary("SDL2_net");
+			System.loadLibrary("clump");
+			System.loadLibrary("zip");
+			System.loadLibrary("main");
+		} catch(UnsatisfiedLinkError e) {
+			printf(e.getMessage());
+		} catch(Exception e) {
+			printf(e.getMessage());
+		}
+
 		String state = Environment.getExternalStorageState();
 		if (! Environment.MEDIA_MOUNTED.equals(state)) {
 			printf("Failed: No Media.");
@@ -59,7 +81,7 @@ public class AldaronActivity extends NativeActivity {
 			printf("Ads couldn't set app data.");
 		}
 		// Create inline ad
-		adContainer = new RelativeLayout(this)
+		adContainer = new RelativeLayout(this);
 		try {
 			inlineAd = InlineAd.createInstance("203888",
 				(ViewGroup) adContainer);
@@ -138,11 +160,11 @@ public class AldaronActivity extends NativeActivity {
 		nativeLaFraction(ad_height);
 
 		// Set layout
-		layout = new RelativeLayout(this);
-		layout.addView(mNativeContentView);
-		layout.addView(adContainer,
-			ViewGroup.LayoutParams.WRAP_CONTENT,
-			dm.heightPixels * ad_height);
-		setContentView(layout);
+//		layout = new RelativeLayout(this);
+//		layout.addView(View.getRootView());
+//		layout.addView(adContainer,
+//			ViewGroup.LayoutParams.WRAP_CONTENT,
+//			(int) (dm.heightPixels * ad_height) );
+//		setContentView(layout);
 	}
 }

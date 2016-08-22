@@ -12,6 +12,8 @@
 	#define SDL_MENU_KEY SDL_SCANCODE_APPLICATION
 #elif JL_PLAT == JL_PLAT_PHONE
 	#define SDL_MENU_KEY SDL_SCANCODE_MENU
+
+	extern char la_keyboard_press;
 #endif
 
 /*
@@ -536,13 +538,24 @@ void jl_ct_init__(jlgr_t* jlgr) {
 */
 uint8_t jlgr_input_typing_get(jlgr_t *jlgr) {
 	if(!SDL_IsTextInputActive()) SDL_StartTextInput();
+
+#if JL_PLAT == JL_PLAT_COMPUTER
 	uint8_t rtn = jlgr->main.ct.text_input[jlgr->main.ct.read_cursor];
+
 	if(jl_ct_key_pressed__(jlgr, SDL_SCANCODE_BACKSPACE) == 1) return '\b';
 	if(jl_ct_key_pressed__(jlgr, SDL_SCANCODE_DELETE) == 1) return '\02';
 	if(jl_ct_key_pressed__(jlgr, SDL_SCANCODE_RETURN) == 1) return '\n';
-	if(!rtn) return 0;
-	jlgr->main.ct.read_cursor++;
+
+	if(rtn) jlgr->main.ct.read_cursor++;
 	return rtn;
+#else
+	if(la_keyboard_press) {
+		char key = la_keyboard_press;
+		la_keyboard_press = 0;
+		return key;
+	}
+	return 0;
+#endif
 }
 
 /**

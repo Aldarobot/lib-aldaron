@@ -7,6 +7,8 @@
 
 #define JL_WM_FULLSCREEN SDL_WINDOW_FULLSCREEN_DESKTOP
 
+extern float la_banner_size;
+
 static void jl_wm_killedit(jl_t* jl, char *str) {
 	jl_print(jl, str);
 	jl_print(jl, SDL_GetError());
@@ -49,6 +51,10 @@ uint16_t jlgr_wm_getw(jlgr_t* jlgr) {
 
 uint16_t jlgr_wm_geth(jlgr_t* jlgr) {
 	return jlgr->wm.h;
+}
+
+float la_window_banner_size(jlgr_t* jlgr) {
+	return la_banner_size;
 }
 
 /**

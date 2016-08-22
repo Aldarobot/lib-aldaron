@@ -110,6 +110,8 @@ install: -release
 	 $(LA_HOME)/src/lib/sdl/android-project/jni/src/
 	cp -u $(LA_HOME)/src/android/SDL_image-Android.mk\
 	 $(LA_HOME)/src/lib/sdl-image/Android.mk
+	cp -u $(LA_HOME)/src/android/SDL_mixer-Android.mk\
+	 $(LA_HOME)/src/lib/sdl-mixer/Android.mk
 	cp -u $(LA_HOME)/src/android/jconfig.h\
 	 $(LA_HOME)/src/lib/sdl-image/external/jpeg-9/jconfig.h
 	cp -u $(LA_HOME)/src/android/libzip-Android.mk\
@@ -153,7 +155,6 @@ android-gradle: build/android-release-key.keystore -android-sdl-mods
 	ln -sTf $(LA_HOME)/src/lib/sdl-image/ build/android-project/app/src/main/jni/SDL_image
 	# Link SDL_mixer sources
 	ln -sTf $(LA_HOME)/src/lib/sdl-mixer/ build/android-project/app/src/main/jni/SDL_mixer
-	ln -sTf $(LA_HOME)/src/lib/sdl-mixer/external/libmikmod-3.1.12/ build/android-project/app/src/main/jni/mikmod
 	ln -sTf $(LA_HOME)/src/lib/sdl-mixer/external/smpeg2-2.0.0/ build/android-project/app/src/main/jni/smpeg2
 	# Link SDL_net sources
 	ln -sTf $(LA_HOME)/src/lib/sdl-net/ build/android-project/app/src/main/jni/SDL_net
@@ -166,7 +167,6 @@ android-gradle: build/android-release-key.keystore -android-sdl-mods
 	cp -u $(LA_HOME)/src/lib/sdl/android-project/jni/src/Android.mk build/android-project/app/src/main/jni/src/
 	ln -fs $(CURDIR)/src/ build/android-project/app/src/main/jni/src/
 	# NDK
-	mkdir -p build/android-project/app/src/main/jniLibs/
 	cd build/android-project/app/src/main/jni/ && $(LA_HOME)/src/android-ndk/ndk-build -j `nproc`
 	# Gradle
 	cd build/android-project/ && \
@@ -187,7 +187,7 @@ android-debug:
 	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/platform-tools && \
 	`which adb` install -r build/com.$(USERNAME).$(PACKNAME).apk && \
 	echo "Logcat is starting ( You can open your app now )...." && \
-	`which adb` logcat | grep LA_EVENT # grep $(PACKNAME)
+	`which adb` logcat | grep SDL # grep LA_EVENT # grep $(PACKNAME)
 
 build-notify:
 	# Building program for target=$(PLATFORM)....

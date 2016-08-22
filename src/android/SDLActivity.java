@@ -88,7 +88,6 @@ public class SDLActivity extends Activity {
 		return new String[] {
 			"SDL2",
 			"SDL2_image",
-			"mikmod",
 			"smpeg2",
 			"SDL2_mixer",
 			"SDL2_net",
@@ -302,6 +301,16 @@ public class SDLActivity extends Activity {
 		mLayout.addView(adContainer,
 			ViewGroup.LayoutParams.WRAP_CONTENT, 50);
 		setContentView(mLayout);
+
+		// Get Ad Height ( 50 dp in fraction of screen size)
+		DisplayMetrics dm = new DisplayMetrics();
+		SDLActivity.mSingleton.getWindowManager()
+			.getDefaultDisplay().getMetrics(dm);
+		int dens = dm.densityDpi;
+		float hi = 1.0f / (float)dens;
+		float hdp = hi * 160.0f;
+		float shrink_height = 50.0f / hdp;
+		SDLActivity.nativeLaFraction(shrink_height);
 	}
 
 	// Events
@@ -520,6 +529,7 @@ public class SDLActivity extends Activity {
 	// C functions we call
 	public static native void nativeJlSendData(String data);
 	public static native void nativeLaExit();
+	public static native void nativeLaFraction(float fraction);
 	public static native int nativeInit(Object arguments);
 	public static native void nativeLowMemory();
 	public static native void nativeQuit();
@@ -1068,16 +1078,16 @@ public class SDLActivity extends Activity {
 class SDLMain implements Runnable {
 	@Override
 	public void run() {
-		System.out.println(":I/SDL/APP: Running Program....\n");
+		System.out.println(":I/SDL/APP: Running Program....");
 		String state = Environment.getExternalStorageState();
 		if (! Environment.MEDIA_MOUNTED.equals(state)) {
-			System.out.println(":I/SDL/APP: Mount your media.\n");
+			System.out.println(":I/SDL/APP: Mount your media.");
 			return;
 		}
 		SDLActivity.nativeJlSendData(Environment.
 			getExternalStorageDirectory().getAbsolutePath() + "/");
 		// Runs SDL_main()
-		System.out.println(":I/SDL/APP: Running SDL's nativeInit....\n");
+		System.out.println(":I/SDL/APP: Running SDL's nativeInit....");
 		SDLActivity.nativeInit(SDLActivity.mSingleton.getArguments());
 		System.out.println(":I/SDL/APP: SDL thread terminated");
 	}
@@ -1249,10 +1259,6 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 	// Key events
 	@Override
 	public boolean onKey(View  v, int keyCode, KeyEvent event) {
-		// Dispatch the different events depending on where they come from
-		// Some SOURCE_DPAD or SOURCE_GAMEPAD are also SOURCE_KEYBOARD
-		// So, we try to process them as DPAD or GAMEPAD events first, if that fails we try them as KEYBOARD
-
 		if ( (event.getSource() & InputDevice.SOURCE_GAMEPAD) != 0 ||
 				   (event.getSource() & InputDevice.SOURCE_DPAD) != 0 ) {
 			if (event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -1438,6 +1444,8 @@ class DummyEdit extends View implements View.OnKeyListener {
 	@Override
 	public boolean onKey(View v, int keyCode, KeyEvent event) {
 
+		if(keyCode != 0) System.out.println("r SDL KEY" + keyCode);
+
 		// This handles the hardware keyboard input
 		if (event.isPrintingKey()) {
 			if (event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -1447,9 +1455,11 @@ class DummyEdit extends View implements View.OnKeyListener {
 		}
 
 		if (event.getAction() == KeyEvent.ACTION_DOWN) {
+
 			SDLActivity.onNativeKeyDown(keyCode);
 			return true;
 		} else if (event.getAction() == KeyEvent.ACTION_UP) {
+			System.out.println("SDL KEYUPUP" + keyCode);
 			SDLActivity.onNativeKeyUp(keyCode);
 			return true;
 		}
@@ -1460,7 +1470,6 @@ class DummyEdit extends View implements View.OnKeyListener {
 	//
 	@Override
 	public boolean onKeyPreIme (int keyCode, KeyEvent event) {
-		// FIXME: Write native code to detect keyboard.
 		if (event.getAction()==KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
 			if (SDLActivity.mTextEdit != null && SDLActivity.mTextEdit.getVisibility() == View.VISIBLE) {
 				SDLActivity.onNativeKeyboardFocusLost();
@@ -1510,8 +1519,8 @@ class SDLInputConnection extends BaseInputConnection {
 
 	@Override
 	public boolean commitText(CharSequence text, int newCursorPosition) {
-
-		nativeCommitText(text.toString(), newCursorPosition);
+		System.out.println("SDL text: " + text.toString());
+		nativeLaType(text.toString());
 
 		return super.commitText(text, newCursorPosition);
 	}
@@ -1524,7 +1533,7 @@ class SDLInputConnection extends BaseInputConnection {
 		return super.setComposingText(text, newCursorPosition);
 	}
 
-	public native void nativeCommitText(String text, int newCursorPosition);
+	public native void nativeLaType(String text);
 
 	public native void nativeSetComposingText(String text, int newCursorPosition);
 

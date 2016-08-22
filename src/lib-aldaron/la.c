@@ -17,9 +17,11 @@ void jl_mode_loop__(jl_t* jl);
 	#include "SDL_log.h"
 
 	const char* JL_FL_BASE;
+	char la_keyboard_press = 0;
 #endif
 
 SDL_atomic_t la_running;
+float la_banner_size = 0.f;
 
 //Initialize The Libraries Needed At Very Beginning: The Base Of It All
 static inline jl_t* la_init_essential__(void) {
@@ -162,7 +164,7 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, const char* name,
 #if JL_PLAT == JL_PLAT_PHONE
 
 JNIEXPORT void JNICALL
-Java_org_libsdl_app_SDLActivity_nativeJlSendData( JNIEnv *env, jobject obj,
+Java_org_libsdl_app_SDLActivity_nativeJlSendData(JNIEnv *env, jobject obj,
 	jstring data)
 {
 	// Enable SDL standard application logging
@@ -174,8 +176,22 @@ Java_org_libsdl_app_SDLActivity_nativeJlSendData( JNIEnv *env, jobject obj,
 }
 
 JNIEXPORT void JNICALL
-Java_org_libsdl_app_SDLActivity_nativeLaExit( JNIEnv *env, jobject obj) {
+Java_org_libsdl_app_SDLActivity_nativeLaExit(JNIEnv *env, jobject obj) {
 	SDL_AtomicSet(&la_running, 0);
+}
+
+JNIEXPORT void JNICALL
+Java_org_libsdl_app_SDLActivity_nativeLaFraction(JNIEnv *env, jobject obj,
+	float fraction)
+{
+	la_banner_size = fraction;
+}
+
+JNIEXPORT void JNICALL
+Java_org_libsdl_app_SDLInputConnection_nativeLaType(JNIEnv *env, jobject obj,
+	jstring data)
+{
+	la_keyboard_press = *((*env)->GetStringUTFChars(env, data, 0));
 }
 
 int SDL_main(char* argv[], int argc) {

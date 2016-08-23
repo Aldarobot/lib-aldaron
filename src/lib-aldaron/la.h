@@ -5,6 +5,7 @@
 #ifndef LIB_ALDARON_H
 #define LIB_ALDARON_H
 
+#include "port.h"
 #include <stdint.h>
 #include "clump.h" // LibClump
 #include "SDL_thread.h"
@@ -15,15 +16,15 @@
 #define JL_PLAT_GAME 2 // 3DS
 #if defined(__ANDROID__)
         #define JL_PLAT JL_PLAT_PHONE
-	#define JL_PHONE
-	#define JL_PHONE_ANDROID
+	#define LA_PHONE
+	#define LA_PHONE_ANDROID
 #elif defined(__IPHONEOS__)
         #define JL_PLAT JL_PLAT_PHONE
-	#define JL_PHONE
-	#define JL_PHONE_APPLE
+	#define LA_PHONE
+	#define LA_PHONE_APPLE
 #else
         #define JL_PLAT JL_PLAT_COMPUTER
-	#define JL_COMPUTER
+	#define LA_COMPUTER
 #endif
 
 //Determine Which OpenGL to use.
@@ -246,11 +247,6 @@ void jl_print_rewrite(jl_t* jl, const char* format, ... );
 void jl_print_function(jl_t* jl, const char* fn_name);
 void jl_print_return(jl_t* jl, const char* fn_name);
 void jl_print_stacktrace(jl_t* jl);
-#ifdef JL_DEBUG
-	#define JL_PRINT_DEBUG(jl, ...) jl_print(jl, __VA_ARGS__)
-#else
-	#define JL_PRINT_DEBUG(jl, ...)
-#endif
 
 // "JLfile.c"
 void jl_file_print(jl_t* jl, const char* fname, const char* msg);

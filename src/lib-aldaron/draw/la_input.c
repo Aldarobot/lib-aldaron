@@ -9,10 +9,7 @@
 #include "JLGRprivate.h"
 
 #if JL_PLAT == JL_PLAT_COMPUTER
-	#define SDL_MENU_KEY SDL_SCANCODE_APPLICATION
 #elif JL_PLAT == JL_PLAT_PHONE
-	#define SDL_MENU_KEY SDL_SCANCODE_MENU
-
 	extern char la_keyboard_press;
 #endif
 
@@ -201,7 +198,7 @@ void jlgr_input_press__(jlgr_t *jlgr, jlgr_input_fnct inputfn) {//Any touch
 void jlgr_input_dont(jlgr_t* jlgr, jlgr_input_t input) { }
 
 void jl_ct_key_menu(jlgr_t *jlgr, jlgr_input_fnct inputfn) {
-	jl_ct_key(jlgr, inputfn, SDL_MENU_KEY); //xyrhpk
+	jl_ct_key(jlgr, inputfn, SDL_SCANCODE_APPLICATION); //xyrhpk
 }
 
 static inline void la_input_clamp_msy(jlgr_t* jlgr, float* msy) {
@@ -285,7 +282,6 @@ static void jl_ct_handle_resize__(jlgr_t* jlgr) {
 
 static inline void jlgr_input_handle_events__(jlgr_t* jlgr) {
 	if ( jlgr->main.ct.event.type == SDL_TEXTINPUT) {
-//		JL_PRINT("%1s\n", &(jlgr->main.ct.event.text.text[0]));
 		int i;
 		for(i = 0; i < 32; i++)
 			jlgr->main.ct.text_input[i] =
@@ -343,8 +339,8 @@ int8_t jlgr_input_do(jlgr_t *jlgr, jlgr_control_t events, jlgr_input_fnct fn,
 		jlgr->main.ct.getEvents[event];
 
 	if(jlgr->main.ct.getEvents[event] == NULL) {
-		jl_print(jlgr->jl,"Null Pointer: jlgr->main.ct.getEvents.Event");
-		jl_print(jlgr->jl,"event=%d", event);
+		la_print("Null Pointer: jlgr->main.ct.getEvents.Event");
+		la_print("event=%d", event);
 		exit(-1);
 	}
 	// Get the input.
@@ -356,28 +352,28 @@ int8_t jlgr_input_do(jlgr_t *jlgr, jlgr_control_t events, jlgr_input_fnct fn,
 }
 
 void jl_ct_getevents_(jlgr_t* jlgr) {
-	jlgr->main.ct.keys = SDL_GetKeyboardState(NULL);
 #if JL_PLAT == JL_PLAT_COMPUTER
+	jlgr->main.ct.keys = SDL_GetKeyboardState(NULL);
 	jlgr->main.ct.back = jl_ct_key_pressed__(jlgr, SDL_SCANCODE_ESCAPE);
-#endif
 	while(SDL_PollEvent(&jlgr->main.ct.event))
 		jlgr_input_handle_events__(jlgr);
+#endif
 #if JL_PLAT == JL_PLAT_PHONE
 	jl_ct_state__(&jlgr->main.ct.back, jlgr->main.ct.input.back);
 #endif
 }
 
 void jl_ct_quickloop_(jlgr_t* jlgr) {
-	jl_print_function(jlgr->jl, "INPUT_QUICKLOOP");
 	jlgr->jl->has.quickloop = 1;
 	if(jlgr->jl->has.input) {
 		jl_ct_getevents_(jlgr);
 		jl_ct_testquit__(jlgr);
 	}else{
+#if JL_PLAT == JL_PLAT_COMPUTER
 		while(SDL_PollEvent(&jlgr->main.ct.event))
 			jl_ct_handle_resize__(jlgr);
+#endif
 	}
-	jl_print_return(jlgr->jl, "INPUT_QUICKLOOP");
 }
 
 //Main Input Loop
@@ -537,9 +533,8 @@ void jl_ct_init__(jlgr_t* jlgr) {
  * @returns: The key pressed.
 */
 uint8_t jlgr_input_typing_get(jlgr_t *jlgr) {
-	if(!SDL_IsTextInputActive()) SDL_StartTextInput();
-
-#if JL_PLAT == JL_PLAT_COMPUTER
+#ifdef LA_PHONE_ANDROID
+#else
 	uint8_t rtn = jlgr->main.ct.text_input[jlgr->main.ct.read_cursor];
 
 	if(jl_ct_key_pressed__(jlgr, SDL_SCANCODE_BACKSPACE) == 1) return '\b';
@@ -548,13 +543,6 @@ uint8_t jlgr_input_typing_get(jlgr_t *jlgr) {
 
 	if(rtn) jlgr->main.ct.read_cursor++;
 	return rtn;
-#else
-	if(la_keyboard_press) {
-		char key = la_keyboard_press;
-		la_keyboard_press = 0;
-		return key;
-	}
-	return 0;
 #endif
 }
 
@@ -562,5 +550,8 @@ uint8_t jlgr_input_typing_get(jlgr_t *jlgr) {
  * Stop receiving input from jl_input_typing_get(). If phone, hides keyboard.
 */
 void jlgr_input_typing_disable(void) {
+#ifdef LA_PHONE_ANDROID
+#else
 	SDL_StopTextInput();
+#endif
 }

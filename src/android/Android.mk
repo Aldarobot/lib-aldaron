@@ -23,8 +23,7 @@ LOCAL_C_INCLUDES += $(shell find -L $(LOCAL_PATH)/src/ -type d)
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(NATIVE_PATH)
 
 # Add your application source files here...
-LOCAL_SRC_FILES := $(SDL_PATH)/src/main/android/SDL_android_main.c
-LOCAL_SRC_FILES += $(NATIVE_PATH)/android_native_app_glue.c
+LOCAL_SRC_FILES := $(NATIVE_PATH)/android_native_app_glue.c
 LOCAL_SRC_FILES += $(subst $(LOCAL_PATH)/,, \
 	$(shell find -L $(LOCAL_PATH)/src/ -type f -name '*.c'))
 
@@ -33,6 +32,6 @@ LOCAL_SHARED_LIBRARIES := SDL2 clump zip SDL2_image SDL2_net SDL2_mixer
 LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2 -llog -landroid -lEGL
 
 # Debuging
-#LOCAL_CFLAGS := -DJL_DEBUG
+LOCAL_CFLAGS := -DJL_DEBUG
 
 include $(BUILD_SHARED_LIBRARY)

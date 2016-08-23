@@ -69,10 +69,8 @@ const char *JL_SHADER_TEX_VERT =
 	static void jlgr_opengl_error__(jlgr_t* jlgr, int width, const char* fname) {
 		uint8_t thread = jl_thread_current(jlgr->jl);
 		if(thread != 1) {
-			jl_print(jlgr->jl, "\"%s\" is on the Wrong Thread: %d",
-				fname, thread);
-			jl_print(jlgr->jl, "Must be on thread 1!");
-			jl_print_stacktrace(jlgr->jl);
+			la_print("\"%s\" is on the Wrong Thread: %d", fname, thread);
+			la_print("Must be on thread 1!");
 			exit(-1);
 		}
 
@@ -90,11 +88,11 @@ const char *JL_SHADER_TEX_VERT =
 				"!! (Texture too big?)\n";
 			GLint a;
 			glGetIntegerv(GL_MAX_TEXTURE_SIZE, &a);
-			JL_PRINT("Max texture size: %d/%d\n", width, a);
+			la_print("Max texture size: %d/%d\n", width, a);
 		}else{
 			fstrerr = "opengl: unknown error!\n";
 		}
-		jl_print(jlgr->jl, "error: %s:%s (%d)",fname,fstrerr,width);
+		la_print("error: %s:%s (%d)",fname,fstrerr,width);
 		exit(-1);
 	}
 #endif
@@ -106,8 +104,7 @@ static void jl_gl_buffer_use__(jlgr_t* jlgr, uint32_t *buffer) {
 #ifdef JL_DEBUG
 		jlgr_opengl_error__(jlgr, 0,"buffer gen");
 		if(*buffer == 0) {
-			jl_print(jlgr->jl,
-				"buffer is made wrongly on thread #%d!",
+			la_print("buffer is made wrongly on thread #%d!",
 				jl_thread_current(jlgr->jl));
 			exit(-1);
 		}
@@ -168,7 +165,7 @@ GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
 				glDeleteShader(shader);
 				shader = 0;
 			}
-			jl_print(jlgr->jl, "Failed to make shader.");
+			la_print("Failed to make shader.");
 			exit(-1);
 		}
 	}
@@ -178,29 +175,29 @@ GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
 GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 	const char* pFragmentSource)
 {
-	JL_PRINT_DEBUG(jlgr->jl, "Making program....");
+	la_print("Making program....");
 	GLuint vertexShader =
 		jl_gl_load_shader(jlgr, GL_VERTEX_SHADER, pVertexSource);
 	if (!vertexShader) {
-		jl_print(jlgr->jl, "couldn't load vertex shader");
+		la_print("couldn't load vertex shader");
 		exit(-1);
 	}
-	JL_PRINT_DEBUG(jlgr->jl, "Frag shader....");
+	la_print("Frag shader....");
 	GLuint fragmentShader =
 		jl_gl_load_shader(jlgr, GL_FRAGMENT_SHADER, pFragmentSource);
 	if (!fragmentShader) {
-		jl_print(jlgr->jl, "couldn't load fragment shader");
+		la_print("couldn't load fragment shader");
 		exit(-1);
 	}
-	JL_PRINT_DEBUG(jlgr->jl, "Together Shader....");
+	la_print("Together Shader....");
 	GLuint program = glCreateProgram();
 	JL_GL_ERROR(jlgr, 0,"glCreateProgram");
 	if (!program) {
-		jl_print(jlgr->jl, "Failed to load program");
+		la_print("Failed to load program");
 		exit(-1);
 	}
 
-	JL_PRINT_DEBUG(jlgr->jl, "Linking....");
+	la_print("Linking....");
 
 	GLint linkStatus = GL_FALSE;
 
@@ -224,20 +221,19 @@ GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 			buf = (char*) malloc(bufLength);
 			if (buf) {
 				glGetProgramInfoLog(program, bufLength, NULL, buf);
-				jl_print(jlgr->jl,
-					"Could not link program:%s",buf);
+				la_print("Could not link program: %s", buf);
 				exit(-1);
 			}else{
-				jl_print(jlgr->jl, "failed malloc");
+				la_print("failed malloc");
 				exit(-1);
 			}
 		}else{
 			glDeleteProgram(program);
-			jl_print(jlgr->jl, "no info log");
+			la_print("no info log");
 			exit(-1);
 		}
 	}
-	JL_PRINT_DEBUG(jlgr->jl, "Made program!");
+	la_print("Made program!");
 	return program;
 }
 
@@ -246,7 +242,7 @@ static void jl_gl_texture_make__(jlgr_t* jlgr, uint32_t *tex) {
 #ifdef JL_DEBUG
 	if(!(*tex)) {
 		jlgr_opengl_error__(jlgr, 0, "jl_gl_texture_make__: glGenTextures");
-		jl_print(jlgr->jl, "jl_gl_texture_make__: GL tex = 0");
+		la_print("jl_gl_texture_make__: GL tex = 0");
 		exit(-1);
 	}
 	jlgr_opengl_error__(jlgr, 0, "jl_gl_texture_make__: glGenTextures");
@@ -288,7 +284,7 @@ static inline void jl_gl_texture__bind__(jlgr_t* jlgr, uint32_t tex) {
 void jlgr_opengl_texture_bind_(jlgr_t* jlgr, uint32_t tex) {
 #ifdef JL_DEBUG
 	if(tex == 0) {
-		jl_print(jlgr->jl, "jlgr_opengl_texture_bind_: GL tex = 0");
+		la_print("jlgr_opengl_texture_bind_: GL tex = 0");
 		exit(-1);
 	}
 #endif
@@ -304,7 +300,6 @@ void jlgr_opengl_texture_off_(jlgr_t* jlgr) {
 void jlgr_opengl_texture_new_(jlgr_t* jlgr, uint32_t *tex, uint8_t* px,
 	uint16_t w, uint16_t h, uint8_t bytepp)
 {
-	jl_print_function(jlgr->jl, "jl_gl_texture_new");
 	// Make the texture
 	jl_gl_texture_make__(jlgr, tex);
 	// Bind the texture
@@ -313,7 +308,6 @@ void jlgr_opengl_texture_new_(jlgr_t* jlgr, uint32_t *tex, uint8_t* px,
 	jl_gl_texture_set__(jlgr, px, w, h, bytepp);
 	// Set the texture parametrs.
 	jl_gl_texpar_set__(jlgr);
-	jl_print_return(jlgr->jl, "jl_gl_texture_new");
 }
 
 void jl_gl_texture_free_(jlgr_t* jlgr, uint32_t *tex) {
@@ -328,15 +322,13 @@ uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 {
 	uint32_t texture;
 
-	jl_print_function(jlgr->jl, "GL_MkTex");
 	if (!pixels) {
-		jl_print(jlgr->jl, "null pixels");
+		la_print("null pixels");
 		exit(-1);
 	}
-	JL_PRINT_DEBUG(jlgr->jl, "generating texture (%d,%d)", width, height);
+	la_print("generating texture (%d,%d)", width, height);
 	// Make the texture.
 	jlgr_opengl_texture_new_(jlgr, &texture, pixels, width, height, bytepp);
-	jl_print_return(jlgr->jl, "GL_MkTex");
 	return texture;
 }
 
@@ -363,7 +355,7 @@ void jlgr_opengl_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl, float* x, uint8_t vec,
 {
 #ifdef JL_DEBUG
 	if(glsl == NULL) {
-		jl_print(jlgr->jl, "jlgr_opengl_uniform: NULL SHADER");
+		la_print("jlgr_opengl_uniform: NULL SHADER");
 		exit(-1);
 	}
 #endif
@@ -394,7 +386,7 @@ void jlgr_opengl_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl, float* x, uint8_t vec,
 			glUniform4f(uv, x[0], x[1], x[2], x[3]);
 			break;
 		default:
-			jl_print(jlgr->jl, "vec must be 1-4");
+			la_print("vec must be 1-4");
 			break;
 	}
 	JL_GL_ERROR(jlgr, uv, "glUniform..f");
@@ -438,7 +430,7 @@ void jlgr_opengl_uniformi(jlgr_t* jlgr, jlgr_glsl_t* glsl, int32_t* x,
 			glUniform4i(uv, x[0], x[1], x[2], x[3]);
 			break;
 		default:
-			jl_print(jlgr->jl, "vec must be 1-4");
+			la_print("vec must be 1-4");
 			break;
 	}
 	JL_GL_ERROR(jlgr, uv, "glUniform..i");
@@ -620,7 +612,7 @@ void jlgr_opengl_viewport_(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 void jl_opengl_framebuffer_make_(jlgr_t* jlgr, uint32_t *fb) {
 	glGenFramebuffers(1, fb);
 	if(!(*fb)) {
-		jl_print(jlgr->jl, "jl_gl_framebuffer_make__: GL FB = 0");
+		la_print("jl_gl_framebuffer_make__: GL FB = 0");
 		exit(-1);
 	}
 	JL_GL_ERROR(jlgr, *fb,"glGenFramebuffers");
@@ -649,7 +641,7 @@ void jlgr_opengl_framebuffer_subtx_(jlgr_t* jlgr) {
 void jlgr_opengl_framebuffer_status_(jlgr_t* jlgr) {
 	// Check to see if framebuffer was made properly.
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-		jl_print(jlgr->jl, "Frame buffer not complete!");
+		la_print("Frame buffer not complete!");
 		exit(-1);
 	}
 }
@@ -737,7 +729,7 @@ static int32_t _jl_gl_getu(jlgr_t* jlgr, GLuint prg, const char *var) {
 	int32_t a = glGetUniformLocation(prg, var);
 #ifdef JL_DEBUG
 	if(a == -1) {
-		jl_print(jlgr->jl, ":opengl: bad name; is: %s", var);
+		la_print("opengl: bad name; is: %s", var);
 		exit(-1);
 	}
 	jlgr_opengl_error__(jlgr, a,"glGetUniformLocation");
@@ -747,9 +739,8 @@ static int32_t _jl_gl_getu(jlgr_t* jlgr, GLuint prg, const char *var) {
 
 void _jl_gl_geta(jlgr_t* jlgr, GLuint prg, int32_t *attrib, const char *title) {
 	if((*attrib = glGetAttribLocation(prg, title)) == -1) {
-		jl_print(jlgr->jl, "for name \"%s\":", title);
-		jl_print(jlgr->jl,
-			"attribute name is either reserved or non-existant");
+		la_print("for name \"%s\":", title);
+		la_print("attribute name is either reserved or non-existant");
 		exit(-1);
 	}
 }
@@ -760,14 +751,14 @@ void _jl_gl_geta(jlgr_t* jlgr, GLuint prg, int32_t *attrib, const char *title) {
 /************************/
 
 static inline void _jl_gl_init_setup_gl(jlgr_t* jlgr) {
-	JL_PRINT_DEBUG(jlgr->jl, "setting properties....");
+	la_print("setting properties....");
 	//Disallow Dither & Depth Test
 	_jl_gl_init_disable_extras(jlgr);
 	//Set alpha=0 to transparent
 	_jl_gl_init_enable_alpha(jlgr);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	JL_PRINT_DEBUG(jlgr->jl, "set glproperties.");
+	la_print("set glproperties.");
 }
 
 /**
@@ -826,18 +817,17 @@ void jlgr_opengl_shader_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl,
 }
 
 static inline void _jl_gl_init_shaders(jlgr_t* jlgr) {
-	JL_PRINT_DEBUG(jlgr->jl, "Making Shader: texture");
+	la_print("Making Shader: texture");
 	jlgr_opengl_shader_init(jlgr, &jlgr->gl.prg.texture, NULL,
 		JL_SHADER_TEX_FRAG, 1);
-	JL_PRINT_DEBUG(jlgr->jl, "Making Shader: color");
+	la_print("Making Shader: color");
 	jlgr_opengl_shader_init(jlgr, &jlgr->gl.prg.color, JL_SHADER_CLR_VERT,
 		JL_SHADER_CLR_FRAG, 0);
-	JL_PRINT_DEBUG(jlgr->jl, "Set up shaders!");
+	la_print("Set up shaders!");
 }
 
 //Load and create all resources
 static inline void _jl_gl_make_res(jlgr_t* jlgr) {
-	jl_print_function(jlgr->jl, "GL_Init");
 	// Setup opengl properties
 	_jl_gl_init_setup_gl(jlgr);
 	// Create shaders and set up attribute/uniform variable communication
@@ -845,8 +835,7 @@ static inline void _jl_gl_make_res(jlgr_t* jlgr) {
 	// Default GL Texture Coordinate Buffer
 	jlgr_opengl_buffer_set_(jlgr, &jlgr->gl.default_tc, DEFAULT_TC, 8);
 	jlgr_opengl_buffer_set_(jlgr, &jlgr->gl.upsidedown_tc, UPSIDEDOWN_TC, 8);
-	JL_PRINT_DEBUG(jlgr->jl, "made temp vo & default tex. c. buff!");
-	jl_print_return(jlgr->jl, "GL_Init");
+	la_print("made temp vo & default tex. c. buff!");
 }
 
 /**	  @endcond	  **/
@@ -901,7 +890,7 @@ void jl_gl_clear(jlgr_t* jlgr, float r, float g, float b, float a) {
 void jl_gl_init__(jlgr_t* jlgr) {
 #ifdef JL_GLTYPE_HAS_GLEW
 	if(glewInit()!=GLEW_OK) {
-		jl_print(jlgr->jl, "glew fail!(no sticky)");
+		la_print("glew fail!(no sticky)");
 		exit(-1);
 	}
 #endif

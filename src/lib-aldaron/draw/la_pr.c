@@ -59,15 +59,14 @@ static void jlgr_pr_init__(jlgr_t* jlgr, jl_pr_t* pr) {
 static void jlgr_pr_use__(jlgr_t* jlgr, jl_pr_t* pr) {
 	jl_t* jl = jlgr->jl;
 
-	jl_print_function(jl, "jlgr_pr_use__");
 	jlgr_pr_init__(jlgr, pr);
 	if(pr->w == 0) {
 		jl_exit(jl, "jlgr_pr_use__ failed: 'w' must be more than 0");
 	}else if(pr->h == 0) {
 		jl_exit(jl, "jlgr_pr_use__ failed: 'h' must be more than 0");
 	}else if((pr->w > GL_MAX_TEXTURE_SIZE)||(pr->h > GL_MAX_TEXTURE_SIZE)) {
-		jl_print(jl, "_jl_gl_pr_obj_make() failed:");
-		jl_print(jl, "w = %d,h = %d", pr->w, pr->h);
+		la_print("_jl_gl_pr_obj_make() failed:");
+		la_print("w = %d,h = %d", pr->w, pr->h);
 		jl_exit(jl, "texture is too big for graphics card.");
 	}
 	// Bind the texture.
@@ -76,7 +75,6 @@ static void jlgr_pr_use__(jlgr_t* jlgr, jl_pr_t* pr) {
 	jlgr_opengl_framebuffer_bind_(jlgr, pr->fb);
 	// Render on the whole framebuffer [ lower left -> upper right ]
 	jlgr_opengl_viewport_(jlgr, pr->w, pr->h);
-	jl_print_return(jl, "jlgr_pr_use__");
 }
 
 static void jlgr_pr_set__(jl_pr_t *pr, float w, float h, uint16_t w_px) {
@@ -186,7 +184,7 @@ void jlgr_pr(jlgr_t* jlgr, jl_pr_t* pr, jl_fnct par__redraw) {
 	jl_pr_t* oldpr = jlgr->gl.cp;
 
 	if(!pr) {
-		jl_print(jl, "Drawing on lost pre-renderer.");
+		la_print("Drawing on lost pre-renderer.");
 		exit(-1);
 	}
 	// Use the vo's pr

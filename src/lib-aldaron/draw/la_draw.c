@@ -32,7 +32,6 @@ static void jlgr_loop_(jl_t* jl) {
 jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 	jlgr_t* jlgr = jl_memi(jl, sizeof(jlgr_t));
 
-	jl_print_function(jl, "jlgr-init");
 	jl->jlgr = jlgr;
 	jl->loop = jlgr_loop_;
 #if JL_PLAT == JL_PLAT_COMPUTER
@@ -41,21 +40,20 @@ jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 	jlgr->jl = jl;
 	jlgr->fl.inloop = 1;
 	// Initialize Subsystem
+#ifndef LA_PHONE_ANDROID
 	SDL_VideoInit(NULL);
-	JL_PRINT_DEBUG(jl, "Initializing Input....");
+#endif
+	la_print("Initializing Input....");
 	jl_ct_init__(jlgr); // Prepare to read input.
-	JL_PRINT_DEBUG(jl, "Initialized CT! / Initializing file viewer....");
+	la_print("Initialized CT! / Initializing file viewer....");
 	jlgr_fl_init(jlgr);
-	JL_PRINT_DEBUG(jl, "Initializing file viewer!");
-	jl_print_return(jl, "jlgr-init");
-	jl_print_function(jl, "jlgr-init2");
+	la_print("Initializing file viewer!");
 	// Create communicators for multi-threading
 	jl_thread_wait_init(jl, &jlgr->wait);
 	// Start Drawing thread.
 	jlgr_thread_init(jlgr, fn_);
 	// Wait for drawing thread to initialize, if not initialized already.
 	jl_thread_wait(jlgr->jl, &jlgr->wait);
-	jl_print_return(jl, "jlgr-init2");
 	return jlgr;
 }
 
@@ -100,15 +98,17 @@ void jlgr_kill(jlgr_t* jlgr) {
 #ifdef JL_DEBUG
 	jl_t* jl = jlgr->jl;
 #endif
-	JL_PRINT_DEBUG(jl, "Sending Kill to threads....");
+	la_print("Sending Kill to threads....");
 	SDL_AtomicSet(&jlgr->running, 0);
-	JL_PRINT_DEBUG(jl, "Waiting on threads....");
+	la_print("Waiting on threads....");
 	jlgr_thread_kill(jlgr); // Shut down thread.
-	JL_PRINT_DEBUG(jl, "Threads are dead....");
+	la_print("Threads are dead....");
 	jlgr_file_kill_(jlgr); // Remove clump filelist for fileviewer.
-	JL_PRINT_DEBUG(jl, "Fileviewer is dead....");
+	la_print("Fileviewer is dead....");
+#ifndef LA_PHONE_ANDROID
 	SDL_VideoQuit();
-	JL_PRINT_DEBUG(jl, "Killed SDL/VIDEO Subsystem!");
+#endif
+	la_print("Killed SDL/VIDEO Subsystem!");
 }
 
 // End of file.

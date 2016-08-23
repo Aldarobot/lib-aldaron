@@ -20,7 +20,7 @@ static void jlgr_thread_programsresize(jlgr_t* jlgr) {
 }
 
 static void jlgr_thread_resize(jlgr_t* jlgr, uint16_t w, uint16_t h) {
-	JL_PRINT_DEBUG(jlgr->jl, "Resizing to %dx%d....", w, h);
+	la_print("Resizing to %dx%d....", w, h);
 	// Set window size & aspect ratio stuff.
 	jl_wm_resz__(jlgr, w, h);
 	// Update the size of the background.
@@ -47,25 +47,24 @@ static void jlgr_thread_windowresize(jlgr_t* jlgr) {
 static void jlgr_thread_draw_init__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
-	jl_print_function(jl, "thead-draw-init");
 	// Initialize subsystems
-	JL_PRINT_DEBUG(jl, "Creating the window....");
+	la_print("Creating the window....");
 	jl_wm_init__(jlgr);
 	
 	jlgr_text_init__(jlgr);
-	JL_PRINT_DEBUG(jl, "Loading default graphics from package....");
+	la_print("Loading default graphics from package....");
 	jl_sg_init__(jlgr);
-	JL_PRINT_DEBUG(jl, "Setting up OpenGL....");
+	la_print("Setting up OpenGL....");
 	jl_gl_init__(jlgr);
-	JL_PRINT_DEBUG(jl, "Setting up effects....");
+	la_print("Setting up effects....");
 	jlgr_effects_init__(jlgr);
-	JL_PRINT_DEBUG(jl, "Load graphics....");
+	la_print("Load graphics....");
 	jlgr_init__(jlgr);
-	JL_PRINT_DEBUG(jl, "Creating Taskbar sprite....");
+	la_print("Creating Taskbar sprite....");
 	jlgr_menubar_init__(jlgr);
-	JL_PRINT_DEBUG(jl, "Creating Mouse sprite....");
+	la_print("Creating Mouse sprite....");
 	jlgr_mouse_init__(jlgr);
-	JL_PRINT_DEBUG(jl, "User's Init....");
+	la_print("User's Init....");
 	SDL_AtomicSet(&jlgr->running, 1);
 	jl_fnct program_init_;
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
@@ -75,10 +74,9 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	program_init_(jl);
 	jlgr_thread_resize(jlgr, jlgr_wm_getw(jlgr), jlgr_wm_geth(jlgr));
 	jlgr_wm_setwindowname(jlgr, jl->name);
-	JL_PRINT_DEBUG(jl, "Sending finish packet....");
+	la_print("Sending finish packet....");
 	// Tell main thread to stop waiting.
 	jl_thread_wait_stop(jl, &jlgr->wait);
-	jl_print_return(jl, "thead-draw-init");
 }
 
 void jlgr_thead_check_resize(jlgr_t* jlgr) {
@@ -124,7 +122,6 @@ int jlgr_thread_draw(void* data) {
 void jlgr_thread_init(jlgr_t* jlgr, jl_fnct fn_) {
 	jl_t* jl = jlgr->jl;
 
-	jl_print_function(jl, "jl-thread-init");
 	jl_thread_pvar_init(jl, &jlgr->pvar, NULL, sizeof(jlgr_pvar_t));
 	// Set init function
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
@@ -133,7 +130,6 @@ void jlgr_thread_init(jlgr_t* jlgr, jl_fnct fn_) {
 	// Start thread
 	jlgr->thread = jl_thread_new(jl, "JL_Lib/Graphics",
 		jlgr_thread_draw);
-	jl_print_return(jl, "jl-thread-init");
 }
 
 void jlgr_thread_kill(jlgr_t* jlgr) {

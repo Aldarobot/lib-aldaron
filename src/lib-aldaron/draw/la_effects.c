@@ -340,8 +340,7 @@ void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
 	float normal[] = { 0.f, 0.f, 1.f };
 #ifdef JL_DEBUG
 	if(jlgr->effects.lights.point_count == 0) {
-		jl_print(jlgr->jl, "jlgr_effects_vo_light: No lights have been"
-			" created yet.");
+		la_print("jlgr_effects_vo_light: No lights have been created yet.");
 		exit(-1);
 	}
 #endif
@@ -468,23 +467,23 @@ void jlgr_effects_light_update(jlgr_t* jlgr) {
 }
 
 void jlgr_effects_init__(jlgr_t* jlgr) {
-	JL_PRINT_DEBUG(jlgr->jl, "MAKING EFFECT: ALPHA");
+	la_print("MAKING EFFECT: ALPHA");
 	jlgr_opengl_shader_init(jlgr, &jlgr->effects.alpha.shader, NULL,
 		JL_EFFECT_ALPHA, 1);
 	jlgr_opengl_shader_uniform(jlgr, &jlgr->effects.alpha.shader,
 		&jlgr->effects.alpha.fade, "multiply_alpha");
 
-	JL_PRINT_DEBUG(jlgr->jl, "MAKING EFFECT: HUE");
+	la_print("MAKING EFFECT: HUE");
 	jlgr_opengl_shader_init(jlgr, &jlgr->effects.hue.shader, NULL,
 		JL_EFFECT_HUE, 1);
 	jlgr_opengl_shader_uniform(jlgr, &jlgr->effects.hue.shader,
 		&jlgr->effects.hue.new_color, "new_color");
 
-	JL_PRINT_DEBUG(jlgr->jl, "MAKING EFFECT: SHADOW");
+	la_print("MAKING EFFECT: SHADOW");
 	jlgr_opengl_shader_init(jlgr, &jlgr->effects.shadow.shader,
 		NULL, JL_EFFECT_SHADOW, 1);
 
-	JL_PRINT_DEBUG(jlgr->jl, "MADE EFFECTS!");
+	la_print("MADE EFFECTS!");
 	jlgr->effects.lights.lights = cl_array_create(
 		sizeof(jlgr_effects_lightsource_t), 0);
 	jlgr_effects_light_clear(jlgr);

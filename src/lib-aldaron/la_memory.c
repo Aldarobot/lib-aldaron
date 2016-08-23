@@ -40,7 +40,7 @@ void jl_mem_leak_init(jl_t* jl) {
 **/
 void jl_mem_leak_fail(jl_t* jl, const char* fn_name) {
 	if(jl_mem_tbiu() != jl->info) {
-		jl_print(jl, "%s: Memory Leak Fail", fn_name);
+		la_print("%s: Memory Leak Fail", fn_name);
 		exit(-1);
 	}
 }
@@ -58,7 +58,7 @@ void jl_mem_leak_fail(jl_t* jl, const char* fn_name) {
 void *jl_mem(jl_t* jl, void *a, uint32_t size) {
 	if(size == 0) { // Free
 		if(a == NULL) {
-			jl_print(jl, "Double Free or free on NULL pointer");
+			la_print("Double Free or free on NULL pointer");
 			exit(-1);
 		}else{
 			free(a);
@@ -68,7 +68,7 @@ void *jl_mem(jl_t* jl, void *a, uint32_t size) {
 		return malloc(size);
 	}else{ // Allocate or Resize
 		if((a = realloc(a, size)) == NULL) {
-			jl_print(jl, "realloc() failed! Out of memory?");
+			la_print("realloc() failed! Out of memory?");
 			exit(-1);
 		}
 	}
@@ -114,7 +114,7 @@ void* la_memory_free(void* data) {
 void *jl_memi(jl_t* jl, uint32_t size) {
 	// Make sure size is non-zero.
 	if(!size) {
-		if(jl) jl_print(jl, "jl_memi(): size must be more than 0");
+		if(jl) la_print("jl_memi(): size must be more than 0");
 		else JL_PRINT("jl_memi(): size must be more than 0");
 		exit(-1);
 	}

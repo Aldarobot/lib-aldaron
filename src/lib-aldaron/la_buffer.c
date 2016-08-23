@@ -192,10 +192,10 @@ void jl_data_data(jl_t *jl, data_t* a, const data_t* b, uint64_t bytes) {
 	uint32_t sizeb = a->curs + bytes;
 
 	if(a == NULL) {
-		jl_print(jl, "jl_data_data: NULL A STRING");
+		la_print("jl_data_data: NULL A STRING");
 		exit(-1);
 	}else if(b == NULL) {
-		jl_print(jl, "jl_data_data: NULL B STRING");
+		la_print("jl_data_data: NULL B STRING");
 		exit(-1);
 	}
 	if(sizeb > size) size = sizeb;

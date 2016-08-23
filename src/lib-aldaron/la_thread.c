@@ -34,47 +34,33 @@ static void jl_thread_init_new(jl_t* jl, uint8_t thread_id) {
 uint8_t jl_thread_new(jl_t *jl, const char* name, SDL_ThreadFunction fn) {
 	int8_t i, rtn = -1;
 
-	jl_print_function(jl, "jl-thread-new");
 	// Skip main thread ( i = 1 )
 	for(i = 1; i < 16; i++) {
-		jl_print_function(jl, "i=");
 		// Look for not init'd thread.
 		if(jl->jl_ctx[i].thread == NULL) {
-			jl_print_function(jl, "thread-init-new");
-
 			jl_thread_wait_init(jl, &jl->wait);
 			// Run thread-specific initalizations
 			jl_thread_init_new(jl, i);
-			jl_print_return(jl, "thread-init-new");
 			// Create a thread
-			jl_print_function(jl, "create-a-thread");
 			jl->jl_ctx[i].thread =	SDL_CreateThread(fn, name, jl);
 			jl->jl_ctx[i].thread_id =
 				SDL_GetThreadID(jl->jl_ctx[i].thread);
-			jl_print_return(jl, "create-a-thread");
 			// Check if success
 			if(jl->jl_ctx[i].thread == NULL) {
-				jl_print_function(jl, "fail");
-				jl_print(jl, "SDL_CreateThread failed: %s",
+				la_print("SDL_CreateThread failed: %s",
 					SDL_GetError());
-				jl_print_return(jl, "fail");
 				exit(-1);
 			}
 			rtn = i;
 			jl_thread_wait_stop(jl, &jl->wait);
-			jl_print_return(jl, "i=");
 			break;
 		}
-		jl_print_return(jl, "i=");
 	}
-	jl_print_function(jl, "ohyeah");
 	if(rtn == -1) {
-		jl_print(jl, "Cannot have more than 16 threads!");
+		la_print("Cannot have more than 16 threads!");
 		exit(-1);
 	}
-	JL_PRINT_DEBUG(jl, "Made thread #%d", rtn);
-	jl_print_return(jl, "ohyeah");
-	jl_print_return(jl, "jl-thread-new");
+	la_print("Made thread #%d", rtn);
 	return rtn;
 }
 
@@ -254,9 +240,7 @@ void jl_thread_wait(jl_t* jl, jl_wait_t* wait) {
 }
 
 void jl_thread_wait_init(jl_t* jl, jl_wait_t* wait) {
-	jl_print_function(jl, "jl-wait-init");
 	SDL_AtomicSet(&wait->wait, 1);
-	jl_print_return(jl, "jl-wait-init");
 }
 
 void jl_thread_wait_stop(jl_t* jl, jl_wait_t* wait) {

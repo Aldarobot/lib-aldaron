@@ -21,7 +21,6 @@ void jl_mode_loop__(jl_t* jl);
 	char la_keyboard_press = 0;
 #endif
 
-SDL_atomic_t la_running;
 float la_banner_size = 0.f;
 
 //Initialize The Libraries Needed At Very Beginning: The Base Of It All
@@ -34,17 +33,17 @@ static inline jl_t* la_init_essential__(void) {
 }
 
 static inline void jl_init_libs__(jl_t* jl) {
-	JL_PRINT_DEBUG(jl, "Initializing threads....");
+	la_print("Initializing threads....");
 	jl_thread_init__(jl);
-	JL_PRINT_DEBUG(jl, "Initializing file system....");
+	la_print("Initializing file system....");
 	jl_file_init_(jl);
-	JL_PRINT_DEBUG(jl, "Initializing modes....");
+	la_print("Initializing modes....");
 	jl_mode_init__(jl);
-	JL_PRINT_DEBUG(jl, "Initializing time....");
+	la_print("Initializing time....");
 	jl_sdl_init__(jl);
-	JL_PRINT_DEBUG(jl, "Initializing SDL....");
+	la_print("Initializing SDL....");
 	SDL_Init(0);
-	JL_PRINT_DEBUG(jl, "Initialized!");
+	la_print("Initialized!");
 }
 
 static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
@@ -52,7 +51,7 @@ static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 {
 	//
 	jl->loop = main_loop_;
-	JL_PRINT_DEBUG(jl, "Initializing subsystems....");
+	la_print("Initializing subsystems....");
 	// Run the library's init function.
 	jl_init_libs__(jl);
 	// Allocate the program's context.
@@ -64,8 +63,7 @@ static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 	jl_mode_loop__(jl);
 	//
 	jl->time.timer = jl_time_get(jl);
-	JL_PRINT_DEBUG(jl, "Started JL_Lib!");
-	SDL_AtomicSet(&la_running, 1);
+	la_print("Started JL_Lib!");
 }
 
 static void jl_time_reset__(jl_t* jl, uint8_t on_time) {
@@ -89,9 +87,9 @@ static inline int la_kill__(jl_t* jl, jl_fnct _fnc_kill_, int32_t rc) {
 	if(jl->jlgr) jlgr_kill(jl->jlgr);
 	if(jl->jlau) jlau_kill(jl->jlau);
 	_fnc_kill_(jl);
-	JL_PRINT_DEBUG(jl, "Killing SDL....");
+	la_print("Killing SDL....");
 	SDL_Quit();
-	JL_PRINT_DEBUG(jl, "Killing Printing....");
+	la_print("Killing Printing....");
 	jl_print_kill__(jl);
 	jl_mem_kill_(jl);
 	JL_PRINT("[\\JL_Lib] ");
@@ -156,60 +154,7 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, const char* name,
 	// Initialize JL_lib!
 	la_init__(jl, fnc_init, name, ctx_size);
 	// Run the Loop
-	while(jl->mode.count && SDL_AtomicGet(&la_running))
-		((jl_fnct)jl->loop)(jl);
+	while(jl->mode.count) ((jl_fnct)jl->loop)(jl);
 	// Kill the program
 	return la_kill__(jl, fnc_kill, 0);
 }
-
-#if JL_PLAT == JL_PLAT_PHONE
-
-/*#include "la_file.h" // Needed for printing to file
-
-JNIEXPORT void JNICALL
-Java_org_libsdl_app_SDLActivity_nativeLaSetFiles(JNIEnv *env, jobject obj,
-	jstring data, jstring logfile)
-{
-	// Enable SDL standard application logging
-	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
-	//
-	SDL_Log("nativeJlSendData\n");
-	JL_FL_BASE = (*env)->GetStringUTFChars(env, data, 0);
-	LA_FILE_LOG = (*env)->GetStringUTFChars(env, logfile, 0);
-	SDL_Log("nativeJlSendData \"%s\"\n", JL_FL_BASE);
-}
-
-JNIEXPORT void JNICALL
-Java_org_libsdl_app_SDLActivity_nativeLaExit(JNIEnv *env, jobject obj) {
-	SDL_AtomicSet(&la_running, 0);
-}
-
-JNIEXPORT void JNICALL
-Java_org_libsdl_app_SDLActivity_nativeLaFraction(JNIEnv *env, jobject obj,
-	float fraction)
-{
-	la_banner_size = fraction;
-}
-
-JNIEXPORT void JNICALL
-Java_org_libsdl_app_SDLActivity_nativeLaPrint(JNIEnv *env, jobject obj,
-	jstring data)
-{
-	const char* string_data = (*env)->GetStringUTFChars(env, data, 0);
-	la_file_append(LA_FILE_LOG, string_data, strlen(string_data));
-}
-
-//
-
-JNIEXPORT void JNICALL
-Java_org_libsdl_app_SDLInputConnection_nativeLaType(JNIEnv *env, jobject obj,
-	jstring data)
-{
-	la_keyboard_press = *((*env)->GetStringUTFChars(env, data, 0));
-}*/
-
-int SDL_main(char* argv[], int argc) {
-	main(argv, argc);
-}
-
-#endif

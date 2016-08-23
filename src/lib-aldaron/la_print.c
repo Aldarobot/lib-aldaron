@@ -281,7 +281,5 @@ void jl_print_init__(jl_t* jl) {
 }
 
 void jl_print_kill__(jl_t * jl) {
-	JL_PRINT_DEBUG(jl, "Killing printing....");
 	jl_print_return(jl, "JL_Lib");
-	JL_PRINT_DEBUG(jl, "Killed Printing!");
 }

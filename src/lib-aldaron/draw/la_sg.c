@@ -59,17 +59,14 @@ void _jl_sg_load_jlpx(jlgr_t* jlgr,data_t* data,void **pixels,int *w,int *h) {
 	int i, j;
 
 	if(data->data[0] == 0) {
-		jl_print(jlgr->jl, "NO DATA!");
+		la_print("NO DATA!");
 		exit(-1);
 	}
 
-	jl_print_function(jlgr->jl, "SG_Jlpx");
-
-	JL_PRINT_DEBUG(jlgr->jl, "File Size = %d", data->size);
+	la_print("File Size = %d", data->size);
 	rw = SDL_RWFromMem(data->data + data->curs, data->size);
 	if ((image = IMG_Load_RW(rw, 1)) == NULL) {
-		jl_print(jlgr->jl, "Couldn't load image: %s",
-			IMG_GetError());
+		la_print("Couldn't load image: %s", IMG_GetError());
 		exit(-1);
 	}
 	// Covert SDL_Surface.
@@ -86,8 +83,6 @@ void _jl_sg_load_jlpx(jlgr_t* jlgr,data_t* data,void **pixels,int *w,int *h) {
 	*h = image->h;
 	// Clean-up
 	SDL_free(image);
-
-	jl_print_return(jlgr->jl, "SG_Jlpx");
 }
 
 //Load the images in the image file
@@ -97,14 +92,12 @@ static inline uint32_t jl_sg_add_image__(jlgr_t* jlgr, data_t* data) {
 	int fh;
 	uint32_t rtn;
 
-	jl_print_function(jlgr->jl, "SG_InitImgs");
-	JL_PRINT_DEBUG(jlgr->jl, "size = %d", data->size);
+	la_print("size = %d", data->size);
 //load textures
 	_jl_sg_load_jlpx(jlgr, data, &fpixels, &fw, &fh);
-	JL_PRINT_DEBUG(jlgr->jl, "creating image....");
+	la_print("creating image....");
 	rtn = jl_gl_maketexture(jlgr, fpixels, fw, fh, 0);
-	JL_PRINT_DEBUG(jlgr->jl, "created image!");
-	jl_print_return(jlgr->jl, "SG_InitImgs");
+	la_print("created image!");
 	return rtn;
 }
 
@@ -116,24 +109,21 @@ static inline uint32_t jl_sg_add_image__(jlgr_t* jlgr, data_t* data) {
  * @returns: Texture object.
 */
 uint32_t jl_sg_add_image(jlgr_t* jlgr, data_t* zipdata, const char* filename) {
-	jl_print_function(jlgr->jl, "SG_LImg");
 	data_t img;
 
 	// Load image into "img"
 	jl_file_pk_load_fdata(jlgr->jl, &img, zipdata, filename);
 	if(jlgr->jl->errf) exit(-1);
 
-	JL_PRINT_DEBUG(jlgr->jl, "Loading Image....");
+	la_print("Loading Image....");
 	uint32_t rtn = jl_sg_add_image__(jlgr, &img);
-	JL_PRINT_DEBUG(jlgr->jl, "Loaded Image!");
-	jl_print_return(jlgr->jl, "SG_LImg");
+	la_print("Loaded Image!");
 	return rtn;
 }
 
 static void jl_sg_draw_up(jl_t* jl, uint8_t resize, void* data) {
 	jlgr_t* jlgr = jl->jlgr;
 
-	jl_print_function(jlgr->jl, "sg-draw-up");
 	// Clear the screen.
 	jl_gl_clear(jl->jlgr, 0., .5, .66, 1.);
 	// Run the screen's redraw function
@@ -141,13 +131,11 @@ static void jl_sg_draw_up(jl_t* jl, uint8_t resize, void* data) {
 	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)pjlgr->functions.redraw.lower)(jl) :
 		((jl_fnct)pjlgr->functions.redraw.upper)(jl);
 	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
-	jl_print_return(jlgr->jl, "sg-draw-up");
 }
 
 static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
 	jlgr_t* jlgr = jl->jlgr;
 
-	jl_print_function(jlgr->jl, "sg-draw-dn");
 	// Clear the screen.
 	jl_gl_clear(jlgr, 1., .5, 0., 1.);
 	// Run the screen's redraw function
@@ -157,36 +145,29 @@ static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
 	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 	// Draw Menu Bar & Mouse
 	if(!resize) _jlgr_loopa(jl->jlgr);
-	jl_print_return(jlgr->jl, "sg-draw-dn");
 }
 
 // Double screen loop
 static void _jl_sg_loop_ds(jlgr_t* jlgr) {
-	jl_print_function(jlgr->jl, "sg-loop-ds");
 	// Draw upper screen - alternate screen
 	jlgr_sprite_redraw(jlgr, &jlgr->sg.bg.up, NULL);
 	jlgr_sprite_draw(jlgr, &jlgr->sg.bg.up);
 	// Draw lower screen - default screen
 	jlgr_sprite_redraw(jlgr, &jlgr->sg.bg.dn, NULL);
 	jlgr_sprite_draw(jlgr, &jlgr->sg.bg.dn);
-	jl_print_return(jlgr->jl, "sg-loop-ds");
 }
 
 // Single screen loop
 static void _jl_sg_loop_ss(jlgr_t* jlgr) {
-	jl_print_function(jlgr->jl, "sg-loop-ss");
 	// Draw lower screen - default screen
 	jlgr_sprite_redraw(jlgr, &jlgr->sg.bg.dn, NULL);
 	jlgr_sprite_draw(jlgr, &jlgr->sg.bg.dn);
-	jl_print_return(jlgr->jl, "sg-loop-ss");
 }
 
 // Run the current loop.
 void _jl_sg_loop(jlgr_t* jlgr) {
 	jl_gl_clear(jlgr, 0.f, 0.f, 0.f, 1.);
-	jl_print_function(jlgr->jl, "SG_LP");
 	((jlgr_fnct)jlgr->sg.loop)(jlgr);
-	jl_print_return(jlgr->jl, "SG_LP");
 }
 
 static void jl_sg_init_ds_(jl_t* jl) {
@@ -220,20 +201,17 @@ static void jl_sg_init_ss_(jl_t* jl) {
 void jl_sg_resz__(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
-	jl_print_function(jl, "sg-resize");
 	// Check screen count.
 	if(jlgr->sg.cs == JL_SCR_SS)
 		jl_sg_init_ss_(jl);
 	else
 		jl_sg_init_ds_(jl);
-	jl_print_return(jl, "sg-resize");
 }
 
 void jl_sg_init__(jlgr_t* jlgr) {
 	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
 	jl_t* jl = jlgr->jl;
 
-	jl_print_function(jl, "sg-init");
 	// Initialize redraw routines to do nothing.
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
 	pjlgr->functions.redraw = (jlgr_redraw_t){jl_dont, jl_dont, jl_dont, jl_dont};
@@ -248,5 +226,4 @@ void jl_sg_init__(jlgr_t* jlgr) {
 	// Resize.
 	jlgr->sg.cs = JL_SCR_SS; // JL_SCR_DN
 	jl_sg_resz__(jl);
-	jl_print_return(jl, "sg-init");
 }

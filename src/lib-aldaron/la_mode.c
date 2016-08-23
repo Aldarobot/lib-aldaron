@@ -9,8 +9,6 @@
 **/
 #include "JLprivate.h"
 
-extern SDL_atomic_t la_running;
-
 static void _jl_mode_add(jl_t* jl) {
 	// Allocate a new mode.
 	jl->mode.mdes = jl_mem(jl, jl->mode.mdes,
@@ -114,7 +112,7 @@ LA_CHANGE_MODE:;
 		// Run exit routine.
 		kill_(jl);
 		// If mode is same as before, then quit.
-		if(which == jl->mode.which) SDL_AtomicSet(&la_running, 0);
+		if(which == jl->mode.which) jl->mode.count = 0;
 		else goto LA_CHANGE_MODE;
 
 		jl->mode.changed = 0;

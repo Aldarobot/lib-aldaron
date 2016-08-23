@@ -45,8 +45,7 @@ static uint8_t jl_fl_user_select_open_dir__(jlgr_t* jlgr, char *dirname) {
 	converted_filename = jl_file_convert__(jlgr->jl, jlgr->fl.dirname);
 	cl_list_clear(jlgr->fl.filelist);
 //UnComment to test file system conversion code.
-	JL_PRINT_DEBUG(jlgr->jl, "dirname=%s:%s\n", jlgr->fl.dirname,
-		converted_filename);
+	la_print("dirname=%s:%s\n", jlgr->fl.dirname, converted_filename);
 	if ((dir = opendir (converted_filename)) != NULL) {
 		/* print all the files and directories within directory */
 		while ((ent = readdir (dir)) != NULL) {
@@ -73,12 +72,12 @@ static uint8_t jl_fl_user_select_open_dir__(jlgr_t* jlgr, char *dirname) {
 		}else if((errsv == EMFILE) || (errsv == ENFILE) ||
 			(errsv == ENOMEM)) //Not enough memory!
 		{
-			jl_print(jlgr->jl, "FileViewer Can't Open Directory:"
-				"Not Enough Memory!");
+			la_print("FileViewer Can't Open Directory: Not Enough "
+				"Memory!");
 			exit(-1);
 		}else{ //Unknown error
-			jl_print(jlgr->jl, "FileViewer Can't Open Directory:"
-				"Unknown Error!");
+			la_print("FileViewer Can't Open Directory: Unknown "
+				"Error!");
 			exit(-1);
 		}
 	}
@@ -339,8 +338,8 @@ void jlgr_fl_init(jlgr_t* jlgr) {
 
 void jlgr_file_kill_(jlgr_t* jlgr) {
 	if(jlgr->jl->has.fileviewer) {
-		JL_PRINT_DEBUG(jlgr->jl, "killing fl....");
+		la_print("killing fl....");
 		cl_list_destroy(jlgr->fl.filelist);
-		JL_PRINT_DEBUG(jlgr->jl, "killed fl!");
+		la_print("killed fl!");
 	}
 }

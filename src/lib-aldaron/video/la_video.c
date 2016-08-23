@@ -29,7 +29,7 @@ void jlvi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
 	uint8_t* data = NULL;
 	jpeg_long_int_t data_size = 0;
 
-	jl_print(jl, "w:%d h:%d", w, h);
+	la_print("w:%d h:%d", w, h);
 
 	/* This struct contains the JPEG compression parameters and pointers to
 	 * working space (which is allocated as needed by the JPEG library).

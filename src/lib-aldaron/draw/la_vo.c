@@ -108,7 +108,7 @@ void jlgr_vo_init__(jl_t* jl, jl_vo_t* vo) {
 
 void jlgr_vo_exit__(jl_vo_t* vo, const char* error) {
 	if(vo->jl == NULL) {
-		JL_PRINT("Vertex object uninit'd: %s\n", error);
+		printf("Vertex object uninit'd: %s\n", error);
 		exit(-1);
 	}
 }
@@ -186,8 +186,7 @@ void jlgr_vo_image(jlgr_t* jlgr, jl_vo_t *vo, uint32_t img) {
 	vo->tx = img;
 #ifdef JL_DEBUG
 	if(!vo->tx) {
-		jl_print(jlgr->jl, "Error: Texture=0!");
-		jl_print_stacktrace(jlgr->jl);
+		la_print("Error: Texture=0!");
 		exit(-1);
 	}
 #endif
@@ -297,7 +296,6 @@ void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos) {
 **/
 void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
 	jlgr_vo_exit__(vo, "Can't Draw2!");
-	jl_print_function(jlgr->jl, "GL/Draw");
 	// Use Temporary Vertex Object If no vertex object.
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	if(vo->tx) {
@@ -316,7 +314,6 @@ void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
 	// Draw the image on the screen!
 	jlgr_opengl_draw_arrays_(jlgr, vo->rs ? GL_TRIANGLES : GL_TRIANGLE_FAN,
 		vo->vc);
-	jl_print_return(jlgr->jl, "GL/Draw");
 }
 
 /**

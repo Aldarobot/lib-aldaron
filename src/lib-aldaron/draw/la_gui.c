@@ -338,7 +338,7 @@ void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine) {
  * @param format: The message
  */
 void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, uint8_t c, char* format, ...) {
-	JL_PRINT_DEBUG(jlgr->jl, "jlgr_draw_msge");
+	la_print("jlgr_draw_msge");
 	if(format) {
 		va_list arglist;
 
@@ -349,14 +349,12 @@ void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, uint8_t c, char* format, ...) {
 	}else{
 		jlgr->gui.msge.message[0] = '\0';
 	}
-	jl_print_function(jlgr->jl, "JLGR_MSGE");
 	jlgr->gui.msge.t = tex;
 	jlgr->gui.msge.c = c;
-	JL_PRINT_DEBUG(jlgr->jl, "DRAW LOADSCREEN");
+	la_print("DRAW LOADSCREEN");
 	
 	jlgr_draw_loadscreen(jlgr, jlgr_draw_msge__);
-	JL_PRINT_DEBUG(jlgr->jl, "DREW LOADSCREEN");
-	jl_print_return(jlgr->jl, "JLGR_MSGE");
+	la_print("DREW LOADSCREEN");
 }
 
 /**
@@ -366,7 +364,7 @@ void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, uint8_t c, char* format, ...) {
  */
 void jlgr_term_msge(jlgr_t* jlgr, char *message) {
 	jlgr_draw_msge(jlgr, jlgr->textures.icon, 1, message);
-	jl_print(jlgr->jl, message);
+	la_print(message);
 	exit(-1);
 }
 
@@ -571,9 +569,9 @@ void jlgr_init__(jlgr_t* jlgr) {
 	jl_data_mkfrom_data(jlgr->jl, &packagedata, jl_gem_size(), jl_gem());
 	jlgr->textures.logo = jl_sg_add_image(jlgr, &packagedata,
 		"/images/JL_Lib.png");
-	JL_PRINT_DEBUG(jlgr->jl, "Draw Loading Screen");
+	la_print("Draw Loading Screen");
 	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, 0);
-	JL_PRINT_DEBUG(jlgr->jl, "Drew Loading Screen");
+	la_print("Drew Loading Screen");
 	// Load Graphics
 	jlgr->textures.font = jl_sg_add_image(jlgr, &packagedata,
 		"/images/font.png");

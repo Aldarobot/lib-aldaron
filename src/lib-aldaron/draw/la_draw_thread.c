@@ -22,6 +22,8 @@ static void jlgr_thread_programsresize(jlgr_t* jlgr) {
 static void jlgr_thread_resize(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	la_print("Resizing to %dx%d....", w, h);
 	jl_wm_resz__(jlgr, w, h);
+	la_print("Load the stuff....");
+	jl_mode_loop__(jlgr->jl);
 	la_print("User's resize....");
 	jlgr_thread_programsresize(jlgr);
 	la_print("Updating the size of the background....");
@@ -98,8 +100,6 @@ int jlgr_thread_draw(jl_t* jl) {
 
 	// Initialize subsystems
 	jlgr_thread_draw_init__(jl);
-	// Update Modes
-	jl_mode_loop__(jl);
 	// Redraw loop
 	while(SDL_AtomicGet(&jlgr->running)) {
 		// Check for resize
@@ -111,7 +111,6 @@ int jlgr_thread_draw(jl_t* jl) {
 		//Update Screen.
 		jl_wm_loop__(jlgr);
 	}
-	jl_wm_kill__(jlgr); // Kill window
 	jlgr_sprite_free(jlgr, &jlgr->sg.bg.up);
 	jlgr_sprite_free(jlgr, &jlgr->sg.bg.dn);
 	return 0;

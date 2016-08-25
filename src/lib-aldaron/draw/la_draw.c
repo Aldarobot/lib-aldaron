@@ -97,8 +97,10 @@ void jlgr_kill(jlgr_t* jlgr) {
 	SDL_AtomicSet(&jlgr->running, 0);
 	la_print("Removing clump filelist for fileviewer....");
 	jlgr_file_kill_(jlgr);
-	la_print("Fileviewer is dead....");
+	la_print("Destroying window....");
+	SDL_DestroyWindow(jlgr->wm.window);
 #ifndef LA_PHONE_ANDROID
+	la_print("SDL_VideoQuit()....");
 	SDL_VideoQuit();
 #endif
 	la_print("Killed SDL/VIDEO Subsystem!");

@@ -128,7 +128,7 @@ static inline void jlgr_wm_create__(jlgr_t* jlgr) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 	// Create window.
 	jlgr->wm.window = jlgr_wm_mkwindow__(jlgr);
-	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 0);
+	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 	jlgr->wm.glcontext = jl_wm_gl_context(jlgr);
 #endif
 }
@@ -158,16 +158,4 @@ void jl_wm_init__(jlgr_t* jlgr) {
 	jl_ct_quickloop_(jlgr);
 	// Get Window Size
 	jl_wm_updatewh_(jlgr);
-}
-
-void jl_wm_kill__(jlgr_t* jlgr) {
-#ifndef LA_PHONE_ANDROID
-	SDL_ShowCursor(SDL_ENABLE);
-	la_print("Closing Window....");
-	if (jlgr->wm.glcontext != NULL) {
-//		SDL_free(jlgr->wm.glcontext);
-		SDL_DestroyWindow(jlgr->wm.window);
-	}
-	la_print("Closed Window!");
-#endif
 }

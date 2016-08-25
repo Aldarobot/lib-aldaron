@@ -107,10 +107,7 @@ void jlgr_vo_init__(jl_t* jl, jl_vo_t* vo) {
 }
 
 void jlgr_vo_exit__(jl_vo_t* vo, const char* error) {
-	if(vo->jl == NULL) {
-		printf("Vertex object uninit'd: %s\n", error);
-		exit(-1);
-	}
+	if(vo->jl == NULL) la_panic("Vertex object uninit'd: %s\n", error);
 }
 
 /** @endcond */
@@ -185,10 +182,7 @@ void jlgr_vo_image(jlgr_t* jlgr, jl_vo_t *vo, uint32_t img) {
 	// Make sure non-textured colors aren't attempted
 	vo->tx = img;
 #ifdef JL_DEBUG
-	if(!vo->tx) {
-		la_print("Error: Texture=0!");
-		exit(-1);
-	}
+	if(!vo->tx) la_panic("Error: Texture=0!");
 #endif
 	jlgr_vo_txmap(jlgr, vo, 0, 0, 0, -1);
 }
@@ -322,7 +316,7 @@ void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
  * @param vo: The vertex object to draw.
 **/
 void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo) {
-	if(vo->jl == NULL) jl_exit(jlgr->jl, "Can't Draw");
+	if(vo->jl == NULL) la_panic("Can't Draw");
 	jlgr_vo_exit__(vo, "Can't Draw!");
 	jlgr_glsl_t* shader = vo->tx ?
 		&jlgr->gl.prg.texture : &jlgr->gl.prg.color;

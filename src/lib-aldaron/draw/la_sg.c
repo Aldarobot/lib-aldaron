@@ -58,17 +58,12 @@ void _jl_sg_load_jlpx(jlgr_t* jlgr,data_t* data,void **pixels,int *w,int *h) {
 	data_t pixel_data;
 	int i, j;
 
-	if(data->data[0] == 0) {
-		la_print("NO DATA!");
-		exit(-1);
-	}
+	if(data->data[0] == 0) la_panic("NO DATA!");
 
 	la_print("File Size = %d", data->size);
 	rw = SDL_RWFromMem(data->data + data->curs, data->size);
-	if ((image = IMG_Load_RW(rw, 1)) == NULL) {
-		la_print("Couldn't load image: %s", IMG_GetError());
-		exit(-1);
-	}
+	if ((image = IMG_Load_RW(rw, 1)) == NULL)
+		la_panic("Couldn't load image: %s", IMG_GetError());
 	// Covert SDL_Surface.
 	jl_data_init(jlgr->jl, &pixel_data, image->w * image->h * 4);
 	for(i = 0; i < image->h; i++) {
@@ -113,7 +108,7 @@ uint32_t jl_sg_add_image(jlgr_t* jlgr, data_t* zipdata, const char* filename) {
 
 	// Load image into "img"
 	jl_file_pk_load_fdata(jlgr->jl, &img, zipdata, filename);
-	if(jlgr->jl->errf) exit(-1);
+	if(jlgr->jl->errf) la_panic("add-image: pk_load_fdata failed!");
 
 	la_print("Loading Image....");
 	uint32_t rtn = jl_sg_add_image__(jlgr, &img);

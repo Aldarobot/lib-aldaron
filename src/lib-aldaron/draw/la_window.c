@@ -11,8 +11,7 @@ extern float la_banner_size;
 
 static void jl_wm_killedit(jl_t* jl, char *str) {
 	la_print(str);
-	la_print(SDL_GetError());
-	exit(-1);
+	la_panic(SDL_GetError());
 }
 
 #if JL_PLAT == JL_PLAT_COMPUTER
@@ -150,7 +149,6 @@ void jl_wm_resz__(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	jlgr->wm.h = h;
 	jlgr->wm.ar = ((float)h) / ((float)w);
 	jl_gl_viewport_screen(jlgr);
-	la_print("Resized");
 }
 
 void jl_wm_init__(jlgr_t* jlgr) {

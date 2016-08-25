@@ -8,60 +8,26 @@
 **/
 #include "JLprivate.h"
 #include "la_safe.h"
+#include "la_thread.h"
+#include "la_memory.h"
 
 #define JL_THREAD_MUTEX_UNLOCKED 255
 
-//
-// Static Functions
-//
+const char* la_thread_new(la_thread_t* thread, la_thread_fn_t fn,
+	const char* name, void* data)
+{
+	la_thread_t newthread;
 
-// Initialize a new thread.
-static void jl_thread_init_new(jl_t* jl, uint8_t thread_id) {
-	jl_print_init_thread__(jl, thread_id);
-}
-
-//
-// Exported Functions
-//
-
-/**
- * Create a thread.  User can program up to 16 threads.
- * @param jl: The library context.
- * @param name: The name of the thread.
- * @param fn: The main function of the thread.
- * @returns: The thread ID number.
-**/
-uint8_t jl_thread_new(jl_t *jl, const char* name, SDL_ThreadFunction fn) {
-	int8_t i, rtn = -1;
-
-	// Skip main thread ( i = 1 )
-	for(i = 1; i < 16; i++) {
-		// Look for not init'd thread.
-		if(jl->jl_ctx[i].thread == NULL) {
-			jl_thread_wait_init(jl, &jl->wait);
-			// Run thread-specific initalizations
-			jl_thread_init_new(jl, i);
-			// Create a thread
-			jl->jl_ctx[i].thread =	SDL_CreateThread(fn, name, jl);
-			jl->jl_ctx[i].thread_id =
-				SDL_GetThreadID(jl->jl_ctx[i].thread);
-			// Check if success
-			if(jl->jl_ctx[i].thread == NULL) {
-				la_print("SDL_CreateThread failed: %s",
-					SDL_GetError());
-				exit(-1);
-			}
-			rtn = i;
-			jl_thread_wait_stop(jl, &jl->wait);
-			break;
-		}
+	newthread.fn = fn;
+	newthread.thread = SDL_CreateThread(fn, name, data);
+	newthread.id = SDL_GetThreadID(newthread.thread);
+	if(newthread.thread == NULL) {
+		return SDL_GetError();
+	}else{
+		return NULL;
 	}
-	if(rtn == -1) {
-		la_print("Cannot have more than 16 threads!");
-		exit(-1);
-	}
-	la_print("Made thread #%d", rtn);
-	return rtn;
+	// Set thread.
+	if(thread) *thread = newthread;
 }
 
 /**
@@ -127,19 +93,19 @@ void jl_thread_mutex_lock(jl_mutex_t* mutex) {
 	// Test if mutex is uninit'd
 #if JL_DEBUG
 	if(!mutex || !jl) {
-		jl_exit(jl, "Mutex is uninit'd\n");
+		la_panic("Mutex is uninit'd!");
 	}
 #endif
 	int error;
 	while((error = SDL_TryLockMutex(mutex->mutex))) {
 		timepass += jl_sdl_timer(jl, &timer);
 		if(timepass > 2.f)
-			jl_exit(jl, "jl_thread_mutex_lock timeout %s\n",
+			la_panic("jl_thread_mutex_lock timeout %s",
 				SDL_GetError());
 	}
 #if JL_DEBUG
 	if(mutex->thread_id == current_thread)
-		jl_exit(jl, "jl_thread_mutex_lock redundant\n");
+		la_panic("jl_thread_mutex_lock redundant");
 	mutex->thread_id = current_thread;
 #endif
 }
@@ -154,14 +120,14 @@ void jl_thread_mutex_unlock(jl_mutex_t* mutex) {
 	jl_t* jl = mutex->jl;
 	// Test if mutex is uninit'd
 	if(!mutex || !jl) {
-		jl_exit(jl, "Mutex is uninit'd\n");
+		la_panic("Mutex is uninit'd\n");
 	}
 	if(mutex->thread_id == JL_THREAD_MUTEX_UNLOCKED) {
-		jl_exit(jl, "jl_thread_mutex_unlock redundant\n");
+		la_panic("jl_thread_mutex_unlock redundant\n");
 	}
 	mutex->thread_id = JL_THREAD_MUTEX_UNLOCKED;
 	if(SDL_UnlockMutex(mutex->mutex))
-		jl_exit(jl, "SDL_UnlockMutex failed: %s\n", SDL_GetError());
+		la_panic("SDL_UnlockMutex failed: %s\n", SDL_GetError());
 #else
 	SDL_UnlockMutex(mutex->mutex);
 #endif
@@ -183,9 +149,7 @@ void jl_thread_mutex_cpy(jl_t *jl, jl_mutex_t* mutex, void* src, void* dst,
 {
 	// Test if mutex is uninit'd
 #if JL_DEBUG
-	if(!mutex || !mutex->jl) {
-		jl_exit(jl, "Mutex is uninit'd\n");
-	}
+	if(!mutex || !mutex->jl) la_panic("Mutex is uninit'd\n");
 #endif
 	// Lock mutex
 	jl_thread_mutex_lock(mutex);
@@ -204,7 +168,7 @@ void jl_thread_mutex_cpy(jl_t *jl, jl_mutex_t* mutex, void* src, void* dst,
 void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size) {
 	pvar->jl = jl;
 	jl_thread_mutex_new(jl, &pvar->lock);
-	pvar->data = data ? jl_mem_copy(jl, data, size) : jl_memi(jl, size);
+	pvar->data = data? jl_mem_copy(jl, data, size):la_memory_allocate(size);
 	pvar->size = size;
 }
 
@@ -233,18 +197,6 @@ void jl_thread_pvar_drop(jl_pvar_t* pvar, void** data) {
 void jl_thread_pvar_free(jl_pvar_t* pvar) {
 	pvar->data = jl_mem(pvar->jl, pvar->data, 0);
 	pvar->size = 0;
-}
-
-void jl_thread_wait(jl_t* jl, jl_wait_t* wait) {
-	while(SDL_AtomicGet(&wait->wait));
-}
-
-void jl_thread_wait_init(jl_t* jl, jl_wait_t* wait) {
-	SDL_AtomicSet(&wait->wait, 1);
-}
-
-void jl_thread_wait_stop(jl_t* jl, jl_wait_t* wait) {
-	SDL_AtomicSet(&wait->wait, 0);
 }
 
 /**

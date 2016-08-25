@@ -8,7 +8,7 @@
 #include "port.h"
 #include <stdint.h>
 #include "clump.h" // LibClump
-#include "SDL_thread.h"
+#include "la_signal.h"
 
 //Platform Declarations
 #define JL_PLAT_COMPUTER 0 //PC/MAC
@@ -102,11 +102,6 @@ typedef struct{
 	size_t size;		/** Size of "data" */
 }jl_pvar_t;
 
-// Thread-Wait Variable
-typedef struct{
-	SDL_atomic_t wait;
-}jl_wait_t;
-
 //Standard Mode Class
 typedef struct {
 	void* init;
@@ -119,12 +114,6 @@ typedef struct{
 	SDL_Thread* thread;
 	SDL_threadID thread_id;
 
-	struct {
-		int8_t ofs2;
-		char stack[50][30];
-		uint8_t level;
-	}print;
-
 	void* temp_ptr;
 }jl_ctx_t;
 
@@ -136,11 +125,6 @@ typedef struct{
 		uint8_t input; // Input is enabled.
 		uint8_t quickloop; // Quickloop is enabled
 	}has;
-	struct{
-		void* printfn; // Function for printing
-		uint8_t bkspc; // Backspace.
-		jl_mutex_t mutex; // Mutex for printing to terminal
-	}print;
 	struct{
 		double psec; // Seconds since last frame.
 		double timer; // Time 1 frame ago started
@@ -170,27 +154,28 @@ typedef struct{
 	uint8_t mode_switch_skip;
 	//
 	jl_ctx_t jl_ctx[16];
-	jl_wait_t wait;
+	la_signal_t wait;
 	// Program's context.
 	void* prg_context;
 	// Built-in library pointers.
 	void* jlgr;
 	void* jlau;
+	// 
+	void* kill;
 }jl_t;
 
 typedef void(*jl_fnct)(jl_t* jl);
 typedef void(*jl_data_fnct)(jl_t* jl, void* data);
 typedef void(*jl_print_fnt)(jl_t* jl, const char * print);
 
-void la_panic(jl_t* jl, const char* format, ...);
+void la_panic(const char* format, ...);
 void la_dont(jl_t* jl);
 void* la_context(jl_t* jl);
-int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, const char* name,
+void la_start(jl_fnct fnc_init, jl_fnct fnc_kill, const char* name,
 	size_t ctx_size);
 
 // "JLmem.c"
 void *jl_mem(jl_t* jl, void *a, uint32_t size);
-void *jl_memi(jl_t* jl, uint32_t size);
 void *jl_mem_copy(jl_t* jl, const void *src, uint64_t size);
 uint64_t jl_mem_tbiu(void);
 void jl_mem_leak_init(jl_t* jl);
@@ -244,9 +229,6 @@ void jl_mode_exit(jl_t* jl);
 void jl_print_set(jl_t* jl, jl_print_fnt fn_);
 void jl_print(jl_t* jl, const char* format, ... );
 void jl_print_rewrite(jl_t* jl, const char* format, ... );
-void jl_print_function(jl_t* jl, const char* fn_name);
-void jl_print_return(jl_t* jl, const char* fn_name);
-void jl_print_stacktrace(jl_t* jl);
 
 // "JLfile.c"
 void jl_file_print(jl_t* jl, const char* fname, const char* msg);
@@ -265,7 +247,6 @@ struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive);
 char* jl_file_get_resloc(jl_t* jl, const char* prg_folder, const char* fname);
 
 // "JLthread.c"
-uint8_t jl_thread_new(jl_t *jl, const char* name, SDL_ThreadFunction fn);
 uint8_t jl_thread_current(jl_t *jl);
 int32_t jl_thread_old(jl_t *jl, uint8_t threadnum);
 void jl_thread_mutex_new(jl_t *jl, jl_mutex_t* mutex);
@@ -277,9 +258,6 @@ void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size);
 void* jl_thread_pvar_edit(jl_pvar_t* pvar);
 void jl_thread_pvar_drop(jl_pvar_t* pvar, void** data);
 void jl_thread_pvar_free(jl_pvar_t* pvar);
-void jl_thread_wait(jl_t* jl, jl_wait_t* wait);
-void jl_thread_wait_init(jl_t* jl, jl_wait_t* wait);
-void jl_thread_wait_stop(jl_t* jl, jl_wait_t* wait);
 
 // "JLsdl.c"
 double jl_time_get(jl_t* jl);

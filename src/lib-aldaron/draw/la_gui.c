@@ -69,8 +69,7 @@ void jlgr_dont(jlgr_t* jlgr) { }
 void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, 
 	int16_t c)
 {
-	if(!tex) jl_exit(jlgr->jl, "jlgr_fill_image_set:"
-		"Texture Must Be Nonzero!\n");
+	if(!tex) la_panic("jlgr_fill_image_set: Texture Must Be Nonzero!\n");
 	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
 
 	jlgr_vo_set_image(jlgr, &jlgr->gui.vos.whole_screen, rc, tex);
@@ -364,8 +363,7 @@ void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, uint8_t c, char* format, ...) {
  */
 void jlgr_term_msge(jlgr_t* jlgr, char *message) {
 	jlgr_draw_msge(jlgr, jlgr->textures.icon, 1, message);
-	la_print(message);
-	exit(-1);
+	la_panic(message);
 }
 
 /**

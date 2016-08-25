@@ -21,14 +21,16 @@ static void jlgr_thread_programsresize(jlgr_t* jlgr) {
 
 static void jlgr_thread_resize(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	la_print("Resizing to %dx%d....", w, h);
-	// Set window size & aspect ratio stuff.
 	jl_wm_resz__(jlgr, w, h);
-	// Update the size of the background.
+	la_print("User's resize....");
+	jlgr_thread_programsresize(jlgr);
+	la_print("Updating the size of the background....");
 	jl_sg_resz__(jlgr->jl);
-	// Taskbar resize.
+	la_print("Resizing the menubar....");
 	jlgr_menu_resize_(jlgr);
-	// Mouse resize
+	la_print("Resizing the mouse....");
 	jlgr_mouse_resize__(jlgr);
+	la_print("Resized.");
 }
 
 static void jlgr_thread_windowresize(jlgr_t* jlgr) {
@@ -41,7 +43,6 @@ static void jlgr_thread_windowresize(jlgr_t* jlgr) {
 	if(w == 0) w = jlgr_wm_getw(jlgr);
 	if(h == 0) h = jlgr_wm_geth(jlgr);
 	jlgr_thread_resize(jlgr, w, h);
-	jlgr_thread_programsresize(jlgr);
 }
 
 static void jlgr_thread_draw_init__(jl_t* jl) {
@@ -74,9 +75,7 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	program_init_(jl);
 	jlgr_thread_resize(jlgr, jlgr_wm_getw(jlgr), jlgr_wm_geth(jlgr));
 	jlgr_wm_setwindowname(jlgr, jl->name);
-	la_print("Sending finish packet....");
-	// Tell main thread to stop waiting.
-	jl_thread_wait_stop(jl, &jlgr->wait);
+	la_print("Window Created!");
 }
 
 void jlgr_thead_check_resize(jlgr_t* jlgr) {
@@ -92,8 +91,7 @@ void jlgr_thead_check_resize(jlgr_t* jlgr) {
 	if(should_resize == 2) jlgr_thread_windowresize(jlgr);
 }
 
-int jlgr_thread_draw(void* data) {
-	jl_t* jl = data;
+int jlgr_thread_draw(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
 
 	jl_thread_wait(jl, &jl->wait);
@@ -128,10 +126,5 @@ void jlgr_thread_init(jlgr_t* jlgr, jl_fnct fn_) {
 	pjlgr->functions.fn = fn_;
 	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 	// Start thread
-	jlgr->thread = jl_thread_new(jl, "JL_Lib/Graphics",
-		jlgr_thread_draw);
-}
-
-void jlgr_thread_kill(jlgr_t* jlgr) {
-	jl_thread_old(jlgr->jl, jlgr->thread);
+	jlgr_thread_draw(jl);
 }

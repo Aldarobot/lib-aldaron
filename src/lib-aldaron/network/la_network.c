@@ -5,6 +5,7 @@
 */
 
 #include "la_network.h"
+#include "la_memory.h"
 
 /**
  * Initialize Lib-Aldaron-Comm
@@ -12,9 +13,9 @@
  * @param sockets: Number of sockets to allocate.
 **/
 aldc_t* aldc_init(jl_t* jl, uint8_t sockets) {
-	aldc_t* aldc = jl_memi(jl, sizeof(aldc_t));
+	aldc_t* aldc = la_memory_allocate(sizeof(aldc_t));
 	aldc->jl = jl;
-	aldc->sockets = jl_memi(jl, sizeof(aldc_socket_t) * sockets);
+	aldc->sockets = la_memory_allocate(sizeof(aldc_socket_t) * sockets);
 	SDLNet_Init();
 	aldc->set = SDLNet_AllocSocketSet(sockets);
 	aldc->numSockets = 0;
@@ -31,16 +32,15 @@ aldc_t* aldc_init(jl_t* jl, uint8_t sockets) {
 void aldc_tcp(aldc_t* aldc, aldc_tcp_socket_t* socket, const char* hostname,
 	uint16_t port, size_t size)
 {
-	jl_t* jl = aldc->jl;
 	IPaddress serverIP;
 
 	socket->socket = NULL;
 	SDLNet_ResolveHost(&serverIP, hostname, port);
 	if(serverIP.host == INADDR_NONE)
-		jl_exit(jl, "Couldn't resolve hostname %s.\n", hostname);
+		la_panic("Couldn't resolve hostname %s.\n", hostname);
 	socket->socket = SDLNet_TCP_Open(&serverIP);
 	if(socket->socket == NULL)
-		jl_exit(jl, "Couldn't connect.\n");
+		la_panic("Couldn't connect.\n");
 	SDLNet_TCP_AddSocket(aldc->set, socket->socket);
 
 	aldc->sockets[aldc->numSockets].socket = socket->socket;
@@ -82,7 +82,7 @@ uint8_t aldc_pull(aldc_t* aldc, void* data) {
 		if (SDLNet_SocketReady(aldc->sockets[i].socket)) {
 			if(!SDLNet_TCP_Recv(aldc->sockets[i].socket,
 				(char *)data, aldc->sockets[i].size))
-				jl_exit(aldc->jl, "connection lost.\n");
+				la_panic("connection lost.\n");
 			else
 				return 1;
 		}

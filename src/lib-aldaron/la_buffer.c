@@ -1,4 +1,5 @@
 #include "JLprivate.h"
+#include "la_memory.h"
 
 //
 // Internal Functions
@@ -37,7 +38,7 @@ void jl_data_clear(jl_t* jl, data_t* pa) {
  * @returns: A new initialized "strt".
 */
 void jl_data_init(jl_t* jl, data_t* a, uint32_t size) {
-	a->data = jl_memi(jl, size+1);
+	a->data = la_memory_allocate(size+1);
 	a->size = size;
 	a->curs = 0;
 }
@@ -191,13 +192,8 @@ void jl_data_data(jl_t *jl, data_t* a, const data_t* b, uint64_t bytes) {
 	uint32_t size = a->size;
 	uint32_t sizeb = a->curs + bytes;
 
-	if(a == NULL) {
-		la_print("jl_data_data: NULL A STRING");
-		exit(-1);
-	}else if(b == NULL) {
-		la_print("jl_data_data: NULL B STRING");
-		exit(-1);
-	}
+	if(a == NULL) la_panic("jl_data_data: NULL A STRING");
+	else if(b == NULL) la_panic("jl_data_data: NULL B STRING");
 	if(sizeb > size) size = sizeb;
 	a->data = jl_mem(jl, a->data, size + 1);
 	for(i = 0; i < bytes; i++) {

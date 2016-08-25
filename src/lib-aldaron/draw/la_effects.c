@@ -339,10 +339,8 @@ void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
 	if(material == NULL) material = &default_material;
 	float normal[] = { 0.f, 0.f, 1.f };
 #ifdef JL_DEBUG
-	if(jlgr->effects.lights.point_count == 0) {
-		la_print("jlgr_effects_vo_light: No lights have been created yet.");
-		exit(-1);
-	}
+	if(jlgr->effects.lights.point_count == 0)
+		la_panic("jlgr_effects_vo_light: No lights have been created yet.");
 #endif
 	jlgr_effects_lightsource_t* lightsource = cl_array_borrow(
 		jlgr->effects.lights.lights, jlgr->effects.lights.point_count-1);

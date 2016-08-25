@@ -9,6 +9,7 @@
 */
 #include "JLprivate.h"
 #include "jlau.h"
+#include "la_memory.h"
 
 #define JLAU_CHANNEL_MUSIC -2
 #define JLAU_CHANNEL_SOUND -3
@@ -39,9 +40,8 @@ static inline void jlau_load(jlau_t* jlau, jlau_audio_t* audio,
 	else
 		audio->audio = Mix_LoadWAV_RW(rw, 1);
 	if(audio->audio == NULL) {
-		la_print(":Couldn't load audio because: %s",
-			(char *)SDL_GetError());
-		exit(-1);
+		la_panic("Couldn't load audio because: %s", (char *)
+			SDL_GetError());
 	}
 	audio->channel = isMusic ? JLAU_CHANNEL_MUSIC : JLAU_CHANNEL_SOUND;
 	Mix_VolumeChunk(audio->audio, volumeChange);
@@ -166,7 +166,7 @@ void jlau_add_audio(jlau_t* jlau, jlau_audio_t* audio, data_t* zipdata,
 }
 
 jlau_t* jlau_init(jl_t* jl) {
-	jlau_t* jlau = jl_memi(jl, sizeof(jlau_t));
+	jlau_t* jlau = la_memory_allocate(sizeof(jlau_t));
 
 	jlau->jl = jl;
 	jl->jlau = jlau;
@@ -176,9 +176,8 @@ jlau_t* jlau_init(jl_t* jl) {
 	la_print("initializing audio....");
 	Mix_Init(MIX_INIT_OGG);
 	if ( Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 1024) < 0 ) {
-		la_print(":Couldn't set 11025 Hz 16-bit audio because: %s",
+		la_panic("Couldn't set 11025 Hz 16-bit audio because: %s",
 			(char *)SDL_GetError());
-		exit(-1);
 	}else{
 		la_print("audio has been set.");
 	}

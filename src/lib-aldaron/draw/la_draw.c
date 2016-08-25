@@ -8,6 +8,9 @@
  *	2D rendering & 3D rendering.
  */
 #include "JLGRprivate.h"
+#include "la_memory.h"
+
+extern jl_t* la_jl_deprecated;
 
 static void jlgr_loop_(jl_t* jl) {
 	jlgr_t* jlgr = jl->jlgr;
@@ -24,18 +27,16 @@ static void jlgr_loop_(jl_t* jl) {
 
 /**
  * Create a window.
- * @param jl: The library context.
- * @param fullscreen: 0 for windowed mode, 1 for fullscreen.
+ * @param jlgr: The window.
  * @param fn_: Graphic initialization function run on graphical thread.
- * @returns The jlgr library context.
 **/
-jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
-	jlgr_t* jlgr = jl_memi(jl, sizeof(jlgr_t));
+void la_window_init(jlgr_t* jlgr, jl_fnct fn_) {
+	jl_t* jl = la_jl_deprecated;
 
 	jl->jlgr = jlgr;
 	jl->loop = jlgr_loop_;
 #if JL_PLAT == JL_PLAT_COMPUTER
-	jlgr->wm.fullscreen = fullscreen;
+	jlgr->wm.fullscreen = 0;
 #endif
 	jlgr->jl = jl;
 	jlgr->fl.inloop = 1;
@@ -48,13 +49,10 @@ jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_) {
 	la_print("Initialized CT! / Initializing file viewer....");
 	jlgr_fl_init(jlgr);
 	la_print("Initializing file viewer!");
-	// Create communicators for multi-threading
-	jl_thread_wait_init(jl, &jlgr->wait);
 	// Start Drawing thread.
 	jlgr_thread_init(jlgr, fn_);
-	// Wait for drawing thread to initialize, if not initialized already.
-	jl_thread_wait(jlgr->jl, &jlgr->wait);
-	return jlgr;
+	//
+	jl->mode.count = 0;
 }
 
 /**
@@ -95,15 +93,10 @@ void jlgr_resz(jlgr_t* jlgr, uint16_t w, uint16_t h) {
  * @param jlgr: The jlgr library context.
 **/
 void jlgr_kill(jlgr_t* jlgr) {
-#ifdef JL_DEBUG
-	jl_t* jl = jlgr->jl;
-#endif
 	la_print("Sending Kill to threads....");
 	SDL_AtomicSet(&jlgr->running, 0);
-	la_print("Waiting on threads....");
-	jlgr_thread_kill(jlgr); // Shut down thread.
-	la_print("Threads are dead....");
-	jlgr_file_kill_(jlgr); // Remove clump filelist for fileviewer.
+	la_print("Removing clump filelist for fileviewer....");
+	jlgr_file_kill_(jlgr);
 	la_print("Fileviewer is dead....");
 #ifndef LA_PHONE_ANDROID
 	SDL_VideoQuit();

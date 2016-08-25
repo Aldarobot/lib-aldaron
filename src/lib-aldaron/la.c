@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "JLprivate.h"
 #include "jlau.h"
 #include "jlgr.h"
@@ -6,6 +8,9 @@
 #else
 #include "SDL.h"
 #endif
+
+#include "la_thread.h"
+#include "la_memory.h"
 
 void jlau_kill(jlau_t* jlau);
 void jlgr_kill(jlgr_t* jlgr);
@@ -22,15 +27,7 @@ void jl_mode_loop__(jl_t* jl);
 #endif
 
 float la_banner_size = 0.f;
-
-//Initialize The Libraries Needed At Very Beginning: The Base Of It All
-static inline jl_t* la_init_essential__(void) {
-	// Memory
-	jl_t* jl = jl_mem_init_(); // Create The Library Context
-	// Printing to terminal
-	jl_print_init__(jl);
-	return jl;
-}
+jl_t* la_jl_deprecated = NULL;
 
 static inline void jl_init_libs__(jl_t* jl) {
 	la_print("Initializing threads....");
@@ -55,7 +52,7 @@ static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 	// Run the library's init function.
 	jl_init_libs__(jl);
 	// Allocate the program's context.
-	jl->prg_context = jl_memi(jl, ctx1s);
+	jl->prg_context = la_memory_allocate(ctx1s);
 	jl->name = jl_mem_copy(jl, nm, strlen(nm) + 1);
 	// Run the program's init function.
 	_fnc_init_(jl);
@@ -89,12 +86,10 @@ static inline int la_kill__(jl_t* jl, jl_fnct _fnc_kill_, int32_t rc) {
 	_fnc_kill_(jl);
 	la_print("Killing SDL....");
 	SDL_Quit();
-	la_print("Killing Printing....");
-	jl_print_kill__(jl);
+	la_print("Freeing library context....");
 	jl_mem_kill_(jl);
-	JL_PRINT("[\\JL_Lib] ");
-	if(!rc) JL_PRINT("| No errors ");
-	JL_PRINT("| Exiting with return value %d |\n", rc);
+	if(!rc) la_print("| No errors |");
+	la_print("| Exiting with return value %d |", rc);
 	return rc;
 }
 
@@ -114,14 +109,14 @@ void main_loop_(jl_t* jl) {
 /**
  * Exit The program on an error.
 **/
-void la_panic(jl_t* jl, const char* format, ...) {
+void la_panic(const char* format, ...) {
 	va_list arglist;
 
 	va_start( arglist, format );
-	printf( format, arglist );
+	la_print( format, arglist );
 	va_end( arglist );
 
-	jl_print_stacktrace(jl);
+	assert(0);
 }
 
 /**
@@ -138,23 +133,32 @@ void* la_context(jl_t* jl) {
 	return jl->prg_context;
 }
 
+static int la_main_loop(jl_t* jl) {
+	// Run the Loop
+	while(jl->mode.count) ((jl_fnct)jl->loop)(jl);
+	// Kill the program
+	exit( la_kill__(jl, jl->kill, 0) );
+}
+
 /**
- * Start JL_Lib.  Returns when program is closed.
+ * Start Lib-Aldaron on a separate thread.
  * @param fnc_init: The function initialize the program.
  * @param fnc_kill: The function to free anything that needs to be freed.
  * @param name: The name of the program, used for storage / window name etc.
  * @param ctx_size: The size of the program context.
 **/
-int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, const char* name,
+void la_start(jl_fnct fnc_init, jl_fnct fnc_kill, const char* name,
 	size_t ctx_size)
 {
-	//Set Up Memory And Logging
-	jl_t* jl = la_init_essential__();
+	// Set Up Memory.
+	jl_t* jl = jl_mem_init_(); // Create The Library Context
 
 	// Initialize JL_lib!
 	la_init__(jl, fnc_init, name, ctx_size);
-	// Run the Loop
-	while(jl->mode.count) ((jl_fnct)jl->loop)(jl);
-	// Kill the program
-	return la_kill__(jl, fnc_kill, 0);
+	jl->kill = fnc_kill;
+	// Start a new thread.
+	la_thread_new(NULL, (la_thread_fn_t)la_main_loop, "la_main", jl);
+	//
+	la_jl_deprecated = jl;
+	return;
 }

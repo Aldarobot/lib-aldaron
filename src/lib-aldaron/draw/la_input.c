@@ -340,8 +340,7 @@ int8_t jlgr_input_do(jlgr_t *jlgr, jlgr_control_t events, jlgr_input_fnct fn,
 
 	if(jlgr->main.ct.getEvents[event] == NULL) {
 		la_print("Null Pointer: jlgr->main.ct.getEvents.Event");
-		la_print("event=%d", event);
-		exit(-1);
+		la_panic("event=%d", event);
 	}
 	// Get the input.
 	jlgr->main.ct.current_event = event;

@@ -40,8 +40,7 @@ void jl_mem_leak_init(jl_t* jl) {
 **/
 void jl_mem_leak_fail(jl_t* jl, const char* fn_name) {
 	if(jl_mem_tbiu() != jl->info) {
-		la_print("%s: Memory Leak Fail", fn_name);
-		exit(-1);
+		la_panic("%s: Memory Leak Fail", fn_name);
 	}
 }
 
@@ -57,20 +56,16 @@ void jl_mem_leak_fail(jl_t* jl, const char* fn_name) {
 **/
 void *jl_mem(jl_t* jl, void *a, uint32_t size) {
 	if(size == 0) { // Free
-		if(a == NULL) {
-			la_print("Double Free or free on NULL pointer");
-			exit(-1);
-		}else{
+		if(a == NULL)
+			la_panic("Double Free or free on NULL pointer");
+		else
 			free(a);
-		}
 		return NULL;
 	}else if(a == NULL) {
 		return malloc(size);
 	}else{ // Allocate or Resize
-		if((a = realloc(a, size)) == NULL) {
-			la_print("realloc() failed! Out of memory?");
-			exit(-1);
-		}
+		if((a = realloc(a, size)) == NULL)
+			la_panic("realloc() failed! Out of memory?");
 	}
 	return a;
 }
@@ -95,7 +90,7 @@ void* la_memory_makecopy(void* data, size_t size) {
 	return la_memory_copy(data, dest, size);
 }
 
-void* la_memory(size_t size) {
+void* la_memory_allocate(size_t size) {
 	void* data = malloc(size);
 	return la_memory_clear(data, size);
 }
@@ -103,28 +98,6 @@ void* la_memory(size_t size) {
 void* la_memory_free(void* data) {
 	free(data);
 	return NULL;
-}
-
-/**
- * Allocate & Initialize Dynamic Memory.  All memory allocated by this function
- * is initialized as 0.
- * @param jl: The library context.
- * @param size: # of bytes to allocate.
-**/
-void *jl_memi(jl_t* jl, uint32_t size) {
-	// Make sure size is non-zero.
-	if(!size) {
-		if(jl) la_print("jl_memi(): size must be more than 0");
-		else JL_PRINT("jl_memi(): size must be more than 0");
-		exit(-1);
-	}
-	// Allocate Memory.
-	void* a = jl_mem(jl, NULL, size);
-
-	// Clear the memory.
-	jl_mem_clr(a, size);
-	// Return the memory
-	return a;
 }
 
 /**

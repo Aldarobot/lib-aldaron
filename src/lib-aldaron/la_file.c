@@ -59,16 +59,12 @@ static int jl_file_save_(jl_t* jl, const void *file_data, const char *file_name,
 	ssize_t n_bytes;
 	int fd;
 	
-	if(file_name == NULL) {
-		la_print("Save[file_name]: is Null");
-		exit(-1);
-	}else if(strlen(file_name) == 0) {
-		la_print("Save[strlen]: file_name is Empty String");
-		exit(-1);
-	}else if(!file_data) {
-		la_print("Save[file_data]: file_data is NULL");
-		exit(-1);
-	}
+	if(file_name == NULL)
+		la_panic("Save[file_name]: is Null");
+	else if(strlen(file_name) == 0)
+		la_panic("Save[strlen]: file_name is Empty String");
+	else if(!file_data)
+		la_panic("Save[file_data]: file_data is NULL");
 
 	const char* converted_filename = jl_file_convert__(jl, file_name);
 	fd = open(converted_filename, O_RDWR | O_CREAT, JL_FL_PERMISSIONS);
@@ -79,8 +75,7 @@ static int jl_file_save_(jl_t* jl, const void *file_data, const char *file_name,
 		la_print("Save/Open: ");
 		la_print("\tFailed to open file: \"%s\"",
 			converted_filename);
-		la_print("\tWrite failed: %s", strerror(errsv));
-		exit(-1);
+		la_panic("\tWrite failed: %s", strerror(errsv));
 	}
 	int at = lseek(fd, 0, SEEK_END);
 	n_bytes = write(fd, file_data, bytes);
@@ -88,8 +83,7 @@ static int jl_file_save_(jl_t* jl, const void *file_data, const char *file_name,
 		errsv = errno;
 		close(fd);
 		la_print(":Save[write]: Write to \"%s\" failed:");
-		la_print("\"%s\"", strerror(errsv));
-		exit(-1);
+		la_panic("\"%s\"", strerror(errsv));
 	}
 	close(fd);
 	return at;
@@ -131,8 +125,7 @@ static inline void jl_file_get_root__(jl_t * jl) {
 	char* pref_path = SDL_GetPrefPath(JL_ROOT_DIRNAME, "\0");
 
 	if(!pref_path) {
-		la_print("This platform has no pref path!");
-		exit(-1);
+		la_panic("This platform has no pref path!");
 	}
 	// Erase extra non-needed '/'s
 	pref_path[strlen(pref_path) - 1] = '\0';
@@ -145,8 +138,7 @@ static inline void jl_file_get_root__(jl_t * jl) {
 	const char* error = NULL;
 	if((error = la_file_mkdir((char*) root_path.data))) {
 		la_print((char*) root_path.data);
-		la_print(": mkdir : %s", error);
-		exit(-1);
+		la_panic("mkdir: %s", error);
 	}
 	// Set paths.root & free root_path
 	jl->fl.paths.root = jl_data_tostring(jl, &root_path);
@@ -231,21 +223,16 @@ uint8_t jl_file_exist(jl_t* jl, const char* path) {
 	if ((dir = opendir (path)) == NULL) {
 		//Couldn't open Directory
 		int errsv = errno;
-		if(errsv == ENOTDIR) { //Not a directory - is a file
+		if(errsv == ENOTDIR) //Not a directory - is a file
 			return 2;
-		}else if(errsv == ENOENT) { // Directory Doesn't Exist
+		else if(errsv == ENOENT) // Directory Doesn't Exist
 			return 0;
-		}else if(errsv == EACCES) { // Doesn't have permission
+		else if(errsv == EACCES) // Doesn't have permission
 			return 3;
-		}else if((errsv == EMFILE) || (errsv == ENFILE) ||
-			(errsv == ENOMEM)) //Not enough memory!
-		{
-			la_print("jl_file_exist: Out of Memory!");
-			exit(-1);
-		}else{ //Unknown error
-			la_print("jl_file_exist: Unknown Error!");
-			exit(-1);
-		}
+		else if((errsv == EMFILE) || (errsv == ENFILE) || (errsv == ENOMEM)) //Not enough memory!
+			la_panic("jl_file_exist: Out of Memory!");
+		else //Unknown error
+			la_panic("jl_file_exist: Unknown Error!");
 	}else{
 		return 1; // Directory Does exist
 	}
@@ -298,11 +285,8 @@ void jl_file_load(jl_t* jl, data_t* load, const char* file_name) {
 		la_print("jl_file_load/open: ");
 		la_print("\tFailed to open file: \"%s\"", converted_filename);
 		la_print("\tLoad failed because: %s", strerror(errsv));
-		if(errsv == ENOENT) {
-		}else{
-			// Is a Directory
-			exit(-1);
-		}
+		if(errsv != ENOENT)
+			la_panic("jl_file_load can't load a directory.");
 		jl->errf = JL_ERR_FIND;
 		return;
 	}
@@ -343,9 +327,8 @@ char jl_file_pk_save(jl_t* jl, const char* packageFileName,
 	struct zip_source *s;
 	if ((s=zip_source_buffer(archive, (void *)data, dataSize, 0)) == NULL) {
 		zip_source_free(s);
-		la_print("src null error[replace]: %s",
+		la_panic("src null error[replace]: %s",
 			(char *)zip_strerror(archive));
-		exit(-1);
 	}
 //	la_print("%d,%d,%d\n",archive,sb.index,s);
 	if(zip_file_add(archive, fileName, s, ZIP_FL_OVERWRITE)) {
@@ -422,8 +405,7 @@ void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 	if(ze.zip_err != ZIP_ER_OK) {
 		la_print("couldn't make pckg buffer!");
 		//zip_error_init_with_code(&ze, ze.zip_err);
-		la_print("because: \"%s\"", zip_error_strerror(&ze));
-		exit(-1);
+		la_panic("because: \"%s\"", zip_error_strerror(&ze));
 	}
 
 	la_print("error check 2.");
@@ -433,24 +415,19 @@ void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 	if(ze.zip_err != ZIP_ER_OK) {
 		zip_error_init_with_code(&ze, ze.zip_err);
 		la_print("couldn't load pckg file");
-		la_print("because: \"%s\"", zip_error_strerror(&ze));
-//		char name[3]; name[0] = data->data[0]; name[1] = '\0';
-//		la_print("First character = %s %d", data->data, data->data[0]);
-		exit(-1);
+		la_panic("because: \"%s\"", zip_error_strerror(&ze));
 	}
 
 //	struct zip *zipfile = zip_open(converted, ZIP_CHECKCONS, &zerror);
 	la_print("error check 3.");
 	if(zipfile == NULL) {
 		la_print("couldn't load zip because:");
-		if(zerror == ZIP_ER_INCONS) {
-			la_print("\tcorrupt file");
-		}else if(zerror == ZIP_ER_NOZIP) {
-			la_print("\tnot a zip file");
-		}else{
-			la_print("\tunknown error");
-		}
-		exit(-1);
+		if(zerror == ZIP_ER_INCONS)
+			la_panic("\tcorrupt file");
+		else if(zerror == ZIP_ER_NOZIP)
+			la_panic("\tnot a zip file");
+		else
+			la_panic("\tunknown error");
 	}
 	la_print("error check 4.");
 	la_print((char *)zip_strerror(zipfile));
@@ -468,10 +445,8 @@ void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 		return;
 	}
 	la_print("opened file in package / reading opened file....");
-	if((jl->info = zip_fread(file, fileToLoad, PKFMAX)) == -1) {
-		la_print("file reading failed");
-		exit(-1);
-	}
+	if((jl->info = zip_fread(file, fileToLoad, PKFMAX)) == -1)
+		la_panic("file reading failed");
 	if(jl->info == 0) {
 		la_print("empty file, returning NULL.");
 		return;
@@ -514,7 +489,7 @@ void jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
 		return;
 	}
 	jl_file_pk_load_fdata(jl, rtn, &data, filename);
-	if(jl->errf) exit(-1);
+	if(jl->errf) la_panic("jl_file_pk_load_fdata failed!");
 	return;
 }
 
@@ -583,11 +558,9 @@ static int8_t jl_file_dirls__(jl_t* jl,const char* filename,uint8_t recursive,
 	}else if((errsv == EMFILE) || (errsv == ENFILE) ||
 		(errsv == ENOMEM)) //Not enough memory!
 	{
-		la_print("Can't Open Directory: Not Enough Memory!\n");
-		exit(-1);
+		la_panic("Can't Open Directory: Not Enough Memory!\n");
 	}else{ //Unknown error
-		la_print("Can't Open Directory: Unknown Error!\n");
-		exit(-1);
+		la_panic("Can't Open Directory: Unknown Error!\n");
 	}
 	return -1;
 }
@@ -645,8 +618,7 @@ char* jl_file_get_resloc(jl_t* jl, const char* prg_folder, const char* fname) {
 	if( ( error = la_file_mkdir((char*) resloc.data) ) ) {
 		la_print("jl_file_get_resloc: couldn't make \"%s\"",
 			(char*) resloc.data);
-		la_print("mkdir: %s", error);
-		exit(-1);
+		la_panic("mkdir: %s", error);
 	}
 	// Append 'fname' onto 'resloc'
 	jl_data_merg(jl, &resloc, &fnstrt);

@@ -332,8 +332,6 @@ typedef struct{
 	jl_font_t font;
 	jl_vo_t mouse;
 
-	uint8_t thread; // Graphical Thread ID.
-	jl_wait_t wait;
 	jl_pvar_t pvar; // Protected context.
 
 	SDL_atomic_t running;
@@ -552,7 +550,7 @@ typedef struct{
 }jl_menu_t;
 
 // JLGR.c:
-jlgr_t* jlgr_init(jl_t* jl, uint8_t fullscreen, jl_fnct fn_);
+void la_window_init(jlgr_t* jlgr, jl_fnct fn_);
 void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 	jl_fnct downscreen, jl_fnct resize);
 

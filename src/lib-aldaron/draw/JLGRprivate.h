@@ -80,7 +80,6 @@ void jl_wm_loop__(jlgr_t* jlgr);
 void _jlgr_loopa(jlgr_t* jlgr);
 // kill
 void jl_wm_kill__(jlgr_t* jlgr);
-void jlgr_thread_kill(jlgr_t* jlgr);
 void jlgr_file_kill_(jlgr_t* jlgr);
 
 //

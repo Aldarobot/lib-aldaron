@@ -16,13 +16,6 @@
 #define VAR_COLORS 1
 #define VAR_TEXTUREI 2
 
-// Printing
-#if JL_PLAT == JL_PLAT_COMPUTER
-	#define JL_PRINT(...) printf(__VA_ARGS__)
-#else
-	#define JL_PRINT(...) SDL_Log(__VA_ARGS__)
-#endif
-
 // Files
 #define JL_FILE_SEPARATOR "/"
 #define JL_ROOT_DIRNAME "JL_Lib"
@@ -46,14 +39,11 @@ uint32_t jl_gem_size(void);
 	void jl_cm_init_(jl_t* jl);
 	void jl_file_init_(jl_t * jl);
 	jl_t* jl_mem_init_(void);
-	void jl_print_init__(jl_t* jl);
 	void jl_thread_init__(jl_t* jl);
 	void jl_mode_init__(jl_t* jl);
 	void jl_sdl_init__(jl_t* jl);
 
 	// LIB KILLS
 	void jl_mem_kill_(jl_t* jl);
-	void jl_print_kill__(jl_t* jl);
 
-	// LIB THREAD INITS
-	void jl_print_init_thread__(jl_t* jl, uint8_t thread_id);
+// End of file

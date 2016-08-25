@@ -67,13 +67,6 @@ const char *JL_SHADER_TEX_VERT =
 
 #ifdef JL_DEBUG
 	static void jlgr_opengl_error__(jlgr_t* jlgr, int width, const char* fname) {
-		uint8_t thread = jl_thread_current(jlgr->jl);
-		if(thread != 1) {
-			la_print("\"%s\" is on the Wrong Thread: %d", fname, thread);
-			la_print("Must be on thread 1!");
-			exit(-1);
-		}
-
 		GLenum err= glGetError();
 		if(err == GL_NO_ERROR) return;
 		char *fstrerr;
@@ -92,8 +85,7 @@ const char *JL_SHADER_TEX_VERT =
 		}else{
 			fstrerr = "opengl: unknown error!\n";
 		}
-		la_print("error: %s:%s (%d)",fname,fstrerr,width);
-		exit(-1);
+		la_panic("error: %s:%s (%d)",fname,fstrerr,width);
 	}
 #endif
 
@@ -104,9 +96,8 @@ static void jl_gl_buffer_use__(jlgr_t* jlgr, uint32_t *buffer) {
 #ifdef JL_DEBUG
 		jlgr_opengl_error__(jlgr, 0,"buffer gen");
 		if(*buffer == 0) {
-			la_print("buffer is made wrongly on thread #%d!",
+			la_panic("buffer is made wrongly on thread #%d!",
 				jl_thread_current(jlgr->jl));
-			exit(-1);
 		}
 #endif
 	}
@@ -158,15 +149,13 @@ GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
 					const char* msg =
 						(shaderType==GL_VERTEX_SHADER)?
 						"vertex shader":"fragment shader";
-					printf(
-						"Could not compile %s:%s",msg,buf);
-					exit(-1);
+					la_panic("Could not compile %s:%s", msg,
+						buf);
 				}
 				glDeleteShader(shader);
 				shader = 0;
 			}
-			la_print("Failed to make shader.");
-			exit(-1);
+			la_panic("Failed to make shader.");
 		}
 	}
 	return shader;
@@ -179,22 +168,19 @@ GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 	GLuint vertexShader =
 		jl_gl_load_shader(jlgr, GL_VERTEX_SHADER, pVertexSource);
 	if (!vertexShader) {
-		la_print("couldn't load vertex shader");
-		exit(-1);
+		la_panic("couldn't load vertex shader");
 	}
 	la_print("Frag shader....");
 	GLuint fragmentShader =
 		jl_gl_load_shader(jlgr, GL_FRAGMENT_SHADER, pFragmentSource);
 	if (!fragmentShader) {
-		la_print("couldn't load fragment shader");
-		exit(-1);
+		la_panic("couldn't load fragment shader");
 	}
 	la_print("Together Shader....");
 	GLuint program = glCreateProgram();
 	JL_GL_ERROR(jlgr, 0,"glCreateProgram");
 	if (!program) {
-		la_print("Failed to load program");
-		exit(-1);
+		la_panic("Failed to load program");
 	}
 
 	la_print("Linking....");
@@ -221,16 +207,13 @@ GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 			buf = (char*) malloc(bufLength);
 			if (buf) {
 				glGetProgramInfoLog(program, bufLength, NULL, buf);
-				la_print("Could not link program: %s", buf);
-				exit(-1);
+				la_panic("Could not link program: %s", buf);
 			}else{
-				la_print("failed malloc");
-				exit(-1);
+				la_panic("failed malloc");
 			}
 		}else{
 			glDeleteProgram(program);
-			la_print("no info log");
-			exit(-1);
+			la_panic("no info log");
 		}
 	}
 	la_print("Made program!");
@@ -242,8 +225,7 @@ static void jl_gl_texture_make__(jlgr_t* jlgr, uint32_t *tex) {
 #ifdef JL_DEBUG
 	if(!(*tex)) {
 		jlgr_opengl_error__(jlgr, 0, "jl_gl_texture_make__: glGenTextures");
-		la_print("jl_gl_texture_make__: GL tex = 0");
-		exit(-1);
+		la_panic("jl_gl_texture_make__: GL tex = 0");
 	}
 	jlgr_opengl_error__(jlgr, 0, "jl_gl_texture_make__: glGenTextures");
 #endif
@@ -284,8 +266,7 @@ static inline void jl_gl_texture__bind__(jlgr_t* jlgr, uint32_t tex) {
 void jlgr_opengl_texture_bind_(jlgr_t* jlgr, uint32_t tex) {
 #ifdef JL_DEBUG
 	if(tex == 0) {
-		la_print("jlgr_opengl_texture_bind_: GL tex = 0");
-		exit(-1);
+		la_panic("jlgr_opengl_texture_bind_: GL tex = 0");
 	}
 #endif
 	jl_gl_texture__bind__(jlgr, tex);
@@ -322,10 +303,7 @@ uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 {
 	uint32_t texture;
 
-	if (!pixels) {
-		la_print("null pixels");
-		exit(-1);
-	}
+	if (!pixels) la_panic("null pixels");
 	la_print("generating texture (%d,%d)", width, height);
 	// Make the texture.
 	jlgr_opengl_texture_new_(jlgr, &texture, pixels, width, height, bytepp);
@@ -335,8 +313,7 @@ uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 //Lower Level Stuff
 static inline void jl_gl_usep__(jlgr_t* jlgr, GLuint prg) {
 #ifdef JL_DEBUG
-	if(!prg)
-		jl_exit(jlgr->jl, "shader program uninit'd!");
+	if(!prg) la_panic("shader program uninit'd!");
 #endif
 	glUseProgram(prg);
 	JL_GL_ERROR(jlgr, prg, "glUseProgram");
@@ -354,10 +331,7 @@ void jlgr_opengl_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl, float* x, uint8_t vec,
 	const char* name, ...)
 {
 #ifdef JL_DEBUG
-	if(glsl == NULL) {
-		la_print("jlgr_opengl_uniform: NULL SHADER");
-		exit(-1);
-	}
+	if(glsl == NULL) la_panic("jlgr_opengl_uniform: NULL SHADER");
 #endif
 	int32_t uv;
 	char uniform_name[256];
@@ -611,10 +585,7 @@ void jlgr_opengl_viewport_(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 
 void jl_opengl_framebuffer_make_(jlgr_t* jlgr, uint32_t *fb) {
 	glGenFramebuffers(1, fb);
-	if(!(*fb)) {
-		la_print("jl_gl_framebuffer_make__: GL FB = 0");
-		exit(-1);
-	}
+	if(!(*fb)) la_panic("jl_gl_framebuffer_make__: GL FB = 0");
 	JL_GL_ERROR(jlgr, *fb,"glGenFramebuffers");
 }
 
@@ -640,10 +611,8 @@ void jlgr_opengl_framebuffer_subtx_(jlgr_t* jlgr) {
 
 void jlgr_opengl_framebuffer_status_(jlgr_t* jlgr) {
 	// Check to see if framebuffer was made properly.
-	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-		la_print("Frame buffer not complete!");
-		exit(-1);
-	}
+	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		la_panic("Frame buffer not complete!");
 }
 
 void jl_opengl_framebuffer_free_(jlgr_t* jlgr, uint32_t *fb) {
@@ -728,10 +697,7 @@ void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh) {
 static int32_t _jl_gl_getu(jlgr_t* jlgr, GLuint prg, const char *var) {
 	int32_t a = glGetUniformLocation(prg, var);
 #ifdef JL_DEBUG
-	if(a == -1) {
-		la_print("opengl: bad name; is: %s", var);
-		exit(-1);
-	}
+	if(a == -1) la_panic("opengl: bad name; is: %s", var);
 	jlgr_opengl_error__(jlgr, a,"glGetUniformLocation");
 #endif
 	return a;
@@ -740,8 +706,7 @@ static int32_t _jl_gl_getu(jlgr_t* jlgr, GLuint prg, const char *var) {
 void _jl_gl_geta(jlgr_t* jlgr, GLuint prg, int32_t *attrib, const char *title) {
 	if((*attrib = glGetAttribLocation(prg, title)) == -1) {
 		la_print("for name \"%s\":", title);
-		la_print("attribute name is either reserved or non-existant");
-		exit(-1);
+		la_panic("attribute name is either reserved or non-existant");
 	}
 }
 
@@ -889,10 +854,7 @@ void jl_gl_clear(jlgr_t* jlgr, float r, float g, float b, float a) {
 
 void jl_gl_init__(jlgr_t* jlgr) {
 #ifdef JL_GLTYPE_HAS_GLEW
-	if(glewInit()!=GLEW_OK) {
-		la_print("glew fail!(no sticky)");
-		exit(-1);
-	}
+	if(glewInit()!=GLEW_OK) la_panic("glew fail!(no sticky)");
 #endif
 	jlgr->gl.cp = NULL;
 	_jl_gl_make_res(jlgr);

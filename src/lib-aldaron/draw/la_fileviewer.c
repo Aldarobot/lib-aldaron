@@ -72,13 +72,11 @@ static uint8_t jl_fl_user_select_open_dir__(jlgr_t* jlgr, char *dirname) {
 		}else if((errsv == EMFILE) || (errsv == ENFILE) ||
 			(errsv == ENOMEM)) //Not enough memory!
 		{
-			la_print("FileViewer Can't Open Directory: Not Enough "
+			la_panic("FileViewer Can't Open Directory: Not Enough "
 				"Memory!");
-			exit(-1);
 		}else{ //Unknown error
-			la_print("FileViewer Can't Open Directory: Unknown "
+			la_panic("FileViewer Can't Open Directory: Unknown "
 				"Error!");
-			exit(-1);
 		}
 	}
 	return 1;

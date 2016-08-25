@@ -146,7 +146,7 @@ void la_video_load_jpeg(jl_t* jl, void* output, void* data, size_t size,
 
 	rw = SDL_RWFromMem(data, size);
 	if ((image = IMG_Load_RW(rw, 0)) == NULL)
-		la_panic(jl, "Couldn't load image: %s", IMG_GetError());
+		la_panic("Couldn't load image: %s", IMG_GetError());
 	// Covert SDL_Surface.
 	jl_data_init(jl, &pixel_data, image->w * image->h * 3);
 	for(i = 0; i < image->h; i++) {

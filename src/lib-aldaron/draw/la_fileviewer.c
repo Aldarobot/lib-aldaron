@@ -275,7 +275,7 @@ const char* jlgr_openfile_kill(la_window_t* jlgr) {
 		return NULL;
 }
 
-static void jl_fl_btn_makefile_press__(la_window_t* jlgr, jlgr_input_t input) {
+static void jl_fl_btn_makefile_press__(la_window_t* jlgr) {
 	jlgr->fl.prompt = 1;
 }
 

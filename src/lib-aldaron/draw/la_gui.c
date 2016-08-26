@@ -399,7 +399,7 @@ void jlgr_slidebtn_rsz(la_window_t* jlgr, jl_sprite_t * spr, const char* txt) {
  * @param 'prun': the function to run when pressed.
 **/
 void jlgr_slidebtn_loop(la_window_t* jlgr, jl_sprite_t * spr, float defaultx,
-	float slidex, jlgr_input_fnct prun)
+	float slidex, jlgr_fnct prun)
 {
 	spr->pr.cb.pos.x = defaultx;
 //	if(jlgr_sprite_collide(jlgr, &jlgr->mouse.pr, &spr->pr)) {
@@ -417,7 +417,7 @@ void jlgr_slidebtn_loop(la_window_t* jlgr, jl_sprite_t * spr, float defaultx,
  * @param 'prun': the function to run when pressed.
 **/
 void jlgr_glow_button_draw(la_window_t* jlgr, jl_sprite_t * spr,
-	char *txt, jlgr_input_fnct prun)
+	char *txt, jlgr_fnct prun)
 {
 //		jlgr_sprite_redraw(jlgr, spr);
 	jlgr_sprite_draw(jlgr, spr);

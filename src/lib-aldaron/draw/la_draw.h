@@ -16,13 +16,6 @@
 #define JLGR_TEXT_ALIGNR JLGR_TEXT_CMD "\x12"
 #define JLGR_TEXT_ALIGNJ JLGR_TEXT_CMD "\x13"
 
-typedef enum{
-	JLGR_INPUT_PRESS_ISNT, // User is not currently using the control
-	JLGR_INPUT_PRESS_JUST, // User just started using the control
-	JLGR_INPUT_PRESS_HELD, // User is using the control
-	JLGR_INPUT_PRESS_STOP, // User just released the control.
-}JLGR_INPUT_PRESS_T;
-
 typedef enum {
 	JL_SCR_UP,
 	JL_SCR_DN,
@@ -143,23 +136,7 @@ typedef struct{
 
 #include "port.h"
 
-typedef void(*jlgr_fnct)(la_window_t* jlgr);
-typedef void(*jlgr_input_fnct)(la_window_t* jlgr, jlgr_input_t input);
-typedef void(*jlgr_menu_fnct)(la_window_t* jlgr, void* menu);
-
-typedef struct{
-	// Used for all icons on the menubar.
-	jl_vo_t icon;
-	jl_vo_t shadow;
-	// Redraw Functions for 10 icons.
-	jlgr_menu_fnct redrawfn[10];
-	// Pressed & Not Pressed Functions for 10 icons.
-	jlgr_input_fnct inputfn[10];
-	// Cursor
-	int8_t cursor;
-	// What needs redrawing - -1 nothing -2 all
-	int8_t redraw;
-}jl_menu_t;
+typedef void(*jlgr_fnct)(la_window_t* window);
 
 // JLGR.c:
 void la_window_init(la_window_t* jlgr, jl_fnct fn_);
@@ -185,8 +162,8 @@ void* jlgr_sprite_getdrawctx(jl_sprite_t *sprite);
 // JLGRmenu.c
 void jlgr_menu_draw(la_window_t* jlgr, uint8_t resize);
 void jlgr_menu_loop(la_window_t* jlgr);
-void jlgr_menu_draw_icon(la_window_t* jlgr,uint32_t tex,uint8_t c,jl_menu_t* menu);
-void jlgr_menu_addicon(la_window_t* jlgr, jlgr_input_fnct inputfn, jlgr_menu_fnct rdr);
+void jlgr_menu_draw_icon(la_window_t* window, uint32_t tex, uint8_t c);
+void jlgr_menu_addicon(la_window_t* window, jlgr_fnct inputfn, jlgr_fnct rdr);
 void jlgr_menu_addicon_flip(la_window_t* jlgr);
 void jlgr_menu_addicon_slow(la_window_t* jlgr);
 void jlgr_menu_addicon_name(la_window_t* jlgr);
@@ -211,9 +188,9 @@ void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ..
 void jlgr_term_msge(la_window_t* jlgr, char* message);
 void jlgr_slidebtn_rsz(la_window_t* jlgr, jl_sprite_t * spr, const char* txt);
 void jlgr_slidebtn_loop(la_window_t* jlgr, jl_sprite_t * spr, float defaultx,
-	float slidex, jlgr_input_fnct prun);
+	float slidex, jlgr_fnct prun);
 void jlgr_glow_button_draw(la_window_t* jlgr, jl_sprite_t * spr,
-	char *txt, jlgr_input_fnct prun);
+	char *txt, jlgr_fnct prun);
 void jlgr_gui_textbox_init(la_window_t* jlgr, data_t* string);
 uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr);
 void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc);

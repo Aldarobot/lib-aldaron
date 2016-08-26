@@ -162,7 +162,8 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, uint8_t openwindow,
 {
 	jl_t* jl = jl_mem_init_(); // Create The Library Context
 	la_thread_t la_main;
-	la_window_t* window = openwindow ? la_memory_allocate(sizeof(la_window_t)) : NULL;
+	la_window_t* window = openwindow ?
+		la_memory_allocate(sizeof(la_window_t)) : NULL;
 
 	// Initialize JL_lib!
 	la_init__(jl, openwindow ? la_dont : fnc_init, name, ctx_size);
@@ -174,7 +175,6 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, uint8_t openwindow,
 	// Open a window, if "openwindow" is set.
 	if(openwindow) la_window_init(window, fnc_init);
 	// Wait for the thread to finish.
-//	int32_t rtn = la_thread_old(&la_main);
 	la_print("Kill Window....");
 	if(openwindow) jlgr_kill(window);
 	la_print("SDL_Quit()");

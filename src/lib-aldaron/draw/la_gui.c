@@ -304,15 +304,15 @@ void jlgr_draw_msge__(jl_t* jl) {
 void jlgr_draw_loadscreen(la_window_t* jlgr, jl_fnct draw_routine) {
 	uint8_t inloop = jlgr->fl.inloop;
 
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	jlgr_redraw_t old_redrawfns = pjlgr->functions.redraw;
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	jlgr_redraw_t old_redrawfns = jlgr->protected.functions.redraw;
 
 	// Set Graphical loops.
-	pjlgr->functions.redraw = (jlgr_redraw_t) {
+	jlgr->protected.functions.redraw = (jlgr_redraw_t) {
 		draw_routine, draw_routine,
 		draw_routine, jl_dont };
 
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 
 	jlgr->fl.inloop = 1;
 	// Update events
@@ -322,9 +322,9 @@ void jlgr_draw_loadscreen(la_window_t* jlgr, jl_fnct draw_routine) {
 	// Update Screen.
 	jl_wm_loop__(jlgr);
 	//
-	pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	pjlgr->functions.redraw = old_redrawfns;
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	jlgr->protected.functions.redraw = old_redrawfns;
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 
 	jlgr->fl.inloop = inloop;
 }
@@ -402,10 +402,10 @@ void jlgr_slidebtn_loop(la_window_t* jlgr, jl_sprite_t * spr, float defaultx,
 	float slidex, jlgr_input_fnct prun)
 {
 	spr->pr.cb.pos.x = defaultx;
-	if(jlgr_sprite_collide(jlgr, &jlgr->mouse.pr, &spr->pr)) {
+//	if(jlgr_sprite_collide(jlgr, &jlgr->mouse.pr, &spr->pr)) {
 //		jlgr_input_do(jlgr, JL_INPUT_PRESS, prun, NULL);
-		spr->pr.cb.pos.x = defaultx + slidex;
-	}
+//		spr->pr.cb.pos.x = defaultx + slidex;
+//	}
 	jlgr_sprite_draw(jlgr, spr);
 }
 
@@ -421,7 +421,7 @@ void jlgr_glow_button_draw(la_window_t* jlgr, jl_sprite_t * spr,
 {
 //		jlgr_sprite_redraw(jlgr, spr);
 	jlgr_sprite_draw(jlgr, spr);
-	if(jlgr_sprite_collide(jlgr, &jlgr->mouse.pr, &spr->pr)) {
+/*	if(jlgr_sprite_collide(jlgr, &jlgr->mouse.pr, &spr->pr)) {
 		jl_rect_t rc = { spr->pr.cb.pos.x, spr->pr.cb.pos.y,
 			spr->pr.cb.ofs.x, spr->pr.cb.ofs.y };
 		float glow_color[] = { 1., 1., 1., .25 };
@@ -437,7 +437,7 @@ void jlgr_glow_button_draw(la_window_t* jlgr, jl_sprite_t * spr,
 				jlgr->fontcolor, .05 });
 		// Run if press
 //		jlgr_input_do(jlgr, JL_INPUT_PRESS, prun, NULL);
-	}
+	}*/
 }
 
 /**
@@ -517,15 +517,15 @@ void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc){
  * @param notification: The message to display.
 */
 void jlgr_notify(la_window_t* jlgr, const char* notification, ...) {
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
 	va_list arglist;
 
 	va_start( arglist, notification );
-	vsprintf( pjlgr->notification.message, notification, arglist );
+	vsprintf( jlgr->protected.notification.message, notification, arglist );
 	va_end( arglist );
-	pjlgr->notification.timeTilVanish = 4.5;
+	jlgr->protected.notification.timeTilVanish = 4.5;
 
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 }
 
 /***      @cond       ***/
@@ -535,21 +535,21 @@ void jlgr_notify(la_window_t* jlgr, const char* notification, ...) {
 
 void _jlgr_loopb(la_window_t* jlgr) {
 	//Message Display
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	if(pjlgr->notification.timeTilVanish > 0.f) {
-		if(pjlgr->notification.timeTilVanish > .5) {
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	if(jlgr->protected.notification.timeTilVanish > 0.f) {
+		if(jlgr->protected.notification.timeTilVanish > .5) {
 			float color[] = { 1., 1., 1., 1. };
-			jlgr_draw_ctxt(jlgr, pjlgr->notification.message, 0,
+			jlgr_draw_ctxt(jlgr, jlgr->protected.notification.message, 0,
 				color);
 		}else{
 			float color[] = { 1., 1., 1.,
-				(pjlgr->notification.timeTilVanish / .5)};
-			jlgr_draw_ctxt(jlgr, pjlgr->notification.message, 0,
+				(jlgr->protected.notification.timeTilVanish / .5)};
+			jlgr_draw_ctxt(jlgr, jlgr->protected.notification.message, 0,
 				color);
 		}
-		pjlgr->notification.timeTilVanish-=jlgr->psec;
+		jlgr->protected.notification.timeTilVanish-=jlgr->psec;
 	}
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 }
 
 void _jlgr_loopa(la_window_t* jlgr) {
@@ -583,9 +583,9 @@ void jlgr_init__(la_window_t* jlgr) {
 	// Draw message on the screen
 	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "LOADING JL_LIB....");
 	// Set other variables
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	pjlgr->notification.timeTilVanish = 0.f;
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	jlgr->protected.notification.timeTilVanish = 0.f;
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 	// Load other images....
 	jlgr->textures.icon = jl_sg_add_image(jlgr, &packagedata,
 		"/images/taskbar_items.png");

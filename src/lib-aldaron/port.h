@@ -66,7 +66,23 @@ typedef struct {
 	jl_font_t font;
 	jl_vo_t mouse;
 
-	jl_pvar_t pvar; // Protected context.
+	struct {
+		jl_mutex_t mutex;
+
+		struct {
+			float timeTilVanish;
+			char message[256];
+		} notification;
+
+		struct {
+			jl_fnct fn;
+			jlgr_redraw_t redraw;
+		} functions;
+
+		uint8_t needs_resize;
+		uint16_t set_width;
+		uint16_t set_height;
+	} protected;
 
 	SDL_atomic_t running;
 
@@ -180,11 +196,11 @@ typedef struct {
 	struct {
 	#if JL_PLAT == JL_PLAT_COMPUTER
 		uint8_t fullscreen;
-	#endif
 
-		char windowTitle[2][16];
 		SDL_Window* window;
 		SDL_GLContext* glcontext;
+	#endif
+		char windowTitle[2][16];
 		// The full width and height of the window.
 		int32_t w, h;
 		// Aspect Ratio of the window

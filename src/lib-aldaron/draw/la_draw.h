@@ -141,28 +141,6 @@ typedef struct{
 	void* resize;
 }jlgr_redraw_t;
 
-typedef struct{
-	uint8_t id;		// Packet ID
-	uint16_t x, y;		// X(w), Y(h)
-	jl_fnct fn;		// Function
-}jlgr_thread_packet_t;
-
-typedef struct{
-	struct {
-		float timeTilVanish;
-		char message[256];
-	} notification;
-
-	struct {
-		jl_fnct fn;
-		jlgr_redraw_t redraw;
-	} functions;
-
-	uint8_t needs_resize;
-	uint16_t set_width;
-	uint16_t set_height;
-}jlgr_pvar_t;
-
 #include "port.h"
 
 typedef void(*jlgr_fnct)(la_window_t* jlgr);

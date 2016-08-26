@@ -174,20 +174,6 @@ uint32_t jl_mem_random_int(uint32_t a) {
 }
 
 /**
- * Save up to 256 bytes to a buffer, return the previous value of the buffer.
- * @param jl: The library context.
- * @param mem: The new memory to save to the buffer.
- * @param size: Size of pointer.
- * @returns: The old/previous value of the pointer.
-**/
-void *jl_mem_temp(jl_t* jl, void *mem) {
-	void* rtn = jl->jl_ctx[jl_thread_current(jl)].temp_ptr;
-
-	jl->jl_ctx[jl_thread_current(jl)].temp_ptr = mem;
-	return rtn;
-}
-
-/**
  * Add 2 Numbers, Keeping within a range of 0-1.
 **/
 double jl_mem_addwrange(double v1, double v2) {

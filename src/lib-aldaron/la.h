@@ -108,11 +108,6 @@ typedef struct {
 	void* kill;
 }jl_mode_t;
 
-// Thread-Specific context.
-typedef struct{
-	void* temp_ptr;
-}jl_ctx_t;
-
 typedef struct{
 	struct {
 		uint8_t graphics; //graphics are enabled
@@ -149,7 +144,6 @@ typedef struct{
 	//
 	uint8_t mode_switch_skip;
 	//
-	jl_ctx_t jl_ctx[16];
 	la_signal_t wait;
 	// Program's context.
 	void* prg_context;
@@ -181,7 +175,6 @@ void jl_mem_copyto(const void* src, void* dst, uint64_t size);
 void jl_mem_format(char* rtn, const char* format, ... );
 void jl_mem_format2(char* rtn, const char* format, ...);
 uint32_t jl_mem_random_int(uint32_t a);
-void *jl_mem_temp(jl_t* jl, void *mem);
 double jl_mem_addwrange(double v1, double v2);
 double jl_mem_difwrange(double v1, double v2);
 void jl_mem_vec_add(jl_vec3_t* v1, const jl_vec3_t* v2);

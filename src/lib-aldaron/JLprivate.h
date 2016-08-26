@@ -32,7 +32,6 @@ uint32_t jl_gem_size(void);
 
 // Main - Prototypes
 	char* jl_file_convert__(jl_t* jl, const char* filename);
-	jl_ctx_t* jl_thread_get_safe__(jl_t* jl);
 	void main_loop_(jl_t* jl);
 
 	// LIB INITIALIZATION fn(Context)

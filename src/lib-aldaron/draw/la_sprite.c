@@ -8,14 +8,14 @@
  */
 #include "JLGRprivate.h"
 
-static void jlgr_sprite_draw_to_pr__(jl_t *jl) {
-	jl_sprite_t *sprite = jl_mem_temp(jl, NULL);
+static jl_sprite_t *sprite = NULL;
 
+static void jlgr_sprite_draw_to_pr__(jl_t *jl) {
 	((jlgr_sprite_draw_fnt)sprite->draw)(jl, sprite->resize, sprite->ctx_draw);
 }
 
 static void jlgr_sprite_redraw_tex__(la_window_t* jlgr, jl_sprite_t *spr) {
-	jl_mem_temp(jlgr->jl, spr);
+	sprite = spr;
 	jl_thread_mutex_lock(&spr->mutex);
 	jlgr_pr(jlgr, &spr->pr, jlgr_sprite_draw_to_pr__);
 	jl_thread_mutex_unlock(&spr->mutex);

@@ -122,10 +122,10 @@ static void jl_sg_draw_up(jl_t* jl, uint8_t resize, void* data) {
 	// Clear the screen.
 	jl_gl_clear(jl->jlgr, 0., .5, .66, 1.);
 	// Run the screen's redraw function
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)pjlgr->functions.redraw.lower)(jl) :
-		((jl_fnct)pjlgr->functions.redraw.upper)(jl);
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)jlgr->protected.functions.redraw.lower)(jl) :
+		((jl_fnct)jlgr->protected.functions.redraw.upper)(jl);
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 }
 
 static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
@@ -134,10 +134,10 @@ static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
 	// Clear the screen.
 	jl_gl_clear(jlgr, 1., .5, 0., 1.);
 	// Run the screen's redraw function
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)pjlgr->functions.redraw.upper)(jl) :
-		((jl_fnct)pjlgr->functions.redraw.lower)(jl);
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	(jlgr->sg.cs == JL_SCR_UP) ? ((jl_fnct)jlgr->protected.functions.redraw.upper)(jl) :
+		((jl_fnct)jlgr->protected.functions.redraw.lower)(jl);
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 	// Draw Menu Bar & Mouse
 	if(!resize) _jlgr_loopa(jl->jlgr);
 }
@@ -208,9 +208,9 @@ void jl_sg_init__(la_window_t* jlgr) {
 	jl_t* jl = jlgr->jl;
 
 	// Initialize redraw routines to do nothing.
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	pjlgr->functions.redraw = (jlgr_redraw_t){jl_dont, jl_dont, jl_dont, jl_dont};
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	jlgr->protected.functions.redraw = (jlgr_redraw_t){jl_dont, jl_dont, jl_dont, jl_dont};
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 	// Create upper and lower screens
 	jlgr_sprite_init(jlgr, &jlgr->sg.bg.up, rc,
 		jlgr_sprite_dont, jl_sg_draw_up, NULL, 0, NULL, 0);

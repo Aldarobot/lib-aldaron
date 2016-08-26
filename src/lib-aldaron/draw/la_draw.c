@@ -63,13 +63,13 @@ void la_window_init(la_window_t* window, jl_fnct fn_) {
 void jlgr_loop_set(la_window_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 	jl_fnct downscreen, jl_fnct resize)
 {
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	pjlgr->functions.redraw.single = onescreen;
-	pjlgr->functions.redraw.upper = upscreen;
-	pjlgr->functions.redraw.lower = downscreen;
-	pjlgr->functions.redraw.resize = resize;
-	pjlgr->needs_resize = 1;
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	jlgr->protected.functions.redraw.single = onescreen;
+	jlgr->protected.functions.redraw.upper = upscreen;
+	jlgr->protected.functions.redraw.lower = downscreen;
+	jlgr->protected.functions.redraw.resize = resize;
+	jlgr->protected.needs_resize = 1;
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 }
 
 /**
@@ -77,11 +77,11 @@ void jlgr_loop_set(la_window_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
  * @param jlgr: The library context.
 **/
 void jlgr_resz(la_window_t* jlgr, uint16_t w, uint16_t h) {
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	pjlgr->needs_resize = 2;
-	pjlgr->set_width = w;
-	pjlgr->set_height = h;
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	jlgr->protected.needs_resize = 2;
+	jlgr->protected.set_width = w;
+	jlgr->protected.set_height = h;
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 }
 
 /**

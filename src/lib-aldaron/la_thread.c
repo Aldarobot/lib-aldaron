@@ -80,16 +80,19 @@ void jl_thread_mutex_lock(jl_mutex_t* mutex) {
 	jl_sdl_timer(jl, &timer);
 	// Test if mutex is uninit'd
 #if JL_DEBUG
-	if(!mutex || !jl) {
+	if(!mutex) {
+		la_panic("Mutex is NULL!");
+	}
+	if(!mutex->mutex || !jl) {
 		la_panic("Mutex is uninit'd!");
 	}
 #endif
 	int error;
 	while((error = SDL_TryLockMutex(mutex->mutex))) {
 		timepass += jl_sdl_timer(jl, &timer);
-		if(timepass > 2.f)
-			la_panic("jl_thread_mutex_lock timeout %s",
-				SDL_GetError());
+//		if(timepass > 2.f)
+//			la_panic("jl_thread_mutex_lock timeout %s",
+//				SDL_GetError());
 	}
 #if JL_DEBUG
 	if(mutex->thread_id == current_thread)
@@ -107,8 +110,11 @@ void jl_thread_mutex_unlock(jl_mutex_t* mutex) {
 #if JL_DEBUG
 	jl_t* jl = mutex->jl;
 	// Test if mutex is uninit'd
-	if(!mutex || !jl) {
-		la_panic("Mutex is uninit'd\n");
+	if(!mutex) {
+		la_panic("Mutex is NULL\n");
+	}
+	if(!mutex->mutex || !jl) {
+		la_panic("Mutex is uninit'd!");
 	}
 	if(mutex->thread_id == JL_THREAD_MUTEX_UNLOCKED) {
 		la_panic("jl_thread_mutex_unlock redundant\n");

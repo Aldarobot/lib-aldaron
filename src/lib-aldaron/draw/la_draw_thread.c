@@ -12,10 +12,12 @@ void jlgr_mouse_resize__(la_window_t* jlgr);
 void jl_mode_loop__(jl_t* jl);
 void jl_wm_resz__(la_window_t* jlgr, uint16_t w, uint16_t h);
 
+jl_mutex_t* la_mutex;
+
 static void jlgr_thread_programsresize(la_window_t* jlgr) {
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	jl_fnct resize_ = pjlgr->functions.redraw.resize;
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	jl_fnct resize_ = jlgr->protected.functions.redraw.resize;
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 	resize_(jlgr->jl);
 }
 
@@ -36,10 +38,10 @@ static void jlgr_thread_resize(la_window_t* jlgr, uint16_t w, uint16_t h) {
 }
 
 static void jlgr_thread_windowresize(la_window_t* jlgr) {
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	uint16_t w = pjlgr->set_width;
-	uint16_t h = pjlgr->set_height;
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	uint16_t w = jlgr->protected.set_width;
+	uint16_t h = jlgr->protected.set_height;
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 
 	jl_wm_updatewh_(jlgr);
 	if(w == 0) w = jlgr_wm_getw(jlgr);
@@ -68,10 +70,10 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	la_print("User's Init....");
 	SDL_AtomicSet(&jlgr->running, 1);
 	jl_fnct program_init_;
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	pjlgr->needs_resize = 1;
-	program_init_ = pjlgr->functions.fn;
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	jlgr->protected.needs_resize = 1;
+	program_init_ = jlgr->protected.functions.fn;
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 	program_init_(jl);
 	jlgr_thread_resize(jlgr, jlgr_wm_getw(jlgr), jlgr_wm_geth(jlgr));
 	jlgr_wm_setwindowname(jlgr, jl->name);
@@ -80,12 +82,11 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 
 void jlgr_thead_check_resize(la_window_t* jlgr) {
 	uint8_t should_resize;
-	jlgr_pvar_t* pjlgr;
 
-	pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	should_resize = pjlgr->needs_resize;
-	pjlgr->needs_resize = 0;
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	should_resize = jlgr->protected.needs_resize;
+	jlgr->protected.needs_resize = 0;
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 
 	if(should_resize == 1) jlgr_thread_programsresize(jlgr);
 	if(should_resize == 2) jlgr_thread_windowresize(jlgr);
@@ -117,11 +118,13 @@ int jlgr_thread_draw(jl_t* jl) {
 void jlgr_thread_init(la_window_t* jlgr, jl_fnct fn_) {
 	jl_t* jl = jlgr->jl;
 
-	jl_thread_pvar_init(jl, &jlgr->pvar, NULL, sizeof(jlgr_pvar_t));
+	la_print("THIS IS ITTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
+	jl_thread_mutex_new(jl, &jlgr->protected.mutex);
+	la_mutex = &jlgr->protected.mutex;
 	// Set init function
-	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
-	pjlgr->functions.fn = fn_;
-	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
+	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	jlgr->protected.functions.fn = fn_;
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 	// Start thread
 	jlgr_thread_draw(jl);
 }

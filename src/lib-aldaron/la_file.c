@@ -28,6 +28,8 @@
 	extern const char* LA_FILE_ROOT;
 #endif
 
+static void* la_file_temp = NULL;
+
 // This function converts linux filenames to native filnames
 char* jl_file_convert__(jl_t* jl, const char* filename) {
 	data_t src; jl_data_mkfrom_str(&src, filename);
@@ -342,12 +344,11 @@ char jl_file_pk_save(jl_t* jl, const char* packageFileName,
 }
 
 static void jl_file_pk_compress_iterate__(jl_t* jl, void* data) {
-	char* name = jl_mem_temp(jl, NULL);
+	char* name = la_file_temp;
 	data_t read; jl_file_load(jl, &read, data);
 
 	jl_file_pk_save(jl, name, data + strlen(name)-4, read.data, read.size);
 	la_print("\t%s", data);
-	jl_mem_temp(jl, name);
 	jl_data_free(&read);
 }
 
@@ -376,7 +377,7 @@ char* jl_file_pk_compress(jl_t* jl, const char* folderName) {
 	// Overwrite any existing package with same name
 	jl_file_rm(jl, pkName);
 	//
-	jl_mem_temp(jl, pkName);
+	la_file_temp = pkName;
 	// Find Filse
 	struct cl_list * filelist = jl_file_dir_ls(jl, folderName, 1);
 	// Save Files Into Package

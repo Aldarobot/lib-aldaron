@@ -8,3 +8,4 @@ typedef struct {
 
 const char* la_thread_new(la_thread_t* thread, la_thread_fn_t fn,
 	const char* name, void* data);
+int32_t la_thread_old(la_thread_t* thread);

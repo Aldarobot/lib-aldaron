@@ -15,7 +15,7 @@ static void jl_wm_killedit(jl_t* jl, char *str) {
 }
 
 #if JL_PLAT == JL_PLAT_COMPUTER
-static void jlgr_wm_fscreen__(jlgr_t* jlgr, uint8_t a) {
+static void jlgr_wm_fscreen__(la_window_t* jlgr, uint8_t a) {
 	// Make sure the fullscreen value is either a 1 or a 0.
 	jlgr->wm.fullscreen = !!a;
 	// Actually set whether fullscreen or not.
@@ -32,27 +32,27 @@ static void jlgr_wm_fscreen__(jlgr_t* jlgr, uint8_t a) {
 // EXPORT FUNCTIONS
 //
 
-void jlgr_wm_setfullscreen(jlgr_t* jlgr, uint8_t is) {
+void jlgr_wm_setfullscreen(la_window_t* jlgr, uint8_t is) {
 #if JL_PLAT == JL_PLAT_COMPUTER
 	jlgr_wm_fscreen__(jlgr, is);
 #endif
 }
 
-void jlgr_wm_togglefullscreen(jlgr_t* jlgr) {
+void jlgr_wm_togglefullscreen(la_window_t* jlgr) {
 #if JL_PLAT == JL_PLAT_COMPUTER
 	jlgr_wm_fscreen__(jlgr, !jlgr->wm.fullscreen);
 #endif
 }
 
-uint16_t jlgr_wm_getw(jlgr_t* jlgr) {
+uint16_t jlgr_wm_getw(la_window_t* jlgr) {
 	return jlgr->wm.w;
 }
 
-uint16_t jlgr_wm_geth(jlgr_t* jlgr) {
+uint16_t jlgr_wm_geth(la_window_t* jlgr) {
 	return jlgr->wm.h;
 }
 
-float la_window_banner_size(jlgr_t* jlgr) {
+float la_window_banner_size(la_window_t* jlgr) {
 	return la_banner_size;
 }
 
@@ -62,7 +62,7 @@ float la_window_banner_size(jlgr_t* jlgr) {
  * @param jlgr: The library context.
  * @param window_name: What to name the window.
 **/
-void jlgr_wm_setwindowname(jlgr_t* jlgr, const char* window_name) {
+void jlgr_wm_setwindowname(la_window_t* jlgr, const char* window_name) {
 	int ii;
 
 #ifndef LA_PHONE_ANDROID
@@ -78,7 +78,7 @@ void jlgr_wm_setwindowname(jlgr_t* jlgr, const char* window_name) {
 //STATIC FUNCTIONS
 
 #ifndef LA_PHONE_ANDROID
-static inline SDL_Window* jlgr_wm_mkwindow__(jlgr_t* jlgr) {
+static inline SDL_Window* jlgr_wm_mkwindow__(la_window_t* jlgr) {
 	int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 
 	if(jlgr->wm.fullscreen)
@@ -96,7 +96,7 @@ static inline SDL_Window* jlgr_wm_mkwindow__(jlgr_t* jlgr) {
 	return rtn;
 }
 
-static inline SDL_GLContext* jl_wm_gl_context(jlgr_t* jlgr) {
+static inline SDL_GLContext* jl_wm_gl_context(la_window_t* jlgr) {
 	SDL_GLContext* rtn = SDL_GL_CreateContext(jlgr->wm.window);
 	if(rtn == NULL) jl_wm_killedit(jlgr->jl, "SDL_GL_CreateContext");
 	return rtn;
@@ -104,7 +104,7 @@ static inline SDL_GLContext* jl_wm_gl_context(jlgr_t* jlgr) {
 #endif
 
 //Update the SDL_displayMode structure
-void jl_wm_updatewh_(jlgr_t* jlgr) {
+void jl_wm_updatewh_(la_window_t* jlgr) {
 	// Get Window Size
 #ifndef LA_PHONE_ANDROID
 	SDL_GetWindowSize(jlgr->wm.window, &jlgr->wm.w, &jlgr->wm.h);
@@ -117,7 +117,7 @@ void jl_wm_updatewh_(jlgr_t* jlgr) {
 }
 
 //This is the code that actually creates the window by accessing SDL
-static inline void jlgr_wm_create__(jlgr_t* jlgr) {
+static inline void jlgr_wm_create__(la_window_t* jlgr) {
 #if JL_PLAT == JL_PLAT_COMPUTER
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -135,7 +135,7 @@ static inline void jlgr_wm_create__(jlgr_t* jlgr) {
 
 // ETOM FUNCTIONS
 
-void jl_wm_loop__(jlgr_t* jlgr) {
+void jl_wm_loop__(la_window_t* jlgr) {
 #ifndef LA_PHONE_ANDROID
 	//Update Screen
 	SDL_GL_SwapWindow(jlgr->wm.window); //end current draw
@@ -144,18 +144,18 @@ void jl_wm_loop__(jlgr_t* jlgr) {
 	jlgr->psec=jl_time_regulatefps(jlgr->jl, &jlgr->timer, &jlgr->on_time);
 }
 
-void jl_wm_resz__(jlgr_t* jlgr, uint16_t w, uint16_t h) {
+void jl_wm_resz__(la_window_t* jlgr, uint16_t w, uint16_t h) {
 	jlgr->wm.w = w;
 	jlgr->wm.h = h;
 	jlgr->wm.ar = ((float)h) / ((float)w);
 	jl_gl_viewport_screen(jlgr);
 }
 
-void jl_wm_init__(jlgr_t* jlgr) {
+void jl_wm_init__(la_window_t* jlgr) {
 	// Create Window
 	jlgr_wm_create__(jlgr);
 	// Get Resize Event
-	jl_ct_quickloop_(jlgr);
+	la_port_input(jlgr);
 	// Get Window Size
 	jl_wm_updatewh_(jlgr);
 }

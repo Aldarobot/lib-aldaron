@@ -18,8 +18,8 @@ char *GMessage[3] = {
 };
 
 // Run when the menubar is clicked/pressed
-static void jlgr_menu_loop_press__(jlgr_t* jlgr, jlgr_input_t input) {
-	jl_menu_t* menu = input.data;
+static void jlgr_menu_loop_press__(la_window_t* jlgr, jlgr_input_t input) {
+/*	jl_menu_t* menu = input.data;
 	// Figure out what's selected.
 	const uint8_t selected = (uint8_t)((1. - al_safe_get_float(&jlgr->main.ct.msx)) / .1);
 
@@ -29,10 +29,10 @@ static void jlgr_menu_loop_press__(jlgr_t* jlgr, jlgr_input_t input) {
 		// Run the input loop.
 		if(menu->cursor == selected && al_safe_get_float(&jlgr->main.ct.msy) < .1)
 			menu->inputfn[menu->cursor](jlgr, input);
-	}
+	}*/
 }
 
-static inline void jlgr_menubar_shadow__(jlgr_t* jlgr, jl_menu_t* menu) {
+static inline void jlgr_menubar_shadow__(la_window_t* jlgr, jl_menu_t* menu) {
 	// Clear Texture.
 	jl_gl_clear(jlgr, 0., 0., 0., 0.);
 	// Draw Shadows.
@@ -51,7 +51,7 @@ static inline void jlgr_menubar_shadow__(jlgr_t* jlgr, jl_menu_t* menu) {
 
 // Run whenever a redraw is needed for an icon.
 static void jlgr_menubar_draw_(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 	jl_menu_t* menu = jl_thread_pvar_edit(&jlgr->menubar.pvar);
 
 	if(menu->redraw == MENU_REDRAW_ALL) {
@@ -67,7 +67,7 @@ static void jlgr_menubar_draw_(jl_t* jl) {
 	jl_thread_pvar_drop(&jlgr->menubar.pvar, (void**)&menu);
 }
 
-void jlgr_menubar_init__(jlgr_t* jlgr) {
+void jlgr_menubar_init__(la_window_t* jlgr) {
 	jl_rect_t rc = { 0.f, 0.f, 1.f, .11f };
 	jl_rect_t rc_icon = { 0., 0., .1, .1};
 	jl_rect_t rc_shadow = { -.01, .01, .1, .1 };
@@ -98,7 +98,7 @@ void jlgr_menubar_init__(jlgr_t* jlgr) {
 	jlgr_pr(jlgr, &jlgr->menubar.menubar.pr, jlgr_menubar_draw_);
 }
 
-static void jlgr_menubar_text__(jlgr_t* jlgr, float* color, float y,
+static void jlgr_menubar_text__(la_window_t* jlgr, float* color, float y,
 	const char* text, jl_menu_t* menu)
 {
 	jl_vec3_t tr = { .9 - (.1 * menu->redraw), y, 0. };
@@ -108,11 +108,11 @@ static void jlgr_menubar_text__(jlgr_t* jlgr, float* color, float y,
 			.1 / strlen(text)});
 }
 
-static void jlgr_menu_flip_draw__(jlgr_t* jlgr, void* menu) {
+static void jlgr_menu_flip_draw__(la_window_t* jlgr, void* menu) {
 	jlgr_menu_draw_icon(jlgr,jlgr->textures.icon,JLGR_ID_FLIP_IMAGE,menu);
 }
 
-static void jlgr_menu_flip_press__(jlgr_t* jlgr, jlgr_input_t input) {
+static void jlgr_menu_flip_press__(la_window_t* jlgr, jlgr_input_t input) {
 	if(input.h != JLGR_INPUT_PRESS_JUST) return;
 	// Actually Flip the screen.
 	if(jlgr->sg.cs == JL_SCR_UP) {
@@ -126,11 +126,11 @@ static void jlgr_menu_flip_press__(jlgr_t* jlgr, jlgr_input_t input) {
 	jlgr_resz(jlgr, 0, 0);
 }
 
-static void jlgr_menu_name_draw2__(jlgr_t* jlgr, void* menu) {
+static void jlgr_menu_name_draw2__(la_window_t* jlgr, void* menu) {
 	jlgr_menu_draw_icon(jlgr, jlgr->textures.icon, JLGR_ID_UNKNOWN, menu);
 }
 
-static void jlgr_menu_name_draw__(jlgr_t* jlgr, void* menu2) {
+static void jlgr_menu_name_draw__(la_window_t* jlgr, void* menu2) {
 	jl_menu_t* menu = menu2;
 	float text_size = jl_gl_ar(jlgr) * .5;
 
@@ -147,7 +147,7 @@ static void jlgr_menu_name_draw__(jlgr_t* jlgr, void* menu2) {
 			text_size});
 }
 
-static void jlgr_menu_slow_draw__(jlgr_t* jlgr, void* menu) {
+static void jlgr_menu_slow_draw__(la_window_t* jlgr, void* menu) {
 	jl_t* jl = jlgr->jl;
 	float color[] = { .5, .5, 1., 1. };
 	char formated[80];
@@ -162,12 +162,12 @@ static void jlgr_menu_slow_draw__(jlgr_t* jlgr, void* menu) {
 	jlgr_menubar_text__(jlgr, color, .05, formated, menu);
 }
 
-static void jlgr_menu_slow_loop__(jlgr_t* jlgr, jlgr_input_t input) {
-	jl_menu_t* menu = input.data;
-	menu->redraw = menu->cursor;	
+static void jlgr_menu_slow_loop__(la_window_t* jlgr, jlgr_input_t input) {
+//	jl_menu_t* menu = input.data;
+//	menu->redraw = menu->cursor;	
 }
 
-void jlgr_menu_resize_(jlgr_t* jlgr) {
+void jlgr_menu_resize_(la_window_t* jlgr) {
 	jl_menu_t* menu = jl_thread_pvar_edit(&jlgr->menubar.pvar);
 	menu->cursor = -1;
 	jlgr_vo_rect(jlgr, &jlgr->menubar.menubar, NULL);
@@ -183,7 +183,7 @@ void jlgr_menu_resize_(jlgr_t* jlgr) {
  * @param jlgr: The library context
  * @param resize: Is window is being resized?
 **/
-void jlgr_menu_draw(jlgr_t* jlgr, uint8_t resize) {
+void jlgr_menu_draw(la_window_t* jlgr, uint8_t resize) {
 	uint8_t redraw;
 
 	jl_menu_t* menu = jl_thread_pvar_edit(&jlgr->menubar.pvar);
@@ -201,7 +201,7 @@ void jlgr_menu_draw(jlgr_t* jlgr, uint8_t resize) {
  * Check for menubar input.  Should be paired with jlgr_menu_draw().
  * @param jlgr: The library context
 **/
-void jlgr_menu_loop(jlgr_t* jlgr) {
+void jlgr_menu_loop(la_window_t* jlgr) {
 	jl_menu_t* menu = jl_thread_pvar_edit(&jlgr->menubar.pvar);
 
 	// Run the proper loops.
@@ -210,7 +210,7 @@ void jlgr_menu_loop(jlgr_t* jlgr) {
 	jl_thread_pvar_drop(&jlgr->menubar.pvar, (void**)&menu);
 }
 
-void jlgr_menu_draw_icon(jlgr_t* jlgr,uint32_t tex,uint8_t c,jl_menu_t* menu) {
+void jlgr_menu_draw_icon(la_window_t* jlgr,uint32_t tex,uint8_t c,jl_menu_t* menu) {
 	jl_rect_t rc_icon = { 0., 0., .1, .1};
 	jl_vec3_t tr = { .9 - (.1 * menu->redraw), 0., 0. };
 
@@ -227,7 +227,7 @@ void jlgr_menu_draw_icon(jlgr_t* jlgr,uint32_t tex,uint8_t c,jl_menu_t* menu) {
  * @param inputfn: The function to run when the icon is / isn't pressed.
  * @param rdr: the function to run when redraw is called.
 **/
-void jlgr_menu_addicon(jlgr_t* jlgr, jlgr_input_fnct inputfn, jlgr_menu_fnct rdr) {
+void jlgr_menu_addicon(la_window_t* jlgr, jlgr_input_fnct inputfn, jlgr_menu_fnct rdr) {
 	jl_menu_t* menu = jl_thread_pvar_edit(&jlgr->menubar.pvar);
 	uint8_t i;
 
@@ -244,7 +244,7 @@ void jlgr_menu_addicon(jlgr_t* jlgr, jlgr_input_fnct inputfn, jlgr_menu_fnct rdr
  * Add the flip screen icon to the menubar.
  * @param jlgr: the libary context
 **/
-void jlgr_menu_addicon_flip(jlgr_t* jlgr) {
+void jlgr_menu_addicon_flip(la_window_t* jlgr) {
 	jlgr_menu_addicon(jlgr, jlgr_menu_flip_press__, jlgr_menu_flip_draw__);	
 }
 
@@ -252,7 +252,7 @@ void jlgr_menu_addicon_flip(jlgr_t* jlgr) {
  * Add slowness detector to the menubar.
  * @param jlgr: the libary context
 **/
-void jlgr_menu_addicon_slow(jlgr_t* jlgr) {
+void jlgr_menu_addicon_slow(la_window_t* jlgr) {
 	jlgr_menu_addicon(jlgr, jlgr_menu_slow_loop__, jlgr_menu_slow_draw__);
 }
 
@@ -260,7 +260,7 @@ void jlgr_menu_addicon_slow(jlgr_t* jlgr) {
  * Add program title to the menubar.
  * @param jlgr: the libary context
 **/
-void jlgr_menu_addicon_name(jlgr_t* jlgr) {
+void jlgr_menu_addicon_name(la_window_t* jlgr) {
 	int i;
 	for(i = 0; i < 4; i++) {
 		jlgr_menu_addicon(jlgr, jlgr_input_dont, jlgr_menu_name_draw2__);

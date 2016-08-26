@@ -3,6 +3,8 @@
 
 #include "la.h"
 
+void la_print(const char* format, ...);
+
 static inline void la_deprecated(const char* a, const char* b) {
 #if JL_DEBUG
 	printf("%s is deprecated: use %s\n", a, b);

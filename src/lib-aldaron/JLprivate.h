@@ -39,7 +39,6 @@ uint32_t jl_gem_size(void);
 	void jl_cm_init_(jl_t* jl);
 	void jl_file_init_(jl_t * jl);
 	jl_t* jl_mem_init_(void);
-	void jl_thread_init__(jl_t* jl);
 	void jl_mode_init__(jl_t* jl);
 	void jl_sdl_init__(jl_t* jl);
 

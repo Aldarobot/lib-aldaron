@@ -22,4 +22,4 @@
 	#define GLSL_HEAD "#version 100\n"
 #endif
 
-void jlgr_opengl_draw_arrays_(jlgr_t* jlgr, GLenum mode, uint8_t count);
+void jlgr_opengl_draw_arrays_(la_window_t* jlgr, GLenum mode, uint8_t count);

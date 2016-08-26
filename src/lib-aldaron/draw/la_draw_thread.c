@@ -8,18 +8,18 @@
 **/
 #include "JLGRprivate.h"
 
-void jlgr_mouse_resize__(jlgr_t* jlgr);
+void jlgr_mouse_resize__(la_window_t* jlgr);
 void jl_mode_loop__(jl_t* jl);
-void jl_wm_resz__(jlgr_t* jlgr, uint16_t w, uint16_t h);
+void jl_wm_resz__(la_window_t* jlgr, uint16_t w, uint16_t h);
 
-static void jlgr_thread_programsresize(jlgr_t* jlgr) {
+static void jlgr_thread_programsresize(la_window_t* jlgr) {
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
 	jl_fnct resize_ = pjlgr->functions.redraw.resize;
 	jl_thread_pvar_drop(&jlgr->pvar, (void**)&pjlgr);
 	resize_(jlgr->jl);
 }
 
-static void jlgr_thread_resize(jlgr_t* jlgr, uint16_t w, uint16_t h) {
+static void jlgr_thread_resize(la_window_t* jlgr, uint16_t w, uint16_t h) {
 	la_print("Resizing to %dx%d....", w, h);
 	jl_wm_resz__(jlgr, w, h);
 	la_print("Load the stuff....");
@@ -35,7 +35,7 @@ static void jlgr_thread_resize(jlgr_t* jlgr, uint16_t w, uint16_t h) {
 	la_print("Resized.");
 }
 
-static void jlgr_thread_windowresize(jlgr_t* jlgr) {
+static void jlgr_thread_windowresize(la_window_t* jlgr) {
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
 	uint16_t w = pjlgr->set_width;
 	uint16_t h = pjlgr->set_height;
@@ -48,12 +48,12 @@ static void jlgr_thread_windowresize(jlgr_t* jlgr) {
 }
 
 static void jlgr_thread_draw_init__(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 
 	// Initialize subsystems
 	la_print("Creating the window....");
 	jl_wm_init__(jlgr);
-	
+	la_print("Creating font....");
 	jlgr_text_init__(jlgr);
 	la_print("Loading default graphics from package....");
 	jl_sg_init__(jlgr);
@@ -80,7 +80,7 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	la_print("Window Created!");
 }
 
-void jlgr_thead_check_resize(jlgr_t* jlgr) {
+void jlgr_thead_check_resize(la_window_t* jlgr) {
 	uint8_t should_resize;
 	jlgr_pvar_t* pjlgr;
 
@@ -94,7 +94,7 @@ void jlgr_thead_check_resize(jlgr_t* jlgr) {
 }
 
 int jlgr_thread_draw(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 
 	jl_thread_wait(jl, &jl->wait);
 
@@ -116,7 +116,7 @@ int jlgr_thread_draw(jl_t* jl) {
 	return 0;
 }
 
-void jlgr_thread_init(jlgr_t* jlgr, jl_fnct fn_) {
+void jlgr_thread_init(la_window_t* jlgr, jl_fnct fn_) {
 	jl_t* jl = jlgr->jl;
 
 	jl_thread_pvar_init(jl, &jlgr->pvar, NULL, sizeof(jlgr_pvar_t));

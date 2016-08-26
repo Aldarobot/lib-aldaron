@@ -15,7 +15,7 @@
  * @param loc: The position to draw it at
  * @param f: The font to use.
 **/
-void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
+void jlgr_text_draw(la_window_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
 	if(str == NULL) return;
 
 	const uint8_t *text = (void*)str;
@@ -64,5 +64,5 @@ void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
 	}
 }
 
-void jlgr_text_init__(jlgr_t* jlgr) {
+void jlgr_text_init__(la_window_t* jlgr) {
 }

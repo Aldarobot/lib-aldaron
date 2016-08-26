@@ -5,7 +5,6 @@
 #ifndef LIB_ALDARON_H
 #define LIB_ALDARON_H
 
-#include "port.h"
 #include <stdint.h>
 #include "clump.h" // LibClump
 #include "la_signal.h"
@@ -111,9 +110,6 @@ typedef struct {
 
 // Thread-Specific context.
 typedef struct{
-	SDL_Thread* thread;
-	SDL_threadID thread_id;
-
 	void* temp_ptr;
 }jl_ctx_t;
 
@@ -171,8 +167,8 @@ typedef void(*jl_print_fnt)(jl_t* jl, const char * print);
 void la_panic(const char* format, ...);
 void la_dont(jl_t* jl);
 void* la_context(jl_t* jl);
-void la_start(jl_fnct fnc_init, jl_fnct fnc_kill, const char* name,
-	size_t ctx_size);
+int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, uint8_t openwindow,
+	const char* name, size_t ctx_size);
 
 // "JLmem.c"
 void *jl_mem(jl_t* jl, void *a, uint32_t size);
@@ -248,7 +244,6 @@ char* jl_file_get_resloc(jl_t* jl, const char* prg_folder, const char* fname);
 
 // "JLthread.c"
 uint8_t jl_thread_current(jl_t *jl);
-int32_t jl_thread_old(jl_t *jl, uint8_t threadnum);
 void jl_thread_mutex_new(jl_t *jl, jl_mutex_t* mutex);
 void jl_thread_mutex_lock(jl_mutex_t* mutex);
 void jl_thread_mutex_unlock(jl_mutex_t* mutex);

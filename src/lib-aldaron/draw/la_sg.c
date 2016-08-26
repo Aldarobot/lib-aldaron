@@ -10,7 +10,7 @@
 #include "SDL_image.h"
 
 // SG Prototypes
-void jl_gl_draw_prendered(jlgr_t* jlgr, jl_vo_t* pv);
+void jl_gl_draw_prendered(la_window_t* jlgr, jl_vo_t* pv);
 
 // Constants
 	//ALL IMAGES: 1024x1024
@@ -51,7 +51,7 @@ uint32_t _jl_sg_gpix(/*in */ SDL_Surface* surface, int32_t x, int32_t y) {
 	return color;
 }
 
-void _jl_sg_load_jlpx(jlgr_t* jlgr,data_t* data,void **pixels,int *w,int *h) {
+void _jl_sg_load_jlpx(la_window_t* jlgr,data_t* data,void **pixels,int *w,int *h) {
 	SDL_Surface *image;
 	SDL_RWops *rw;
 	uint32_t color = 0;
@@ -81,7 +81,7 @@ void _jl_sg_load_jlpx(jlgr_t* jlgr,data_t* data,void **pixels,int *w,int *h) {
 }
 
 //Load the images in the image file
-static inline uint32_t jl_sg_add_image__(jlgr_t* jlgr, data_t* data) {
+static inline uint32_t jl_sg_add_image__(la_window_t* jlgr, data_t* data) {
 	void *fpixels = NULL;
 	int fw;
 	int fh;
@@ -103,7 +103,7 @@ static inline uint32_t jl_sg_add_image__(jlgr_t* jlgr, data_t* data) {
  * @param filename: Name of the image file in the package.
  * @returns: Texture object.
 */
-uint32_t jl_sg_add_image(jlgr_t* jlgr, data_t* zipdata, const char* filename) {
+uint32_t jl_sg_add_image(la_window_t* jlgr, data_t* zipdata, const char* filename) {
 	data_t img;
 
 	// Load image into "img"
@@ -117,7 +117,7 @@ uint32_t jl_sg_add_image(jlgr_t* jlgr, data_t* zipdata, const char* filename) {
 }
 
 static void jl_sg_draw_up(jl_t* jl, uint8_t resize, void* data) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 
 	// Clear the screen.
 	jl_gl_clear(jl->jlgr, 0., .5, .66, 1.);
@@ -129,7 +129,7 @@ static void jl_sg_draw_up(jl_t* jl, uint8_t resize, void* data) {
 }
 
 static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 
 	// Clear the screen.
 	jl_gl_clear(jlgr, 1., .5, 0., 1.);
@@ -143,7 +143,7 @@ static void jl_sg_draw_dn(jl_t* jl, uint8_t resize, void* data) {
 }
 
 // Double screen loop
-static void _jl_sg_loop_ds(jlgr_t* jlgr) {
+static void _jl_sg_loop_ds(la_window_t* jlgr) {
 	// Draw upper screen - alternate screen
 	jlgr_sprite_redraw(jlgr, &jlgr->sg.bg.up, NULL);
 	jlgr_sprite_draw(jlgr, &jlgr->sg.bg.up);
@@ -153,20 +153,20 @@ static void _jl_sg_loop_ds(jlgr_t* jlgr) {
 }
 
 // Single screen loop
-static void _jl_sg_loop_ss(jlgr_t* jlgr) {
+static void _jl_sg_loop_ss(la_window_t* jlgr) {
 	// Draw lower screen - default screen
 	jlgr_sprite_redraw(jlgr, &jlgr->sg.bg.dn, NULL);
 	jlgr_sprite_draw(jlgr, &jlgr->sg.bg.dn);
 }
 
 // Run the current loop.
-void _jl_sg_loop(jlgr_t* jlgr) {
+void _jl_sg_loop(la_window_t* jlgr) {
 	jl_gl_clear(jlgr, 0.f, 0.f, 0.f, 1.);
 	((jlgr_fnct)jlgr->sg.loop)(jlgr);
 }
 
 static void jl_sg_init_ds_(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 	jl_rect_t rcrd = {
 		0.f, 0.f,
 		1.f, .5f * jlgr->wm.ar
@@ -181,7 +181,7 @@ static void jl_sg_init_ds_(jl_t* jl) {
 }
 
 static void jl_sg_init_ss_(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 	jl_rect_t rcrd = {
 		0.f, 0.f,
 		1.f, jlgr->wm.ar
@@ -194,7 +194,7 @@ static void jl_sg_init_ss_(jl_t* jl) {
 }
 
 void jl_sg_resz__(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 
 	// Check screen count.
 	if(jlgr->sg.cs == JL_SCR_SS)
@@ -203,7 +203,7 @@ void jl_sg_resz__(jl_t* jl) {
 		jl_sg_init_ds_(jl);
 }
 
-void jl_sg_init__(jlgr_t* jlgr) {
+void jl_sg_init__(la_window_t* jlgr) {
 	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
 	jl_t* jl = jlgr->jl;
 

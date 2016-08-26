@@ -299,16 +299,6 @@ typedef struct{
 }jlgr_thread_packet_t;
 
 typedef struct{
-	float x; // X Location
-	float y; // Y Location
-	float r; // Rotational Value in "pi radians" 2=full circle
-	float p; // Pressure 0-1
-	int8_t h; // How long held down.
-	uint8_t k; // Which key [ a-z, 0-9 , left/right click ]
-	void* data; // Parameter
-}jlgr_input_t;
-
-typedef struct{
 	struct {
 		float timeTilVanish;
 		char message[256];
@@ -324,216 +314,11 @@ typedef struct{
 	uint16_t set_height;
 }jlgr_pvar_t;
 
-typedef struct{
-	jl_t* jl;
+#include "port.h"
 
-	// For Programer's Use
-	float fontcolor[4];
-	jl_font_t font;
-	jl_vo_t mouse;
-
-	jl_pvar_t pvar; // Protected context.
-
-	SDL_atomic_t running;
-
-	struct{
-		jlgr_input_t input;
-		int8_t states[JLGR_INPUT_NONE];
-		uint8_t used[JLGR_INPUT_NONE];
-	}input;
-
-	struct {
-		//Input Information
-		struct {
-			void* getEvents[JLGR_INPUT_NONE];
-
-			safe_float_t msx, msy;
-			int32_t msxi, msyi;
-
-			SDL_Event event;
-		
-			const Uint8 *keys;
-
-			struct {
-				#if JL_PLAT == JL_PLAT_PHONE
-					uint8_t back;
-				#elif JL_PLAT == JL_PLAT_COMPUTER
-					uint8_t click_right; // Or Ctrl-Click
-					uint8_t click_middle; // Or Shift-Click
-				#endif
-				//Multi-Platform
-				uint8_t click; // Or Click Left
-				uint8_t scroll_right;
-				uint8_t scroll_left;
-				uint8_t scroll_up;
-				uint8_t scroll_down;
-			}input;
-
-			uint8_t back; //Back Key, Escape Key, Start Button
-			int8_t keyDown[255];
-			uint32_t sd; //NYI: stylus delete
-		
-			uint8_t sc;
-			uint8_t text_input[32];
-			uint8_t read_cursor;
-
-			uint8_t current_event;
-		}ct;
-	}main;
-
-	// Window Info
-	struct {
-		uint32_t taskbar[5];
-		uint32_t init_image_location;
-
-		// If Matching FPS
-		uint8_t on_time;
-		uint8_t changed;
-		
-		// Each screen is a sprite.
-		struct {
-			jl_sprite_t up;
-			jl_sprite_t dn;
-		}bg;
-
-		void* loop; // ( jlgr_fnct ) For upper or lower screen.
-		uint8_t cs; // The current screen "jlgr_which_screen_t"
-	}sg;
-
-	struct {
-		struct {
-			jlgr_glsl_t shader;
-		}shadow;
-
-		struct {
-			jlgr_glsl_t shader;
-			int32_t fade;
-		}alpha;
-
-		struct {
-			jlgr_glsl_t shader;
-			int32_t new_color;
-		}hue;
-
-		struct {
-			jlgr_glsl_t aa;
-
-			int32_t norm;
-			int32_t lightPos;
-			int32_t color;
-			int32_t ambient;
-			int32_t shininess;
-
-			// Shader drawing settings
-			jl_vec3_t light_position;
-			jl_vec3_t light_color;
-			float light_power;
-			jl_vec3_t material_brightness;
-			int32_t light_texture;
-		}light;
-
-		float colors[4];
-		jl_vec3_t* vec3;
-		jl_vo_t* vo;
-
-		jlgr_effects_light_t lights;
-	}effects;
-
-	struct {
-		jlgr_glsl_t shader_laa[32]; // Light Ambient Attenuation
-		uint8_t shader_laa_init[32];
-	} effect;
-	
-	//Opengl Data
-	struct {
-		struct {
-			jlgr_glsl_t texture;
-			jlgr_glsl_t color;
-		}prg;
-
-		jl_vo_t temp_vo;
-		// Default texture coordinates.
-		uint32_t default_tc;
-		uint32_t upsidedown_tc;
-		
-		jl_pr_t* cp; // Renderer currently being drawn on.
-	}gl;
-
-	struct {
-		jl_vo_t menubar;
-		jl_pvar_t pvar;
-	}menubar;
-
-	// Gui
-	struct {
-		struct {
-			char* window_name;
-			char* message;
-			jl_popup_button_t* btns;
-		}popup;
-		struct {
-			jl_vo_t whole_screen;
-		}vos;
-		struct {
-			char message[256];
-			uint16_t t;
-			uint8_t c;
-		}msge;
-		struct{
-			data_t* string;
-			float counter;
-			uint8_t do_it;
-			uint8_t cursor;
-		}textbox;
-	}gui;
-
-	// Window Management
-	struct {
-	#if JL_PLAT == JL_PLAT_COMPUTER
-		uint8_t fullscreen;
-	#endif
-
-		char windowTitle[2][16];
-		SDL_Window* window;
-		SDL_GLContext* glcontext;
-		// The full width and height of the window.
-		int32_t w, h;
-		// Aspect Ratio of the window
-		float ar;
-	}wm;
-
-	// File Manager
-	struct {
-		struct cl_list *filelist; //List of all files in working dir.
-		int8_t cursor;
-		uint8_t cpage;
-		char *dirname;
-		char *selecteditem;
-		uint8_t returnit;
-		uint8_t drawupto;
-		uint8_t inloop;
-		jl_sprite_t btns[2];
-		void *newfiledata;
-		uint64_t newfilesize;
-		uint8_t prompt;
-		data_t* promptstring;
-	}fl;
-
-	struct {
-		uint32_t font; // JL_Lib font
-		uint32_t logo; // JL_Lib Loading Logo
-		uint32_t game; // Game Graphics
-		uint32_t icon; // Icons
-	}textures;
-
-	double timer;
-	double psec;
-	uint8_t on_time;
-}jlgr_t;
-
-typedef void(*jlgr_fnct)(jlgr_t* jlgr);
-typedef void(*jlgr_input_fnct)(jlgr_t* jlgr, jlgr_input_t input);
-typedef void(*jlgr_menu_fnct)(jlgr_t* jlgr, void* menu);
+typedef void(*jlgr_fnct)(la_window_t* jlgr);
+typedef void(*jlgr_input_fnct)(la_window_t* jlgr, jlgr_input_t input);
+typedef void(*jlgr_menu_fnct)(la_window_t* jlgr, void* menu);
 
 typedef struct{
 	// Used for all icons on the menubar.
@@ -550,128 +335,128 @@ typedef struct{
 }jl_menu_t;
 
 // JLGR.c:
-void la_window_init(jlgr_t* jlgr, jl_fnct fn_);
-void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
+void la_window_init(la_window_t* jlgr, jl_fnct fn_);
+void jlgr_loop_set(la_window_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 	jl_fnct downscreen, jl_fnct resize);
 
 // JLGRsprite.c
 void jlgr_sprite_dont(jl_t* jl, jl_sprite_t* sprite);
-void jlgr_sprite_redraw(jlgr_t* jlgr, jl_sprite_t *spr, void* ctx);
-void jlgr_sprite_resize(jlgr_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc);
-void jlgr_sprite_loop(jlgr_t* jlgr, jl_sprite_t *spr);
-void jlgr_sprite_draw(jlgr_t* jlgr, jl_sprite_t *spr);
-void jlgr_sprite_init(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
+void jlgr_sprite_redraw(la_window_t* jlgr, jl_sprite_t *spr, void* ctx);
+void jlgr_sprite_resize(la_window_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc);
+void jlgr_sprite_loop(la_window_t* jlgr, jl_sprite_t *spr);
+void jlgr_sprite_draw(la_window_t* jlgr, jl_sprite_t *spr);
+void jlgr_sprite_init(la_window_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	jlgr_sprite_loop_fnt loopfn, jlgr_sprite_draw_fnt drawfn,
 	void* main_ctx, uint32_t main_ctx_size,
 	void* draw_ctx, uint32_t draw_ctx_size);
-void jlgr_sprite_free(jlgr_t* jlgr, jl_sprite_t* sprite);
-uint8_t jlgr_sprite_collide(jlgr_t* jlgr, jl_pr_t *pr1, jl_pr_t *pr2);
+void jlgr_sprite_free(la_window_t* jlgr, jl_sprite_t* sprite);
+uint8_t jlgr_sprite_collide(la_window_t* jlgr, jl_pr_t *pr1, jl_pr_t *pr2);
 void jlgr_sprite_clamp(jl_vec3_t xyz, jl_area_t area, jl_vec3_t* rtn);
 void* jlgr_sprite_getcontext(jl_sprite_t *sprite);
 void* jlgr_sprite_getdrawctx(jl_sprite_t *sprite);
 
 // JLGRmenu.c
-void jlgr_menu_draw(jlgr_t* jlgr, uint8_t resize);
-void jlgr_menu_loop(jlgr_t* jlgr);
-void jlgr_menu_draw_icon(jlgr_t* jlgr,uint32_t tex,uint8_t c,jl_menu_t* menu);
-void jlgr_menu_addicon(jlgr_t* jlgr, jlgr_input_fnct inputfn, jlgr_menu_fnct rdr);
-void jlgr_menu_addicon_flip(jlgr_t* jlgr);
-void jlgr_menu_addicon_slow(jlgr_t* jlgr);
-void jlgr_menu_addicon_name(jlgr_t* jlgr);
+void jlgr_menu_draw(la_window_t* jlgr, uint8_t resize);
+void jlgr_menu_loop(la_window_t* jlgr);
+void jlgr_menu_draw_icon(la_window_t* jlgr,uint32_t tex,uint8_t c,jl_menu_t* menu);
+void jlgr_menu_addicon(la_window_t* jlgr, jlgr_input_fnct inputfn, jlgr_menu_fnct rdr);
+void jlgr_menu_addicon_flip(la_window_t* jlgr);
+void jlgr_menu_addicon_slow(la_window_t* jlgr);
+void jlgr_menu_addicon_name(la_window_t* jlgr);
 
 // JLGRgraphics.c:
-void jlgr_dont(jlgr_t* jlgr);
-void jlgr_fill_image_set(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, 
+void jlgr_dont(la_window_t* jlgr);
+void jlgr_fill_image_set(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, 
 	int16_t c);
-void jlgr_fill_image_draw(jlgr_t* jlgr);
-void jlgr_draw_bg(jlgr_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, int16_t c);
+void jlgr_fill_image_draw(la_window_t* jlgr);
+void jlgr_draw_bg(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, int16_t c);
 
 // JLGRtext.c:
-void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f);
-void jlgr_draw_int(jlgr_t* jlgr, int64_t num, jl_vec3_t loc, jl_font_t f);
-void jlgr_draw_dec(jlgr_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
+void jlgr_text_draw(la_window_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f);
+void jlgr_draw_int(la_window_t* jlgr, int64_t num, jl_vec3_t loc, jl_font_t f);
+void jlgr_draw_dec(la_window_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
 	jl_font_t f);
-void jlgr_text_draw_area(jlgr_t* jlgr, jl_sprite_t * spr, const char* txt);
-void jlgr_draw_text_sprite(jlgr_t* jlgr, jl_sprite_t* spr, const char* txt);
-void jlgr_draw_ctxt(jlgr_t* jlgr, char *str, float yy, float* color);
-void jlgr_draw_loadscreen(jlgr_t* jlgr, jl_fnct draw_routine);
-void jlgr_draw_msge(jlgr_t* jlgr, uint32_t tex, uint8_t c, char* format, ...);
-void jlgr_term_msge(jlgr_t* jlgr, char* message);
-void jlgr_slidebtn_rsz(jlgr_t* jlgr, jl_sprite_t * spr, const char* txt);
-void jlgr_slidebtn_loop(jlgr_t* jlgr, jl_sprite_t * spr, float defaultx,
+void jlgr_text_draw_area(la_window_t* jlgr, jl_sprite_t * spr, const char* txt);
+void jlgr_draw_text_sprite(la_window_t* jlgr, jl_sprite_t* spr, const char* txt);
+void jlgr_draw_ctxt(la_window_t* jlgr, char *str, float yy, float* color);
+void jlgr_draw_loadscreen(la_window_t* jlgr, jl_fnct draw_routine);
+void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ...);
+void jlgr_term_msge(la_window_t* jlgr, char* message);
+void jlgr_slidebtn_rsz(la_window_t* jlgr, jl_sprite_t * spr, const char* txt);
+void jlgr_slidebtn_loop(la_window_t* jlgr, jl_sprite_t * spr, float defaultx,
 	float slidex, jlgr_input_fnct prun);
-void jlgr_glow_button_draw(jlgr_t* jlgr, jl_sprite_t * spr,
+void jlgr_glow_button_draw(la_window_t* jlgr, jl_sprite_t * spr,
 	char *txt, jlgr_input_fnct prun);
-void jlgr_gui_textbox_init(jlgr_t* jlgr, data_t* string);
-uint8_t jlgr_gui_textbox_loop(jlgr_t* jlgr);
-void jlgr_gui_textbox_draw(jlgr_t* jlgr, jl_rect_t rc);
-void jlgr_gui_slider(jlgr_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
+void jlgr_gui_textbox_init(la_window_t* jlgr, data_t* string);
+uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr);
+void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc);
+void jlgr_gui_slider(la_window_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 	uint8_t isdouble, float* x1, float* x2);
-void jlgr_notify(jlgr_t* jlgr, const char* notification, ...);
+void jlgr_notify(la_window_t* jlgr, const char* notification, ...);
 
 // JLGRvo.c
-void jlgr_vo_rect(jlgr_t* jlgr, jl_vo_t* vo, jl_rect_t* rc);
-void jlgr_vo_set_vg(jlgr_t* jlgr, jl_vo_t *vo, uint16_t tricount,
+void jlgr_vo_rect(la_window_t* jlgr, jl_vo_t* vo, jl_rect_t* rc);
+void jlgr_vo_set_vg(la_window_t* jlgr, jl_vo_t *vo, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor);
-void jlgr_vo_set_rect(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
+void jlgr_vo_set_rect(la_window_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
 	uint8_t multicolor);
-void jlgr_vo_image(jlgr_t* jlgr, jl_vo_t *vo, uint32_t img);
-void jlgr_vo_set_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex);
-void jlgr_vo_txmap(jlgr_t* jlgr, jl_vo_t* vo, uint8_t orientation,
+void jlgr_vo_image(la_window_t* jlgr, jl_vo_t *vo, uint32_t img);
+void jlgr_vo_set_image(la_window_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex);
+void jlgr_vo_txmap(la_window_t* jlgr, jl_vo_t* vo, uint8_t orientation,
 	uint8_t w, uint8_t h, int16_t map);
-void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
-void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba);
+void jlgr_vo_color_gradient(la_window_t* jlgr, jl_vo_t* vo, float* rgba);
+void jlgr_vo_color_solid(la_window_t* jlgr, jl_vo_t* vo, float* rgba);
 void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos);
-void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh);
-void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo);
-void jlgr_vo_draw_pr(jlgr_t* jlgr, jl_vo_t* vo);
-void jlgr_vo_free(jlgr_t* jlgr, jl_vo_t *vo);
+void jlgr_vo_draw2(la_window_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh);
+void jlgr_vo_draw(la_window_t* jlgr, jl_vo_t* vo);
+void jlgr_vo_draw_pr(la_window_t* jlgr, jl_vo_t* vo);
+void jlgr_vo_free(la_window_t* jlgr, jl_vo_t *vo);
 
 // JLGRpr.c
-void jlgr_pr_off(jlgr_t* jlgr);
-void jlgr_pr_resize(jlgr_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
-void jlgr_pr_draw(jlgr_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, uint8_t orient);
-void jlgr_pr(jlgr_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
+void jlgr_pr_off(la_window_t* jlgr);
+void jlgr_pr_resize(la_window_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
+void jlgr_pr_draw(la_window_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, uint8_t orient);
+void jlgr_pr(la_window_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
 
 // OpenGL
-uint32_t la_texture_new(jlgr_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,
+uint32_t la_texture_new(la_window_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,
 	uint8_t bpp);
-void la_texture_set(jlgr_t* jlgr, uint32_t texture, uint8_t* pixels,
+void la_texture_set(la_window_t* jlgr, uint32_t texture, uint8_t* pixels,
 	uint16_t w, uint16_t h, uint8_t bpp);
-uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
+uint32_t jl_gl_maketexture(la_window_t* jlgr, void* pixels,
 	uint32_t width, uint32_t height, uint8_t bytepp);
-float jl_gl_ar(jlgr_t* jlgr);
-void jl_gl_clear(jlgr_t* jlgr, float r, float g, float b, float a);
+float jl_gl_ar(la_window_t* jlgr);
+void jl_gl_clear(la_window_t* jlgr, float r, float g, float b, float a);
 
 // JLGRopengl.c
-void jlgr_opengl_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl, float* x, uint8_t vec,
+void jlgr_opengl_uniform(la_window_t* jlgr, jlgr_glsl_t* glsl, float* x, uint8_t vec,
 	const char* name, ...);
-void jlgr_opengl_uniformi(jlgr_t* jlgr, jlgr_glsl_t* glsl, int32_t* x,
+void jlgr_opengl_uniformi(la_window_t* jlgr, jlgr_glsl_t* glsl, int32_t* x,
 	uint8_t vec, const char* name, ...);
-void jlgr_opengl_uniform1(jlgr_t* jlgr, uint8_t e, int32_t uv, float* x);
-void jlgr_opengl_uniform1i(jlgr_t* jlgr, uint8_t e, int32_t uv, int32_t* x);
-void jlgr_opengl_uniform3(jlgr_t* jlgr, uint8_t e, int32_t uv, float* xyz);
-void jlgr_opengl_uniform4(jlgr_t* jlgr, uint8_t e, int32_t uv, float* xyzw);
-void jlgr_opengl_uniformM(jlgr_t* jlgr, int32_t uv, float m[]);
-void jlgr_opengl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
+void jlgr_opengl_uniform1(la_window_t* jlgr, uint8_t e, int32_t uv, float* x);
+void jlgr_opengl_uniform1i(la_window_t* jlgr, uint8_t e, int32_t uv, int32_t* x);
+void jlgr_opengl_uniform3(la_window_t* jlgr, uint8_t e, int32_t uv, float* xyz);
+void jlgr_opengl_uniform4(la_window_t* jlgr, uint8_t e, int32_t uv, float* xyzw);
+void jlgr_opengl_uniformM(la_window_t* jlgr, int32_t uv, float m[]);
+void jlgr_opengl_shader_init(la_window_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
 	const char* frag, uint8_t has_tex);
-void jlgr_opengl_shader_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl,
+void jlgr_opengl_shader_uniform(la_window_t* jlgr, jlgr_glsl_t* glsl,
 	int32_t* uniform, const char* name);
-void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh);
+void jlgr_opengl_draw1(la_window_t* jlgr, jlgr_glsl_t* sh);
 
 // JLGReffects.c
-void jlgr_effects_vo_alpha(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a);
-void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]);
-void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
+void jlgr_effects_vo_alpha(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a);
+void jlgr_effects_vo_hue(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]);
+void jlgr_effects_vo_light(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
 	jl_vec3_t* material);
-void jlgr_effects_hue(jlgr_t* jlgr, float c[]);
-void jlgr_effects_draw(jlgr_t* jlgr, jl_vo_t* vo);
+void jlgr_effects_hue(la_window_t* jlgr, float c[]);
+void jlgr_effects_draw(la_window_t* jlgr, jl_vo_t* vo);
 
-void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t* material);
-void jlgr_effects_light_clear(jlgr_t* jlgr);
-void jlgr_effects_light_add(jlgr_t* jlgr, jl_vec3_t point, float ambient[],
+void jlgr_effects_light(la_window_t* jlgr, jl_vec3_t* material);
+void jlgr_effects_light_clear(la_window_t* jlgr);
+void jlgr_effects_light_add(la_window_t* jlgr, jl_vec3_t point, float ambient[],
 	float diffuse[], float specular[], float power);
-void jlgr_effects_light_update(jlgr_t* jlgr);
+void jlgr_effects_light_update(la_window_t* jlgr);
 
 // video
 void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
@@ -679,27 +464,26 @@ void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
 uint8_t* jlgr_load_image(jl_t* jl, data_t* data, uint16_t* w, uint16_t* h);
 
 // SG
-uint32_t jl_sg_add_image(jlgr_t* jlgr, data_t* zipdata, const char* filename);
+uint32_t jl_sg_add_image(la_window_t* jlgr, data_t* zipdata, const char* filename);
 
 // JLGRinput.c
-int8_t jlgr_input_do(jlgr_t *jlgr, jlgr_control_t events, jlgr_input_fnct fn,
+int8_t jlgr_input_do(la_window_t *jlgr, jlgr_control_t events, jlgr_input_fnct fn,
 	void* data);
-void jlgr_input_dont(jlgr_t* jlgr, jlgr_input_t input);
-void jl_ct_quickloop_(jlgr_t* jlgr);
-uint8_t jlgr_input_typing_get(jlgr_t *jlgr);
+void jlgr_input_dont(la_window_t* jlgr, jlgr_input_t input);
+uint8_t jlgr_input_typing_get(la_window_t *jlgr);
 void jlgr_input_typing_disable(void);
 
 // JLGRfiles.c
-uint8_t jlgr_openfile_init(jlgr_t* jlgr, const char* program_name,
+uint8_t jlgr_openfile_init(la_window_t* jlgr, const char* program_name,
 	void *newfiledata, uint64_t newfilesize);
-void jlgr_openfile_loop(jlgr_t* jlgr);
-const char* jlgr_openfile_kill(jlgr_t* jlgr);
+void jlgr_openfile_loop(la_window_t* jlgr);
+const char* jlgr_openfile_kill(la_window_t* jlgr);
 
 // JLGRwm.c
-void jlgr_wm_setfullscreen(jlgr_t* jlgr, uint8_t is);
-void jlgr_wm_togglefullscreen(jlgr_t* jlgr);
-uint16_t jlgr_wm_getw(jlgr_t* jlgr);
-uint16_t jlgr_wm_geth(jlgr_t* jlgr);
-void jlgr_wm_setwindowname(jlgr_t* jlgr, const char* window_name);
+void jlgr_wm_setfullscreen(la_window_t* jlgr, uint8_t is);
+void jlgr_wm_togglefullscreen(la_window_t* jlgr);
+uint16_t jlgr_wm_getw(la_window_t* jlgr);
+uint16_t jlgr_wm_geth(la_window_t* jlgr);
+void jlgr_wm_setwindowname(la_window_t* jlgr, const char* window_name);
 
 #endif

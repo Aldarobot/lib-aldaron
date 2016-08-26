@@ -4,11 +4,11 @@
 
 /** @cond */
 
-void jlgr_opengl_framebuffer_subtx_(jlgr_t* jlgr);
-void jlgr_opengl_framebuffer_addtx_(jlgr_t* jlgr, uint32_t tx);
-void jlgr_opengl_blend_add_(jlgr_t* jlgr);
-void jlgr_opengl_blend_default_(jlgr_t* jlgr);
-void jlgr_opengl_blend_none_(jlgr_t* jlgr);
+void jlgr_opengl_framebuffer_subtx_(la_window_t* jlgr);
+void jlgr_opengl_framebuffer_addtx_(la_window_t* jlgr, uint32_t tx);
+void jlgr_opengl_blend_add_(la_window_t* jlgr);
+void jlgr_opengl_blend_default_(la_window_t* jlgr);
+void jlgr_opengl_blend_none_(la_window_t* jlgr);
 
 const char *JL_EFFECT_SHADOW = 
 	GLSL_HEAD
@@ -176,7 +176,7 @@ const char* JL_EFFECT_LIGHTV =
 	"}";
 
 static void jlgr_effect_pr_hue__(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 
 	jlgr_opengl_framebuffer_subtx_(jlgr);
 	jlgr_vo_set_image(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
@@ -187,7 +187,7 @@ static void jlgr_effect_pr_hue__(jl_t* jl) {
 }
 
 static void jlgr_effect_pr_light__(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 
 	jlgr_opengl_framebuffer_subtx_(jlgr);
 	jlgr_vo_set_image(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
@@ -203,7 +203,7 @@ static void jlgr_effects_clear__(jl_t* jl) {
 
 /** @endcond */
 
-void jlgr_effects_clear(jlgr_t* jlgr, jl_vo_t* vo) {
+void jlgr_effects_clear(la_window_t* jlgr, jl_vo_t* vo) {
 	jlgr_pr(jlgr, &vo->pr, jlgr_effects_clear__);
 }
 
@@ -214,7 +214,7 @@ void jlgr_effects_clear(jlgr_t* jlgr, jl_vo_t* vo) {
  * @param offs: The offset vector to translate by.
  * @param a: The alpha value to multiply each pixel by. [ 0.f - 1.f ]
 **/
-void jlgr_effects_vo_alpha(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a) {
+void jlgr_effects_vo_alpha(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a) {
 	if(a < 0.f) a = 0.f;
 	if(a > 1.f) a = 1.f;
 	// Bind shader
@@ -239,7 +239,7 @@ void jlgr_effects_vo_alpha(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a) {
  * @param offs: The offset to draw it at.
  * @param c: The new hue ( r, g, b, a ) [ 0.f - 1.f ]
 **/
-void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]) {
+void jlgr_effects_vo_hue(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]) {
 	// Bind shader
 	jlgr_opengl_draw1(jlgr, &jlgr->effects.hue.shader);
 	// Translate by offset vector
@@ -260,7 +260,7 @@ void jlgr_effects_vo_hue(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]) {
  * @param jlgr: The library context.
  * @param vo: The vertex object.
 **/
-void jlgr_effects_draw(jlgr_t* jlgr, jl_vo_t* vo) {
+void jlgr_effects_draw(la_window_t* jlgr, jl_vo_t* vo) {
 	jlgr_pr_draw(jlgr, &vo->pr, &vo->pr.cb.pos, 0);
 }
 
@@ -274,7 +274,7 @@ void jlgr_effects_draw(jlgr_t* jlgr, jl_vo_t* vo) {
 void la_effect_light(jl_vo_t* vo, la_light_t* lights, uint8_t light_count,
 	jl_vec3_t material_brightness)
 {
-	jlgr_t* jlgr = vo->jl->jlgr;
+	la_window_t* jlgr = vo->jl->jlgr;
 	int i;
 	jlgr_glsl_t* shader = &jlgr->effect.shader_laa[light_count];
 	float ar = jl_gl_ar(jlgr);
@@ -332,7 +332,7 @@ void la_effect_light(jl_vo_t* vo, la_light_t* lights, uint8_t light_count,
  *  ( shininess, max brightness, unused )
  *  or null for default material ( 32.f, 1.f, 0.f )
 **/
-void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
+void jlgr_effects_vo_light(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
 	jl_vec3_t* material)
 {
 	jl_vec3_t default_material = (jl_vec3_t) { 32.f, 1.f, 0.f };
@@ -368,7 +368,7 @@ void jlgr_effects_vo_light(jlgr_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
  * @param jlgr: The library context.
  * @param c: The hue to make everything.
 **/
-void jlgr_effects_hue(jlgr_t* jlgr, float c[]) {
+void jlgr_effects_hue(la_window_t* jlgr, float c[]) {
 	jl_mem_copyto(c, jlgr->effects.colors, sizeof(float) * 4);
 	jlgr_pr(jlgr, jlgr->gl.cp, jlgr_effect_pr_hue__);
 }
@@ -376,7 +376,7 @@ void jlgr_effects_hue(jlgr_t* jlgr, float c[]) {
 /**
  * @param material: Material shininess / Max brightness
 **/
-void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t* material) {
+void jlgr_effects_light(la_window_t* jlgr, jl_vec3_t* material) {
 	jlgr->effects.vec3 = material;
 	jlgr_pr(jlgr, jlgr->gl.cp, jlgr_effect_pr_light__);
 }
@@ -384,7 +384,7 @@ void jlgr_effects_light(jlgr_t* jlgr, jl_vec3_t* material) {
 /**
  * Delete all light sources.
 **/
-void jlgr_effects_light_clear(jlgr_t* jlgr) {
+void jlgr_effects_light_clear(la_window_t* jlgr) {
 	jlgr->effects.lights.has_directional = 0;
 	jlgr->effects.lights.point_count = 0;
 	jlgr->effects.lights.ambient = (jl_vec3_t) { 0.f, 0.f, 0.f };
@@ -397,7 +397,7 @@ void jlgr_effects_light_clear(jlgr_t* jlgr) {
  * @param ambient, diffuse, specular: Color and intensity.
  * @param c, l, q: Light properties.
 **/
-void jlgr_effects_light_add(jlgr_t* jlgr, jl_vec3_t point, float ambient[],
+void jlgr_effects_light_add(la_window_t* jlgr, jl_vec3_t point, float ambient[],
 	float diffuse[], float specular[], float power)
 {
 	int which = jlgr->effects.lights.point_count;
@@ -439,7 +439,7 @@ void jlgr_effects_light_add(jlgr_t* jlgr, jl_vec3_t point, float ambient[],
 	jl_mem_vec_add(&jlgr->effects.lights.ambient, &add_ambient);
 }
 
-void jlgr_effects_light_update(jlgr_t* jlgr) {
+void jlgr_effects_light_update(la_window_t* jlgr) {
 	int i;
 	jlgr_effects_lightsource_t* lightsource = cl_array_borrow(
 		jlgr->effects.lights.lights, jlgr->effects.lights.point_count - 1);
@@ -464,7 +464,7 @@ void jlgr_effects_light_update(jlgr_t* jlgr) {
 		(float*) &jlgr->effects.lights.ambient, 3, "ambient");
 }
 
-void jlgr_effects_init__(jlgr_t* jlgr) {
+void jlgr_effects_init__(la_window_t* jlgr) {
 	la_print("MAKING EFFECT: ALPHA");
 	jlgr_opengl_shader_init(jlgr, &jlgr->effects.alpha.shader, NULL,
 		JL_EFFECT_ALPHA, 1);

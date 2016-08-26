@@ -66,7 +66,7 @@ const char *JL_SHADER_TEX_VERT =
 #endif
 
 #ifdef JL_DEBUG
-	static void jlgr_opengl_error__(jlgr_t* jlgr, int width, const char* fname) {
+	static void jlgr_opengl_error__(la_window_t* jlgr, int width, const char* fname) {
 		GLenum err= glGetError();
 		if(err == GL_NO_ERROR) return;
 		char *fstrerr;
@@ -89,7 +89,7 @@ const char *JL_SHADER_TEX_VERT =
 	}
 #endif
 
-static void jl_gl_buffer_use__(jlgr_t* jlgr, uint32_t *buffer) {
+static void jl_gl_buffer_use__(la_window_t* jlgr, uint32_t *buffer) {
 	// Make buffer if not initialized.
 	if(*buffer == 0) {
 		glGenBuffers(1, buffer);
@@ -106,7 +106,7 @@ static void jl_gl_buffer_use__(jlgr_t* jlgr, uint32_t *buffer) {
 	JL_GL_ERROR(jlgr, *buffer, "bind buffer");
 }
 
-void jlgr_opengl_buffer_set_(jlgr_t* jlgr, uint32_t *buffer,
+void jlgr_opengl_buffer_set_(la_window_t* jlgr, uint32_t *buffer,
 	const void *buffer_data, uint16_t buffer_size)
 {
 	//Bind Buffer "buffer"
@@ -117,13 +117,13 @@ void jlgr_opengl_buffer_set_(jlgr_t* jlgr, uint32_t *buffer,
 	JL_GL_ERROR(jlgr, buffer_size, "buffer data");
 }
 
-void jlgr_opengl_buffer_old_(jlgr_t* jlgr, uint32_t *buffer) {
+void jlgr_opengl_buffer_old_(la_window_t* jlgr, uint32_t *buffer) {
 	glDeleteBuffers(1, buffer);
 	JL_GL_ERROR(jlgr, 0,"buffer free");
 	*buffer = 0;
 }
 
-GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
+GLuint jl_gl_load_shader(la_window_t* jlgr, GLenum shaderType, const char* pSource) {
 	GLuint shader = glCreateShader(shaderType);
 	JL_GL_ERROR(jlgr, 0,"couldn't create shader");
 	if (shader) {
@@ -161,7 +161,7 @@ GLuint jl_gl_load_shader(jlgr_t* jlgr, GLenum shaderType, const char* pSource) {
 	return shader;
 }
 
-GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
+GLuint jl_gl_glsl_prg_create(la_window_t* jlgr, const char* pVertexSource,
 	const char* pFragmentSource)
 {
 	la_print("Making program....");
@@ -220,7 +220,7 @@ GLuint jl_gl_glsl_prg_create(jlgr_t* jlgr, const char* pVertexSource,
 	return program;
 }
 
-static void jl_gl_texture_make__(jlgr_t* jlgr, uint32_t *tex) {
+static void jl_gl_texture_make__(la_window_t* jlgr, uint32_t *tex) {
 	glGenTextures(1, tex);
 #ifdef JL_DEBUG
 	if(!(*tex)) {
@@ -232,7 +232,7 @@ static void jl_gl_texture_make__(jlgr_t* jlgr, uint32_t *tex) {
 }
 
 // Set the bound texture.  px is the pixels 0 - blank texture.
-static void jl_gl_texture_set__(jlgr_t* jlgr, uint8_t* px, uint16_t w, uint16_t h,
+static void jl_gl_texture_set__(la_window_t* jlgr, uint8_t* px, uint16_t w, uint16_t h,
 	uint8_t bytepp)
 {
 	GLenum format = (bytepp == 3) ? GL_RGB : GL_RGBA;
@@ -246,7 +246,7 @@ static void jl_gl_texture_set__(jlgr_t* jlgr, uint8_t* px, uint16_t w, uint16_t 
 	JL_GL_ERROR(jlgr, w, "texture image 2D");
 }
 
-static void jl_gl_texpar_set__(jlgr_t* jlgr) {
+static void jl_gl_texpar_set__(la_window_t* jlgr) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	JL_GL_ERROR(jlgr, 0,"glTexParameteri");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -257,13 +257,13 @@ static void jl_gl_texpar_set__(jlgr_t* jlgr) {
 	JL_GL_ERROR(jlgr, 3,"glTexParameteri");
 }
 
-static inline void jl_gl_texture__bind__(jlgr_t* jlgr, uint32_t tex) {
+static inline void jl_gl_texture__bind__(la_window_t* jlgr, uint32_t tex) {
 	glBindTexture(GL_TEXTURE_2D, tex);
 	JL_GL_ERROR(jlgr, tex,"jlgr_opengl_texture_bind_: glBindTexture");
 }
 
 // Bind a texture.
-void jlgr_opengl_texture_bind_(jlgr_t* jlgr, uint32_t tex) {
+void jlgr_opengl_texture_bind_(la_window_t* jlgr, uint32_t tex) {
 #ifdef JL_DEBUG
 	if(tex == 0) {
 		la_panic("jlgr_opengl_texture_bind_: GL tex = 0");
@@ -273,12 +273,12 @@ void jlgr_opengl_texture_bind_(jlgr_t* jlgr, uint32_t tex) {
 }
 
 // Unbind a texture
-void jlgr_opengl_texture_off_(jlgr_t* jlgr) {
+void jlgr_opengl_texture_off_(la_window_t* jlgr) {
 	jl_gl_texture__bind__(jlgr, 0);
 }
 
 // Make & Bind a new texture.
-void jlgr_opengl_texture_new_(jlgr_t* jlgr, uint32_t *tex, uint8_t* px,
+void jlgr_opengl_texture_new_(la_window_t* jlgr, uint32_t *tex, uint8_t* px,
 	uint16_t w, uint16_t h, uint8_t bytepp)
 {
 	// Make the texture
@@ -291,14 +291,14 @@ void jlgr_opengl_texture_new_(jlgr_t* jlgr, uint32_t *tex, uint8_t* px,
 	jl_gl_texpar_set__(jlgr);
 }
 
-void jl_gl_texture_free_(jlgr_t* jlgr, uint32_t *tex) {
+void jl_gl_texture_free_(la_window_t* jlgr, uint32_t *tex) {
 	glDeleteTextures(1, tex);
 	JL_GL_ERROR(jlgr, 0, "glDeleteTextures");
 	*tex = 0;
 }
 
 // Make a texture - doesn't free "pixels"
-uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
+uint32_t jl_gl_maketexture(la_window_t* jlgr, void* pixels,
 	uint32_t width, uint32_t height, uint8_t bytepp)
 {
 	uint32_t texture;
@@ -311,7 +311,7 @@ uint32_t jl_gl_maketexture(jlgr_t* jlgr, void* pixels,
 }
 
 //Lower Level Stuff
-static inline void jl_gl_usep__(jlgr_t* jlgr, GLuint prg) {
+static inline void jl_gl_usep__(la_window_t* jlgr, GLuint prg) {
 #ifdef JL_DEBUG
 	if(!prg) la_panic("shader program uninit'd!");
 #endif
@@ -327,7 +327,7 @@ static inline void jl_gl_usep__(jlgr_t* jlgr, GLuint prg) {
  * @param vec: 1-4 for float-vec2-vec3-vec4
  * @param name: Format variable for uniform name.
 **/
-void jlgr_opengl_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl, float* x, uint8_t vec,
+void jlgr_opengl_uniform(la_window_t* jlgr, jlgr_glsl_t* glsl, float* x, uint8_t vec,
 	const char* name, ...)
 {
 #ifdef JL_DEBUG
@@ -374,7 +374,7 @@ void jlgr_opengl_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl, float* x, uint8_t vec,
  * @param vec: 1-4 for float-vec2-vec3-vec4
  * @param name: Format variable for uniform name.
 **/
-void jlgr_opengl_uniformi(jlgr_t* jlgr, jlgr_glsl_t* glsl, int32_t* x,
+void jlgr_opengl_uniformi(la_window_t* jlgr, jlgr_glsl_t* glsl, int32_t* x,
 	uint8_t vec, const char* name, ...)
 {
 	int32_t uv;
@@ -417,12 +417,12 @@ void jlgr_opengl_uniformi(jlgr_t* jlgr, jlgr_glsl_t* glsl, int32_t* x,
  * @param uv: The uniform variable.
  * @param x: The float value.
 **/
-void jlgr_opengl_uniform1(jlgr_t* jlgr, uint8_t e, int32_t uv, float* x) {
+void jlgr_opengl_uniform1(la_window_t* jlgr, uint8_t e, int32_t uv, float* x) {
 	glUniform1fv(uv, e, x);
 	JL_GL_ERROR(jlgr, uv, "glUniform1fv");
 }
 
-void jlgr_opengl_uniform1i(jlgr_t* jlgr, uint8_t e, int32_t uv, int32_t* x) {
+void jlgr_opengl_uniform1i(la_window_t* jlgr, uint8_t e, int32_t uv, int32_t* x) {
 	glUniform1iv(uv, e, x);
 	JL_GL_ERROR(jlgr, uv, "glUniform1iv");
 }
@@ -433,7 +433,7 @@ void jlgr_opengl_uniform1i(jlgr_t* jlgr, uint8_t e, int32_t uv, int32_t* x) {
  * @param uv: The uniform variable.
  * @param xyz: The vec3 value.
 **/
-void jlgr_opengl_uniform3(jlgr_t* jlgr, uint8_t e, int32_t uv, float* xyz) {
+void jlgr_opengl_uniform3(la_window_t* jlgr, uint8_t e, int32_t uv, float* xyz) {
 	glUniform3fv(uv, e, xyz);
 	JL_GL_ERROR(jlgr, uv, "glUniform3fv");
 }
@@ -444,7 +444,7 @@ void jlgr_opengl_uniform3(jlgr_t* jlgr, uint8_t e, int32_t uv, float* xyz) {
  * @param uv: The uniform variable.
  * @param x, y, z, w: The vec4 value.
 **/
-void jlgr_opengl_uniform4(jlgr_t* jlgr, uint8_t e, int32_t uv, float* xyzw) {
+void jlgr_opengl_uniform4(la_window_t* jlgr, uint8_t e, int32_t uv, float* xyzw) {
 	glUniform4fv(uv, e, xyzw);
 	JL_GL_ERROR(jlgr, uv, "glUniform4fv");
 }
@@ -455,14 +455,14 @@ void jlgr_opengl_uniform4(jlgr_t* jlgr, uint8_t e, int32_t uv, float* xyzw) {
  * @param uv: The uniform variable.
  * @param m: The mat4 value.
 **/
-void jlgr_opengl_uniformM(jlgr_t* jlgr, int32_t uv, float m[]) {
+void jlgr_opengl_uniformM(la_window_t* jlgr, int32_t uv, float m[]) {
 	glUniformMatrix4fv(uv, 1, 1, m);
 	JL_GL_ERROR(jlgr, uv, "glUniformMatrix4fv");
 }
 
 //This pushes VBO "buff" up to the shader's vertex attribute "vertexAttrib"
 //Set xyzw to 2 if 2D coordinates 3 if 3D. etc.
-void jlgr_opengl_setv(jlgr_t* jlgr, uint32_t* buff, uint32_t vertexAttrib,
+void jlgr_opengl_setv(la_window_t* jlgr, uint32_t* buff, uint32_t vertexAttrib,
 	uint8_t xyzw)
 {
 	// Bind Buffer
@@ -481,12 +481,12 @@ void jlgr_opengl_setv(jlgr_t* jlgr, uint32_t* buff, uint32_t vertexAttrib,
 	JL_GL_ERROR(jlgr, 0,"glVertexAttribPointer");
 }
 
-void jlgr_opengl_draw_arrays_(jlgr_t* jlgr, GLenum mode, uint8_t count) {
+void jlgr_opengl_draw_arrays_(la_window_t* jlgr, GLenum mode, uint8_t count) {
 	glDrawArrays(mode, 0, count);
 	JL_GL_ERROR(jlgr, 0,"glDrawArrays");
 }
 
-void jlgr_opengl_blend_default_(jlgr_t* jlgr) {
+void jlgr_opengl_blend_default_(la_window_t* jlgr) {
 	glEnable(GL_BLEND);
 	JL_GL_ERROR(jlgr, 0,"glEnable( BLEND )");
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA,
@@ -494,26 +494,26 @@ void jlgr_opengl_blend_default_(jlgr_t* jlgr) {
 	JL_GL_ERROR(jlgr, 0, "glBlendFuncSeparate");
 }
 
-void jlgr_opengl_blend_add_(jlgr_t* jlgr) {
+void jlgr_opengl_blend_add_(la_window_t* jlgr) {
 	glEnable(GL_BLEND);
 	JL_GL_ERROR(jlgr, 0,"glEnable( BLEND )");
 	glBlendFunc(GL_ONE, GL_ONE);
 	JL_GL_ERROR(jlgr, 0, "glBlendFunc");
 }
 
-void jlgr_opengl_blend_none_(jlgr_t* jlgr) {
+void jlgr_opengl_blend_none_(la_window_t* jlgr) {
 	glDisable(GL_BLEND);
 	JL_GL_ERROR(jlgr, 0,"glDisable( BLEND )");
 }
 
-static inline void _jl_gl_init_disable_extras(jlgr_t* jlgr) {
+static inline void _jl_gl_init_disable_extras(la_window_t* jlgr) {
 	glDisable(GL_DEPTH_TEST);
 	JL_GL_ERROR(jlgr, 0, "glDisable(GL_DEPTH_TEST)");
 	glDisable(GL_DITHER);
 	JL_GL_ERROR(jlgr, 0, "glDisable(GL_DITHER)");
 }
 
-static inline void _jl_gl_init_enable_alpha(jlgr_t* jlgr) {
+static inline void _jl_gl_init_enable_alpha(la_window_t* jlgr) {
 	glEnable(GL_CULL_FACE);
 	JL_GL_ERROR(jlgr, 0,"glEnable( CULL FACE )");
 	glBlendColor(0.f,0.f,0.f,0.f);
@@ -522,7 +522,7 @@ static inline void _jl_gl_init_enable_alpha(jlgr_t* jlgr) {
 }
 
 // Copy & Push vertices to a VBO.
-void jlgr_opengl_vertices_(jlgr_t* jlgr, const float *xyzw, uint8_t vertices,
+void jlgr_opengl_vertices_(la_window_t* jlgr, const float *xyzw, uint8_t vertices,
 	float* cv, uint32_t* gl)
 {
 	uint16_t items = (vertices*3);
@@ -538,7 +538,7 @@ void jlgr_opengl_vertices_(jlgr_t* jlgr, const float *xyzw, uint8_t vertices,
  * Create a new texture object.
  * @param jlgr: The library context.
 **/
-uint32_t la_texture_new(jlgr_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,
+uint32_t la_texture_new(la_window_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,
 	uint8_t bpp)
 {
 	uint32_t texture;
@@ -559,7 +559,7 @@ uint32_t la_texture_new(jlgr_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,
  * @param w, h: The dimensions
  * @param bpp: The bytes per pixel.  Must be 3 or 4.
 **/
-void la_texture_set(jlgr_t* jlgr, uint32_t texture, uint8_t* pixels,
+void la_texture_set(la_window_t* jlgr, uint32_t texture, uint8_t* pixels,
 	uint16_t w, uint16_t h, uint8_t bpp)
 {
 	GLenum format = GL_RGBA;
@@ -578,23 +578,23 @@ void la_texture_set(jlgr_t* jlgr, uint32_t texture, uint8_t* pixels,
 /***  ETOM Functions  ***/
 /************************/
 
-void jlgr_opengl_viewport_(jlgr_t* jlgr, uint16_t w, uint16_t h) {
+void jlgr_opengl_viewport_(la_window_t* jlgr, uint16_t w, uint16_t h) {
 	glViewport(0, 0, w, h);
 	JL_GL_ERROR(jlgr, w * h, "glViewport");
 }
 
-void jl_opengl_framebuffer_make_(jlgr_t* jlgr, uint32_t *fb) {
+void jl_opengl_framebuffer_make_(la_window_t* jlgr, uint32_t *fb) {
 	glGenFramebuffers(1, fb);
 	if(!(*fb)) la_panic("jl_gl_framebuffer_make__: GL FB = 0");
 	JL_GL_ERROR(jlgr, *fb,"glGenFramebuffers");
 }
 
-void jlgr_opengl_framebuffer_bind_(jlgr_t* jlgr, uint32_t fb) {
+void jlgr_opengl_framebuffer_bind_(la_window_t* jlgr, uint32_t fb) {
 	glBindFramebuffer(GL_FRAMEBUFFER, fb);
 	JL_GL_ERROR(jlgr, fb, "glBindFramebuffer");
 }
 
-void jlgr_opengl_framebuffer_addtx_(jlgr_t* jlgr, uint32_t tx) {
+void jlgr_opengl_framebuffer_addtx_(la_window_t* jlgr, uint32_t tx) {
 	// Set "*tex" as color attachment #0.
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 		GL_TEXTURE_2D, tx, 0);
@@ -602,27 +602,27 @@ void jlgr_opengl_framebuffer_addtx_(jlgr_t* jlgr, uint32_t tx) {
 		"jlgr_opengl_framebuffer_addtx_: glFramebufferTexture2D");
 }
 
-void jlgr_opengl_framebuffer_subtx_(jlgr_t* jlgr) {
+void jlgr_opengl_framebuffer_subtx_(la_window_t* jlgr) {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 		GL_TEXTURE_2D, 0, 0);
 	JL_GL_ERROR(jlgr, 0,
 		"jlgr_opengl_framebuffer_subtx_: glFramebufferTexture2D");
 }
 
-void jlgr_opengl_framebuffer_status_(jlgr_t* jlgr) {
+void jlgr_opengl_framebuffer_status_(la_window_t* jlgr) {
 	// Check to see if framebuffer was made properly.
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		la_panic("Frame buffer not complete!");
 }
 
-void jl_opengl_framebuffer_free_(jlgr_t* jlgr, uint32_t *fb) {
+void jl_opengl_framebuffer_free_(la_window_t* jlgr, uint32_t *fb) {
 	glDeleteFramebuffers(1, fb);
 	JL_GL_ERROR(jlgr, *fb, "glDeleteFramebuffers");
 	*fb = 0;
 }
 
 // Set the viewport to the screen size.
-void jl_gl_viewport_screen(jlgr_t* jlgr) {
+void jl_gl_viewport_screen(la_window_t* jlgr) {
 	jlgr_opengl_viewport_(jlgr, jlgr->wm.w, jlgr->wm.h);
 }
 
@@ -635,7 +635,7 @@ void jl_gl_viewport_screen(jlgr_t* jlgr) {
  * @param near: The near clipping pane.
  * @param far: The far clipping pane.
 **/
-void jlgr_opengl_matrix(jlgr_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
+void jlgr_opengl_matrix(la_window_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
 	jl_vec3_t rotatev, jl_vec3_t translatev, jl_vec3_t lookv, float ar)
 {
 	float scale[] = {
@@ -690,11 +690,11 @@ void jlgr_opengl_matrix(jlgr_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
  * @param jlgr: The library context.
  * @param sh: The shader to use.
 **/
-void jlgr_opengl_draw1(jlgr_t* jlgr, jlgr_glsl_t* sh) {
+void jlgr_opengl_draw1(la_window_t* jlgr, jlgr_glsl_t* sh) {
 	jl_gl_usep__(jlgr, sh->program);
 }
 
-static int32_t _jl_gl_getu(jlgr_t* jlgr, GLuint prg, const char *var) {
+static int32_t _jl_gl_getu(la_window_t* jlgr, GLuint prg, const char *var) {
 	int32_t a = glGetUniformLocation(prg, var);
 #ifdef JL_DEBUG
 	if(a == -1) la_panic("opengl: bad name; is: %s", var);
@@ -703,7 +703,7 @@ static int32_t _jl_gl_getu(jlgr_t* jlgr, GLuint prg, const char *var) {
 	return a;
 }
 
-void _jl_gl_geta(jlgr_t* jlgr, GLuint prg, int32_t *attrib, const char *title) {
+void _jl_gl_geta(la_window_t* jlgr, GLuint prg, int32_t *attrib, const char *title) {
 	if((*attrib = glGetAttribLocation(prg, title)) == -1) {
 		la_print("for name \"%s\":", title);
 		la_panic("attribute name is either reserved or non-existant");
@@ -715,7 +715,7 @@ void _jl_gl_geta(jlgr_t* jlgr, GLuint prg, int32_t *attrib, const char *title) {
 /*** Static Functions ***/
 /************************/
 
-static inline void _jl_gl_init_setup_gl(jlgr_t* jlgr) {
+static inline void _jl_gl_init_setup_gl(la_window_t* jlgr) {
 	la_print("setting properties....");
 	//Disallow Dither & Depth Test
 	_jl_gl_init_disable_extras(jlgr);
@@ -734,7 +734,7 @@ static inline void _jl_gl_init_setup_gl(jlgr_t* jlgr) {
  * @param frag: The fragment shader.
  * @param has_tex: Whether has texture or not.
 **/
-void jlgr_opengl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
+void jlgr_opengl_shader_init(la_window_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
 	const char* frag, uint8_t has_tex)
 {
 	const char* vertShader = vert ? vert : JL_SHADER_TEX_VERT;
@@ -775,13 +775,13 @@ void jlgr_opengl_shader_init(jlgr_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
  * @param uniform: The uniform to get ( output ).
  * @param name: The name of the uniform.
 **/
-void jlgr_opengl_shader_uniform(jlgr_t* jlgr, jlgr_glsl_t* glsl,
+void jlgr_opengl_shader_uniform(la_window_t* jlgr, jlgr_glsl_t* glsl,
 	int32_t* uniform, const char* name)
 {
 	*uniform = _jl_gl_getu(jlgr, glsl->program, name);
 }
 
-static inline void _jl_gl_init_shaders(jlgr_t* jlgr) {
+static inline void _jl_gl_init_shaders(la_window_t* jlgr) {
 	la_print("Making Shader: texture");
 	jlgr_opengl_shader_init(jlgr, &jlgr->gl.prg.texture, NULL,
 		JL_SHADER_TEX_FRAG, 1);
@@ -792,7 +792,7 @@ static inline void _jl_gl_init_shaders(jlgr_t* jlgr) {
 }
 
 //Load and create all resources
-static inline void _jl_gl_make_res(jlgr_t* jlgr) {
+static inline void _jl_gl_make_res(la_window_t* jlgr) {
 	// Setup opengl properties
 	_jl_gl_init_setup_gl(jlgr);
 	// Create shaders and set up attribute/uniform variable communication
@@ -812,7 +812,7 @@ static inline void _jl_gl_make_res(jlgr_t* jlgr) {
  * Get the Aspect Ratio of the pre-renderer in use.
  * @param jlgr: The library context.
 **/
-float jl_gl_ar(jlgr_t* jlgr) {
+float jl_gl_ar(la_window_t* jlgr) {
 	uint8_t thread = jl_thread_current(jlgr->jl);
 
 	if(thread)
@@ -825,7 +825,7 @@ float jl_gl_ar(jlgr_t* jlgr) {
  * Get the Width for the pre-renderer in use.
  * @param jlgr: The library context.
 **/
-uint32_t jl_gl_w(jlgr_t* jlgr) {
+uint32_t jl_gl_w(la_window_t* jlgr) {
 	uint32_t w;
 
 	w = jlgr->gl.cp ? jlgr->gl.cp->w : jlgr->wm.w;
@@ -840,7 +840,7 @@ uint32_t jl_gl_w(jlgr_t* jlgr) {
  * @param b: The amount of blue [ 0.f - 1.f ]
  * @param a: The translucency [ 0.f - 1.f ]
 **/
-void jl_gl_clear(jlgr_t* jlgr, float r, float g, float b, float a) {
+void jl_gl_clear(la_window_t* jlgr, float r, float g, float b, float a) {
 	glClearColor(r, g, b, a);
 	JL_GL_ERROR(jlgr, a, "jl_gl_clear(): glClearColor");
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -852,7 +852,7 @@ void jl_gl_clear(jlgr_t* jlgr, float r, float g, float b, float a) {
 /***  ETOM Functions  ***/
 /************************/
 
-void jl_gl_init__(jlgr_t* jlgr) {
+void jl_gl_init__(la_window_t* jlgr) {
 #ifdef JL_GLTYPE_HAS_GLEW
 	if(glewInit()!=GLEW_OK) la_panic("glew fail!(no sticky)");
 #endif

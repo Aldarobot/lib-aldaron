@@ -31,36 +31,23 @@ const char* la_thread_new(la_thread_t* thread, la_thread_fn_t fn,
 }
 
 /**
+ * Wait for a thread to exit.
+ * @returns: Value returned from the thread.
+**/
+int32_t la_thread_old(la_thread_t* thread) {
+	int32_t threadReturnValue = 0;
+
+	SDL_WaitThread(thread->thread, &threadReturnValue);
+	return threadReturnValue;
+}
+
+/**
  * Return the ID of the current thread.
  * @param jl: The library context.
  * @returns: The thread ID number, 0 if main thread.
 **/
 uint8_t jl_thread_current(jl_t *jl) {
-	SDL_threadID current_thread = SDL_ThreadID();
-	uint8_t i, rtn = 0;
-
-	// Skip main thread ( i = 1 )
-	for(i = 1; i < 16; i++) {
-		// Look for not init'd thread.
-		if(jl->jl_ctx[i].thread_id == current_thread) {
-			rtn = i;
-			break;
-		}
-	}
-	return rtn;
-}
-
-/**
- * Wait for a thread to exit.
- * @param jl: The library context.
- * @param threadnum: The thread id returned from jl_thread_new().
- * @returns: Value returned from the thread.
-**/
-int32_t jl_thread_old(jl_t *jl, uint8_t threadnum) {
-	int32_t threadReturnValue = 0;
-
-	SDL_WaitThread(jl->jl_ctx[threadnum].thread, &threadReturnValue);
-	return threadReturnValue;
+	return SDL_ThreadID();
 }
 
 /**
@@ -222,15 +209,4 @@ float al_safe_get_float(safe_float_t* var) {
 	float value;
 	al_safe_get(var, &value, sizeof(float));
 	return value;
-}
-
-//
-// Internal functions
-//
-
-void jl_thread_init__(jl_t* jl) {
-	uint8_t i;
-
-	// Set all threads to null
-	for(i = 0; i < 16; i++) jl->jl_ctx[i].thread = NULL;
 }

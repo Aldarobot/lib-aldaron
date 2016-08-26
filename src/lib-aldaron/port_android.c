@@ -1,6 +1,8 @@
-#include "port.h"
+#include "la_draw.h"
 
 #ifdef LA_PHONE_ANDROID
+
+#include "port.h"
 
 #include <jni.h>
 #include <errno.h>
@@ -260,6 +262,10 @@ void la_print(const char* format, ...) {
 
 	la_file_append(LA_FILE_LOG, temp, strlen(temp)); // To File
 	ANDROID_LOG("%s", temp); // To Logcat
+}
+
+void la_port_input(la_window_t* window) {
+	
 }
 
 JNIEXPORT void JNICALL

@@ -13,10 +13,8 @@
 extern jl_t* la_jl_deprecated;
 
 static void jlgr_loop_(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
-
 	// Update events.
-	jl_ct_loop__(jlgr);
+	la_port_input(jl->jlgr);
 	// Run Main Loop
 	main_loop_(jl);
 }
@@ -30,7 +28,7 @@ static void jlgr_loop_(jl_t* jl) {
  * @param jlgr: The window.
  * @param fn_: Graphic initialization function run on graphical thread.
 **/
-void la_window_init(jlgr_t* jlgr, jl_fnct fn_) {
+void la_window_init(la_window_t* jlgr, jl_fnct fn_) {
 	jl_t* jl = la_jl_deprecated;
 
 	jl->jlgr = jlgr;
@@ -44,11 +42,6 @@ void la_window_init(jlgr_t* jlgr, jl_fnct fn_) {
 #ifndef LA_PHONE_ANDROID
 	SDL_VideoInit(NULL);
 #endif
-	la_print("Initializing Input....");
-	jl_ct_init__(jlgr); // Prepare to read input.
-	la_print("Initialized CT! / Initializing file viewer....");
-	jlgr_fl_init(jlgr);
-	la_print("Initializing file viewer!");
 	// Start Drawing thread.
 	jlgr_thread_init(jlgr, fn_);
 	//
@@ -64,7 +57,7 @@ void la_window_init(jlgr_t* jlgr, jl_fnct fn_) {
  * @param downscreen: The function to redraw the lower or secondary display.
  * @param resize: The function called when window is resized.
 **/
-void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
+void jlgr_loop_set(la_window_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 	jl_fnct downscreen, jl_fnct resize)
 {
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
@@ -80,7 +73,7 @@ void jlgr_loop_set(jlgr_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
  * Resize the window.
  * @param jlgr: The library context.
 **/
-void jlgr_resz(jlgr_t* jlgr, uint16_t w, uint16_t h) {
+void jlgr_resz(la_window_t* jlgr, uint16_t w, uint16_t h) {
 	jlgr_pvar_t* pjlgr = jl_thread_pvar_edit(&jlgr->pvar);
 	pjlgr->needs_resize = 2;
 	pjlgr->set_width = w;
@@ -92,7 +85,7 @@ void jlgr_resz(jlgr_t* jlgr, uint16_t w, uint16_t h) {
  * Destroy the window and free the jlgr library context.
  * @param jlgr: The jlgr library context.
 **/
-void jlgr_kill(jlgr_t* jlgr) {
+void jlgr_kill(la_window_t* jlgr) {
 	la_print("Sending Kill to threads....");
 	SDL_AtomicSet(&jlgr->running, 0);
 	la_print("Removing clump filelist for fileviewer....");

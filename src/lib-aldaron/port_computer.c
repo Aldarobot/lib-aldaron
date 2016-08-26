@@ -21,71 +21,78 @@ void la_print(const char* format, ...) {
 }
 
 void la_port_input(la_window_t* window) {
-	// Keyboard Input
-	window->main.ct.keys = SDL_GetKeyboardState(NULL);
-	// 
-	while(SDL_PollEvent(&window->main.ct.event)) {
-		uint8_t isNowDown = window->main.ct.event.type == SDL_MOUSEBUTTONDOWN;
-		uint8_t isNowUp = window->main.ct.event.type == SDL_MOUSEBUTTONUP;
+	while(SDL_PollEvent(&window->sdl_event)) {
+		uint8_t isNowDown = window->sdl_event.type == SDL_MOUSEBUTTONDOWN;
+		uint8_t isNowUp = window->sdl_event.type == SDL_MOUSEBUTTONUP;
 
 		// Keyboard
-		if ( window->main.ct.event.type == SDL_TEXTINPUT) {
-			int i;
-			for(i = 0; i < 32; i++)
-				window->main.ct.text_input[i] =
-					window->main.ct.event.text.text[i];
-			window->main.ct.read_cursor = 0;
+		if ( window->sdl_event.type == SDL_TEXTINPUT) {
+//			int i;
+//			for(i = 0; i < 32; i++)
+//				window->main.ct.text_input[i] =
+//					window->sdl_event.text.text[i];
+//			window->main.ct.read_cursor = 0;
 
 		// Keys
-		}else if(window->main.ct.event.type == SDL_KEYDOWN) {
-			if(window->main.ct.event.key.keysym.scancode
-				== SDL_SCANCODE_ESCAPE)
-			{
-				la_print("back due to escape");
-				jl_mode_exit(window->jl);
+		}else if(window->sdl_event.type == SDL_KEYDOWN) {
+			switch(window->sdl_event.key.keysym.scancode) {
+				case SDL_SCANCODE_ESCAPE: {
+					la_print("back due to escape");
+					jl_mode_exit(window->jl);
+					break;
+				} case SDL_SCANCODE_F11: {
+					jlgr_wm_togglefullscreen(window);
+					break;
+				} default: {
+					break;
+				}
 			}
 
 		// Move Mouse
-		}else if(window->main.ct.event.type == SDL_MOUSEMOTION) {
-			float x = (float)window->main.ct.event.motion.x /
+		}else if(window->sdl_event.type == SDL_MOUSEMOTION) {
+			float x = (float)window->sdl_event.motion.x /
 				(float)window->wm.w;
-			float y = (float)window->main.ct.event.motion.y /
+			float y = (float)window->sdl_event.motion.y /
 				(float)window->wm.h;
+			if(window->wm.w == 0) x = 0.f;
+			if(window->wm.h == 0) y = 0.f;
 			// Set location of virtual mouse.
-			al_safe_set_float(&window->main.ct.msx, x);
-			al_safe_set_float(&window->main.ct.msy, y * window->wm.ar);
+			al_safe_set_float(&window->mouse_x, x);
+			al_safe_set_float(&window->mouse_y, y * window->wm.ar);
 
 		// Click Mouse
 		}else if ( isNowDown || isNowUp) {
-			if(window->main.ct.event.button.button == SDL_BUTTON_LEFT)
-				window->main.ct.input.click = isNowDown;
-			else if(window->main.ct.event.button.button == SDL_BUTTON_RIGHT)
-				window->main.ct.input.click_right = isNowDown;
-			else if(window->main.ct.event.button.button == SDL_BUTTON_MIDDLE)
-				window->main.ct.input.click_middle = isNowDown;
+//			if(window->sdl_event.button.button == SDL_BUTTON_LEFT)
+//				window->main.ct.input.click = isNowDown;
+//			else if(window->sdl_event.button.button == SDL_BUTTON_RIGHT)
+//				window->main.ct.input.click_right = isNowDown;
+//			else if(window->sdl_event.button.button == SDL_BUTTON_MIDDLE)
+//				window->main.ct.input.click_middle = isNowDown;
 
 		// Scroll Wheel
-		}else if (window->main.ct.event.wheel.type == SDL_MOUSEWHEEL) {
-			uint8_t flip = (window->main.ct.event.wheel.direction ==
-				SDL_MOUSEWHEEL_FLIPPED) ? -1 : 1;
-			int32_t x = flip * window->main.ct.event.wheel.x;
-			int32_t y = flip * window->main.ct.event.wheel.y;
-			if(window->main.ct.event.wheel.y > 0)
-				window->main.ct.input.scroll_up = (y > 0) ? y : -y;
-			else if(window->main.ct.event.wheel.y < 0)
-				window->main.ct.input.scroll_down = (y > 0) ? y : -y;
-			if(window->main.ct.event.wheel.x > 0)
-				window->main.ct.input.scroll_right = (x > 0) ? x : -x;
-			else if(window->main.ct.event.wheel.x < 0)
-				window->main.ct.input.scroll_left = (x > 0) ? x : -x;
+		}else if (window->sdl_event.wheel.type == SDL_MOUSEWHEEL) {
+//			uint8_t flip = (window->sdl_event.wheel.direction ==
+//				SDL_MOUSEWHEEL_FLIPPED) ? -1 : 1;
+//			int32_t x = flip * window->sdl_event.wheel.x;
+//			int32_t y = flip * window->sdl_event.wheel.y;
+			if (window->sdl_event.wheel.y > 0) {
+//				window->main.ct.input.scroll_up = (y > 0) ? y : -y;
+			} else if(window->sdl_event.wheel.y < 0) {
+//				window->main.ct.input.scroll_down = (y > 0) ? y : -y;
+			}
+			if (window->sdl_event.wheel.x > 0) {
+//				window->main.ct.input.scroll_right = (x > 0) ? x : -x;
+			} else if(window->sdl_event.wheel.x < 0) {
+//				window->main.ct.input.scroll_left = (x > 0) ? x : -x;
+			}
 
 		// Resize or Close
-		}else if (window->main.ct.event.type==SDL_WINDOWEVENT) {
-			switch(window->main.ct.event.window.event) {
+		}else if (window->sdl_event.type==SDL_WINDOWEVENT) {
+			switch(window->sdl_event.window.event) {
 				case SDL_WINDOWEVENT_RESIZED: {
 					jlgr_resz(window,
-						window->main.ct.event.window.data1,
-						window->main.ct.event.window.data2);
+						window->sdl_event.window.data1,
+						window->sdl_event.window.data2);
 					break;
 				} case SDL_WINDOWEVENT_CLOSE: {
 					la_print("back due to close");

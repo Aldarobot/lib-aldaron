@@ -28,7 +28,7 @@ void jlgr_mouse_draw__(la_window_t* jlgr);
 static void _jlgr_popup_loop(jl_t *jl) {
 }
 
-static void jlgr_gui_textbox_cursor__(la_window_t* jlgr, jlgr_input_t input) {
+/*static void jlgr_gui_textbox_cursor__(la_window_t* jlgr, jlgr_input_t input) {
 	if(input.h == 2) jlgr->gui.textbox.counter += jlgr->jl->time.psec;
 	if(input.h != 1 && jlgr->gui.textbox.do_it != 1) return;
 	switch(input.k) {
@@ -50,7 +50,7 @@ static void jlgr_gui_textbox_cursor__(la_window_t* jlgr, jlgr_input_t input) {
 			break;
 		}
 	}
-}
+}*/
 
 /** @endcond */
 
@@ -157,8 +157,8 @@ void jlgr_draw_ctxt(la_window_t* jlgr, char *str, float yy, float* color) {
 }
 
 // TODO: MOVE
-static void jlgr_gui_slider_touch(la_window_t* jlgr, jlgr_input_t input) {
-/*	jl_sprite_t* spr = input.data;
+/*static void jlgr_gui_slider_touch(la_window_t* jlgr, jlgr_input_t input) {
+	jl_sprite_t* spr = input.data;
 	jl_gui_slider_main* slider = jlgr_sprite_getcontext(spr);
 
 	if(jlgr_sprite_collide(jlgr, &spr->pr, &jlgr->mouse.pr) == 0 ||
@@ -188,15 +188,15 @@ static void jlgr_gui_slider_touch(la_window_t* jlgr, jlgr_input_t input) {
 		(*slider->x1) = x / (1. - (jl_gl_ar(jlgr) * .15));
 		slider->draw.where[0].x = x;
 	}
-	jlgr_sprite_redraw(jlgr, spr, &slider->draw);*/
-}
+	jlgr_sprite_redraw(jlgr, spr, &slider->draw);
+}*/
 
 static void jlgr_gui_slider_singleloop(jl_t* jl, jl_sprite_t* spr) {
-	jlgr_input_do(jl->jlgr, JL_INPUT_PRESS, jlgr_gui_slider_touch, spr);
+//	jlgr_input_do(jl->jlgr, JL_INPUT_PRESS, jlgr_gui_slider_touch, spr);
 }
 
 static void jlgr_gui_slider_doubleloop(jl_t* jl, jl_sprite_t* spr) {
-	jlgr_input_do(jl->jlgr, JL_INPUT_PRESS, jlgr_gui_slider_touch, spr);
+//	jlgr_input_do(jl->jlgr, JL_INPUT_PRESS, jlgr_gui_slider_touch, spr);
 }
 
 static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
@@ -403,7 +403,7 @@ void jlgr_slidebtn_loop(la_window_t* jlgr, jl_sprite_t * spr, float defaultx,
 {
 	spr->pr.cb.pos.x = defaultx;
 	if(jlgr_sprite_collide(jlgr, &jlgr->mouse.pr, &spr->pr)) {
-		jlgr_input_do(jlgr, JL_INPUT_PRESS, prun, NULL);
+//		jlgr_input_do(jlgr, JL_INPUT_PRESS, prun, NULL);
 		spr->pr.cb.pos.x = defaultx + slidex;
 	}
 	jlgr_sprite_draw(jlgr, spr);
@@ -436,7 +436,7 @@ void jlgr_glow_button_draw(la_window_t* jlgr, jl_sprite_t * spr,
 			(jl_font_t) { jlgr->textures.icon, 0,
 				jlgr->fontcolor, .05 });
 		// Run if press
-		jlgr_input_do(jlgr, JL_INPUT_PRESS, prun, NULL);
+//		jlgr_input_do(jlgr, JL_INPUT_PRESS, prun, NULL);
 	}
 }
 
@@ -457,7 +457,7 @@ void jlgr_gui_textbox_init(la_window_t* jlgr, data_t* string) {
  * @returns 0: if not.
 **/
 uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr) {
-	uint8_t bytetoinsert = 0;
+//	uint8_t bytetoinsert = 0;
 
 	jlgr->gui.textbox.counter += jlgr->jl->time.psec;
 	if(jlgr->gui.textbox.counter > .5) {
@@ -469,9 +469,9 @@ uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr) {
 		jlgr->gui.textbox.do_it = 0;
 	}
 #if JL_PLAT == JL_PLAT_COMPUTER
-	jlgr_input_do(jlgr, JL_INPUT_JOYC, jlgr_gui_textbox_cursor__, NULL);
+//	jlgr_input_do(jlgr, JL_INPUT_JOYC, jlgr_gui_textbox_cursor__, NULL);
 #endif
-	if((bytetoinsert = jlgr_input_typing_get(jlgr))) {
+/*	if((bytetoinsert = jlgr_input_typing_get(jlgr))) {
 		if(bytetoinsert == '\b') {
 			if(jlgr->gui.textbox.string->curs == 0) return 0;
 			jlgr->gui.textbox.string->curs--;
@@ -485,7 +485,7 @@ uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr) {
 			jl_data_insert_byte(jlgr->jl, jlgr->gui.textbox.string,
 				 bytetoinsert);
 		}
-	}
+	}*/
 	return 0;
 }
 

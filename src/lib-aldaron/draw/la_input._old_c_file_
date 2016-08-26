@@ -311,26 +311,6 @@ int8_t jlgr_input_do(la_window_t *jlgr, jlgr_control_t events, jlgr_input_fnct f
 	return 0;
 }
 
-//Main Input Loop
-void jl_ct_loop__(la_window_t* jlgr) {
-	
-	#if JL_PLAT == JL_PLAT_COMPUTER
-		//Get Whether mouse is down or not and xy coordinates
-		SDL_GetMouseState(&jlgr->main.ct.msxi,&jlgr->main.ct.msyi);
-
-		int32_t mousex = jlgr->main.ct.msxi;
-		int32_t mousey = jlgr->main.ct.msyi;
-		//translate integer into float by clipping [0-1]
-		float msy = ((float)mousey) / jlgr_wm_geth(jlgr);
-
-		la_input_clamp_msy(jlgr, &msy);
-
-		// F11 toggle fullscreen.
-		if(jl_ct_key_pressed__(jlgr, SDL_SCANCODE_F11) == 1)
-			jlgr_wm_togglefullscreen(jlgr);
-	#endif
-}
-
 static inline void jl_ct_var_init__(la_window_t* jlgr) {
 	int i;
 	for(i = 0; i < 255; i++)

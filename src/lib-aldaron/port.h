@@ -42,7 +42,7 @@ typedef struct {
 	struct saved_state state;
 #endif
 #ifdef LA_COMPUTER
-	
+	SDL_Event sdl_event;
 #endif
 	struct {
 		jlgr_input_t tap; // Touchscreen Tap
@@ -69,44 +69,6 @@ typedef struct {
 	jl_pvar_t pvar; // Protected context.
 
 	SDL_atomic_t running;
-
-	struct {
-		//Input Information
-		struct {
-			void* getEvents[JLGR_INPUT_NONE];
-
-			safe_float_t msx, msy;
-			int32_t msxi, msyi;
-
-			SDL_Event event;
-			const Uint8 *keys;
-
-			struct {
-				#if JL_PLAT == JL_PLAT_PHONE
-					uint8_t back;
-				#elif JL_PLAT == JL_PLAT_COMPUTER
-					uint8_t click_right; // Or Ctrl-Click
-					uint8_t click_middle; // Or Shift-Click
-				#endif
-				//Multi-Platform
-				uint8_t click; // Or Click Left
-				uint8_t scroll_right;
-				uint8_t scroll_left;
-				uint8_t scroll_up;
-				uint8_t scroll_down;
-			}input;
-
-			uint8_t back; //Back Key, Escape Key, Start Button
-			int8_t keyDown[255];
-			uint32_t sd; //NYI: stylus delete
-		
-			uint8_t sc;
-			uint8_t text_input[32];
-			uint8_t read_cursor;
-
-			uint8_t current_event;
-		}ct;
-	}main;
 
 	// Window Info
 	struct {
@@ -256,6 +218,10 @@ typedef struct {
 	double timer;
 	double psec;
 	uint8_t on_time;
+
+	// Mouse x & y
+	safe_float_t mouse_x;
+	safe_float_t mouse_y;
 } la_window_t;
 
 // These functions must be supported by all platforms.

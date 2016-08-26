@@ -18,8 +18,8 @@ char *GMessage[3] = {
 };
 
 // Run when the menubar is clicked/pressed
-static void jlgr_menu_loop_press__(la_window_t* jlgr, jlgr_input_t input) {
-/*	jl_menu_t* menu = input.data;
+/*static void jlgr_menu_loop_press__(la_window_t* jlgr, jlgr_input_t input) {
+	jl_menu_t* menu = input.data;
 	// Figure out what's selected.
 	const uint8_t selected = (uint8_t)((1. - al_safe_get_float(&jlgr->main.ct.msx)) / .1);
 
@@ -29,8 +29,8 @@ static void jlgr_menu_loop_press__(la_window_t* jlgr, jlgr_input_t input) {
 		// Run the input loop.
 		if(menu->cursor == selected && al_safe_get_float(&jlgr->main.ct.msy) < .1)
 			menu->inputfn[menu->cursor](jlgr, input);
-	}*/
-}
+	}
+}*/
 
 static inline void jlgr_menubar_shadow__(la_window_t* jlgr, jl_menu_t* menu) {
 	// Clear Texture.
@@ -205,7 +205,7 @@ void jlgr_menu_loop(la_window_t* jlgr) {
 	jl_menu_t* menu = jl_thread_pvar_edit(&jlgr->menubar.pvar);
 
 	// Run the proper loops.
-	jlgr_input_do(jlgr, JL_INPUT_PRESS, jlgr_menu_loop_press__, menu);
+//	jlgr_input_do(jlgr, JL_INPUT_PRESS, jlgr_menu_loop_press__, menu);
 
 	jl_thread_pvar_drop(&jlgr->menubar.pvar, (void**)&menu);
 }
@@ -263,7 +263,7 @@ void jlgr_menu_addicon_slow(la_window_t* jlgr) {
 void jlgr_menu_addicon_name(la_window_t* jlgr) {
 	int i;
 	for(i = 0; i < 4; i++) {
-		jlgr_menu_addicon(jlgr, jlgr_input_dont, jlgr_menu_name_draw2__);
+		jlgr_menu_addicon(jlgr, NULL, jlgr_menu_name_draw2__);
 	}
-	jlgr_menu_addicon(jlgr, jlgr_input_dont, jlgr_menu_name_draw__);
+	jlgr_menu_addicon(jlgr, NULL, jlgr_menu_name_draw__);
 }

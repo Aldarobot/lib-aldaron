@@ -17,7 +17,6 @@ void jlgr_kill(la_window_t* jlgr);
 
 void jl_mode_loop__(jl_t* jl);
 
-void jl_ct_init__(la_window_t* jlgr);
 void jlgr_fl_init(la_window_t* jlgr);
 
 #if JL_PLAT == JL_PLAT_PHONE
@@ -31,7 +30,6 @@ void jlgr_fl_init(la_window_t* jlgr);
 
 float la_banner_size = 0.f;
 jl_t* la_jl_deprecated = NULL;
-la_signal_t la_wait;
 
 static inline void jl_init_libs__(jl_t* jl) {
 	la_print("Initializing file system....");
@@ -80,16 +78,6 @@ static inline void jl_seconds_passed__(jl_t* jl) {
 
 	jl->time.psec = jl_time_regulatefps(jl, &jl->time.timer, &isOnTime);
 	jl_time_reset__(jl, isOnTime);
-}
-
-static inline int la_kill__(jl_t* jl, jl_fnct _fnc_kill_) {
-	if(jl->jlgr) jlgr_kill(jl->jlgr);
-	if(jl->jlau) jlau_kill(jl->jlau);
-	_fnc_kill_(jl);
-	la_print("Freeing library context....");
-	jl_mem_kill_(jl);
-	la_print("| Successful Exit |");
-	return 0;
 }
 
 void main_loop_(jl_t* jl) {
@@ -141,8 +129,6 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 	jl_t* jl = ctx->jl;
 	la_window_t* jlgr = ctx->jlgr;
 	if(jlgr) {
-		la_print("Initializing Input....");
-		jl_ct_init__(jlgr); // Prepare to read input.
 		la_print("Initialized CT! / Initializing file viewer....");
 		jlgr_fl_init(jlgr);
 		la_print("Initializing file viewer!");
@@ -150,7 +136,18 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 	// Run the Loop
 	while(jl->mode.count) ((jl_fnct)jl->loop)(jl);
 	// Kill the program
-	return la_kill__(jl, jl->kill);
+	if(jlgr) {
+		la_print("Sending Kill to draw thread....");
+		SDL_AtomicSet(&jlgr->running, 0);
+	}
+	if(jl->jlau) {
+		la_print("Kill Audio....");
+		jlau_kill(jl->jlau);
+	}
+	la_print("Kill Program....");
+	((jl_fnct)jl->kill)(jl);
+	la_print("Success!");
+	return 0;
 }
 
 /**
@@ -165,22 +162,25 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, uint8_t openwindow,
 {
 	jl_t* jl = jl_mem_init_(); // Create The Library Context
 	la_thread_t la_main;
-	la_window_t* jlgr = openwindow ? la_memory_allocate(sizeof(la_window_t)) : NULL;
+	la_window_t* window = openwindow ? la_memory_allocate(sizeof(la_window_t)) : NULL;
 
 	// Initialize JL_lib!
 	la_init__(jl, openwindow ? la_dont : fnc_init, name, ctx_size);
 	jl->kill = fnc_kill;
 	la_jl_deprecated = jl;
-	la_signal_init(&la_wait);
 	// Start a new thread.
-	la_main_thread_t ctx = (la_main_thread_t) { jl, jlgr };
+	la_main_thread_t ctx = (la_main_thread_t) { jl, window };
 	la_thread_new(&la_main, (la_thread_fn_t)la_main_thread, "la_main", &ctx);
 	// Open a window, if "openwindow" is set.
-	if(openwindow) la_window_init(jlgr, fnc_init);
-	else la_signal_send(&la_wait);
+	if(openwindow) la_window_init(window, fnc_init);
 	// Wait for the thread to finish.
-	int32_t rtn = la_thread_old(&la_main);
-	la_print("Killing SDL....");
+//	int32_t rtn = la_thread_old(&la_main);
+	la_print("Kill Window....");
+	if(openwindow) jlgr_kill(window);
+	la_print("SDL_Quit()");
 	SDL_Quit();
-	return rtn;
+	la_print("Free library context....");
+	jl_mem_kill_(jl);
+	la_print("| success |");
+	return 0;
 }

@@ -26,6 +26,7 @@ const char* la_thread_new(la_thread_t* thread, la_thread_fn_t fn,
 	}else{
 		return NULL;
 	}
+	SDL_DetachThread(newthread.thread);
 	// Set thread.
 	if(thread) *thread = newthread;
 }

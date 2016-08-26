@@ -1,25 +1,23 @@
 #include "main.h"
 #include "la_effect.h"
 
-static jlgr_t window;
-
 static void ex_redraw(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* window = jl->jlgr;
 	ctx_t* ctx = la_context(jl);
 	la_light_t light = {
-		(jl_vec3_t) { al_safe_get_float(&jlgr->main.ct.msx),
-			al_safe_get_float(&jlgr->main.ct.msy) },
+		(jl_vec3_t) { al_safe_get_float(&window->mouse_x),
+			al_safe_get_float(&window->mouse_y) },
 		(jl_vec3_t) { 1.f, 1.f, 1.f },
 		.25f
 	};
 
 // Draw
-	jlgr_vo_draw(jlgr, &ctx->vo1);
+	jlgr_vo_draw(window, &ctx->vo1);
 // Light
 	la_effect_light(&ctx->vo1, &light, 1, (jl_vec3_t) { 1.f, 1.f, 1.f });
 }
 
-void ex_down(jlgr_t* jlgr, jlgr_input_t input) {
+void ex_down(la_window_t* jlgr, jlgr_input_t input) {
 	if(input.h == 1) {
 		ctx_t* ctx = la_context(jlgr->jl);
 
@@ -32,12 +30,11 @@ void ex_down(jlgr_t* jlgr, jlgr_input_t input) {
 }
 
 void ex_edit_loop(jl_t* jl) {
-	jlgr_input_do(jl->jlgr, JL_INPUT_MENU, ex_down, NULL);
 	jlgr_menu_loop(jl->jlgr);
 }
 
 void ex_wdns(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 
 	jlgr_text_draw(jlgr, "testing""\xCA""1234567890",
 		(jl_vec3_t) { 0., 0., 0. },
@@ -47,7 +44,7 @@ void ex_wdns(jl_t* jl) {
 }
 
 void ex_wups(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 
 	float fontcolor[] = { 0.f, 0.f, 0.f, 1.f };
 
@@ -60,7 +57,7 @@ void ex_wups(jl_t* jl) {
 // Called when window is made/resized.
 static void ex_edit_resz(jl_t* jl) {
 	ctx_t* ctx = la_context(jl);
-	jlgr_t* jlgr = jl->jlgr;
+	la_window_t* jlgr = jl->jlgr;
 	jl_rect_t rc1 = { 0.f, 0.f, 1.f, jl_gl_ar(jl->jlgr) };
 	jl_rect_t rc2 = { 0.f, 0.f, 2.f, 1.f };
 	float colors[] = { 1.f, 1.f, 1.f, 1.f };
@@ -84,14 +81,14 @@ static inline void ex_init_modes(jl_t* jl) {
 	jl_mode_switch(jl, EX_MODE_EDIT);
 }
 
-static inline void ex_init_tasks(jlgr_t* jlgr) {
+static inline void ex_init_tasks(la_window_t* jlgr) {
 	jlgr_menu_addicon_flip(jlgr);
 	jlgr_menu_addicon_slow(jlgr);
 //	jlgr_menu_addicon_name(jl);
 }
 
-static void ex_graphical_init(jl_t* jl) {
-	jlgr_t* jlgr = jl->jlgr;
+static void ex_init(jl_t* jl) {
+	la_window_t* jlgr = jl->jlgr;
 
 	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "Initializing");
 	ex_init_tasks(jlgr);
@@ -99,6 +96,6 @@ static void ex_graphical_init(jl_t* jl) {
 }
 
 int main(int argc, char* argv[]) {
-	la_start(la_dont, la_dont, "Lib Aldaron Test Program", sizeof(ctx_t));
-	la_window_init(&window, ex_graphical_init);
+	return la_start(ex_init, la_dont, 1, "Lib Aldaron Test Program",
+		sizeof(ctx_t));
 }

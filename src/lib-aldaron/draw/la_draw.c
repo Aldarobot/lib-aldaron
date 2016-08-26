@@ -28,22 +28,25 @@ static void jlgr_loop_(jl_t* jl) {
  * @param jlgr: The window.
  * @param fn_: Graphic initialization function run on graphical thread.
 **/
-void la_window_init(la_window_t* jlgr, jl_fnct fn_) {
+void la_window_init(la_window_t* window, jl_fnct fn_) {
 	jl_t* jl = la_jl_deprecated;
 
-	jl->jlgr = jlgr;
+	jl->jlgr = window;
 	jl->loop = jlgr_loop_;
 #if JL_PLAT == JL_PLAT_COMPUTER
-	jlgr->wm.fullscreen = 0;
+	window->wm.fullscreen = 0;
 #endif
-	jlgr->jl = jl;
-	jlgr->fl.inloop = 1;
+	window->jl = jl;
+	window->fl.inloop = 1;
 	// Initialize Subsystem
 #ifndef LA_PHONE_ANDROID
 	SDL_VideoInit(NULL);
 #endif
+	// Mouse initial values
+//	al_safe_set_float(&window->mouse_x, 0.f);
+//	al_safe_set_float(&window->mouse_y, 0.f);
 	// Start Drawing thread.
-	jlgr_thread_init(jlgr, fn_);
+	jlgr_thread_init(window, fn_);
 	//
 	jl->mode.count = 0;
 }
@@ -86,8 +89,6 @@ void jlgr_resz(la_window_t* jlgr, uint16_t w, uint16_t h) {
  * @param jlgr: The jlgr library context.
 **/
 void jlgr_kill(la_window_t* jlgr) {
-	la_print("Sending Kill to threads....");
-	SDL_AtomicSet(&jlgr->running, 0);
 	la_print("Removing clump filelist for fileviewer....");
 	jlgr_file_kill_(jlgr);
 	la_print("Destroying window....");

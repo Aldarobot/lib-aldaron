@@ -1,7 +1,7 @@
 #include "JLGRprivate.h"
 #include "SDL_filesystem.h"
 
-static char* jlgr_file_fullname__(la_window_t* jlgr, char* selecteddir,
+/*static char* jlgr_file_fullname__(la_window_t* jlgr, char* selecteddir,
 	char* selecteditem)
 {
 	char *newdir = malloc(
@@ -17,7 +17,7 @@ static char* jlgr_file_fullname__(la_window_t* jlgr, char* selecteddir,
 	newdir[strlen(jlgr->fl.dirname) +
 		strlen(selecteditem) + 1] = '\0';
 	return newdir;
-}
+}*/
 
 static void jl_fl_user_select_check_extradir__(char *dirname) {
 	if(dirname[strlen(dirname)-1] == '/' && strlen(dirname) > 1) {
@@ -113,7 +113,7 @@ uint8_t jlgr_openfile_init(la_window_t* jlgr, const char* program_name,
 	}
 }
 
-static void jl_fl_user_select_up__(la_window_t* jlgr) {
+/*static void jl_fl_user_select_up__(la_window_t* jlgr) {
 	if((jlgr->fl.cursor > 0) || jlgr->fl.cpage) jlgr->fl.cursor--;
 }
 
@@ -185,7 +185,7 @@ static void jl_fl_user_select_do__(la_window_t* jlgr, jlgr_input_t input) {
 			jl_fl_open_file__(jlgr, jlgr->fl.selecteditem);
 		}
 	}
-}
+}*/
 
 /**
  * Run the file viewer.
@@ -205,7 +205,7 @@ void jlgr_openfile_loop(la_window_t* jlgr) {
 	jlgr_text_draw(jlgr, "Select File", (jl_vec3_t) { .02, .02, 0. },
 		jlgr->font);
 
-	jlgr_input_do(jlgr, JL_INPUT_JOYC, jl_fl_user_select_dir__, NULL);
+//	jlgr_input_do(jlgr, JL_INPUT_JOYC, jl_fl_user_select_dir__, NULL);
 	//Draw files
 	for(i = 0; i < cl_list_count(jlgr->fl.filelist); i++) {
 		stringtoprint = cl_list_iterator_next(iterator);
@@ -257,7 +257,7 @@ void jlgr_openfile_loop(la_window_t* jlgr) {
 			(jl_vec3_t) { .02, jl_gl_ar(jlgr) - .02, 0. },
 			(jl_font_t) { jlgr->textures.icon, 0,
 				jlgr->fontcolor, .02});
-		jlgr_input_do(jlgr, JL_INPUT_SELECT, jl_fl_user_select_do__, NULL);
+//		jlgr_input_do(jlgr, JL_INPUT_SELECT, jl_fl_user_select_do__, NULL);
 	}
 	jlgr_sprite_loop(jlgr, &jlgr->fl.btns[0]);
 	jlgr_sprite_loop(jlgr, &jlgr->fl.btns[1]);
@@ -331,13 +331,10 @@ void jlgr_fl_init(la_window_t* jlgr) {
 	jlgr_sprite_init(jlgr, &jlgr->fl.btns[1], rc2,
 		jl_fl_btn_makefolder_loop__, jl_fl_btn_makefolder_draw__,
 		NULL, 0, NULL, 0);
-	jlgr->jl->has.fileviewer = 1;
 }
 
 void jlgr_file_kill_(la_window_t* jlgr) {
-	if(jlgr->jl->has.fileviewer) {
-		la_print("killing fl....");
-		cl_list_destroy(jlgr->fl.filelist);
-		la_print("killed fl!");
-	}
+	la_print("killing fl....");
+	cl_list_destroy(jlgr->fl.filelist);
+	la_print("killed fl!");
 }

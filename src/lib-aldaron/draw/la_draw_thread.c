@@ -65,8 +65,6 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	jlgr_init__(jlgr);
 	la_print("Creating Taskbar sprite....");
 	jlgr_menubar_init__(jlgr);
-	la_print("Creating Mouse sprite....");
-	jlgr_mouse_init__(jlgr);
 	la_print("User's Init....");
 	SDL_AtomicSet(&jlgr->running, 1);
 	jl_fnct program_init_;

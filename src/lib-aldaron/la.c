@@ -40,7 +40,6 @@ static inline void jl_init_libs__(jl_t* jl) {
 	jl_sdl_init__(jl);
 	la_print("Initializing SDL....");
 	SDL_Init(0);
-	la_print("Initialized!");
 }
 
 static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
@@ -60,7 +59,7 @@ static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 	jl_mode_loop__(jl);
 	//
 	jl->time.timer = jl_time_get(jl);
-	la_print("Started JL_Lib!");
+	la_print("Started JL_Lib on thread %X!", la_thread_current());
 }
 
 static void jl_time_reset__(jl_t* jl, uint8_t on_time) {
@@ -97,13 +96,19 @@ void main_loop_(jl_t* jl) {
  * Exit The program on an error.
 **/
 void la_panic(const char* format, ...) {
+	char temp[256];
 	va_list arglist;
 
 	va_start( arglist, format );
-	la_print( format, arglist );
+	vsprintf( temp, format, arglist );
 	va_end( arglist );
 
+	la_print( "%s", temp );
+#ifdef LA_COMPUTER
 	assert(0);
+#else
+	exit(-1);
+#endif
 }
 
 /**
@@ -133,6 +138,7 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 		jlgr_fl_init(jlgr);
 		la_print("Initializing file viewer!");
 	}
+	la_print("This is thread #%X!", la_thread_current());
 	// Run the Loop
 	while(jl->mode.count) ((jl_fnct)jl->loop)(jl);
 	// Kill the program

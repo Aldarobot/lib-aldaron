@@ -236,7 +236,6 @@ struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive);
 char* jl_file_get_resloc(jl_t* jl, const char* prg_folder, const char* fname);
 
 // "JLthread.c"
-uint8_t jl_thread_current(jl_t *jl);
 void jl_thread_mutex_new(jl_t *jl, jl_mutex_t* mutex);
 void jl_thread_mutex_lock(jl_mutex_t* mutex);
 void jl_thread_mutex_unlock(jl_mutex_t* mutex);

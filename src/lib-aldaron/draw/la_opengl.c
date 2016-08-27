@@ -1,5 +1,6 @@
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
+#include "la_thread.h"
 
 const char *JL_SHADER_CLR_FRAG = 
 	GLSL_HEAD
@@ -96,8 +97,8 @@ static void jl_gl_buffer_use__(la_window_t* jlgr, uint32_t *buffer) {
 #ifdef JL_DEBUG
 		jlgr_opengl_error__(jlgr, 0,"buffer gen");
 		if(*buffer == 0) {
-			la_panic("buffer is made wrongly on thread #%d!",
-				jl_thread_current(jlgr->jl));
+			la_panic("buffer is made wrongly on thread #%X!",
+				la_thread_current());
 		}
 #endif
 	}
@@ -265,9 +266,7 @@ static inline void jl_gl_texture__bind__(la_window_t* jlgr, uint32_t tex) {
 // Bind a texture.
 void jlgr_opengl_texture_bind_(la_window_t* jlgr, uint32_t tex) {
 #ifdef JL_DEBUG
-	if(tex == 0) {
-		la_panic("jlgr_opengl_texture_bind_: GL tex = 0");
-	}
+	if(tex == 0) la_panic("jlgr_opengl_texture_bind_: GL tex = 0");
 #endif
 	jl_gl_texture__bind__(jlgr, tex);
 }
@@ -813,12 +812,7 @@ static inline void _jl_gl_make_res(la_window_t* jlgr) {
  * @param jlgr: The library context.
 **/
 float jl_gl_ar(la_window_t* jlgr) {
-	uint8_t thread = jl_thread_current(jlgr->jl);
-
-	if(thread)
-		return jlgr->gl.cp ? jlgr->gl.cp->ar : jlgr->wm.ar;
-	else
-		return jlgr->wm.ar;
+	return jlgr->gl.cp ? jlgr->gl.cp->ar : jlgr->wm.ar;
 }
 
 /**

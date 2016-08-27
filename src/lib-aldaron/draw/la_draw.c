@@ -91,9 +91,9 @@ void jlgr_resz(la_window_t* jlgr, uint16_t w, uint16_t h) {
 void jlgr_kill(la_window_t* jlgr) {
 	la_print("Removing clump filelist for fileviewer....");
 	jlgr_file_kill_(jlgr);
+#ifndef LA_PHONE_ANDROID
 	la_print("Destroying window....");
 	SDL_DestroyWindow(jlgr->wm.window);
-#ifndef LA_PHONE_ANDROID
 	la_print("SDL_VideoQuit()....");
 	SDL_VideoQuit();
 #endif

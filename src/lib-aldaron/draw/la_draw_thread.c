@@ -7,6 +7,7 @@
  *	This file handles a separate thread for drawing graphics.
 **/
 #include "JLGRprivate.h"
+#include "la_thread.h"
 
 void jlgr_mouse_resize__(la_window_t* jlgr);
 void jl_mode_loop__(jl_t* jl);

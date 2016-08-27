@@ -42,12 +42,7 @@ int32_t la_thread_old(la_thread_t* thread) {
 	return threadReturnValue;
 }
 
-/**
- * Return the ID of the current thread.
- * @param jl: The library context.
- * @returns: The thread ID number, 0 if main thread.
-**/
-uint8_t jl_thread_current(jl_t *jl) {
+uint64_t la_thread_current(void) {
 	return SDL_ThreadID();
 }
 
@@ -72,7 +67,7 @@ void jl_thread_mutex_new(jl_t *jl, jl_mutex_t* mutex) {
 void jl_thread_mutex_lock(jl_mutex_t* mutex) {
 	jl_t* jl = mutex->jl;
 #if JL_DEBUG
-	uint8_t current_thread = jl_thread_current(jl);
+	uint8_t current_thread = la_thread_current();
 #endif
 	double timer = 0.f;
 	double timepass = 0.f;

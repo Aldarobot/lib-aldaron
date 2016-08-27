@@ -104,16 +104,16 @@ static inline SDL_GLContext* jl_wm_gl_context(la_window_t* jlgr) {
 #endif
 
 //Update the SDL_displayMode structure
-void jl_wm_updatewh_(la_window_t* jlgr) {
+void jl_wm_updatewh_(la_window_t* window) {
 	// Get Window Size
 #ifndef LA_PHONE_ANDROID
-	SDL_GetWindowSize(jlgr->wm.window, &jlgr->wm.w, &jlgr->wm.h);
+	SDL_GetWindowSize(window->wm.window, &window->wm.w, &window->wm.h);
 #else
-	jlgr->wm.w = 640, jlgr->wm.h = 480; // TODO: actual dimensions
+	window->wm.w = window->width, window->wm.h = window->height;
 #endif
 	// Get Aspect Ratio
-	jlgr->wm.ar = ((double)jlgr->wm.h) / ((double)jlgr->wm.w);
-	la_print("size = %dx%d", jlgr->wm.w, jlgr->wm.h);
+	window->wm.ar = ((double)window->wm.h) / ((double)window->wm.w);
+	la_print("size = %dx%d", window->wm.w, window->wm.h);
 }
 
 //This is the code that actually creates the window by accessing SDL

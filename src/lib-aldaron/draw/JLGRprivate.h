@@ -69,7 +69,6 @@ void jl_sg_init__(la_window_t* jlgr);
 void jl_gl_init__(la_window_t* jlgr);
 void jlgr_init__(la_window_t* jlgr);
 void jlgr_menubar_init__(la_window_t* jlgr);
-void jlgr_thread_init(la_window_t* jlgr, jl_fnct fn_);
 void jlgr_effects_init__(la_window_t* jlgr);
 // loop
 void jl_wm_loop__(la_window_t* jlgr);

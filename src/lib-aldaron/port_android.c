@@ -17,6 +17,8 @@
 
 int main(int argc, char* argv[]);
 void la_opengl_error__(int data, const char* fname);
+void la_window_loop__(la_window_t* window);
+void la_window_kill__(la_window_t* window);
 
 extern const char* LA_FILE_ROOT;
 extern const char* LA_FILE_LOG;
@@ -162,6 +164,8 @@ static void window_handle_cmd(struct android_app* app, int32_t cmd) {
 			main(0, NULL);
 			break;
 		case APP_CMD_TERM_WINDOW:
+			// The cross-platform window kill.
+			la_window_kill__(window);
 			// The window is being hidden or closed, clean it up.
 			window_term_display(window);
 			break;
@@ -253,11 +257,13 @@ void android_main(struct android_app* state) {
 
 			// Check if we are exiting.
 			if (state->destroyRequested != 0) {
+				la_print("DESTROY REQUEST");
 				window_term_display(window);
 				return;
 			}
 		}
-
+		// Run the cross-platform window loop.
+		if(window->context) la_window_loop__(window);
 		// Update the screen.
 		la_port_swap_buffers(window);
 	}

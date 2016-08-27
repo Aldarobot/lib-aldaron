@@ -3,6 +3,7 @@
 #ifdef LA_PHONE_ANDROID
 
 #include "port.h"
+#include "la_memory.h"
 
 #include <jni.h>
 #include <errno.h>
@@ -15,10 +16,12 @@
 #define ANDROID_LOG(...) ((void)__android_log_print(ANDROID_LOG_INFO, "Aldaron", __VA_ARGS__))
 
 int main(int argc, char* argv[]);
+void la_opengl_error__(int data, const char* fname);
 
 extern const char* LA_FILE_ROOT;
 extern const char* LA_FILE_LOG;
 extern float la_banner_size;
+la_window_t* la_window = NULL;
 
 /**
  * Initialize an EGL context for the current display.
@@ -32,12 +35,15 @@ static inline int window_init_display(la_window_t* window) {
 	 * component compatible with on-screen windows
 	 */
 	const EGLint attribs[] = {
-			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-			EGL_BLUE_SIZE, 8,
-			EGL_GREEN_SIZE, 8,
-			EGL_RED_SIZE, 8,
-			EGL_NONE
+		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+		EGL_BLUE_SIZE, 8,
+		EGL_GREEN_SIZE, 8,
+		EGL_RED_SIZE, 8,
+		EGL_NONE
 	};
+
+	const EGLint attrib_list [] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+
 	EGLint w, h, dummy, format;
 	EGLint numConfigs;
 	EGLConfig config;
@@ -62,7 +68,7 @@ static inline int window_init_display(la_window_t* window) {
 	ANativeWindow_setBuffersGeometry(window->app->window, 0, 0, format);
 
 	surface = eglCreateWindowSurface(display, config, window->app->window, NULL);
-	context = eglCreateContext(display, config, NULL, NULL);
+	context = eglCreateContext(display, config, NULL, attrib_list);
 
 	if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
 		la_print("Aldaron Unable to eglMakeCurrent");
@@ -80,11 +86,13 @@ static inline int window_init_display(la_window_t* window) {
 	window->state.angle = 0;
 
 	// Initialize GL state.
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-	glEnable(GL_CULL_FACE);
-	glShadeModel(GL_SMOOTH);
-	glDisable(GL_DEPTH_TEST);
-
+//	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+//	glEnable(GL_CULL_FACE);
+//	glShadeModel(GL_SMOOTH);
+//	glDisable(GL_DEPTH_TEST);
+//	glClear(GL_COLOR_BUFFER_BIT);
+//	glClearColor(1.f, 1.f, 0.f, 1.f);
+	la_opengl_error__(0, "glNone");
 	return 0;
 }
 
@@ -147,6 +155,11 @@ static void window_handle_cmd(struct android_app* app, int32_t cmd) {
 				window_init_display(window);
 				la_port_swap_buffers(window);
 			}
+			uint32_t buffer = 0;
+			glGenBuffers(1, &buffer);
+			la_print("BUFFER: %d", buffer);
+
+			main(0, NULL);
 			break;
 		case APP_CMD_TERM_WINDOW:
 			// The window is being hidden or closed, clean it up.
@@ -180,31 +193,30 @@ static void window_handle_cmd(struct android_app* app, int32_t cmd) {
  * event loop for receiving input events and doing other things.
  */
 void android_main(struct android_app* state) {
-	la_window_t window;
+	la_window_t* window = la_memory_allocate(sizeof(la_window_t));
 
 	// Make sure glue isn't stripped.
 	app_dummy();
 
-	memset(&window, 0, sizeof(window));
-	state->userData = &window;
+	state->userData = window;
 	state->onAppCmd = window_handle_cmd;
 	state->onInputEvent = window_handle_input;
-	window.app = state;
+	window->app = state;
 
 	// Prepare to monitor accelerometer
-	window.sensorManager = ASensorManager_getInstance();
-	window.accelerometerSensor = ASensorManager_getDefaultSensor(
-		window.sensorManager, ASENSOR_TYPE_ACCELEROMETER);
-	window.sensorEventQueue = ASensorManager_createEventQueue(
-		window.sensorManager, state->looper, LOOPER_ID_USER, NULL, NULL);
+	window->sensorManager = ASensorManager_getInstance();
+	window->accelerometerSensor = ASensorManager_getDefaultSensor(
+		window->sensorManager, ASENSOR_TYPE_ACCELEROMETER);
+	window->sensorEventQueue = ASensorManager_createEventQueue(
+		window->sensorManager, state->looper, LOOPER_ID_USER, NULL, NULL);
 
 	if (state->savedState != NULL) {
 		// We are starting with a previous saved state; restore from it.
-		window.state = *(struct saved_state*)state->savedState;
+		window->state = *(struct saved_state*)state->savedState;
 	}
 
 	// Run main():
-	main(0, NULL);
+	la_window = window;
 
 	// Window thread ( Drawing + Events ).
 	while (1) {
@@ -224,10 +236,10 @@ void android_main(struct android_app* state) {
 
 			// If a sensor has data, process it now.
 			if (ident == LOOPER_ID_USER) {
-				if (window.accelerometerSensor != NULL) {
+				if (window->accelerometerSensor != NULL) {
 					ASensorEvent event;
 					while (ASensorEventQueue_getEvents(
-							window.sensorEventQueue,
+							window->sensorEventQueue,
 							&event, 1) > 0)
 					{
 						la_print("accelerometer: x=%f y=%f"
@@ -241,13 +253,13 @@ void android_main(struct android_app* state) {
 
 			// Check if we are exiting.
 			if (state->destroyRequested != 0) {
-				window_term_display(&window);
+				window_term_display(window);
 				return;
 			}
 		}
 
 		// Update the screen.
-		la_port_swap_buffers(&window);
+		la_port_swap_buffers(window);
 	}
 }
 

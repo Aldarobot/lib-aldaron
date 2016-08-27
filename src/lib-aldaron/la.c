@@ -26,6 +26,7 @@ void jlgr_fl_init(la_window_t* jlgr);
 	const char* LA_FILE_ROOT = NULL;
 	const char* LA_FILE_LOG = NULL;
 	char la_keyboard_press = 0;
+	extern la_window_t* la_window;
 #endif
 
 float la_banner_size = 0.f;
@@ -40,6 +41,7 @@ static inline void jl_init_libs__(jl_t* jl) {
 	jl_sdl_init__(jl);
 	la_print("Initializing SDL....");
 	SDL_Init(0);
+	la_print("Initializing SDL 2.0....");
 }
 
 static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
@@ -134,9 +136,9 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 	jl_t* jl = ctx->jl;
 	la_window_t* jlgr = ctx->jlgr;
 	if(jlgr) {
-		la_print("Initialized CT! / Initializing file viewer....");
+		la_print("Initializing file viewer....");
 		jlgr_fl_init(jlgr);
-		la_print("Initializing file viewer!");
+		la_print("Initialized file viewer!");
 	}
 	la_print("This is thread #%X!", la_thread_current());
 	// Run the Loop
@@ -168,25 +170,34 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, uint8_t openwindow,
 {
 	jl_t* jl = jl_mem_init_(); // Create The Library Context
 	la_thread_t la_main;
-	la_window_t* window = openwindow ?
+
+#ifndef LA_PHONE_ANDROID
+	la_window_t* la_window = openwindow ?
 		la_memory_allocate(sizeof(la_window_t)) : NULL;
 
 	// Initialize JL_lib!
 	la_init__(jl, openwindow ? la_dont : fnc_init, name, ctx_size);
+#else
+	la_init__(jl, la_dont, name, ctx_size);
+#endif
 	jl->kill = fnc_kill;
 	la_jl_deprecated = jl;
 	// Start a new thread.
-	la_main_thread_t ctx = (la_main_thread_t) { jl, window };
+	la_main_thread_t ctx = (la_main_thread_t) { jl, la_window };
 	la_thread_new(&la_main, (la_thread_fn_t)la_main_thread, "la_main", &ctx);
 	// Open a window, if "openwindow" is set.
-	if(openwindow) la_window_init(window, fnc_init);
+#ifndef LA_PHONE_ANDROID
+	if(openwindow) la_window_init(la_window, fnc_init);
 	// Wait for the thread to finish.
 	la_print("Kill Window....");
-	if(openwindow) jlgr_kill(window);
+	if(openwindow) jlgr_kill(la_window);
 	la_print("SDL_Quit()");
 	SDL_Quit();
 	la_print("Free library context....");
 	jl_mem_kill_(jl);
 	la_print("| success |");
+#else
+	la_window_init(la_window, fnc_init);
+#endif
 	return 0;
 }

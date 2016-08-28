@@ -3,6 +3,7 @@
 #ifdef LA_COMPUTER
 
 #include "port.h"
+#include "la_memory.h"
 #include <stdio.h>
 
 void jlgr_resz(la_window_t* jlgr, uint16_t x, uint16_t y);
@@ -23,6 +24,10 @@ void la_print(const char* format, ...) {
 void la_port_input(la_window_t* window) {
 	// Anything that was h (first pressed) last time is not anymore.
 	window->input.mouse.h = 0;
+	window->input.keyboard.h = 0;
+	window->input.keyboard.x = 0.f;
+	window->input.keyboard.y = 0.f;
+	window->input.text[0] = '\0';
 	// Read all events & update states.
 	while(SDL_PollEvent(&window->sdl_event)) {
 	 switch(window->sdl_event.type) {
@@ -50,29 +55,61 @@ void la_port_input(la_window_t* window) {
 			window->input.mouse.h = 1;
 			break;
 		}
-		case SDL_TEXTINPUT: {
-//			int i;
-//			for(i = 0; i < 32; i++)
-//				window->main.ct.text_input[i] =
-//					window->sdl_event.text.text[i];
-//			window->main.ct.read_cursor = 0;
+		case SDL_TEXTINPUT:
+			la_memory_copy(window->sdl_event.text.text,
+				window->input.text, 32);
 			break;
-		}
 		case SDL_KEYDOWN: {
+			window->input.keyboard.h = 1;
+			window->input.keyboard.p = 255;
+			window->input.keyboard.k = 0;
 			switch(window->sdl_event.key.keysym.scancode) {
-				case SDL_SCANCODE_ESCAPE: {
+				case SDL_SCANCODE_UP:
+					window->input.keyboard.k = 1;
+					window->input.keyboard.y = -1.f;
+					break;
+				case SDL_SCANCODE_DOWN:
+					window->input.keyboard.k = 1;
+					window->input.keyboard.y = 1.f;
+					break;
+				case SDL_SCANCODE_RIGHT:
+					window->input.keyboard.k = 1;
+					window->input.keyboard.x = 1.f;
+					break;
+				case SDL_SCANCODE_LEFT:
+					window->input.keyboard.k = 1;
+					window->input.keyboard.x = -1.f;
+					break;
+				case SDL_SCANCODE_ESCAPE:
 					la_print("back due to escape");
 					jl_mode_exit(window->jl);
 					break;
-				} case SDL_SCANCODE_F11: {
+				case SDL_SCANCODE_F11:
 					jlgr_wm_togglefullscreen(window);
 					break;
-				} default: {
+				case SDL_SCANCODE_BACKSPACE:
+					window->input.keyboard.k = '\b';
 					break;
-				}
+				case SDL_SCANCODE_DELETE:
+					window->input.keyboard.k = '\02';
+					break;
+				case SDL_SCANCODE_RETURN:
+					window->input.keyboard.k = '\n';
+					break;
+				default:;
+					char key = SDL_GetKeyFromScancode(
+						window->sdl_event.key.keysym
+							.scancode);
+					if(key <= 'z' && key >= 'a')
+						window->input.keyboard.k = key;
+					break;
 			}
 			break;
 		}
+		case SDL_KEYUP:
+			window->input.keyboard.h = 1;
+			window->input.keyboard.p = 0;
+			break;
 		case SDL_MOUSEMOTION: {
 			float x = (float)window->sdl_event.motion.x /
 				(float)window->wm.w;

@@ -20,6 +20,7 @@
 
 #include "la_file.h"
 #include "la_memory.h"
+#include "la_buffer.h"
 
 #define PKFMAX 10000000
 #define JL_FL_PERMISSIONS ( S_IRWXU | S_IRWXG | S_IRWXO )
@@ -45,7 +46,7 @@ char* jl_file_convert__(jl_t* jl, const char* filename) {
 		data_t append; jl_data_read_upto(jl, &append, &src, '/', 300); 
 		if(append.data[0] == '\0') break;
 		jl_data_merg(jl, &converted, &append);
-		if(jl_data_byte(&src) == '/')
+		if(la_buffer_byte(&src) == '/')
 			jl_data_merg(jl, &converted, &jl->fl.separator);
 		src.curs++; // Skip '/'
 		jl_data_free(&append);

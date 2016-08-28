@@ -122,13 +122,15 @@ void jlgr_vo_rect(la_window_t* jlgr, jl_vo_t* vo, jl_rect_t* rc) {
 	jlgr_vo_init__(jlgr->jl, vo);
 	if(rc) {
 		float rectangle_coords[] = {
-			rc->x,		rc->y + rc->h,	0.f,
-			rc->x,		rc->y,		0.f,
-			rc->x + rc->w,	rc->y,		0.f,
-			rc->x + rc->w,	rc->y + rc->h,	0.f };
+			0.f,		rc->h,		0.f,
+			0.f,		0.f,		0.f,
+			rc->w,		0.f,		0.f,
+			rc->w,		rc->h,		0.f };
 
 		// Overwrite the vertex object
 		jlgr_vo_poly__(jlgr, vo, 4, rectangle_coords);
+		//
+		jlgr_vo_move(vo, (jl_vec3_t) { rc->x, rc->y, 0.f } );
 	}
 }
 

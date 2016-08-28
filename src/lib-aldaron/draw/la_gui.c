@@ -457,7 +457,7 @@ void jlgr_gui_textbox_init(la_window_t* jlgr, data_t* string) {
  * @returns 0: if not.
 **/
 uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr) {
-//	uint8_t bytetoinsert = 0;
+	int i;
 
 	jlgr->gui.textbox.counter += jlgr->jl->time.psec;
 	if(jlgr->gui.textbox.counter > .5) {
@@ -471,21 +471,26 @@ uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr) {
 #if JL_PLAT == JL_PLAT_COMPUTER
 //	jlgr_input_do(jlgr, JL_INPUT_JOYC, jlgr_gui_textbox_cursor__, NULL);
 #endif
-/*	if((bytetoinsert = jlgr_input_typing_get(jlgr))) {
-		if(bytetoinsert == '\b') {
+	for(i = 0; i < strlen(jlgr->input.text); i++) {
+		jl_data_insert_byte(jlgr->jl, jlgr->gui.textbox.string,
+			jlgr->input.text[i]);
+	}
+	if(jlgr->input.keyboard.h && jlgr->input.keyboard.p) {
+		switch(jlgr->input.keyboard.k) {
+		case '\b':
 			if(jlgr->gui.textbox.string->curs == 0) return 0;
 			jlgr->gui.textbox.string->curs--;
 			jl_data_delete_byte(jlgr->jl, jlgr->gui.textbox.string);
-		}else if(bytetoinsert == '\02') {
+			break;
+		case '\02':
 			jl_data_delete_byte(jlgr->jl, jlgr->gui.textbox.string);
-		}else if(bytetoinsert == '\n') {
-			jlgr_input_typing_disable();
+			break;
+		case '\n':
 			return 1;
-		}else{
-			jl_data_insert_byte(jlgr->jl, jlgr->gui.textbox.string,
-				 bytetoinsert);
+		default:
+			break;
 		}
-	}*/
+	}
 	return 0;
 }
 

@@ -95,6 +95,12 @@ void* la_memory_allocate(size_t size) {
 	return la_memory_clear(data, size);
 }
 
+void* la_memory_resize(void* data, size_t size) {
+	if(!data) la_panic("la_memory_resize: memory is NULL");
+	if(!size) la_panic("la_memory_resize: size is zero");
+	return realloc(data, size);
+}
+
 void* la_memory_free(void* data) {
 	free(data);
 	return NULL;

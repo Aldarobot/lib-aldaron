@@ -12,6 +12,7 @@
 
 extern jl_t* la_jl_deprecated;
 extern SDL_atomic_t la_rmc;
+extern SDL_atomic_t la_rmcexit;
 
 static void jlgr_loop_(jl_t* jl) {
 	// Update events.
@@ -202,6 +203,7 @@ void jlgr_resz(la_window_t* jlgr, uint16_t w, uint16_t h) {
  * @param jlgr: The jlgr library context.
 **/
 void jlgr_kill(la_window_t* jlgr) {
+	while(SDL_AtomicGet(&la_rmcexit));
 	la_print("Removing clump filelist for fileviewer....");
 	jlgr_file_kill_(jlgr);
 #ifndef LA_PHONE_ANDROID

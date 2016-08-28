@@ -32,6 +32,7 @@ void jlgr_fl_init(la_window_t* jlgr);
 float la_banner_size = 0.f;
 jl_t* la_jl_deprecated = NULL;
 SDL_atomic_t la_rmc; // running / mode count
+SDL_atomic_t la_rmcexit;
 
 static inline void jl_init_libs__(jl_t* jl) {
 	la_print("Initializing file system....");
@@ -136,6 +137,8 @@ typedef struct {
 static int32_t la_main_thread(la_main_thread_t* ctx) {
 	jl_t* jl = ctx->jl;
 	la_window_t* jlgr = ctx->jlgr;
+
+	SDL_AtomicSet(&la_rmcexit, 1);
 	if(jlgr) {
 		la_print("Initializing file viewer....");
 		jlgr_fl_init(jlgr);
@@ -156,6 +159,7 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 	la_print("Kill Program....");
 	((jl_fnct)jl->kill)(jl);
 	la_print("Success!");
+	SDL_AtomicSet(&la_rmcexit, 0);
 	return 0;
 }
 

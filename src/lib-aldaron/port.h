@@ -57,6 +57,8 @@ typedef struct {
 		jlgr_input_t zlbutton; // ZL Button
 		jlgr_input_t zrbutton; // ZR Button
 		jlgr_input_t accel; // Accelerometer
+
+		char text[32]; // Unicode Text Input.
 	} input;
 
 // from JLGR.h

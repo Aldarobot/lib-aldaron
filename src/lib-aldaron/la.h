@@ -78,8 +78,8 @@ typedef struct{
 //4 bytes of information about the string are included
 typedef struct{
 	uint8_t* data; //Actual String
-	uint32_t size; //Allocated Space In String
-	uint32_t curs; //Cursor In String
+	size_t size; //Allocated Space In String
+	size_t curs; //Cursor In String
 }data_t;
 
 typedef struct{
@@ -189,7 +189,6 @@ void jl_data_mkfrom_data(jl_t* jl, data_t* a, uint32_t size, const void *data);
 void jl_data_data(jl_t *jl, data_t* a, const data_t* b, uint64_t bytes);
 void jl_data_merg(jl_t *jl, data_t* a, const data_t* b);
 void jl_data_trunc(jl_t *jl, data_t* a, uint32_t size);
-uint8_t jl_data_byte(data_t* pstr);
 void jl_data_loadto(data_t* pstr, uint32_t varsize, void* var);
 void jl_data_saveto(data_t* pstr, uint32_t varsize, const void* var);
 void jl_data_add_byte(data_t* pstr, uint8_t pvalue);

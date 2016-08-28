@@ -9,15 +9,17 @@
 **/
 #include "JLprivate.h"
 
+extern SDL_atomic_t la_rmc;
+
 static void _jl_mode_add(jl_t* jl) {
 	// Allocate a new mode.
 	jl->mode.mdes = jl_mem(jl, jl->mode.mdes,
-		(jl->mode.count + 1) * sizeof(jl_mode_t));
+		(SDL_AtomicGet(&la_rmc) + 1) * sizeof(jl_mode_t));
 	// Set the mode.
-	jl->mode.mdes[jl->mode.count] =
+	jl->mode.mdes[SDL_AtomicGet(&la_rmc)] =
 		(jl_mode_t) { jl_dont, jl_dont, jl_mode_exit };
 	// Add to mode count.
-	jl->mode.count++;
+	SDL_AtomicSet(&la_rmc, SDL_AtomicGet(&la_rmc) + 1);
 }
 
 //
@@ -42,7 +44,7 @@ static void _jl_mode_add(jl_t* jl) {
  * @param loop: What to change the loop to.
 */
 void jl_mode_set(jl_t* jl, uint16_t mode, jl_mode_t loops) {
-	while(mode >= jl->mode.count) _jl_mode_add(jl);
+	while(mode >= SDL_AtomicGet(&la_rmc)) _jl_mode_add(jl);
 	jl->mode.mdes[mode] = loops;
 }
 
@@ -112,7 +114,7 @@ LA_CHANGE_MODE:;
 		// Run exit routine.
 		kill_(jl);
 		// If mode is same as before, then quit.
-		if(which == jl->mode.which) jl->mode.count = 0;
+		if(which == jl->mode.which) SDL_AtomicSet(&la_rmc, 0);
 		else goto LA_CHANGE_MODE;
 
 		jl->mode.changed = 0;
@@ -122,7 +124,7 @@ LA_CHANGE_MODE:;
 void jl_mode_init__(jl_t* jl) {
 	// Set up modes:
 	jl->mode.which = 0;
-	jl->mode.count = 0;
+	SDL_AtomicSet(&la_rmc, 0);
 	jl->mode.mdes = NULL;
 	_jl_mode_add(jl);
 	// Clear User Loops

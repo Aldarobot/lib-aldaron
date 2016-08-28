@@ -23,6 +23,7 @@ void la_window_kill__(la_window_t* window);
 extern const char* LA_FILE_ROOT;
 extern const char* LA_FILE_LOG;
 extern float la_banner_size;
+extern SDL_atomic_t la_rmc;
 la_window_t* la_window = NULL;
 
 /**
@@ -85,16 +86,6 @@ static inline int window_init_display(la_window_t* window) {
 	window->surface = surface;
 	window->width = w;
 	window->height = h;
-	window->state.angle = 0;
-
-	// Initialize GL state.
-//	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-//	glEnable(GL_CULL_FACE);
-//	glShadeModel(GL_SMOOTH);
-//	glDisable(GL_DEPTH_TEST);
-//	glClear(GL_COLOR_BUFFER_BIT);
-//	glClearColor(1.f, 1.f, 0.f, 1.f);
-	la_opengl_error__(0, "glNone");
 	return 0;
 }
 
@@ -130,13 +121,64 @@ static void window_term_display(la_window_t* window) {
  */
 static int32_t window_handle_input(struct android_app* app, AInputEvent* event) {
 	la_window_t* window = (la_window_t*)app->userData;
-	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
-		window->state.x = AMotionEvent_getX(event, 0);
-		window->state.y = AMotionEvent_getY(event, 0);
-		la_print("motion event: %dx%d", window->state.x, window->state.y);
+	int32_t input_type = AInputEvent_getType(event);
+
+	if (input_type == AINPUT_EVENT_TYPE_MOTION) {
+		la_print("MOTION EVENT");
+		float x = (float)AMotionEvent_getX(event, 0) /
+			(float)window->width;
+		float y = (float)AMotionEvent_getY(event, 0) /
+			(float)window->height;
+		int32_t action = AMotionEvent_getAction(event);
+		int32_t p = (int) (AMotionEvent_getPressure(event, 0) * 255.f);
+		// Set location of virtual mouse.
+		al_safe_set_float(&window->mouse_x, x);
+		al_safe_set_float(&window->mouse_y, y * window->wm.ar);
+		if(action == AMOTION_EVENT_ACTION_DOWN
+			|| action == AMOTION_EVENT_ACTION_MOVE)
+		{
+			safe_set_uint8(&window->in.touch.p,
+				p > 255 ? 255 : (p < 0 ? 0 : p));
+		}else{
+			safe_set_uint8(&window->in.touch.p, 0);
+		}
+		if(action == AMOTION_EVENT_ACTION_DOWN
+			|| action == AMOTION_EVENT_ACTION_UP)
+		{
+			safe_set_uint8(&window->in.touch.h, 1);
+		}
 		return 1;
+	}else if(input_type == AINPUT_EVENT_TYPE_KEY) {
+		la_print("KEY EVENT");
+		int32_t key_code = AKeyEvent_getKeyCode(event);
+		switch(key_code) {
+			case AKEYCODE_BACK:
+				la_print("Back key pressed");
+				safe_set_uint8(&window->in.back, 1);
+				break;
+			case AKEYCODE_CAMERA:
+				la_print("Camera key pressed");
+				break;
+			case AKEYCODE_MENU:
+				la_print("Menu key pressed");
+				break;
+			case AKEYCODE_DEL:
+				la_print("Backspace key pressed");
+				break;
+			case AKEYCODE_ENTER:
+				la_print("Enter key pressed");
+				break;
+			default:
+				if(key_code >= AKEYCODE_A &&
+					key_code <= AKEYCODE_PERIOD)
+				{
+					char key = AKeyEvent_getScanCode(event);
+					la_print("Key Insert %s", &key);
+				}
+				break;
+		}
 	}
-	return 0;
+	return 1;
 }
 
 /**
@@ -146,10 +188,11 @@ static void window_handle_cmd(struct android_app* app, int32_t cmd) {
 	la_window_t* window = (la_window_t*)app->userData;
 	switch (cmd) {
 		case APP_CMD_SAVE_STATE:
+			la_print("---------------------------- app save state");
 			// The system has asked us to save our current state.  Do so.
-			window->app->savedState = malloc(sizeof(struct saved_state));
-			*((struct saved_state*)window->app->savedState) = window->state;
-			window->app->savedStateSize = sizeof(struct saved_state);
+//			window->app->savedState = malloc(sizeof(struct saved_state));
+//			*((struct saved_state*)window->app->savedState) = NULL;//window->state;
+//			window->app->savedStateSize = sizeof(struct saved_state);
 			break;
 		case APP_CMD_INIT_WINDOW:
 			// The window is being shown, get it ready.
@@ -157,10 +200,6 @@ static void window_handle_cmd(struct android_app* app, int32_t cmd) {
 				window_init_display(window);
 				la_port_swap_buffers(window);
 			}
-			uint32_t buffer = 0;
-			glGenBuffers(1, &buffer);
-			la_print("BUFFER: %d", buffer);
-
 			main(0, NULL);
 			break;
 		case APP_CMD_TERM_WINDOW:
@@ -198,6 +237,9 @@ static void window_handle_cmd(struct android_app* app, int32_t cmd) {
  */
 void android_main(struct android_app* state) {
 	la_window_t* window = la_memory_allocate(sizeof(la_window_t));
+	int ident;
+	int events;
+	struct android_poll_source* source;
 
 	// Make sure glue isn't stripped.
 	app_dummy();
@@ -214,52 +256,40 @@ void android_main(struct android_app* state) {
 	window->sensorEventQueue = ASensorManager_createEventQueue(
 		window->sensorManager, state->looper, LOOPER_ID_USER, NULL, NULL);
 
-	if (state->savedState != NULL) {
+//	if (state->savedState != NULL) {
 		// We are starting with a previous saved state; restore from it.
-		window->state = *(struct saved_state*)state->savedState;
-	}
+//		window->state = *(struct saved_state*)state->savedState;
+//	}
 
 	// Run main():
 	la_window = window;
 
+	SDL_AtomicSet(&la_rmc, 1);
 	// Window thread ( Drawing + Events ).
-	while (1) {
-		int ident;
-		int events;
-		struct android_poll_source* source;
+	while (SDL_AtomicGet(&la_rmc)) {
+		// Poll Events
+		ident = ALooper_pollAll(0, NULL, &events, (void**)&source);
 
-		while ((ident = 
-			ALooper_pollAll(0, NULL, &events, (void**)&source))
-			 >= 0)
-		{
+		// Process this event.
+		if (source != NULL) {
+			source->process(state, source);
+		}
 
-			// Process this event.
-			if (source != NULL) {
-				source->process(state, source);
-			}
-
-			// If a sensor has data, process it now.
-			if (ident == LOOPER_ID_USER) {
-				if (window->accelerometerSensor != NULL) {
-					ASensorEvent event;
-					while (ASensorEventQueue_getEvents(
-							window->sensorEventQueue,
-							&event, 1) > 0)
-					{
-						la_print("accelerometer: x=%f y=%f"
-							" z=%f",
-							event.acceleration.x,
-							event.acceleration.y,
-							event.acceleration.z);
-					}
+		// If a sensor has data, process it now.
+		if (ident == LOOPER_ID_USER) {
+			if (window->accelerometerSensor != NULL) {
+				ASensorEvent event;
+				while (ASensorEventQueue_getEvents(
+						window->sensorEventQueue,
+						&event, 1) > 0)
+				{
+					window->input.accel.x =
+						event.acceleration.x;
+					window->input.accel.y =
+						event.acceleration.y;
+					window->input.accel.z =
+						event.acceleration.z;
 				}
-			}
-
-			// Check if we are exiting.
-			if (state->destroyRequested != 0) {
-				la_print("DESTROY REQUEST");
-				window_term_display(window);
-				return;
 			}
 		}
 		// Run the cross-platform window loop.
@@ -267,6 +297,14 @@ void android_main(struct android_app* state) {
 		// Update the screen.
 		la_port_swap_buffers(window);
 	}
+	la_print("port-android quitting....");
+	// The cross-platform window kill.
+	la_window_kill__(window);
+	// The window is being hidden or closed, clean it up.
+	window_term_display(window);
+	la_print("port-android quitted....");
+	exit(0);
+	return;
 }
 
 void la_print(const char* format, ...) {
@@ -282,8 +320,28 @@ void la_print(const char* format, ...) {
 	ANDROID_LOG("%s", temp); // To Logcat
 }
 
+void jl_mode_loop__(jl_t* jl);
+
 void la_port_input(la_window_t* window) {
-	
+	// Touch Input
+	window->input.touch.x = al_safe_get_float(&window->mouse_x);
+	window->input.touch.y = al_safe_get_float(&window->mouse_y);
+	window->input.touch.p = 0;
+	if(safe_get_uint8(&window->in.touch.h)) {
+		la_print("Just touch");
+		window->input.touch.h = 1;
+		window->input.touch.p = safe_get_uint8(&window->in.touch.p);
+		// Not just pressed anymore
+		safe_set_uint8(&window->in.touch.h, 0);
+	}else{
+		window->input.touch.h = 0;
+	}
+	//
+	if(safe_get_uint8(&window->in.back)) {
+		la_print("Back");
+		safe_set_uint8(&window->in.back, 0);
+		jl_mode_exit(window->jl);
+	}
 }
 
 JNIEXPORT void JNICALL

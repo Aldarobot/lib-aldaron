@@ -8,17 +8,10 @@
 #include <android/sensor.h>
 #endif
 
-#ifdef LA_PHONE_ANDROID
-struct saved_state {
-	float angle;
-	int32_t x;
-	int32_t y;
-};
-#endif
-
 typedef struct{
 	float x; // X Location ( -1.f to 1.f )
 	float y; // Y Location ( -1.f to 1.f )
+	float z; // Z Location / Rotation ( -1.f to 1.f )
 	uint8_t p; // Pressure 0-255
 	uint8_t h; // true if just pressed, otherwise false.
 	uint8_t k; // Which key [ a-z, 0-9 , left/right click ]
@@ -38,7 +31,15 @@ typedef struct {
 	EGLContext context;
 	int32_t width;
 	int32_t height;
-	struct saved_state state;
+
+	struct {
+		struct {
+			safe_uint8_t p;
+			safe_uint8_t h;
+		} touch;
+
+		safe_uint8_t back;
+	} in;
 #endif
 #ifdef LA_COMPUTER
 	SDL_Event sdl_event;
@@ -55,6 +56,7 @@ typedef struct {
 		jlgr_input_t rbutton; // R Button
 		jlgr_input_t zlbutton; // ZL Button
 		jlgr_input_t zrbutton; // ZR Button
+		jlgr_input_t accel; // Accelerometer
 	} input;
 
 // from JLGR.h
@@ -82,8 +84,6 @@ typedef struct {
 		uint16_t set_width;
 		uint16_t set_height;
 	} protected;
-
-	SDL_atomic_t running;
 
 	// Window Info
 	struct {

@@ -11,6 +11,7 @@
 #include "la_memory.h"
 
 extern jl_t* la_jl_deprecated;
+extern SDL_atomic_t la_rmc;
 
 static void jlgr_loop_(jl_t* jl) {
 	// Update events.
@@ -79,7 +80,7 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	la_print("Creating Taskbar sprite....");
 	jlgr_menubar_init__(jlgr);
 	la_print("User's Init....");
-	SDL_AtomicSet(&jlgr->running, 1);
+	SDL_AtomicSet(&la_rmc, 1);
 	jl_fnct program_init_;
 	jl_thread_mutex_lock(&jlgr->protected.mutex);
 	jlgr->protected.needs_resize = 1;
@@ -117,7 +118,7 @@ void la_window_loop__(la_window_t* window) {
 void la_window_kill__(la_window_t* window) {
 	jlgr_sprite_free(window, &window->sg.bg.up);
 	jlgr_sprite_free(window, &window->sg.bg.dn);
-	la_jl_deprecated->mode.count = 0;
+	SDL_AtomicSet(&la_rmc, 0);
 }
 
 //
@@ -156,7 +157,7 @@ void la_window_init(la_window_t* window, jl_fnct fn_) {
 	jlgr_thread_draw_init__(jl);
 #ifndef LA_PHONE_ANDROID
 	// Redraw loop
-	while(SDL_AtomicGet(&window->running))
+	while(SDL_AtomicGet(&la_rmc))
 		la_window_loop__(window);
 	// Free stuff.
 	la_window_kill__(window);

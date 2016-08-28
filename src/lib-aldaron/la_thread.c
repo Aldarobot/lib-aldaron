@@ -212,3 +212,13 @@ float al_safe_get_float(safe_float_t* var) {
 	al_safe_get(var, &value, sizeof(float));
 	return value;
 }
+
+void safe_set_uint8(safe_uint8_t* var, uint8_t value) {
+	al_safe_set(var, &value, sizeof(uint8_t));
+}
+
+uint8_t safe_get_uint8(safe_uint8_t* var) {
+	uint8_t value;
+	al_safe_get(var, &value, sizeof(uint8_t));
+	return value;
+}

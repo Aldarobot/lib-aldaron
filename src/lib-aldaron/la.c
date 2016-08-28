@@ -31,6 +31,7 @@ void jlgr_fl_init(la_window_t* jlgr);
 
 float la_banner_size = 0.f;
 jl_t* la_jl_deprecated = NULL;
+SDL_atomic_t la_rmc; // running / mode count
 
 static inline void jl_init_libs__(jl_t* jl) {
 	la_print("Initializing file system....");
@@ -142,11 +143,11 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 	}
 	la_print("This is thread #%X!", la_thread_current());
 	// Run the Loop
-	while(jl->mode.count) ((jl_fnct)jl->loop)(jl);
+	while(SDL_AtomicGet(&la_rmc)) ((jl_fnct)jl->loop)(jl);
 	// Kill the program
 	if(jlgr) {
 		la_print("Sending Kill to draw thread....");
-		SDL_AtomicSet(&jlgr->running, 0);
+		SDL_AtomicSet(&la_rmc, 0);
 	}
 	if(jl->jlau) {
 		la_print("Kill Audio....");

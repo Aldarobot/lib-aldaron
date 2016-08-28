@@ -213,11 +213,6 @@ void jl_mode_reset(jl_t* jl);
 void jl_mode_switch(jl_t* jl, uint16_t mode);
 void jl_mode_exit(jl_t* jl);
 
-// "JLprint.c"
-void jl_print_set(jl_t* jl, jl_print_fnt fn_);
-void jl_print(jl_t* jl, const char* format, ... );
-void jl_print_rewrite(jl_t* jl, const char* format, ... );
-
 // "JLfile.c"
 void jl_file_print(jl_t* jl, const char* fname, const char* msg);
 uint8_t jl_file_exist(jl_t* jl, const char* path);

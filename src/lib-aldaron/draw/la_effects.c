@@ -313,9 +313,12 @@ void la_effect_light(jl_vo_t* vo, la_light_t* lights, uint8_t light_count,
 		jlgr_opengl_uniform(jlgr, shader, (float*)&power,
 			1, "power[%d]", i);
 	}
-	jlgr_opengl_uniform(jlgr, shader, (float*)&material_brightness,
-		3, "brightness");
-	jlgr_opengl_uniform(jlgr, shader, (float*)&vo->pr.cb.pos, 3, "offset");
+	if(light_count) {
+		jlgr_opengl_uniform(jlgr, shader, (float*)&material_brightness,
+			3, "brightness");
+		jlgr_opengl_uniform(jlgr, shader, (float*)&vo->pr.cb.pos, 3,
+			"offset");
+	}
 	// Translate by offset vector
 	jlgr_opengl_matrix(jlgr, shader,
 		(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale

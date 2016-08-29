@@ -2,6 +2,8 @@
 #include "jlgr_opengl_private.h"
 #include "la_thread.h"
 
+extern float la_banner_size;
+
 const char *JL_SHADER_CLR_FRAG = 
 	GLSL_HEAD
 	"varying vec4 vcolor;\n"
@@ -812,6 +814,11 @@ static inline void _jl_gl_make_res(la_window_t* jlgr) {
 **/
 float jl_gl_ar(la_window_t* jlgr) {
 	return jlgr->gl.cp ? jlgr->gl.cp->ar : jlgr->wm.ar;
+}
+
+float la_window_h(la_window_t* window) {
+	float ar = jl_gl_ar(window);
+	return (1. - la_banner_size) * ar;
 }
 
 /**

@@ -140,6 +140,7 @@ typedef void(*jlgr_fnct)(la_window_t* window);
 
 // JLGR.c:
 void la_window_init(la_window_t* jlgr, jl_fnct fn_);
+float la_window_h(la_window_t* window);
 void jlgr_loop_set(la_window_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
 	jl_fnct downscreen, jl_fnct resize);
 

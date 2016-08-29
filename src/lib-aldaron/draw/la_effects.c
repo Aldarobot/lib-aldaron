@@ -10,6 +10,8 @@ void jlgr_opengl_blend_add_(la_window_t* jlgr);
 void jlgr_opengl_blend_default_(la_window_t* jlgr);
 void jlgr_opengl_blend_none_(la_window_t* jlgr);
 
+extern float la_banner_size;
+
 const char *JL_EFFECT_SHADOW = 
 	GLSL_HEAD
 	"uniform sampler2D texture;\n"
@@ -246,7 +248,7 @@ void jlgr_effects_vo_hue(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c
 	jlgr_opengl_matrix(jlgr, &jlgr->effects.hue.shader,
 		(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
-		(jl_vec3_t) { offs.x, offs.y, offs.z }, // Translate
+		(jl_vec3_t) { offs.x, offs.y + la_banner_size, offs.z }, // Translate
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
 		jl_gl_ar(jlgr));
 	// Set Hue Value In Shader

@@ -15,8 +15,12 @@ extern SDL_atomic_t la_rmc;
 extern SDL_atomic_t la_rmcexit;
 
 static void jlgr_loop_(jl_t* jl) {
+	la_window_t* window = jl->jlgr;
+
 	// Update events.
 	la_port_input(jl->jlgr);
+		if(window->input.touch.h && window->input.touch.p)
+			la_print("oh yeah.");
 	// Run Main Loop
 	main_loop_(jl);
 }

@@ -125,37 +125,14 @@ static int32_t window_handle_input(struct android_app* app, AInputEvent* event) 
 	int32_t input_type = AInputEvent_getType(event);
 
 	if (input_type == AINPUT_EVENT_TYPE_MOTION) {
-		la_print("MOTION EVENT");
-		float x = (float)AMotionEvent_getX(event, 0) /
-			(float)window->width;
-		float y = (float)AMotionEvent_getY(event, 0) /
-			(float)window->height;
-		int32_t action = AMotionEvent_getAction(event);
-		int32_t p = (int) (AMotionEvent_getPressure(event, 0) * 255.f);
-		// Set location of virtual mouse.
-		al_safe_set_float(&window->mouse_x, x);
-		al_safe_set_float(&window->mouse_y, y * window->wm.ar);
-		if(action == AMOTION_EVENT_ACTION_DOWN
-			|| action == AMOTION_EVENT_ACTION_MOVE)
-		{
-			safe_set_uint8(&window->in.touch.p,
-				p > 255 ? 255 : (p < 0 ? 0 : p));
-		}else{
-			safe_set_uint8(&window->in.touch.p, 0);
-		}
-		if(action == AMOTION_EVENT_ACTION_DOWN
-			|| action == AMOTION_EVENT_ACTION_UP)
-		{
-			safe_set_uint8(&window->in.touch.h, 1);
-		}
+		
 		return 1;
 	}else if(input_type == AINPUT_EVENT_TYPE_KEY) {
 		la_print("KEY EVENT");
 		int32_t key_code = AKeyEvent_getKeyCode(event);
 		switch(key_code) {
 			case AKEYCODE_BACK:
-				la_print("Back key pressed");
-				safe_set_uint8(&window->in.back, 1);
+
 				break;
 			case AKEYCODE_CAMERA:
 				la_print("Camera key pressed");
@@ -329,7 +306,7 @@ void la_port_input(la_window_t* window) {
 	window->input.touch.y = al_safe_get_float(&window->mouse_y);
 	window->input.touch.p = 0;
 	if(safe_get_uint8(&window->in.touch.h)) {
-		la_print("Just touch");
+		la_print("Just touch %d", safe_get_uint8(&window->in.touch.p));
 		window->input.touch.h = 1;
 		window->input.touch.p = safe_get_uint8(&window->in.touch.p);
 		// Not just pressed anymore
@@ -360,9 +337,11 @@ Java_com_libaldaron_LibAldaronActivity_nativeLaFraction(JNIEnv *env, jobject obj
 	la_banner_size = fraction;
 }
 
-JNIEXPORT void JNICALL
+JNIEXPORT jint JNICALL
 Java_com_libaldaron_LibAldaronActivity_nativeLaDraw(JNIEnv *env, jobject obj) {
 	la_window_loop__(la_window);
+	if(SDL_AtomicGet(&la_rmc) == 0) return 100;
+	else return 0;
 }
 
 JNIEXPORT void JNICALL
@@ -383,6 +362,27 @@ Java_com_libaldaron_LibAldaronActivity_nativeLaResize(JNIEnv *env, jobject obj,
 		la_window->width = w;
 		la_window->height = h;
 	}
+}
+
+JNIEXPORT void JNICALL
+Java_com_libaldaron_LibAldaronActivity_nativeLaBack(JNIEnv *env, jobject obj) {
+	la_print("Back key pressed");
+	safe_set_uint8(&la_window->in.back, 1);
+}
+
+JNIEXPORT void JNICALL
+Java_com_libaldaron_LibAldaronActivity_nativeLaTouch(JNIEnv *env, jobject obj,
+	jint x, jint y, jint p, jint h)
+{
+	float xf = ((float)x) / ((float)la_window->width);
+	float yf = ((float)y) / ((float)la_window->height);
+
+	la_print("%fx%f", xf, yf);
+	// Set location of virtual mouse.
+	al_safe_set_float(&la_window->mouse_x, xf);
+	al_safe_set_float(&la_window->mouse_y, yf * la_window->wm.ar);
+	safe_set_uint8(&la_window->in.touch.p, p);
+	if(h) safe_set_uint8(&la_window->in.touch.h, h);
 }
 
 #endif

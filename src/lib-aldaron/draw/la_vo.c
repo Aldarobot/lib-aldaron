@@ -9,7 +9,7 @@
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
 
-/** @cond */
+extern float la_banner_size;
 
 static inline void jlgr_vo_bounding_box(la_window_t* jlgr, jl_vo_t* vo,
 	const float *xyzw, uint32_t vertices)
@@ -57,6 +57,7 @@ static void jlgr_vo_vertices__(la_window_t* jlgr, jl_vo_t* vo, const float *xyzw
 		jlgr_pr_resize(jlgr, &vo->pr, vo->pr.cb.ofs.x, vo->pr.cb.ofs.y,
 			jlgr->wm.w * vo->pr.cb.ofs.x);
 	}
+	jlgr_vo_move(vo, (jl_vec3_t) { 0.f, 0.f, 0.f });
 }
 
 static void jlgr_vo_color_buffer__(la_window_t* jlgr, jl_vo_t* vo, float* cc) {
@@ -109,8 +110,6 @@ void jlgr_vo_init__(jl_t* jl, jl_vo_t* vo) {
 void jlgr_vo_exit__(jl_vo_t* vo, const char* error) {
 	if(vo->jl == NULL) la_panic("Vertex object uninit'd: %s\n", error);
 }
-
-/** @endcond */
 
 /**
  * Resize a vertex object to a rectangle.
@@ -281,6 +280,7 @@ void jlgr_vo_color_solid(la_window_t* jlgr, jl_vo_t* vo, float* rgba) {
 void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos) {
 	jlgr_vo_exit__(vo, "Can't Move!");
 	vo->pr.cb.pos = pos;
+	vo->pr.cb.pos.y += la_banner_size;
 }
 
 /**

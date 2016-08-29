@@ -15,6 +15,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.opengles.GL10;
+import android.view.inputmethod.InputMethodManager;
 
 import com.millennialmedia.MMSDK;
 import com.millennialmedia.MMLog;
@@ -38,12 +39,58 @@ public class LibAldaronActivity extends Activity {
 	// Native Functions
 	public static native void nativeLaSetFiles(String data, String logfile);
 	public static native void nativeLaFraction(float fraction);
-	public static native void nativeLaDraw();
+	public static native int nativeLaDraw();
 	public static native void nativeLaResize(int w, int h);
+
+	// Native Input Functions
+	public static native void nativeLaBack();
+	public static native void nativeLaTouch(int x, int y, int p, int h);
+
+	private static InputMethodManager inputMethodManager;
 
 	// Function to print to the logcat for | grep Aldaron
 	public static void printf(String whatToPrint) {
 		Log.i("Aldaron", whatToPrint);
+	}
+
+	public void la_quit() {
+		finish();
+	}
+
+	@Override
+	public void onBackPressed() {
+		nativeLaBack();
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		printf("Key Down....");
+		return super.onKeyDown(keyCode, event);
+	}
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		printf("Key Up....");
+		return super.onKeyUp(keyCode, event);
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		int x = (int) event.getX();
+		int y = (int) event.getY();
+
+		switch (event.getAction()) {
+			case MotionEvent.ACTION_DOWN:
+				nativeLaTouch(x, y, 255, 1);
+				break;
+			case MotionEvent.ACTION_MOVE:
+				nativeLaTouch(x, y, 255, 0);
+				break;
+			case MotionEvent.ACTION_UP:
+				nativeLaTouch(x, y, 0, 1);
+				break;
+		}
+		return super.onTouchEvent(event);
 	}
 
 	// Overridden to create ads and send external storage directory.
@@ -63,6 +110,9 @@ public class LibAldaronActivity extends Activity {
 		} catch(Exception e) {
 			printf(e.getMessage());
 		}
+
+		inputMethodManager = (InputMethodManager)
+			getSystemService(INPUT_METHOD_SERVICE);
 
 		String state = Environment.getExternalStorageState();
 		if (! Environment.MEDIA_MOUNTED.equals(state)) {
@@ -179,7 +229,7 @@ public class LibAldaronActivity extends Activity {
 //			(int) (dm.heightPixels * ad_height) );
 	}
 
-	private static class AldaronView extends GLSurfaceView {
+	private class AldaronView extends GLSurfaceView {
 		public AldaronView(Context context) {
 			super(context);
 			setEGLContextFactory(new ContextFactory());
@@ -187,7 +237,7 @@ public class LibAldaronActivity extends Activity {
 			setRenderer(new Renderer());
 		}
 
-		private static class ConfigChooser implements
+		private class ConfigChooser implements
 			GLSurfaceView.EGLConfigChooser
 		{
 			protected int mRedSize;
@@ -211,7 +261,7 @@ public class LibAldaronActivity extends Activity {
 			* We use a minimum size of 4 bits for red/green/blue, but will
 			* perform actual matching in chooseConfig() below.
 			*/
-			private static int[] s_configAttribs2 =
+			private int[] s_configAttribs2 =
 			{
 				EGL10.EGL_RED_SIZE, 8,
 				EGL10.EGL_GREEN_SIZE, 8,
@@ -288,10 +338,10 @@ public class LibAldaronActivity extends Activity {
 			}
 		}
 
-		private static class ContextFactory implements
+		private class ContextFactory implements
 			GLSurfaceView.EGLContextFactory
 		{
-			private static int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
+			private int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
 
 			public EGLContext createContext(EGL10 egl,
 				EGLDisplay display, EGLConfig eglConfig)
@@ -315,16 +365,32 @@ public class LibAldaronActivity extends Activity {
 			}
 		}
 
-		private static void checkEglError(String prompt, EGL10 egl) {
+		private void checkEglError(String prompt, EGL10 egl) {
 			int error;
 			while ((error = egl.eglGetError()) != EGL10.EGL_SUCCESS) {
 			    Log.e("Aldaron", String.format("%s: EGL error", prompt));
 			}
 		}
 
-		private static class Renderer implements GLSurfaceView.Renderer{
+		private class Renderer implements GLSurfaceView.Renderer{
 			public void onDrawFrame(GL10 gl) {
-				nativeLaDraw();
+				switch(nativeLaDraw()) {
+					case 10:
+						inputMethodManager
+							.showSoftInput(
+								aldaronView, 0);
+						break;
+					case 11:
+						inputMethodManager
+							.hideSoftInputFromWindow
+							  (aldaronView.getWindowToken(), 0);
+						break;
+					case 100:
+						la_quit();
+						break;
+					default:
+						break;
+				}
 			}
 
 			public void onSurfaceChanged(GL10 gl, int w, int h) {

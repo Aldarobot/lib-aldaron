@@ -25,6 +25,8 @@ typedef struct {
 
 void jlgr_mouse_draw__(la_window_t* jlgr);
 
+extern float la_banner_size;
+
 static void _jlgr_popup_loop(jl_t *jl) {
 }
 
@@ -70,7 +72,7 @@ void jlgr_fill_image_set(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h,
 	int16_t c)
 {
 	if(!tex) la_panic("jlgr_fill_image_set: Texture Must Be Nonzero!\n");
-	jl_rect_t rc = { 0., 0., 1., jl_gl_ar(jlgr) };
+	jl_rect_t rc = { 0., (.5f * la_window_h(jlgr)) - 1.f, 1.f, 2.f };
 
 	jlgr_vo_set_image(jlgr, &jlgr->gui.vos.whole_screen, rc, tex);
 	jlgr_vo_txmap(jlgr, &jlgr->gui.vos.whole_screen, 0, w, h, c);

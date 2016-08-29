@@ -202,6 +202,7 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, uint8_t openwindow,
 	jl_mem_kill_(jl);
 	la_print("| success |");
 #else
+	la_print("android pre init %d %d", la_window->width, la_window->height);
 	la_window_init(la_window, fnc_init);
 #endif
 	return 0;

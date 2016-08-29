@@ -2,13 +2,10 @@
  * JL_lib
  * Copyright (c) 2015 Jeron A. Lau 
 */
-/** \file
- * JLAU.c
- *	Audio
- * 		This library can play/record music/sound effects.
-*/
 #include "JLprivate.h"
-#include "jlau.h"
+
+#ifdef LA_COMPUTER
+#include "la_audio.h"
 #include "la_memory.h"
 
 #define JLAU_CHANNEL_MUSIC -2
@@ -191,3 +188,5 @@ void jlau_kill(jlau_t* jlau) {
 	Mix_CloseAudio();	
 	la_print("Quit Audio Successfully!");
 }
+
+#endif

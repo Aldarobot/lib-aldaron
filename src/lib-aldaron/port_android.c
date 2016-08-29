@@ -8,6 +8,7 @@
 #include <jni.h>
 #include <errno.h>
 
+// OpenGLES for android.
 #include <GLES/gl.h>
 
 #include <android/log.h>
@@ -357,6 +358,31 @@ Java_com_libaldaron_LibAldaronActivity_nativeLaFraction(JNIEnv *env, jobject obj
 	float fraction)
 {
 	la_banner_size = fraction;
+}
+
+JNIEXPORT void JNICALL
+Java_com_libaldaron_LibAldaronActivity_nativeLaDraw(JNIEnv *env, jobject obj) {
+	la_window_loop__(la_window);
+}
+
+JNIEXPORT void JNICALL
+Java_com_libaldaron_LibAldaronActivity_nativeLaResize(JNIEnv *env, jobject obj,
+	jint w, jint h)
+{
+	// If not initialized, initialize.
+	if(!la_window) {
+		la_print("nativeLaResize %dx%d", w, h);
+		// Allocate the window context.
+		la_window = la_memory_allocate(sizeof(la_window_t));
+		//
+		la_window->width = w;
+		la_window->height = h;
+		// Run the main routine.
+		main(0, NULL);
+	}else{
+		la_window->width = w;
+		la_window->height = h;
+	}
 }
 
 #endif

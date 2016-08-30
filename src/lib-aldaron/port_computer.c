@@ -34,9 +34,9 @@ void la_port_input(la_window_t* window) {
 		case SDL_MOUSEBUTTONDOWN: {
 			// Set x,y
 			window->input.mouse.p = 255;
-			window->input.mouse.x = al_safe_get_float(
+			window->input.mouse.x = la_safe_get_float(
 				&window->mouse_x);
-			window->input.mouse.y = al_safe_get_float(
+			window->input.mouse.y = la_safe_get_float(
 				&window->mouse_y);
 			switch(window->sdl_event.button.button) {
 				case SDL_BUTTON_LEFT: window->input.mouse.k=1;
@@ -48,9 +48,9 @@ void la_port_input(la_window_t* window) {
 		}
 		case SDL_MOUSEBUTTONUP: {
 			window->input.mouse.p = 0;
-			window->input.mouse.x = al_safe_get_float(
+			window->input.mouse.x = la_safe_get_float(
 				&window->mouse_x);
-			window->input.mouse.y = al_safe_get_float(
+			window->input.mouse.y = la_safe_get_float(
 				&window->mouse_y);
 			window->input.mouse.h = 1;
 			break;
@@ -118,8 +118,8 @@ void la_port_input(la_window_t* window) {
 			if(window->wm.w == 0) x = 0.f;
 			if(window->wm.h == 0) y = 0.f;
 			// Set location of virtual mouse.
-			al_safe_set_float(&window->mouse_x, x);
-			al_safe_set_float(&window->mouse_y, y * window->wm.ar);
+			la_safe_set_float(&window->mouse_x, x);
+			la_safe_set_float(&window->mouse_y, y * window->wm.ar);
 			break;
 		}
 		case SDL_MOUSEWHEEL: {

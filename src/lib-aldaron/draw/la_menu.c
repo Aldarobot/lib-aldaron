@@ -181,8 +181,8 @@ void jlgr_menu_draw(la_window_t* window, uint8_t resize) {
 **/
 void jlgr_menu_loop(la_window_t* window) {
 	jl_thread_mutex_lock(&window->menu.mutex);
-	const float mouse_x = al_safe_get_float(&window->mouse_x);
-	const float mouse_y = al_safe_get_float(&window->mouse_y);
+	const float mouse_x = la_safe_get_float(&window->mouse_x);
+	const float mouse_y = la_safe_get_float(&window->mouse_y);
 	const uint8_t selected = (uint8_t) ((1. - mouse_x) / .1);
 
 	for(window->menu.cursor = 0; window->menu.cursor < 10; window->menu.cursor++) {

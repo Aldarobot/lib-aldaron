@@ -20,10 +20,9 @@ void jlgr_mouse_resize__(la_window_t* jlgr) {
 
 void jlgr_mouse_draw__(la_window_t* jlgr) {
 	if(jlgr->mouse.jl == NULL) return;
-//	la_print("mouse draw @ %fx%f!", al_safe_get_float(&jlgr->mouse_x), al_safe_get_float(&jlgr->mouse_y));
 	jlgr_vo_move(&jlgr->mouse, (jl_vec3_t) {
-		al_safe_get_float(&jlgr->mouse_x),
-		al_safe_get_float(&jlgr->mouse_y), 0.f});
+		la_safe_get_float(&jlgr->mouse_x),
+		la_safe_get_float(&jlgr->mouse_y), 0.f});
 	jlgr_vo_draw(jlgr, &jlgr->mouse);
 }
 //#endif

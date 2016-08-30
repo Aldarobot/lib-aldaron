@@ -1,13 +1,6 @@
-/*
- * JL_Lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-/** \file
- * JLthread.c
- *	This file handles a separate thread for drawing graphics.
-**/
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+
 #include "JLprivate.h"
-#include "la_safe.h"
 #include "la_thread.h"
 #include "la_memory.h"
 
@@ -186,39 +179,4 @@ void jl_thread_pvar_drop(jl_pvar_t* pvar, void** data) {
 void jl_thread_pvar_free(jl_pvar_t* pvar) {
 	pvar->data = jl_mem(pvar->jl, pvar->data, 0);
 	pvar->size = 0;
-}
-
-/**
- * Set a thread safe variable
-**/
-void al_safe_set(void* var, void* set, size_t size) {
-	SDL_AtomicLock(var);
-	jl_mem_copyto(set, var + sizeof(SDL_SpinLock), size);
-	SDL_AtomicUnlock(var);
-}
-
-void al_safe_get(void* var, void* set, size_t size) {
-	SDL_AtomicLock(var);
-	jl_mem_copyto(var + sizeof(SDL_SpinLock), set, size);
-	SDL_AtomicUnlock(var);
-}
-
-void al_safe_set_float(safe_float_t* var, float value) {
-	al_safe_set(var, &value, sizeof(float));
-}
-
-float al_safe_get_float(safe_float_t* var) {
-	float value;
-	al_safe_get(var, &value, sizeof(float));
-	return value;
-}
-
-void safe_set_uint8(safe_uint8_t* var, uint8_t value) {
-	al_safe_set(var, &value, sizeof(uint8_t));
-}
-
-uint8_t safe_get_uint8(safe_uint8_t* var) {
-	uint8_t value;
-	al_safe_get(var, &value, sizeof(uint8_t));
-	return value;
 }

@@ -5,8 +5,8 @@ static void ex_redraw(jl_t* jl) {
 	la_window_t* window = jl->jlgr;
 	ctx_t* ctx = la_context(jl);
 	la_light_t light = {
-		(jl_vec3_t) { al_safe_get_float(&window->mouse_x),
-			al_safe_get_float(&window->mouse_y) },
+		(jl_vec3_t) { la_safe_get_float(&window->mouse_x),
+			la_safe_get_float(&window->mouse_y) },
 		(jl_vec3_t) { 1.f, 1.f, 1.f },
 		.25f
 	};

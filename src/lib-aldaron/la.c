@@ -29,7 +29,7 @@ void jlgr_fl_init(la_window_t* jlgr);
 	extern la_window_t* la_window;
 #endif
 
-float la_banner_size = 0.1f;
+float la_banner_size = 0.f;
 jl_t* la_jl_deprecated = NULL;
 SDL_atomic_t la_rmc; // running / mode count
 SDL_atomic_t la_rmcexit;

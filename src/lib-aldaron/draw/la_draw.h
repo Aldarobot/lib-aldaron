@@ -2,9 +2,9 @@
 #define JLGR
 
 #include "jl.h"
-#include "la_safe.h"
 
 #include "SDL_events.h"
+#include "la_safe.h"
 
 #define JLGR_TEXT_CMD "\x01"
 #define JLGR_TEXT_BOLD JLGR_TEXT_CMD "\x01"

@@ -1,16 +1,4 @@
-/*
- * JL_lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-/** \file
- * cl.c
- *	Clump extensions.
- *	Uses Clump:
- *		Clump is a handy memory library that includes various variable
- *		structures which are: Bitarrays, Linked List, Hash Tables,
- *		Data Trees and Huffman Codecs.
-*/
-#include "JLprivate.h"
+#include "la.h"
 
 static inline void *_jl_cl_list_alphabetize_lowest(struct cl_list *list) {
 	int i, j, k;

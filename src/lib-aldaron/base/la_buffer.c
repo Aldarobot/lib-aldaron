@@ -1,4 +1,6 @@
-#include "JLprivate.h"
+#include "la.h"
+#include "la_memory.h"
+#include "la_buffer.h"
 
 //
 // Internal Functions
@@ -6,7 +8,7 @@
 
 static void jl_data_truncate_curs__(data_t* pstr) {
 	if(pstr->curs > pstr->size) {
-		pstr->curs = pstr->size;
+		pstr->curs = pstr->size - 1;
 	}
 }
 
@@ -26,7 +28,7 @@ static void jl_data_increment(data_t* pstr, uint8_t incrementation) {
 void jl_data_clear(jl_t* jl, data_t* pa) {
 	pa->curs = 0;
 //	jl_data_resize(jl, pa, 0);
-	jl_mem_clr(pa->data, pa->size + 1);
+	la_memory_clear(pa->data, pa->size + 1);
 }
 
 /**
@@ -37,9 +39,15 @@ void jl_data_clear(jl_t* jl, data_t* pa) {
  * @returns: A new initialized "strt".
 */
 void jl_data_init(jl_t* jl, data_t* a, uint32_t size) {
-	a->data = jl_memi(jl, size+1);
+	a->data = la_memory_allocate(size+1);
 	a->size = size;
 	a->curs = 0;
+}
+
+void la_buffer_init(la_buffer_t* buffer) {
+	buffer->curs = 0;
+	buffer->size = 8;
+	buffer->data = la_memory_allocate(8);
 }
 
 /**
@@ -55,7 +63,7 @@ void jl_data_free(data_t* pstr) {
 */
 void jl_data_mkfrom_data(jl_t* jl, data_t* a, uint32_t size, const void *data) {
 	jl_data_init(jl, a, size);
-	jl_mem_copyto(data, a->data, size);
+	la_memory_copy(data, a->data, size);
 	a->data[size] = '\0'; // Null terminalte
 }
 
@@ -68,14 +76,24 @@ void jl_data_mkfrom_str(data_t* a, const char* string) {
 	return jl_data_mkfrom_data(NULL, a, strlen(string), string);
 }
 
-/**
- * Returns the byte at the cursor of a "strt".
- * @param pstr: the string to read.
- * @returns: byte at the cursor of "pstr"
-*/
-uint8_t jl_data_byte(data_t* pstr) {
-	jl_data_truncate_curs__(pstr);
-	return pstr->data[pstr->curs];
+void la_buffer_format(la_buffer_t* buffer, const char* format, ...) {
+	va_list arglist;
+
+	// Allocate twice as much space as format.
+	buffer->curs = strlen(format) * 2;
+	la_buffer_resize(buffer);
+	// Format
+	va_start(arglist, format);
+	vsnprintf((void*)buffer->data, buffer->size, format, arglist);
+	va_end(arglist);
+}
+
+uint8_t la_buffer_byte(la_buffer_t* buffer) {
+	// Avoid memory errors.
+	if(buffer->curs >= buffer->size)
+		buffer->curs = buffer->size - 1;
+	// Return byte at cursor.
+	return buffer->data[buffer->curs];
 }
 
 /**
@@ -96,7 +114,7 @@ uint8_t jl_data_get_byte(data_t* pstr) {
 void jl_data_loadto(data_t* pstr, uint32_t varsize, void* var) {
 	void* area = ((void*)pstr->data) + pstr->curs;
 
-	jl_mem_copyto(area, var, varsize);
+	la_memory_copy(area, var, varsize);
 	jl_data_increment(pstr, varsize);
 }
 
@@ -108,7 +126,7 @@ void jl_data_loadto(data_t* pstr, uint32_t varsize, void* var) {
 void jl_data_saveto(data_t* pstr, uint32_t varsize, const void* var) {
 	void* area = ((void*)pstr->data) + pstr->curs;
 
-	jl_mem_copyto(var, area, varsize);
+	la_memory_copy(var, area, varsize);
 	jl_data_increment(pstr, varsize);
 }
 
@@ -135,13 +153,23 @@ void jl_data_delete_byte(jl_t *jl, data_t* pstr) {
 		pstr->data[i] = pstr->data[i+1];
 	pstr->size--;
 	pstr->data[pstr->size] = '\0';
-	if(pstr->size != 0) pstr->data = jl_mem(jl, pstr->data, pstr->size);
+	if(pstr->size != 0) pstr->data = la_memory_resize(pstr->data, pstr->size);
 	jl_data_truncate_curs__(pstr);
+}
+
+void la_buffer_resize(la_buffer_t* buffer) {
+	uint64_t oldsize = buffer->size;
+
+	while(buffer->curs > buffer->size - 1)
+		buffer->size *= 2;
+
+	buffer->data = la_memory_resize(buffer->data, buffer->size);
+	la_memory_clear(buffer->data + oldsize, oldsize);
 }
 
 void jl_data_resize(jl_t *jl, data_t* pstr, uint32_t newsize) {
 	pstr->size = newsize;
-	pstr->data = jl_mem(jl, pstr->data, pstr->size);
+	pstr->data = la_memory_resize(pstr->data, newsize);
 }
 
 /**
@@ -149,27 +177,40 @@ void jl_data_resize(jl_t *jl, data_t* pstr, uint32_t newsize) {
  * the new memory will be allocated. Value 0 is treated as null byte - dont use.
 */
 void jl_data_insert_byte(jl_t *jl, data_t* pstr, uint8_t pvalue) {
-	if(strlen((char*)pstr->data) == pstr->size) {
-		jl_data_resize(jl, pstr, pstr->size + 1);
-	}
-	if(jl_data_byte(pstr) == '\0') {
-		jl_data_add_byte(pstr, pvalue);
-		jl_data_add_byte(pstr, '\0');
+	la_print("inserting a byte...");
+	la_buffer_resize(pstr);
+	
+	if(la_buffer_byte(pstr) == '\0') {
+		// Append at end.
+		pstr->data[pstr->curs] = pvalue;
+		pstr->curs++;
+		la_buffer_resize(pstr);
+		pstr->data[pstr->curs] = '\0';
 	}else{
-		int i;
-		uint32_t pstr_len = pstr->size;
-		pstr->data[pstr_len] = '\0';
-		for(i = pstr_len - 1; i > pstr->curs; i--)
-			pstr->data[i] = pstr->data[i-1];
-		jl_data_add_byte(pstr, pvalue);
+		// Insert in the middle.
+		size_t curs = pstr->curs;
+		size_t string_len = strlen((void*)pstr->data);
+
+		// Resize if not enough space
+		pstr->curs = string_len + 1;
+		la_buffer_resize(pstr);
+		pstr->data[pstr->curs] = '\0';
+		// Move data
+		memmove(pstr->data + curs + 1, pstr->data + curs,
+			string_len - curs);
+		// Set byte
+		pstr->data[curs] = pvalue;
+		// Set cursor
+		pstr->curs = curs + 1;
 	}
+	la_print("inserted a byte...");
 }
 
 void jl_data_insert_data(jl_t *jl, data_t* pstr, const void* data, uint32_t size) {
 	// Add size
 	jl_data_resize(jl, pstr, pstr->size + size);
 	// Copy data.
-	jl_mem_copyto(data, pstr->data + pstr->curs, size);
+	la_memory_copy(data, pstr->data + pstr->curs, size);
 	// Increase cursor
 	pstr->curs+=size;
 }
@@ -191,15 +232,10 @@ void jl_data_data(jl_t *jl, data_t* a, const data_t* b, uint64_t bytes) {
 	uint32_t size = a->size;
 	uint32_t sizeb = a->curs + bytes;
 
-	if(a == NULL) {
-		jl_print(jl, "jl_data_data: NULL A STRING");
-		exit(-1);
-	}else if(b == NULL) {
-		jl_print(jl, "jl_data_data: NULL B STRING");
-		exit(-1);
-	}
+	if(a == NULL) la_panic("jl_data_data: NULL A STRING");
+	else if(b == NULL) la_panic("jl_data_data: NULL B STRING");
 	if(sizeb > size) size = sizeb;
-	a->data = jl_mem(jl, a->data, size + 1);
+	a->data = la_memory_resize(a->data, size + 1);
 	for(i = 0; i < bytes; i++) {
 		a->data[i + a->curs] = b->data[i + b->curs];
 	}
@@ -227,7 +263,7 @@ void jl_data_merg(jl_t *jl, data_t* a, const data_t* b) {
 void jl_data_trunc(jl_t *jl, data_t* a, uint32_t size) {
 	a->curs = 0;
 	a->size = size;
-	a->data = jl_mem(jl, a->data, a->size + 1);
+	a->data = la_memory_resize(a->data, a->size + 1);
 }
 
 /**
@@ -272,7 +308,7 @@ void jl_data_read_upto(jl_t* jl, data_t* compiled, data_t* script, uint8_t end,
 {
 	jl_data_init(jl, compiled, psize);
 	compiled->curs = 0;
-	while((jl_data_byte(script) != end) && (jl_data_byte(script) != 0)) {
+	while((la_buffer_byte(script) != end) && (la_buffer_byte(script) != 0)){
 		strncat((void*)compiled->data,
 			(void*)script->data + script->curs, 1);
 		script->curs++;

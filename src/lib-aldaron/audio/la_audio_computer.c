@@ -1,32 +1,14 @@
-/*
- * JL_lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-/** \file
- * JLAU.c
- *	Audio
- * 		This library can play/record music/sound effects.
-*/
-#include "JLprivate.h"
-#include "jlau.h"
+#include "la.h"
 
-#define JLAU_DEBUG_CHECK(jlau)// jlau_checkthread__(jlau)
+#ifdef LA_COMPUTER
+#include "la_audio.h"
+#include "la_memory.h"
+
 #define JLAU_CHANNEL_MUSIC -2
 #define JLAU_CHANNEL_SOUND -3
 #define JLAU_CHANNEL_LOCK -4
 
 /** @cond **/
-/*static void jlau_checkthread__(jlau_t* jlau) {
-	uint8_t thread = jl_thread_current(jlau->jl);
-	if(thread != 0) {
-		jl_print(jlau->jl, "Audio fn is on the Wrong Thread: %d",
-			thread);
-		jl_print(jlau->jl, "Must be on thread 1!");
-			jl_print_stacktrace(jlau->jl);
-		exit(-1);
-	}
-}*/
-
 static inline int32_t jlau_sec2ms__(float sec) {
 	int32_t ms = ((int32_t)(sec * 1000.f));
 	if(ms < 20) ms = 0;
@@ -43,25 +25,21 @@ static inline void jlau_load(jlau_t* jlau, jlau_audio_t* audio,
 {
 	SDL_RWops *rw;
 
-	JLAU_DEBUG_CHECK(jlau);
-	jl_print_function(jlau->jl, "AU_Load");
-	JL_PRINT_DEBUG(jlau->jl, "ausize: %d", dataSize);
-	JL_PRINT_DEBUG(jlau->jl, "audata: \"%4s\"", data);
+	la_print("ausize: %d", dataSize);
+	la_print("audata: \"%4s\"", data);
 	rw = SDL_RWFromConstMem(data, dataSize);
 	if(isMusic)
 		audio->audio = Mix_LoadMUS_RW(rw, 1);
 	else
 		audio->audio = Mix_LoadWAV_RW(rw, 1);
 	if(audio->audio == NULL) {
-		jl_print(jlau->jl, ":Couldn't load audio because: %s",
-			(char *)SDL_GetError());
-		exit(-1);
+		la_panic("Couldn't load audio because: %s", (char *)
+			SDL_GetError());
 	}
 	audio->channel = isMusic ? JLAU_CHANNEL_MUSIC : JLAU_CHANNEL_SOUND;
 	Mix_VolumeChunk(audio->audio, volumeChange);
 //	SDL_RWclose(rw);
-	JL_PRINT_DEBUG(jlau->jl, "Loaded audio!");
-	jl_print_return(jlau->jl, "AU_Load");
+	la_print("Loaded audio!");
 }
 /** @endcond **/
 
@@ -73,7 +51,6 @@ static inline void jlau_load(jlau_t* jlau, jlau_audio_t* audio,
  * @param vec: Where sound is coming from, or NULL for no position effect.
 */
 void jlau_play(jlau_t* jlau, jlau_audio_t* audio, float in, jl_vec3_t* vec) {
-	JLAU_DEBUG_CHECK(jlau);
 	int32_t ms = jlau_sec2ms__(in);
 
 	if(audio->channel == JLAU_CHANNEL_MUSIC) {
@@ -175,60 +152,37 @@ void jlau_add_audio(jlau_t* jlau, jlau_audio_t* audio, data_t* zipdata,
 {
 	data_t aud;
 
-	JLAU_DEBUG_CHECK(jlau);
 	jl_file_pk_load_fdata(jlau->jl, &aud, zipdata, filename);
-	jl_print_function(jlau->jl, "jlau_add_audio");
-	JL_PRINT_DEBUG(jlau->jl, "Loading audiostuffs....");
+	la_print("Loading audiostuffs....");
 	jlau_load(jlau, audio, 255, aud.data, aud.size, music);
-	JL_PRINT_DEBUG(jlau->jl, "Loaded audiostuffs!");
-	jl_print_return(jlau->jl, "jlau_add_audio");
+	la_print("Loaded audiostuffs!");
 }
-
-/** @cond **/
-static inline void _jlau_print_openblock(jl_t* jl) {
-	jl_print_function(jl, "JLaudio");
-}
-
-static inline void _jlau_print_closeblock(jl_t* jl) {
-	jl_print_return(jl, "JLaudio");
-}
-/** @endcond **/
 
 jlau_t* jlau_init(jl_t* jl) {
-	jlau_t* jlau = jl_memi(jl, sizeof(jlau_t));
+	jlau_t* jlau = la_memory_allocate(sizeof(jlau_t));
 
 	jlau->jl = jl;
 	jl->jlau = jlau;
-	JLAU_DEBUG_CHECK(jlau);
 
 	jlau->num_channels = 0;
-	//Open Block AUDI
-	_jlau_print_openblock(jl);
 	// Open the audio device
-	JL_PRINT_DEBUG(jl, "initializing audio....");
+	la_print("initializing audio....");
 	Mix_Init(MIX_INIT_OGG);
 	if ( Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 1024) < 0 ) {
-		jl_print(jl,
-			":Couldn't set 11025 Hz 16-bit audio because: %s",
+		la_panic("Couldn't set 11025 Hz 16-bit audio because: %s",
 			(char *)SDL_GetError());
-		exit(-1);
 	}else{
-		JL_PRINT_DEBUG(jl, "audio has been set.");
+		la_print("audio has been set.");
 	}
-	//Close Block AUDI
-	_jlau_print_closeblock(jl);
 	// Return the context.
 	return jlau;
 }
 
 void jlau_kill(jlau_t* jlau) {
-	JLAU_DEBUG_CHECK(jlau);
-	//Open Block AUDI
-	_jlau_print_openblock(jlau->jl);
-	JL_PRINT_DEBUG(jlau->jl, "Quiting Audio....");
+	la_print("Quiting Audio....");
 	//Free Everything
 	Mix_CloseAudio();	
-	JL_PRINT_DEBUG(jlau->jl, "Quit Audio Successfully!");
-	//Close Block AUDI
-	_jlau_print_closeblock(jlau->jl);
+	la_print("Quit Audio Successfully!");
 }
+
+#endif

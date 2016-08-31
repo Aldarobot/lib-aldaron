@@ -15,7 +15,7 @@
  * @param loc: The position to draw it at
  * @param f: The font to use.
 **/
-void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
+void jlgr_text_draw(la_window_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
 	if(str == NULL) return;
 
 	const uint8_t *text = (void*)str;
@@ -31,7 +31,10 @@ void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
 		if(text[i] == '\n') {
 			tr.x = 0, tr.y += f.size;
 			continue;
-		}else if(text[i] == '\x01') {
+		} else if(text[i] == '\t') {
+			tr.x += 8.f * f.size * ( 3. / 4. );
+			continue;
+		} else if(text[i] == '\x01') {
 			if(strncmp(&str[i], JLGR_TEXT_BOLD, 2) == 0) {
 				bold = 1;
 			}else if(strncmp(&str[i], JLGR_TEXT_ALIGNC, 2) == 0) {
@@ -64,5 +67,5 @@ void jlgr_text_draw(jlgr_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
 	}
 }
 
-void jlgr_text_init__(jlgr_t* jlgr) {
+void jlgr_text_init__(la_window_t* jlgr) {
 }

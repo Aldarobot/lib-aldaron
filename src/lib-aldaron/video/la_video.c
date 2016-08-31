@@ -6,6 +6,8 @@
  * JLVI.c
  * 	This module edits sounds and graphics.
  */
+
+#include "la_memory.h"
 #include "JLGRprivate.h"
 #include "SDL_image.h"
 #undef HAVE_STDLIB_H
@@ -29,7 +31,7 @@ void jlvi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
 	uint8_t* data = NULL;
 	jpeg_long_int_t data_size = 0;
 
-	jl_print(jl, "w:%d h:%d", w, h);
+	la_print("w:%d h:%d", w, h);
 
 	/* This struct contains the JPEG compression parameters and pointers to
 	 * working space (which is allocated as needed by the JPEG library).
@@ -146,7 +148,7 @@ void la_video_load_jpeg(jl_t* jl, void* output, void* data, size_t size,
 
 	rw = SDL_RWFromMem(data, size);
 	if ((image = IMG_Load_RW(rw, 0)) == NULL)
-		la_panic(jl, "Couldn't load image: %s", IMG_GetError());
+		la_panic("Couldn't load image: %s", IMG_GetError());
 	// Covert SDL_Surface.
 	jl_data_init(jl, &pixel_data, image->w * image->h * 3);
 	for(i = 0; i < image->h; i++) {
@@ -156,7 +158,7 @@ void la_video_load_jpeg(jl_t* jl, void* output, void* data, size_t size,
 		}
 	}
 	//Set Return values
-	jl_mem_copyto(pixel_data.data, output, pixel_data.size);
+	la_memory_copy(pixel_data.data, output, pixel_data.size);
 	jl_data_free(&pixel_data);
 	*w = image->w;
 	*h = image->h;

@@ -9,9 +9,11 @@
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
 
-/** @cond */
+#include "la_memory.h"
 
-static inline void jlgr_vo_bounding_box(jlgr_t* jlgr, jl_vo_t* vo,
+extern float la_banner_size;
+
+static inline void jlgr_vo_bounding_box(la_window_t* jlgr, jl_vo_t* vo,
 	const float *xyzw, uint32_t vertices)
 {
 	int i;
@@ -40,15 +42,15 @@ static inline void jlgr_vo_bounding_box(jlgr_t* jlgr, jl_vo_t* vo,
 	jl_mem_vec_sub(&vo->pr.cb.ofs, vo->pr.cb.pos);
 }
 
-static void jlgr_vo_vertices__(jlgr_t* jlgr, jl_vo_t* vo, const float *xyzw,
+static void jlgr_vo_vertices__(la_window_t* jlgr, jl_vo_t* vo, const float *xyzw,
 	uint32_t vertices)
 {
 	vo->vc = vertices;
 	if(vertices) {
 		// Re-Allocate vo->cc
-		vo->cc = jl_mem(jlgr->jl, vo->cc, vertices * sizeof(float) * 4);
+		vo->cc = la_memory_resize(vo->cc, vertices * sizeof(float) * 4);
 		// Re-Allocate vo->cv
-		vo->cv = jl_mem(jlgr->jl, vo->cv, vertices * sizeof(float) * 3);
+		vo->cv = la_memory_resize(vo->cv, vertices * sizeof(float) * 3);
 		// Set vo->cv & vo->gl
 		jlgr_opengl_vertices_(jlgr, xyzw, vertices, vo->cv, &vo->gl);
 		// Set bounding box
@@ -57,9 +59,10 @@ static void jlgr_vo_vertices__(jlgr_t* jlgr, jl_vo_t* vo, const float *xyzw,
 		jlgr_pr_resize(jlgr, &vo->pr, vo->pr.cb.ofs.x, vo->pr.cb.ofs.y,
 			jlgr->wm.w * vo->pr.cb.ofs.x);
 	}
+	jlgr_vo_move(vo, (jl_vec3_t) { 0.f, 0.f, 0.f });
 }
 
-static void jlgr_vo_color_buffer__(jlgr_t* jlgr, jl_vo_t* vo, float* cc) {
+static void jlgr_vo_color_buffer__(la_window_t* jlgr, jl_vo_t* vo, float* cc) {
 	vo->tx = 0;
 	jl_mem_copyto(cc, vo->cc, vo->vc * 4 * sizeof(float));
 	// Set Color Buffer "vo->bt" to "vo->cc"
@@ -67,7 +70,7 @@ static void jlgr_vo_color_buffer__(jlgr_t* jlgr, jl_vo_t* vo, float* cc) {
 }
 
 // Set vertices for a polygon.
-static void jlgr_vo_poly__(jlgr_t* jlgr, jl_vo_t* vo, uint32_t vertices,
+static void jlgr_vo_poly__(la_window_t* jlgr, jl_vo_t* vo, uint32_t vertices,
 	const float *xyzw)
 {
 	const float FS_RECT[] = {
@@ -107,13 +110,8 @@ void jlgr_vo_init__(jl_t* jl, jl_vo_t* vo) {
 }
 
 void jlgr_vo_exit__(jl_vo_t* vo, const char* error) {
-	if(vo->jl == NULL) {
-		JL_PRINT("Vertex object uninit'd: %s\n", error);
-		exit(-1);
-	}
+	if(vo->jl == NULL) la_panic("Vertex object uninit'd: %s\n", error);
 }
-
-/** @endcond */
 
 /**
  * Resize a vertex object to a rectangle.
@@ -121,17 +119,19 @@ void jlgr_vo_exit__(jl_vo_t* vo, const char* error) {
  * @param vo: The vertex object.
  * @param rc: Rectangle to set it to.
 **/
-void jlgr_vo_rect(jlgr_t* jlgr, jl_vo_t* vo, jl_rect_t* rc) {
+void jlgr_vo_rect(la_window_t* jlgr, jl_vo_t* vo, jl_rect_t* rc) {
 	jlgr_vo_init__(jlgr->jl, vo);
 	if(rc) {
 		float rectangle_coords[] = {
-			rc->x,		rc->y + rc->h,	0.f,
-			rc->x,		rc->y,		0.f,
-			rc->x + rc->w,	rc->y,		0.f,
-			rc->x + rc->w,	rc->y + rc->h,	0.f };
+			0.f,		rc->h,		0.f,
+			0.f,		0.f,		0.f,
+			rc->w,		0.f,		0.f,
+			rc->w,		rc->h,		0.f };
 
 		// Overwrite the vertex object
 		jlgr_vo_poly__(jlgr, vo, 4, rectangle_coords);
+		//
+		jlgr_vo_move(vo, (jl_vec3_t) { rc->x, rc->y, 0.f } );
 	}
 }
 
@@ -140,7 +140,7 @@ void jlgr_vo_rect(jlgr_t* jlgr, jl_vo_t* vo, jl_rect_t* rc) {
  * @param jlgr: The library context.
  * @param vo: The vertex object to set.
 **/
-void jlgr_vo_set_vg(jlgr_t* jlgr, jl_vo_t *vo, uint16_t tricount,
+void jlgr_vo_set_vg(la_window_t* jlgr, jl_vo_t *vo, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor)
 {
 	jlgr_vo_init__(jlgr->jl, vo);
@@ -163,7 +163,7 @@ void jlgr_vo_set_vg(jlgr_t* jlgr, jl_vo_t *vo, uint16_t tricount,
  * @param multicolor: If 0: Then 1 color is used.
  *	If 1: Then 1 color per each vertex is used.
 **/
-void jlgr_vo_set_rect(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
+void jlgr_vo_set_rect(la_window_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
 	uint8_t multicolor)
 {
 	jlgr_vo_init__(jlgr->jl, vo);
@@ -179,17 +179,13 @@ void jlgr_vo_set_rect(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
  * @param vo: The vertex object to modify.
  * @param img: The image to display on the vertex object.
 **/
-void jlgr_vo_image(jlgr_t* jlgr, jl_vo_t *vo, uint32_t img) {
+void jlgr_vo_image(la_window_t* jlgr, jl_vo_t *vo, uint32_t img) {
 	jlgr_vo_init__(jlgr->jl, vo);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	// Make sure non-textured colors aren't attempted
 	vo->tx = img;
 #ifdef JL_DEBUG
-	if(!vo->tx) {
-		jl_print(jlgr->jl, "Error: Texture=0!");
-		jl_print_stacktrace(jlgr->jl);
-		exit(-1);
-	}
+	if(!vo->tx) la_panic("Error: Texture=0!");
 #endif
 	jlgr_vo_txmap(jlgr, vo, 0, 0, 0, -1);
 }
@@ -202,7 +198,7 @@ void jlgr_vo_image(jlgr_t* jlgr, jl_vo_t *vo, uint32_t img) {
  * @param rc: the rectangle to draw the image in.
  * @param tex:  the ID of the image.
 **/
-void jlgr_vo_set_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex) {
+void jlgr_vo_set_image(la_window_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex) {
 	jlgr_vo_init__(jlgr->jl, vo);
 	//From bottom left & clockwise
 	float Oone[] = {
@@ -224,7 +220,7 @@ void jlgr_vo_set_image(jlgr_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex) {
  * @param h: How many characters high the texture is.
  * @param map: The character value to map.  -1 for full texture.
 **/
-void jlgr_vo_txmap(jlgr_t* jlgr, jl_vo_t* vo, uint8_t orientation,
+void jlgr_vo_txmap(la_window_t* jlgr, jl_vo_t* vo, uint8_t orientation,
 	uint8_t w, uint8_t h, int16_t map)
 {
 	jlgr_vo_init__(jlgr->jl, vo);
@@ -254,7 +250,7 @@ void jlgr_vo_txmap(jlgr_t* jlgr, jl_vo_t* vo, uint8_t orientation,
  * @param vo: The Vertex Object
  * @param rgba: { (4 * vertex count) values }
 **/
-void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
+void jlgr_vo_color_gradient(la_window_t* jlgr, jl_vo_t* vo, float* rgba) {
 	jlgr_vo_init__(jlgr->jl, vo);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	jlgr_vo_color_buffer__(jlgr, vo, rgba);
@@ -266,7 +262,7 @@ void jlgr_vo_color_gradient(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
  * @param vo: The Vertex Object
  * @param rgba: { 4 values }
 **/
-void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
+void jlgr_vo_color_solid(la_window_t* jlgr, jl_vo_t* vo, float* rgba) {
 	jlgr_vo_init__(jlgr->jl, vo);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	float rgbav[4 * vo->vc];
@@ -286,6 +282,7 @@ void jlgr_vo_color_solid(jlgr_t* jlgr, jl_vo_t* vo, float* rgba) {
 void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos) {
 	jlgr_vo_exit__(vo, "Can't Move!");
 	vo->pr.cb.pos = pos;
+	vo->pr.cb.pos.y += la_banner_size;
 }
 
 /**
@@ -295,9 +292,8 @@ void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos) {
  * @param sh: The shader to use ( must be the same one used with
  *	jlgr_opengl_draw1(). )
 **/
-void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
+void jlgr_vo_draw2(la_window_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
 	jlgr_vo_exit__(vo, "Can't Draw2!");
-	jl_print_function(jlgr->jl, "GL/Draw");
 	// Use Temporary Vertex Object If no vertex object.
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	if(vo->tx) {
@@ -316,7 +312,6 @@ void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
 	// Draw the image on the screen!
 	jlgr_opengl_draw_arrays_(jlgr, vo->rs ? GL_TRIANGLES : GL_TRIANGLE_FAN,
 		vo->vc);
-	jl_print_return(jlgr->jl, "GL/Draw");
 }
 
 /**
@@ -324,8 +319,8 @@ void jlgr_vo_draw2(jlgr_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
  * @param jlgr: The library context.
  * @param vo: The vertex object to draw.
 **/
-void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo) {
-	if(vo->jl == NULL) jl_exit(jlgr->jl, "Can't Draw");
+void jlgr_vo_draw(la_window_t* jlgr, jl_vo_t* vo) {
+	if(vo->jl == NULL) la_panic("Can't Draw");
 	jlgr_vo_exit__(vo, "Can't Draw!");
 	jlgr_glsl_t* shader = vo->tx ?
 		&jlgr->gl.prg.texture : &jlgr->gl.prg.color;
@@ -345,7 +340,7 @@ void jlgr_vo_draw(jlgr_t* jlgr, jl_vo_t* vo) {
  * @param jlgr: The library context.
  * @param vo: The vertex object.
 **/
-void jlgr_vo_draw_pr(jlgr_t* jlgr, jl_vo_t* vo) {
+void jlgr_vo_draw_pr(la_window_t* jlgr, jl_vo_t* vo) {
 	jlgr_vo_exit__(vo, "Can't Draw Pre-Rendered!");
 	jlgr_pr_draw(jlgr, &vo->pr, &vo->pr.cb.pos, 0);
 }
@@ -355,15 +350,15 @@ void jlgr_vo_draw_pr(jlgr_t* jlgr, jl_vo_t* vo) {
  * @param jl: The library context
  * @param vo: The vertex object to free
 **/
-void jlgr_vo_free(jlgr_t* jlgr, jl_vo_t *vo) {
+void jlgr_vo_free(la_window_t* jlgr, jl_vo_t *vo) {
 	jlgr_vo_exit__(vo, "Can't Free!");
 	// Free GL VBO
 	jlgr_opengl_buffer_old_(jlgr, &vo->gl);
 	// Free GL Texture Buffer
 	jlgr_opengl_buffer_old_(jlgr, &vo->bt);
 	// Free Converted Vertices & Colors
-	if(vo->cv) vo->cv = jl_mem(jlgr->jl, vo->cv, 0);
-	if(vo->cc) vo->cc = jl_mem(jlgr->jl, vo->cc, 0);
+	if(vo->cv) vo->cv = la_memory_resize(vo->cv, 0);
+	if(vo->cc) vo->cc = la_memory_resize(vo->cc, 0);
 	// Free main structure
-	vo = jl_mem(jlgr->jl, (void**)&vo, 0);
+	la_memory_free(vo);
 }

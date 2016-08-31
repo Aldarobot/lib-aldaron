@@ -138,14 +138,14 @@ android-gradle: build/android-release-key.keystore -android-sdl-mods
 	# ic_launcher.png
 	cp resources/icon.png build/android-project/app/src/main/res/drawable/ic_launcher.png
 	# SDLActivity.java
-	mkdir -p build/android-project/app/src/main/java/org/libsdl/app/
-	cp $(LA_HOME)/src/android/SDLActivity.java build/android-project/app/src/main/java/org/libsdl/app/SDLActivity.java
-	sed -i "s|203888|$(AD_ID)|g" build/android-project/app/src/main/java/org/libsdl/app/SDLActivity.java
+	mkdir -p build/android-project/app/src/main/java/com/libaldaron/
+	cp $(LA_HOME)/src/android/LibAldaronActivity.java build/android-project/app/src/main/java/com/libaldaron/LibAldaronActivity.java
+	sed -i "s|203888|$(AD_ID)|g" build/android-project/app/src/main/java/com/libaldaron/LibAldaronActivity.java
 	# SDLActivity.java #2
 	mkdir -p build/android-project/app/src/main/java/com/$(USERNAME)/$(PACKNAME)/
 	echo "package com.$(USERNAME).$(PACKNAME);" > build/android-project/app/src/main/java/com/$(USERNAME)/$(PACKNAME)/AldaronActivity.java
-	echo "import org.libsdl.app.SDLActivity;" >> build/android-project/app/src/main/java/com/$(USERNAME)/$(PACKNAME)/AldaronActivity.java
-	echo "public class AldaronActivity extends SDLActivity {}" >> build/android-project/app/src/main/java/com/$(USERNAME)/$(PACKNAME)/AldaronActivity.java
+	echo "import com.libaldaron.LibAldaronActivity;" >> build/android-project/app/src/main/java/com/$(USERNAME)/$(PACKNAME)/AldaronActivity.java
+	echo "public class AldaronActivity extends LibAldaronActivity {}" >> build/android-project/app/src/main/java/com/$(USERNAME)/$(PACKNAME)/AldaronActivity.java
 	# Link SDL sources
 	mkdir -p build/android-project/app/src/main/jni/SDL
 	ln -sf $(LA_HOME)/src/lib/sdl/src build/android-project/app/src/main/jni/SDL
@@ -163,6 +163,9 @@ android-gradle: build/android-release-key.keystore -android-sdl-mods
 	ln -sTf $(LA_HOME)/src/lib/libzip/lib/ build/android-project/app/src/main/jni/libzip
 	# Link Clump sources
 	ln -sTf $(LA_HOME)/src/lib/clump/ build/android-project/app/src/main/jni/clump
+	# Link Android Native App Glue!
+	ln -sTf $(LA_HOME)/src/android-ndk/sources/android/native_app_glue/\
+	 build/android-project/app/src/main/jni/native_app_glue
 	# Link User sources
 	cp -u $(LA_HOME)/src/lib/sdl/android-project/jni/src/Android.mk build/android-project/app/src/main/jni/src/
 	ln -fs $(CURDIR)/src/ build/android-project/app/src/main/jni/src/
@@ -187,7 +190,7 @@ android-debug:
 	export PATH=$$PATH:$(LA_HOME)/src/android-sdk/platform-tools && \
 	`which adb` install -r build/com.$(USERNAME).$(PACKNAME).apk && \
 	echo "Logcat is starting ( You can open your app now )...." && \
-	`which adb` logcat | grep SDL # grep LA_EVENT # grep $(PACKNAME)
+	`which adb` logcat | grep Aldaron # grep SDL # grep LA_EVENT # grep $(PACKNAME)
 
 build-notify:
 	# Building program for target=$(PLATFORM)....

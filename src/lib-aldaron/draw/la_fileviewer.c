@@ -2,6 +2,12 @@
 #include "SDL_filesystem.h"
 
 #include "la_memory.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+#include <dirent.h>
 
 /*static char* jlgr_file_fullname__(la_window_t* jlgr, char* selecteddir,
 	char* selecteditem)
@@ -44,7 +50,7 @@ static uint8_t jl_fl_user_select_open_dir__(la_window_t* jlgr, char *dirname) {
 	jlgr->fl.dirname = dirname;
 	jlgr->fl.cursor = 0;
 	jlgr->fl.cpage = 0;
-	converted_filename = jl_file_convert__(jlgr->jl, jlgr->fl.dirname);
+	converted_filename = jlgr->fl.dirname;
 	cl_list_clear(jlgr->fl.filelist);
 //UnComment to test file system conversion code.
 	la_print("dirname=%s:%s\n", jlgr->fl.dirname, converted_filename);

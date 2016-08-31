@@ -1,4 +1,4 @@
-#include "JLprivate.h"
+#include "la.h"
 #include "la_memory.h"
 #include "la_buffer.h"
 
@@ -28,7 +28,7 @@ static void jl_data_increment(data_t* pstr, uint8_t incrementation) {
 void jl_data_clear(jl_t* jl, data_t* pa) {
 	pa->curs = 0;
 //	jl_data_resize(jl, pa, 0);
-	jl_mem_clr(pa->data, pa->size + 1);
+	la_memory_clear(pa->data, pa->size + 1);
 }
 
 /**
@@ -63,7 +63,7 @@ void jl_data_free(data_t* pstr) {
 */
 void jl_data_mkfrom_data(jl_t* jl, data_t* a, uint32_t size, const void *data) {
 	jl_data_init(jl, a, size);
-	jl_mem_copyto(data, a->data, size);
+	la_memory_copy(data, a->data, size);
 	a->data[size] = '\0'; // Null terminalte
 }
 
@@ -114,7 +114,7 @@ uint8_t jl_data_get_byte(data_t* pstr) {
 void jl_data_loadto(data_t* pstr, uint32_t varsize, void* var) {
 	void* area = ((void*)pstr->data) + pstr->curs;
 
-	jl_mem_copyto(area, var, varsize);
+	la_memory_copy(area, var, varsize);
 	jl_data_increment(pstr, varsize);
 }
 
@@ -126,7 +126,7 @@ void jl_data_loadto(data_t* pstr, uint32_t varsize, void* var) {
 void jl_data_saveto(data_t* pstr, uint32_t varsize, const void* var) {
 	void* area = ((void*)pstr->data) + pstr->curs;
 
-	jl_mem_copyto(var, area, varsize);
+	la_memory_copy(var, area, varsize);
 	jl_data_increment(pstr, varsize);
 }
 
@@ -210,7 +210,7 @@ void jl_data_insert_data(jl_t *jl, data_t* pstr, const void* data, uint32_t size
 	// Add size
 	jl_data_resize(jl, pstr, pstr->size + size);
 	// Copy data.
-	jl_mem_copyto(data, pstr->data + pstr->curs, size);
+	la_memory_copy(data, pstr->data + pstr->curs, size);
 	// Increase cursor
 	pstr->curs+=size;
 }

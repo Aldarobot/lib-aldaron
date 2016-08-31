@@ -2,7 +2,7 @@
 
 #ifdef LA_COMPUTER
 
-#include "port.h"
+#include "la_port.h"
 #include "la_memory.h"
 #include <stdio.h>
 

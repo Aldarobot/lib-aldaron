@@ -1,8 +1,4 @@
-/*
- * JL_lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-#include "JLprivate.h"
+#include "la.h"
 
 #ifdef LA_PHONE_ANDROID
 #include "la_audio.h"

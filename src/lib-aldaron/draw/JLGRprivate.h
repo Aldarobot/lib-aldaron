@@ -1,5 +1,4 @@
 #include "jlgr.h"
-#include "JLprivate.h"
 
 // Full texture
 #define DEFAULT_TC (const float[]) { \

@@ -1,6 +1,6 @@
 /* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
 
-#include "JLprivate.h"
+#include "la.h"
 #include "la_thread.h"
 #include "la_memory.h"
 
@@ -136,7 +136,7 @@ void jl_thread_mutex_cpy(jl_t *jl, jl_mutex_t* mutex, void* src, void* dst,
 	// Lock mutex
 	jl_thread_mutex_lock(mutex);
 	// Copy data.
-	jl_mem_copyto(src, dst, size);
+	la_memory_copy(src, dst, size);
 	// Give up for other threads
 	jl_thread_mutex_unlock(mutex);
 }
@@ -150,7 +150,7 @@ void jl_thread_mutex_cpy(jl_t *jl, jl_mutex_t* mutex, void* src, void* dst,
 void jl_thread_pvar_init(jl_t* jl, jl_pvar_t* pvar, void* data, uint64_t size) {
 	pvar->jl = jl;
 	jl_thread_mutex_new(jl, &pvar->lock);
-	pvar->data = data? jl_mem_copy(jl, data, size):la_memory_allocate(size);
+	pvar->data = data? la_memory_copy(jl, data, size):la_memory_allocate(size);
 	pvar->size = size;
 }
 

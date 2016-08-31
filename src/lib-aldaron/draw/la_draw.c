@@ -10,6 +10,8 @@
 #include "JLGRprivate.h"
 #include "la_memory.h"
 
+void main_loop_(jl_t* jl);
+
 extern jl_t* la_jl_deprecated;
 extern SDL_atomic_t la_rmc;
 extern SDL_atomic_t la_rmcexit;

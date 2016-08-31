@@ -156,11 +156,3 @@ uint32_t jl_mem_string_upto(const char* string, char chr) {
 	}
 	return strlen(string);
 }
-
-jl_t* jl_mem_init_(void) {
-	return la_memory_allocate(sizeof(jl_t));
-}
-
-void jl_mem_kill_(jl_t* jl) {
-	free(jl);
-}

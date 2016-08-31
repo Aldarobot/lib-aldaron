@@ -8,6 +8,8 @@
 #include <android/sensor.h>
 #endif
 
+#include "la_safe.h"
+
 typedef struct{
 	float x; // X Location ( -1.f to 1.f )
 	float y; // Y Location ( -1.f to 1.f )

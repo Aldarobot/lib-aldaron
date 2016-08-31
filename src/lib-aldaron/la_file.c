@@ -1,18 +1,12 @@
-/*
- * JL_lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-/** \file
- * JLfiles.c
- * 	This allows you to modify the file system.  It uses libzip.
- */
 /** @cond **/
-#include "JLprivate.h"
+#include "la.h"
 #include "SDL_filesystem.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
+#include <dirent.h>
 
 // LIBZIP
 #define ZIP_DISABLE_DEPRECATED //Don't allow the old functions.
@@ -102,7 +96,7 @@ static inline void jl_file_reset_cursor__(const char* file_name) {
 static inline void jl_file_get_root__(jl_t * jl) {
 	data_t root_path;
 
-#if JL_PLAT == JL_PLAT_PHONE
+#if JL_PLAT == JL_PLAT_PHONE // Android
 	data_t root_dir;
 
 	la_print("Get external storage directory.");
@@ -118,7 +112,6 @@ static inline void jl_file_get_root__(jl_t * jl) {
 	la_buffer_init(&root_path);
 	la_buffer_format(&root_path, "%s/.aldaron", getenv("HOME"));
 #endif
-	// Make "-- JL_ROOT_DIR"
 	const char* error = NULL;
 	if((error = la_file_mkdir((char*) root_path.data))) {
 		la_print((char*) root_path.data);
@@ -258,9 +251,10 @@ void jl_file_save(jl_t* jl, const void *file, const char *name, uint32_t bytes){
  */
 const char* jl_file_load(jl_t* jl, data_t* load, const char* file_name) {
 	jl_file_reset_cursor__(file_name);
-	unsigned char *file = malloc(MAXFILELEN);
 	const char* converted_filename = jl_file_convert__(jl, file_name);
 	int fd = open(converted_filename, O_RDWR);
+	int size = lseek(fd, 0, SEEK_END);
+	unsigned char *file = malloc(size);
 	
 	//Open Block FLLD	
 	if(fd <= 0) {
@@ -273,7 +267,7 @@ const char* jl_file_load(jl_t* jl, data_t* load, const char* file_name) {
 			la_panic("jl_file_load can't load a directory.");
 		return la_error("Couldn't Find File.");
 	}
-	int Read = read(fd, file, MAXFILELEN);
+	int Read = read(fd, file, size);
 
 	la_print("jl_file_load(): read %d bytes", Read);
 	close(fd);
@@ -345,8 +339,8 @@ char* jl_file_pk_compress(jl_t* jl, const char* folderName) {
 	uint32_t cursor = strlen(folderName);
 	if(folderName[cursor - 1] == '/') cursor--;
 	// Name+.zip\0
-	char* pkName = jl_memi(jl, cursor + 5);
-	jl_mem_copyto(folderName, pkName, cursor);
+	char* pkName = la_memory_allocate(cursor + 5);
+	la_memory_copy(folderName, pkName, cursor);
 	pkName[cursor] = '.';
 	cursor++;
 	pkName[cursor] = 'z';

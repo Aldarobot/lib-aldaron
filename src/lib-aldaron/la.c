@@ -1,6 +1,5 @@
 #include <assert.h>
 
-#include "JLprivate.h"
 #include "jlau.h"
 #include "jlgr.h"
 #if JL_PLAT == JL_PLAT_PHONE
@@ -11,6 +10,10 @@
 
 #include "la_thread.h"
 #include "la_memory.h"
+
+void jl_file_init_(jl_t * jl);
+void jl_mode_init__(jl_t* jl);
+void jl_sdl_init__(jl_t* jl);
 
 void jlau_kill(jlau_t* jlau);
 void jlgr_kill(la_window_t* jlgr);
@@ -48,6 +51,31 @@ static inline void jl_init_libs__(jl_t* jl) {
 	la_print("Initializing SDL 2.0....");
 }
 
+//return how many seconds passed since last call
+static inline void jl_seconds_passed__(jl_t* jl) {
+	uint8_t isOnTime;
+
+	jl->time.psec = jl_time_regulatefps(jl, &jl->time.timer, &isOnTime);
+
+	if(jl->jlgr) {
+		la_window_t* jlgr = jl->jlgr;
+
+		if((jlgr->sg.changed = ( jlgr->sg.on_time != isOnTime)))
+			jlgr->sg.on_time = isOnTime;
+	}
+}
+
+void main_loop_(jl_t* jl) {
+	jl_fnct loop_ = jl->mode.mode.loop;
+
+	// Check the amount of time passed since last frame.
+	jl_seconds_passed__(jl);
+	// Run the user's mode loop.
+	loop_(jl);
+	// Run the mode loop
+	jl_mode_loop__(jl);
+}
+
 static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 	uint64_t ctx1s)
 {
@@ -65,34 +93,6 @@ static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 	//
 	jl->time.timer = jl_time_get(jl);
 	la_print("Started JL_Lib on thread %X!", la_thread_current());
-}
-
-static void jl_time_reset__(jl_t* jl, uint8_t on_time) {
-	if(jl->jlgr) {
-		la_window_t* jlgr = jl->jlgr;
-
-		if((jlgr->sg.changed = ( jlgr->sg.on_time != on_time)))
-			jlgr->sg.on_time = on_time;
-	}
-}
-
-//return how many seconds passed since last call
-static inline void jl_seconds_passed__(jl_t* jl) {
-	uint8_t isOnTime;
-
-	jl->time.psec = jl_time_regulatefps(jl, &jl->time.timer, &isOnTime);
-	jl_time_reset__(jl, isOnTime);
-}
-
-void main_loop_(jl_t* jl) {
-	jl_fnct loop_ = jl->mode.mode.loop;
-
-	// Check the amount of time passed since last frame.
-	jl_seconds_passed__(jl);
-	// Run the user's mode loop.
-	loop_(jl);
-	// Run the mode loop
-	jl_mode_loop__(jl);
 }
 
 // EXPORT FUNCTIONS
@@ -184,7 +184,7 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, uint8_t openwindow,
 	const char* name, size_t ctx_size)
 {
-	jl_t* jl = jl_mem_init_(); // Create The Library Context
+	jl_t* jl = la_memory_allocate(sizeof(jl_t)); // Create The Library Context
 	la_thread_t la_main;
 
 #ifndef LA_PHONE_ANDROID
@@ -210,7 +210,7 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, uint8_t openwindow,
 	la_print("SDL_Quit()");
 	SDL_Quit();
 	la_print("Free library context....");
-	jl_mem_kill_(jl);
+	free(jl);
 	la_print("| success |");
 #else
 	la_print("android pre init %d %d", la_window->width, la_window->height);

@@ -145,6 +145,7 @@ typedef void(*jl_fnct)(jl_t* jl);
 typedef void(*jl_data_fnct)(jl_t* jl, void* data);
 typedef void(*jl_print_fnt)(jl_t* jl, const char * print);
 
+void la_print(const char* format, ...);
 void la_panic(const char* format, ...);
 void la_dont(jl_t* jl);
 void* la_context(jl_t* jl);

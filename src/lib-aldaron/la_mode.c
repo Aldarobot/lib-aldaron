@@ -9,7 +9,7 @@
 **/
 
 #include "la_memory.h"
-#include "JLprivate.h"
+#include "la.h"
 
 extern SDL_atomic_t la_rmc;
 
@@ -19,7 +19,7 @@ static void _jl_mode_add(jl_t* jl) {
 		(SDL_AtomicGet(&la_rmc) + 1) * sizeof(jl_mode_t));
 	// Set the mode.
 	jl->mode.mdes[SDL_AtomicGet(&la_rmc)] =
-		(jl_mode_t) { jl_dont, jl_dont, jl_mode_exit };
+		(jl_mode_t) { la_dont, la_dont, jl_mode_exit };
 	// Add to mode count.
 	SDL_AtomicSet(&la_rmc, SDL_AtomicGet(&la_rmc) + 1);
 }
@@ -130,5 +130,5 @@ void jl_mode_init__(jl_t* jl) {
 	jl->mode.mdes = NULL;
 	_jl_mode_add(jl);
 	// Clear User Loops
-	jl_mode_override(jl, (jl_mode_t) { jl_dont, jl_dont, jl_dont });
+	jl_mode_override(jl, (jl_mode_t) { la_dont, la_dont, la_dont });
 }

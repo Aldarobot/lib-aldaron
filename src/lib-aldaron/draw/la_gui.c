@@ -9,6 +9,9 @@
  */
 #include "JLGRprivate.h"
 
+void *jl_gem(void);
+uint32_t jl_gem_size(void);
+
 typedef struct {
 	jl_vec3_t where[2];
 	jl_vo_t vo[3]; // Vertex object [ Full, Slider 1, Slider 2 ].

@@ -2,7 +2,7 @@
 
 #ifdef LA_PHONE_ANDROID
 
-#include "port.h"
+#include "la_port.h"
 #include "la_memory.h"
 
 #include <jni.h>

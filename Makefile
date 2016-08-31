@@ -134,15 +134,15 @@ $(OBJ_SDL_MIXER):
 
 $(OBJ_CLUMP): src/lib/clump/*
 	# Compiling clump....
-	gcc src/lib/clump/array.c -c -o build/obj/clump_array.o
-	gcc src/lib/clump/bitarray.c -c -o build/obj/clump_bitarray.o
-	gcc src/lib/clump/clump.c -c -o build/obj/clump_clump.o
-	gcc src/lib/clump/hash.c -c -o build/obj/clump_hash.o
-	gcc src/lib/clump/hcodec.c -c -o build/obj/clump_hcodec.o
-	gcc src/lib/clump/list.c -c -o build/obj/clump_list.o
-	gcc src/lib/clump/pool.c -c -o build/obj/clump_pool.o
-	gcc src/lib/clump/rhash.c -c -o build/obj/clump_rhash.o
-	gcc src/lib/clump/tree.c -c -o build/obj/clump_tree.o
+	gcc src/lib/clump/array.c -c -std=c99 -o build/obj/clump_array.o
+	gcc src/lib/clump/bitarray.c -std=c99 -c -o build/obj/clump_bitarray.o
+	gcc src/lib/clump/clump.c -c -std=c99 -o build/obj/clump_clump.o
+	gcc src/lib/clump/hash.c -c -std=c99 -o build/obj/clump_hash.o
+	gcc src/lib/clump/hcodec.c -std=c99 -c -o build/obj/clump_hcodec.o
+	gcc src/lib/clump/list.c -c -std=c99 -o build/obj/clump_list.o
+	gcc src/lib/clump/pool.c -c -std=c99 -o build/obj/clump_pool.o
+	gcc src/lib/clump/rhash.c -c -std=c99 -o build/obj/clump_rhash.o
+	gcc src/lib/clump/tree.c -c -std=c99 -o build/obj/clump_tree.o
 	ld -r build/obj/clump_*.o -o $(OBJ_CLUMP)
 	# Done!	
 

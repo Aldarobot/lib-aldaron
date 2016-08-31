@@ -1,6 +1,8 @@
 #include "JLGRprivate.h"
 #include "SDL_filesystem.h"
 
+#include "la_memory.h"
+
 /*static char* jlgr_file_fullname__(la_window_t* jlgr, char* selecteddir,
 	char* selecteditem)
 {
@@ -35,7 +37,7 @@ static uint8_t jl_fl_user_select_open_dir__(la_window_t* jlgr, char *dirname) {
 
 	jl_fl_user_select_check_extradir__(dirname);
 	if(dirname[1] == '\0') {
-		jl_mem(jlgr->jl, dirname, 0);
+//		jl_mem(jlgr->jl, dirname, 0);
 		dirname = SDL_GetPrefPath("JL_Lib", "\0");
 		jl_fl_user_select_check_extradir__(dirname);
 	}

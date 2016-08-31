@@ -6,6 +6,8 @@
  * JLVI.c
  * 	This module edits sounds and graphics.
  */
+
+#include "la_memory.h"
 #include "JLGRprivate.h"
 #include "SDL_image.h"
 #undef HAVE_STDLIB_H
@@ -156,7 +158,7 @@ void la_video_load_jpeg(jl_t* jl, void* output, void* data, size_t size,
 		}
 	}
 	//Set Return values
-	jl_mem_copyto(pixel_data.data, output, pixel_data.size);
+	la_memory_copy(pixel_data.data, output, pixel_data.size);
 	jl_data_free(&pixel_data);
 	*w = image->w;
 	*h = image->h;

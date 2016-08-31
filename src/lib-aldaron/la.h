@@ -139,7 +139,6 @@ typedef struct{
 	void* loop; // The main loop.
 	char* name; // The name of the program.
 	uint32_t info; // @startup:# images loaded from media.zip.Set by others.
-	jl_err_t errf; // Set if error
 	//
 	uint8_t mode_switch_skip;
 	//
@@ -160,17 +159,11 @@ typedef void(*jl_print_fnt)(jl_t* jl, const char * print);
 void la_panic(const char* format, ...);
 void la_dont(jl_t* jl);
 void* la_context(jl_t* jl);
+const char* la_error(const char* format, ...);
 int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, uint8_t openwindow,
 	const char* name, size_t ctx_size);
 
 // "JLmem.c"
-void *jl_mem(jl_t* jl, void *a, uint32_t size);
-void *jl_mem_copy(jl_t* jl, const void *src, uint64_t size);
-uint64_t jl_mem_tbiu(void);
-void jl_mem_leak_init(jl_t* jl);
-void jl_mem_leak_fail(jl_t* jl, const char* fn_name);
-void jl_mem_clr(void* mem, uint64_t size);
-void jl_mem_copyto(const void* src, void* dst, uint64_t size);
 void jl_mem_format(char* rtn, const char* format, ... );
 void jl_mem_format2(char* rtn, const char* format, ...);
 uint32_t jl_mem_random_int(uint32_t a);
@@ -217,13 +210,13 @@ void jl_file_print(jl_t* jl, const char* fname, const char* msg);
 uint8_t jl_file_exist(jl_t* jl, const char* path);
 void jl_file_rm(jl_t* jl, const char* filename);
 void jl_file_save(jl_t* jl, const void *file, const char *name, uint32_t bytes);
-void jl_file_load(jl_t* jl, data_t* load, const char* file_name);
+const char* jl_file_load(jl_t* jl, data_t* load, const char* file_name);
 char jl_file_pk_save(jl_t* jl, const char* packageFileName,
 	const char* fileName, void *data, uint64_t dataSize);
 char* jl_file_pk_compress(jl_t* jl, const char* folderName);
-void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
+const char* jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 	const char* file_name);
-void jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
+const char* jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
 	const char *filename);
 struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive);
 char* jl_file_get_resloc(jl_t* jl, const char* prg_folder, const char* fname);

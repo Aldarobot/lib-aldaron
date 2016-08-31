@@ -8,6 +8,8 @@
  */
 #include "JLGRprivate.h"
 
+#include "la_memory.h"
+
 static jl_sprite_t *sprite = NULL;
 
 static void jlgr_sprite_draw_to_pr__(jl_t *jl) {

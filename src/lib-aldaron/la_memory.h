@@ -1,7 +1,10 @@
-void* la_memory_clear(void* data, size_t size);
-void* la_memory_copy(const void* src, void* dst, size_t size);
-void* la_memory_stringcopy(const char* src, char* dst, size_t size);
-void* la_memory_makecopy(void* data, size_t size);
-void* la_memory_allocate(size_t size);
-void* la_memory_resize(void* data, size_t size);
+#include <stdint.h>
+
+uint64_t la_memory_used(void);
+void* la_memory_clear(void* data, uint64_t size);
+void* la_memory_copy(const void* src, void* dst, uint64_t size);
+void* la_memory_stringcopy(const char* src, char* dst, uint64_t size);
+void* la_memory_makecopy(const void* data, uint64_t size);
+void* la_memory_allocate(uint64_t size);
+void* la_memory_resize(void* data, uint64_t size);
 void* la_memory_free(void* data);

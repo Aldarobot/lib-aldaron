@@ -177,6 +177,6 @@ void jl_thread_pvar_drop(jl_pvar_t* pvar, void** data) {
 }
 
 void jl_thread_pvar_free(jl_pvar_t* pvar) {
-	pvar->data = jl_mem(pvar->jl, pvar->data, 0);
+	pvar->data = la_memory_free(pvar->data);
 	pvar->size = 0;
 }

@@ -141,7 +141,7 @@ void jl_data_delete_byte(jl_t *jl, data_t* pstr) {
 		pstr->data[i] = pstr->data[i+1];
 	pstr->size--;
 	pstr->data[pstr->size] = '\0';
-	if(pstr->size != 0) pstr->data = jl_mem(jl, pstr->data, pstr->size);
+	if(pstr->size != 0) pstr->data = la_memory_resize(pstr->data, pstr->size);
 	jl_data_truncate_curs__(pstr);
 }
 
@@ -223,7 +223,7 @@ void jl_data_data(jl_t *jl, data_t* a, const data_t* b, uint64_t bytes) {
 	if(a == NULL) la_panic("jl_data_data: NULL A STRING");
 	else if(b == NULL) la_panic("jl_data_data: NULL B STRING");
 	if(sizeb > size) size = sizeb;
-	a->data = jl_mem(jl, a->data, size + 1);
+	a->data = la_memory_resize(a->data, size + 1);
 	for(i = 0; i < bytes; i++) {
 		a->data[i + a->curs] = b->data[i + b->curs];
 	}
@@ -251,7 +251,7 @@ void jl_data_merg(jl_t *jl, data_t* a, const data_t* b) {
 void jl_data_trunc(jl_t *jl, data_t* a, uint32_t size) {
 	a->curs = 0;
 	a->size = size;
-	a->data = jl_mem(jl, a->data, a->size + 1);
+	a->data = la_memory_resize(a->data, a->size + 1);
 }
 
 /**

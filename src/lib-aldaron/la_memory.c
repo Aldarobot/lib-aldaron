@@ -6,97 +6,49 @@
  * the variables.  Has a specialized string type.
 */
 
-#include "JLprivate.h"
+#include "la_memory.h"
+#include "la.h"
+
 #include <malloc.h>
+#include <string.h>
 
 /**
  * Return Amount Of Total Memory Being Used
  * @returns The total amount of memory being used in bytes.
 **/
-uint64_t jl_mem_tbiu(void) {
+uint64_t la_memory_used(void) {
 	struct mallinfo mi;
 
-#if JL_PLAT != JL_PLAT_PHONE
-	malloc_trim(0); //Remove Free Memory
-#endif
 	mi = mallinfo();
 	return mi.uordblks;
 }
 
-/**
- * Start checking for memory leaks.  Pair up with 1 or multiple calls to
- * jl_mem_leak_fail() to check for memory leaks.
- * @param jl: The library context.
-**/
-void jl_mem_leak_init(jl_t* jl) {
-	jl->info = jl_mem_tbiu();
-}
-
-/**
- * Exit if there's been a memory leak since the last call to jl_mem_leak_init().
- * @param jl: The library context.
- * @param fn_name: Recommended that it is the name of function that leak could
- * happen in, but can be whatever you want.
-**/
-void jl_mem_leak_fail(jl_t* jl, const char* fn_name) {
-	if(jl_mem_tbiu() != jl->info) {
-		la_panic("%s: Memory Leak Fail", fn_name);
-	}
-}
-
-/**
- * Allocate, Resize, or Free Dynamic Memory.  All memory allocated by this
- * function is uninitialized.
- * To allocate dynamic memory:	void* memory = fn(jl, NULL, size);
- * To resize dynamic memory:	memory = fn(jl, memory, new_size);
- * To free dynamic memory:	memory = fn(jl, memory, 0);
- * @param jl: The library context.
- * @param a: Pointer to the memory to resize/free, or NULL if allocating memory.
- * @param size: # of bytes to resize to/allocate, or 0 to free.
-**/
-void *jl_mem(jl_t* jl, void *a, uint32_t size) {
-	if(size == 0) { // Free
-		if(a == NULL)
-			la_panic("Double Free or free on NULL pointer");
-		else
-			free(a);
-		return NULL;
-	}else if(a == NULL) {
-		return malloc(size);
-	}else{ // Allocate or Resize
-		if((a = realloc(a, size)) == NULL)
-			la_panic("realloc() failed! Out of memory?");
-	}
-	return a;
-}
-
-void* la_memory_clear(void* data, size_t size) {
+void* la_memory_clear(void* data, uint64_t size) {
 	memset(data, 0, size);
 	return data;
 }
 
-void* la_memory_copy(const void* src, void* dst, size_t size) {
+void* la_memory_copy(const void* src, void* dst, uint64_t size) {
 	memcpy(dst, src, size);
 	return dst;
 }
 
-void* la_memory_stringcopy(const char* src, char* dst, size_t size) {
+void* la_memory_stringcopy(const char* src, char* dst, uint64_t size) {
 	dst[size] = '\0';
 	return la_memory_copy(src, dst, size);
 }
 
-void* la_memory_makecopy(void* data, size_t size) {
+void* la_memory_makecopy(const void* data, uint64_t size) {
 	void* dest = malloc(size);
 	return la_memory_copy(data, dest, size);
 }
 
-void* la_memory_allocate(size_t size) {
+void* la_memory_allocate(uint64_t size) {
 	void* data = malloc(size);
 	return la_memory_clear(data, size);
 }
 
-void* la_memory_resize(void* data, size_t size) {
-	if(!data) la_panic("la_memory_resize: memory is NULL");
+void* la_memory_resize(void* data, uint64_t size) {
 	if(!size) la_panic("la_memory_resize: size is zero");
 	return realloc(data, size);
 }
@@ -104,38 +56,6 @@ void* la_memory_resize(void* data, size_t size) {
 void* la_memory_free(void* data) {
 	free(data);
 	return NULL;
-}
-
-/**
- * Clear memory pointed to by "mem" of size "size"
- * @param pmem: memory to clear
- * @param size: size of "mem"
-**/
-void jl_mem_clr(void* mem, uint64_t size) {
-	memset(mem, 0, size);
-}
-
-/**
- * Copy memory from one place to another.
- * @param src: The place to copy memory from
- * @param dst: The place to copy memory to
- * @param size: The size of src & dst in bytes.
-**/
-void jl_mem_copyto(const void* src, void* dst, uint64_t size) {
-	memcpy(dst, src, size);
-}
-
-/**
- * Copy "size" bytes of "src" to a new pointer of "size" bytes and return it.
- * @param jl: The library context.
- * @param src: source buffer
- * @param size: # of bytes of "src" to copy to "dst"
- * @returns: a new pointer to 
-*/
-void *jl_mem_copy(jl_t* jl, const void *src, uint64_t size) {
-	void *dest = jl_memi(jl, size);
-	jl_mem_copyto(src, dest, size);
-	return dest;
 }
 
 /**
@@ -180,7 +100,7 @@ uint32_t jl_mem_random_int(uint32_t a) {
 }
 
 /**
- * Add 2 Numbers, Keeping within a range of 0-1.
+ * Add 2 Numbers, Keeping within a range of 0-1. ( Overflow )
 **/
 double jl_mem_addwrange(double v1, double v2) {
 	double rtn = v1 + v2;
@@ -190,7 +110,7 @@ double jl_mem_addwrange(double v1, double v2) {
 }
 
 /**
- * Find the smallest difference within a range of 0-1.
+ * Find the smallest difference within a range of 0-1. ( Overflow )
 **/
 double jl_mem_difwrange(double v1, double v2) {
 	double rtn1 = fabs(jl_mem_addwrange(v1, -v2)); // Find 1 distance
@@ -238,9 +158,7 @@ uint32_t jl_mem_string_upto(const char* string, char chr) {
 }
 
 jl_t* jl_mem_init_(void) {
-	jl_t* jl = jl_memi(NULL, sizeof(jl_t));
-	//Prepare user data structure
-	jl->errf = JL_ERR_NERR; // No error
+	jl_t* jl = la_memory_allocate(sizeof(jl_t));
 	//Make sure that non-initialized things aren't used
 	jl->has.graphics = 0;
 	jl->has.fileviewer = 0;
@@ -251,5 +169,4 @@ jl_t* jl_mem_init_(void) {
 
 void jl_mem_kill_(jl_t* jl) {
 	free(jl);
-//	cl_list_destroy(g_vmap_list);
 }

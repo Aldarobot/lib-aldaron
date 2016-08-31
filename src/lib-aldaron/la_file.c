@@ -275,7 +275,7 @@ void jl_file_save(jl_t* jl, const void *file, const char *name, uint32_t bytes){
  * @param file_name: file to load
  * @returns A readable "strt" containing the bytes from the file.
  */
-void jl_file_load(jl_t* jl, data_t* load, const char* file_name) {
+const char* jl_file_load(jl_t* jl, data_t* load, const char* file_name) {
 	jl_file_reset_cursor__(file_name);
 	unsigned char *file = malloc(MAXFILELEN);
 	const char* converted_filename = jl_file_convert__(jl, file_name);
@@ -290,8 +290,7 @@ void jl_file_load(jl_t* jl, data_t* load, const char* file_name) {
 		la_print("\tLoad failed because: %s", strerror(errsv));
 		if(errsv != ENOENT)
 			la_panic("jl_file_load can't load a directory.");
-		jl->errf = JL_ERR_FIND;
-		return;
+		return la_error("Couldn't Find File.");
 	}
 	int Read = read(fd, file, MAXFILELEN);
 	jl->info = Read;
@@ -300,6 +299,8 @@ void jl_file_load(jl_t* jl, data_t* load, const char* file_name) {
 	close(fd);
 
 	if(jl->info) jl_data_mkfrom_data(jl, load, jl->info, file);
+
+	return NULL;
 }
 
 /**
@@ -395,7 +396,7 @@ char* jl_file_pk_compress(jl_t* jl, const char* folderName) {
  * @param data: The data that contains the zip file.
  * @param file_name: The name of the file to load.
 **/
-void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
+const char* jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 	const char* file_name)
 {
 	zip_error_t ze; ze.zip_err = ZIP_ER_OK;
@@ -406,7 +407,6 @@ void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 
 	if(ze.zip_err != ZIP_ER_OK) {
 		la_print("couldn't make pckg buffer!");
-		//zip_error_init_with_code(&ze, ze.zip_err);
 		la_panic("because: \"%s\"", zip_error_strerror(&ze));
 	}
 
@@ -443,15 +443,14 @@ void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 			file_name);
 		la_print("because: %s", (void *)zip_strerror(zipfile));
 		la_print(zip_get_name(zipfile, 0, ZIP_FL_UNCHANGED));
-		jl->errf = JL_ERR_NONE;
-		return;
+		return la_error("Generic Error");
 	}
 	la_print("opened file in package / reading opened file....");
 	if((jl->info = zip_fread(file, fileToLoad, PKFMAX)) == -1)
 		la_panic("file reading failed");
 	if(jl->info == 0) {
 		la_print("empty file, returning NULL.");
-		return;
+		return NULL;
 	}
 	la_print("jl_file_pk_load: read %d bytes", jl->info);
 	zip_close(zipfile);
@@ -459,7 +458,7 @@ void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 	// Make a data_t* from the data.
 	if(jl->info) jl_data_mkfrom_data(jl, rtn, jl->info, fileToLoad);
 	la_print("done.");
-	jl->errf = JL_ERR_NERR;
+	return NULL;
 }
 
 /**
@@ -475,24 +474,23 @@ void jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
  * @param filename: file within package to load
  * @returns: contents of file ( "filename" ) in package ( "packageFileName" )
 */
-void jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
+const char* jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
 	const char *filename)
 {
 	const char* converted = jl_file_convert__(jl, packageFileName);
-
-	jl->errf = JL_ERR_NERR;
+	const char* error;
 
 	la_print("loading package:\"%s\"...", converted);
 
-	data_t data; jl_file_load(jl, &data, converted);
-	la_print("error check 1.");
-	if(jl->errf == JL_ERR_FIND) {
+	data_t data;
+
+	if((error = jl_file_load(jl, &data, converted))) {
 		la_print("!Package File doesn't exist!");
-		return;
+		return error;
 	}
-	jl_file_pk_load_fdata(jl, rtn, &data, filename);
-	if(jl->errf) la_panic("jl_file_pk_load_fdata failed!");
-	return;
+	if(jl_file_pk_load_fdata(jl, rtn, &data, filename))
+		la_panic("jl_file_pk_load_fdata failed!");
+	return NULL;
 }
 
 /**

@@ -1,6 +1,7 @@
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
 #include "la_effect.h"
+#include "la_memory.h"
 
 /** @cond */
 

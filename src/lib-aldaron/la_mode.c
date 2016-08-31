@@ -7,13 +7,15 @@
  *	Handles things called modes.  An example is: your title screen
  *	of a game and the actual game would be on different modes.
 **/
+
+#include "la_memory.h"
 #include "JLprivate.h"
 
 extern SDL_atomic_t la_rmc;
 
 static void _jl_mode_add(jl_t* jl) {
 	// Allocate a new mode.
-	jl->mode.mdes = jl_mem(jl, jl->mode.mdes,
+	jl->mode.mdes = la_memory_resize(jl->mode.mdes,
 		(SDL_AtomicGet(&la_rmc) + 1) * sizeof(jl_mode_t));
 	// Set the mode.
 	jl->mode.mdes[SDL_AtomicGet(&la_rmc)] =

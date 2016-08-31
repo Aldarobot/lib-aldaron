@@ -1,6 +1,7 @@
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
 #include "la_thread.h"
+#include "la_memory.h"
 
 extern float la_banner_size;
 

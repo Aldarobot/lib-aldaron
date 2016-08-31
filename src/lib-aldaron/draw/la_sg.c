@@ -107,8 +107,8 @@ uint32_t jl_sg_add_image(la_window_t* jlgr, data_t* zipdata, const char* filenam
 	data_t img;
 
 	// Load image into "img"
-	jl_file_pk_load_fdata(jlgr->jl, &img, zipdata, filename);
-	if(jlgr->jl->errf) la_panic("add-image: pk_load_fdata failed!");
+	if(jl_file_pk_load_fdata(jlgr->jl, &img, zipdata, filename))
+		la_panic("add-image: pk_load_fdata failed!");
 
 	la_print("Loading Image....");
 	uint32_t rtn = jl_sg_add_image__(jlgr, &img);

@@ -9,6 +9,8 @@
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
 
+#include "la_memory.h"
+
 extern float la_banner_size;
 
 static inline void jlgr_vo_bounding_box(la_window_t* jlgr, jl_vo_t* vo,
@@ -46,9 +48,9 @@ static void jlgr_vo_vertices__(la_window_t* jlgr, jl_vo_t* vo, const float *xyzw
 	vo->vc = vertices;
 	if(vertices) {
 		// Re-Allocate vo->cc
-		vo->cc = jl_mem(jlgr->jl, vo->cc, vertices * sizeof(float) * 4);
+		vo->cc = la_memory_resize(vo->cc, vertices * sizeof(float) * 4);
 		// Re-Allocate vo->cv
-		vo->cv = jl_mem(jlgr->jl, vo->cv, vertices * sizeof(float) * 3);
+		vo->cv = la_memory_resize(vo->cv, vertices * sizeof(float) * 3);
 		// Set vo->cv & vo->gl
 		jlgr_opengl_vertices_(jlgr, xyzw, vertices, vo->cv, &vo->gl);
 		// Set bounding box
@@ -355,8 +357,8 @@ void jlgr_vo_free(la_window_t* jlgr, jl_vo_t *vo) {
 	// Free GL Texture Buffer
 	jlgr_opengl_buffer_old_(jlgr, &vo->bt);
 	// Free Converted Vertices & Colors
-	if(vo->cv) vo->cv = jl_mem(jlgr->jl, vo->cv, 0);
-	if(vo->cc) vo->cc = jl_mem(jlgr->jl, vo->cc, 0);
+	if(vo->cv) vo->cv = la_memory_resize(vo->cv, 0);
+	if(vo->cc) vo->cc = la_memory_resize(vo->cc, 0);
 	// Free main structure
-	vo = jl_mem(jlgr->jl, (void**)&vo, 0);
+	la_memory_free(vo);
 }

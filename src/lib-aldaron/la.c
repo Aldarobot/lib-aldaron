@@ -33,6 +33,7 @@ float la_banner_size = 0.f;
 jl_t* la_jl_deprecated = NULL;
 SDL_atomic_t la_rmc; // running / mode count
 SDL_atomic_t la_rmcexit;
+static char la_errorv[256];
 
 static inline void jl_init_libs__(jl_t* jl) {
 	la_print("Initializing file system....");
@@ -127,6 +128,16 @@ void la_dont(jl_t* jl) { }
 **/
 void* la_context(jl_t* jl) {
 	return jl->prg_context;
+}
+
+const char* la_error(const char* format, ...) {
+	va_list arglist;
+
+	va_start( arglist, format );
+	snprintf(la_errorv, 256, format, arglist);
+	va_end( arglist );
+
+	return la_errorv;
 }
 
 typedef struct {

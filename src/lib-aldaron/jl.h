@@ -39,5 +39,9 @@ static inline void jl_exit(jl_t* jl, const char* format, ...) {
 #define jl_thread_wait_stop(jl, wait) la_signal_send(wait)
 
 #define jl_memi(jl, size) la_memory_allocate(size)
+#define jl_mem_tbiu() la_memory_used()
+#define jl_mem_clr(mem, size) la_memory_clear(mem, size)
+#define jl_mem_copyto(src, dest, size) la_memory_copy(src, dest, size)
+#define jl_mem_copy(jl, src, size) la_memory_makecopy(src, size)
 
 #endif

@@ -76,6 +76,18 @@ void jl_data_mkfrom_str(data_t* a, const char* string) {
 	return jl_data_mkfrom_data(NULL, a, strlen(string), string);
 }
 
+void la_buffer_format(la_buffer_t* buffer, const char* format, ...) {
+	va_list arglist;
+
+	// Allocate twice as much space as format.
+	buffer->curs = strlen(format) * 2;
+	la_buffer_resize(buffer);
+	// Format
+	va_start(arglist, format);
+	vsnprintf((void*)buffer->data, buffer->size, format, arglist);
+	va_end(arglist);
+}
+
 uint8_t la_buffer_byte(la_buffer_t* buffer) {
 	// Avoid memory errors.
 	if(buffer->curs >= buffer->size)
@@ -146,13 +158,13 @@ void jl_data_delete_byte(jl_t *jl, data_t* pstr) {
 }
 
 void la_buffer_resize(la_buffer_t* buffer) {
-	size_t oldsize = buffer->size;
+	uint64_t oldsize = buffer->size;
 
-	if(buffer->curs > buffer->size - 1) {
+	while(buffer->curs > buffer->size - 1)
 		buffer->size *= 2;
-		buffer->data = la_memory_resize(buffer->data, buffer->size);
-		la_memory_clear(buffer->data + oldsize, oldsize);
-	}
+
+	buffer->data = la_memory_resize(buffer->data, buffer->size);
+	la_memory_clear(buffer->data + oldsize, oldsize);
 }
 
 void jl_data_resize(jl_t *jl, data_t* pstr, uint32_t newsize) {

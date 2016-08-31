@@ -109,13 +109,6 @@ typedef struct {
 }jl_mode_t;
 
 typedef struct{
-	struct {
-		uint8_t graphics; //graphics are enabled
-		uint8_t fileviewer; //Fileviewer is enabled
-		uint8_t filesys; // Filesystem is enabled.
-		uint8_t input; // Input is enabled.
-		uint8_t quickloop; // Quickloop is enabled
-	}has;
 	struct{
 		double psec; // Seconds since last frame.
 		double timer; // Time 1 frame ago started
@@ -137,12 +130,8 @@ typedef struct{
 		data_t separator;
 	}fl;
 	void* loop; // The main loop.
-	char* name; // The name of the program.
-	uint32_t info; // @startup:# images loaded from media.zip.Set by others.
 	//
 	uint8_t mode_switch_skip;
-	//
-	la_signal_t wait;
 	// Program's context.
 	void* prg_context;
 	// Built-in library pointers.

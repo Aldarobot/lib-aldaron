@@ -66,7 +66,7 @@ static void jlgr_thread_windowresize(la_window_t* jlgr) {
 	jlgr_thread_resize(jlgr, w, h);
 }
 
-static void jlgr_thread_draw_init__(jl_t* jl) {
+static void jlgr_thread_draw_init__(jl_t* jl, const char* name) {
 	la_window_t* jlgr = jl->jlgr;
 
 	// Initialize subsystems
@@ -93,7 +93,7 @@ static void jlgr_thread_draw_init__(jl_t* jl) {
 	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 	program_init_(jl);
 	jlgr_thread_resize(jlgr, jlgr_wm_getw(jlgr), jlgr_wm_geth(jlgr));
-	jlgr_wm_setwindowname(jlgr, jl->name);
+	jlgr_wm_setwindowname(jlgr, name);
 	la_print("Window Created!");
 }
 
@@ -135,7 +135,7 @@ void la_window_kill__(la_window_t* window) {
  * @param window: The window.
  * @param fn_: Graphic initialization function run on graphical thread.
 **/
-void la_window_init(la_window_t* window, jl_fnct fn_) {
+void la_window_init__(la_window_t* window, jl_fnct fn_, const char* name) {
 	jl_t* jl = la_jl_deprecated;
 
 	jl->jlgr = window;
@@ -156,10 +156,8 @@ void la_window_init(la_window_t* window, jl_fnct fn_) {
 	jl_thread_mutex_lock(&window->protected.mutex);
 	window->protected.functions.fn = fn_;
 	jl_thread_mutex_unlock(&window->protected.mutex);
-	// Wait ....
-	jl_thread_wait(jl, &jl->wait);
 	// Initialize subsystems
-	jlgr_thread_draw_init__(jl);
+	jlgr_thread_draw_init__(jl, name);
 #ifndef LA_PHONE_ANDROID
 	// Redraw loop
 	while(SDL_AtomicGet(&la_rmc))

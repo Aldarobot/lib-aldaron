@@ -158,13 +158,7 @@ uint32_t jl_mem_string_upto(const char* string, char chr) {
 }
 
 jl_t* jl_mem_init_(void) {
-	jl_t* jl = la_memory_allocate(sizeof(jl_t));
-	//Make sure that non-initialized things aren't used
-	jl->has.graphics = 0;
-	jl->has.fileviewer = 0;
-	jl->has.filesys = 0;
-	jl->has.input = 0;
-	return jl;
+	return la_memory_allocate(sizeof(jl_t));
 }
 
 void jl_mem_kill_(jl_t* jl) {

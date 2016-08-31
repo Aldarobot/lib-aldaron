@@ -24,6 +24,7 @@
 
 #define PKFMAX 10000000
 #define JL_FL_PERMISSIONS ( S_IRWXU | S_IRWXG | S_IRWXO )
+#define JL_FILE_SEPARATOR "/"
 
 #if JL_PLAT == JL_PLAT_PHONE
 	extern const char* LA_FILE_ROOT;
@@ -112,30 +113,10 @@ static inline void jl_file_get_root__(jl_t * jl) {
 	jl_data_merg(jl, &root_path, &root_dir);
 	la_print("Free root_dir.");
 	jl_data_free(&root_dir);
-#elif JL_PLAT_RPI
-	data_t root_dir;
-
-	la_print("Get external storage directory.");
-	jl_data_mkfrom_str(&root_path, "/home/pi/.local/share/");
-	la_print("Append JL_ROOT_DIR.");
-	jl_data_mkfrom_str(&root_dir, JL_ROOT_DIR);
-	la_print("Merging root_path and root_dir.");
-	jl_data_merg(jl, &root_path, &root_dir);
-	la_print("Free root_dir.");
-	jl_data_free(&root_dir);
-#else
-	// Get the operating systems prefered path
-	char* pref_path = SDL_GetPrefPath(JL_ROOT_DIRNAME, "\0");
-
-	if(!pref_path) {
-		la_panic("This platform has no pref path!");
-	}
-	// Erase extra non-needed '/'s
-	pref_path[strlen(pref_path) - 1] = '\0';
+#else // Linux:
 	// Set root path to pref path
-	jl_data_mkfrom_str(&root_path, pref_path);
-	// Free the pointer to pref path
-	SDL_free(pref_path);
+	la_buffer_init(&root_path);
+	la_buffer_format(&root_path, "%s/.aldaron", getenv("HOME"));
 #endif
 	// Make "-- JL_ROOT_DIR"
 	const char* error = NULL;
@@ -208,7 +189,7 @@ const char* la_file_append(const char* filename, const void* data, size_t size){
 **/
 void jl_file_print(jl_t* jl, const char* fname, const char* msg) {
 	// Write to the errf logfile
-	if(jl->has.filesys && fname) jl_file_save_(jl, msg, fname, strlen(msg));
+	if(fname) jl_file_save_(jl, msg, fname, strlen(msg));
 }
 
 /**
@@ -293,12 +274,11 @@ const char* jl_file_load(jl_t* jl, data_t* load, const char* file_name) {
 		return la_error("Couldn't Find File.");
 	}
 	int Read = read(fd, file, MAXFILELEN);
-	jl->info = Read;
 
-	la_print("jl_file_load(): read %d bytes", jl->info);
+	la_print("jl_file_load(): read %d bytes", Read);
 	close(fd);
 
-	if(jl->info) jl_data_mkfrom_data(jl, load, jl->info, file);
+	if(Read) jl_data_mkfrom_data(jl, load, Read, file);
 
 	return NULL;
 }
@@ -402,6 +382,7 @@ const char* jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 	zip_error_t ze; ze.zip_err = ZIP_ER_OK;
 	zip_source_t *file_data;
 	int zerror = 0;
+	int Read;
 
 	file_data = zip_source_buffer_create(data->data, data->size, 0, &ze);
 
@@ -446,17 +427,17 @@ const char* jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 		return la_error("Generic Error");
 	}
 	la_print("opened file in package / reading opened file....");
-	if((jl->info = zip_fread(file, fileToLoad, PKFMAX)) == -1)
+	if((Read = zip_fread(file, fileToLoad, PKFMAX)) == -1)
 		la_panic("file reading failed");
-	if(jl->info == 0) {
+	if(Read == 0) {
 		la_print("empty file, returning NULL.");
 		return NULL;
 	}
-	la_print("jl_file_pk_load: read %d bytes", jl->info);
+	la_print("jl_file_pk_load: read %d bytes", Read);
 	zip_close(zipfile);
 	la_print("closed file.");
 	// Make a data_t* from the data.
-	if(jl->info) jl_data_mkfrom_data(jl, rtn, jl->info, fileToLoad);
+	if(Read) jl_data_mkfrom_data(jl, rtn, Read, fileToLoad);
 	la_print("done.");
 	return NULL;
 }
@@ -640,11 +621,6 @@ void jl_file_init_(jl_t * jl) {
 	la_print("Get/Make directory error logfile....");
 	jl_file_get_errf__(jl);
 	la_print("Complete!");
-	//
-	jl->has.filesys = 1;
-
-	const char* pkfl = jl_file_get_resloc(jl, JL_MAIN_DIR, JL_MAIN_MEF);
-	remove(pkfl);
 
 	truncate(jl->fl.paths.errf, 0);
 	la_print("Starting....");

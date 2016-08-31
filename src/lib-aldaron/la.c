@@ -18,6 +18,7 @@ void jlgr_kill(la_window_t* jlgr);
 void jl_mode_loop__(jl_t* jl);
 
 void jlgr_fl_init(la_window_t* jlgr);
+void la_window_init__(la_window_t* window, jl_fnct fn_, const char* name);
 
 #if JL_PLAT == JL_PLAT_PHONE
 	#include <jni.h>
@@ -57,7 +58,6 @@ static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 	jl_init_libs__(jl);
 	// Allocate the program's context.
 	jl->prg_context = la_memory_allocate(ctx1s);
-	jl->name = jl_mem_copy(jl, nm, strlen(nm) + 1);
 	// Run the program's init function.
 	_fnc_init_(jl);
 	// Run the mode loop
@@ -134,7 +134,7 @@ const char* la_error(const char* format, ...) {
 	va_list arglist;
 
 	va_start( arglist, format );
-	snprintf(la_errorv, 256, format, arglist);
+	vsnprintf(la_errorv, 256, format, arglist);
 	va_end( arglist );
 
 	return la_errorv;
@@ -203,7 +203,7 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, uint8_t openwindow,
 	la_thread_new(&la_main, (la_thread_fn_t)la_main_thread, "la_main", &ctx);
 	// Open a window, if "openwindow" is set.
 #ifndef LA_PHONE_ANDROID
-	if(openwindow) la_window_init(la_window, fnc_init);
+	if(openwindow) la_window_init__(la_window, fnc_init, name);
 	// Wait for the thread to finish.
 	la_print("Kill Window....");
 	if(openwindow) jlgr_kill(la_window);
@@ -214,7 +214,7 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, uint8_t openwindow,
 	la_print("| success |");
 #else
 	la_print("android pre init %d %d", la_window->width, la_window->height);
-	la_window_init(la_window, fnc_init);
+	la_window_init__(la_window, fnc_init, name);
 #endif
 	return 0;
 }

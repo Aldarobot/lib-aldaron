@@ -1,8 +1,4 @@
-
-
-![alt text](https://oxydeadbeef.github.io/lib-aldaron/images/logo.png)
-
-
+![alt text](media/images/logo.png)
 
 Lib Aldaron is a powerful & easy to use library that uses OpenGL/OpenGLES
 with SDL2.  It takes care of any compatibility issues there might be between

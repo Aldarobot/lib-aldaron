@@ -120,15 +120,6 @@ typedef struct{
 		uint16_t which;
 		uint8_t changed;
 	}mode;
-	struct {
-		struct{
-			char* root; // The root directory "-- JL_Lib/"
-			char* cprg; // The current program "-- JL_Lib/program"
-			char* errf; // The error file "-- JL_Lib/errf.txt"
-		}paths; // Paths to different files.
-
-		data_t separator;
-	}fl;
 	void* loop; // The main loop.
 	//
 	uint8_t mode_switch_skip;
@@ -137,8 +128,6 @@ typedef struct{
 	// Built-in library pointers.
 	void* jlgr;
 	void* jlau;
-	// 
-	void* kill;
 }jl_t;
 
 typedef void(*jl_fnct)(jl_t* jl);

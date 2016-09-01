@@ -143,6 +143,7 @@ const char* la_error(const char* format, ...) {
 typedef struct {
 	jl_t* jl;
 	la_window_t* jlgr;
+	jl_fnct kill;
 } la_main_thread_t;
 
 static int32_t la_main_thread(la_main_thread_t* ctx) {
@@ -167,9 +168,8 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 		la_print("Kill Audio....");
 		jlau_kill(jl->jlau);
 	}
-	la_print("Kill Program....");
-	((jl_fnct)jl->kill)(jl);
-	la_print("Success!");
+	ctx->kill(jl);
+	la_print("Killed Program!");
 	SDL_AtomicSet(&la_rmcexit, 0);
 	return 0;
 }
@@ -196,10 +196,9 @@ int32_t la_start(jl_fnct fnc_init, jl_fnct fnc_kill, uint8_t openwindow,
 #else
 	la_init__(jl, la_dont, name, ctx_size);
 #endif
-	jl->kill = fnc_kill;
 	la_jl_deprecated = jl;
 	// Start a new thread.
-	la_main_thread_t ctx = (la_main_thread_t) { jl, la_window };
+	la_main_thread_t ctx = (la_main_thread_t) { jl, la_window, fnc_kill };
 	la_thread_new(&la_main, (la_thread_fn_t)la_main_thread, "la_main", &ctx);
 	// Open a window, if "openwindow" is set.
 #ifndef LA_PHONE_ANDROID

@@ -28,26 +28,12 @@ static void* la_file_temp = NULL;
 
 // This function converts linux filenames to native filnames
 char* jl_file_convert__(jl_t* jl, const char* filename) {
-	data_t src; jl_data_mkfrom_str(&src, filename);
-	data_t converted; jl_data_init(jl, &converted, 0);
-
-	if(jl_data_test_next(&src, "!")) {
-		src.curs++; // ignore
-	}else{
-		src.curs++; // ignore
-		jl_data_merg(jl, &converted, &jl->fl.separator);
-	}
-	while(1) {
-		data_t append; jl_data_read_upto(jl, &append, &src, '/', 300); 
-		if(append.data[0] == '\0') break;
-		jl_data_merg(jl, &converted, &append);
-		if(la_buffer_byte(&src) == '/')
-			jl_data_merg(jl, &converted, &jl->fl.separator);
-		src.curs++; // Skip '/'
-		jl_data_free(&append);
-	}
-	jl_data_free(&src);
-	return jl_data_tostring(jl, &converted);
+	char* newfilename = la_memory_makecopy(filename, strlen(filename));
+// #if // Windows:
+//	int i;
+// #else  // Linux:
+// #endif
+	return newfilename;
 }
 
 static int jl_file_save_(jl_t* jl, const void *file_data, const char *file_name,
@@ -93,23 +79,13 @@ static inline void jl_file_reset_cursor__(const char* file_name) {
 	close(fd);
 }
 
-static inline void jl_file_get_root__(jl_t * jl) {
+static char* jl_file_get_root__(jl_t * jl) {
 	data_t root_path;
 
-#if JL_PLAT == JL_PLAT_PHONE // Android
-	data_t root_dir;
-
-	la_print("Get external storage directory.");
-	jl_data_mkfrom_str(&root_path, LA_FILE_ROOT);
-	la_print("Append JL_ROOT_DIR.");
-	jl_data_mkfrom_str(&root_dir, JL_ROOT_DIR);
-	la_print("Merging root_path and root_dir.");
-	jl_data_merg(jl, &root_path, &root_dir);
-	la_print("Free root_dir.");
-	jl_data_free(&root_dir);
-#else // Linux:
-	// Set root path to pref path
 	la_buffer_init(&root_path);
+#if JL_PLAT == JL_PLAT_PHONE // Android:
+	la_buffer_format(&root_path, "%s", LA_FILE_ROOT);
+#else // Linux:
 	la_buffer_format(&root_path, "%s/.aldaron", getenv("HOME"));
 #endif
 	const char* error = NULL;
@@ -118,21 +94,19 @@ static inline void jl_file_get_root__(jl_t * jl) {
 		la_panic("mkdir: %s", error);
 	}
 	// Set paths.root & free root_path
-	jl->fl.paths.root = jl_data_tostring(jl, &root_path);
-	la_print("Root Path=\"%s\"", jl->fl.paths.root);
+//	la_print("Root Path=\"%s\"", jl->fl.paths.root);
+	return jl_data_tostring(jl, &root_path);
 }
 
-static inline void jl_file_get_errf__(jl_t * jl) {
-	data_t fname; jl_data_mkfrom_str(&fname, "errf.txt");
-	// Add the root path
-	data_t errfs; jl_data_mkfrom_str(&errfs, jl->fl.paths.root);
+static char* jl_file_get_errf__(jl_t * jl) {
+	char* root = jl_file_get_root__(jl);
+	la_buffer_t buffer;
 
-	// Add the file name
-	jl_data_merg(jl, &errfs, &fname);
-	// Free fname
-	jl_data_free(&fname);
-	// Set paths.errf & free errfs
-	jl->fl.paths.errf = jl_data_tostring(jl, &errfs);
+	la_buffer_init(&buffer);
+	la_buffer_format(&buffer, "%s/log.txt", root);
+
+	la_memory_free(root);
+	return jl_data_tostring(jl, &buffer);
 }
 
 // NON-STATIC Library Dependent Functions
@@ -181,7 +155,6 @@ const char* la_file_append(const char* filename, const void* data, size_t size){
  * @param msg: The text to print.
 **/
 void jl_file_print(jl_t* jl, const char* fname, const char* msg) {
-	// Write to the errf logfile
 	if(fname) jl_file_save_(jl, msg, fname, strlen(msg));
 }
 
@@ -568,7 +541,7 @@ struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive){
  * Get the designated location for a resource file. Resloc = Resource Location
  * @param jl: Library Context.
  * @param prg_folder: The name of the folder for all of the program's resources.
- *	For a company "PlopGrizzly" with game "Super Game":
+ *	For a company "Plop Grizzly" with game "Super Game":
  *		Pass: "PlopGrizzly_SG"
  *	For an individual game developer "Jeron Lau" with game "Cool Game":
  *		Pass: "JeronLau_CG"
@@ -577,46 +550,27 @@ struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive){
  * @returns: The designated location for a resouce pack
 */
 char* jl_file_get_resloc(jl_t* jl, const char* prg_folder, const char* fname) {
-	data_t filesr; jl_data_mkfrom_str(&filesr, JL_FILE_SEPARATOR);
-	data_t pfstrt; jl_data_mkfrom_str(&pfstrt, prg_folder);
-	data_t fnstrt; jl_data_mkfrom_str(&fnstrt, fname);
-	data_t resloc; jl_data_mkfrom_str(&resloc, jl->fl.paths.root);
-	char * rtn = NULL;
-	
-	la_print("Getting Resource Location....");
-	// Append 'prg_folder' onto 'resloc'
-	jl_data_merg(jl, &resloc, &pfstrt);
-	// Append 'filesr' onto 'resloc'
-	jl_data_merg(jl, &resloc, &filesr);
+	char* root = jl_file_get_root__(jl);
+	char* pdir = NULL;
+	la_buffer_t buffer;
+
+	la_buffer_init(&buffer);
+	la_buffer_format(&buffer, "%s/%s", root, prg_folder);
+
+	la_memory_free(root);
+	pdir = jl_data_tostring(jl, &buffer);
+
 	// Make 'prg_folder' if it doesn't already exist.
 	const char* error = NULL;
-	if( ( error = la_file_mkdir((char*) resloc.data) ) ) {
-		la_print("jl_file_get_resloc: couldn't make \"%s\"",
-			(char*) resloc.data);
+	if((error = la_file_mkdir(pdir))) {
+		la_print("jl_file_get_resloc: couldn't make \"%s\"", pdir);
 		la_panic("mkdir: %s", error);
 	}
-	// Append 'fname' onto 'resloc'
-	jl_data_merg(jl, &resloc, &fnstrt);
-	// Set 'rtn' to 'resloc' and free 'resloc'
-	rtn = jl_data_tostring(jl, &resloc);
-	// Free pfstrt & fnstrt & filesr
-	jl_data_free(&pfstrt),jl_data_free(&fnstrt),jl_data_free(&filesr);
-	return rtn;
+	return pdir;
 }
 
 void jl_file_init_(jl_t * jl) {
-	// Find out the native file separator.
-	jl_data_mkfrom_str(&jl->fl.separator, "/");
-	// Get ( and if need be, make ) the directory for everything.
-	la_print("Get/Make directory for everything....");
-	jl_file_get_root__(jl);
-	la_print("Complete!");
-	// Get ( and if need be, make ) the error file.
-	la_print("Get/Make directory error logfile....");
-	jl_file_get_errf__(jl);
-	la_print("Complete!");
-
-	truncate(jl->fl.paths.errf, 0);
-	la_print("Starting....");
+	la_print("file init");
+	truncate(jl_file_get_errf__(jl), 0);
 	la_print("finished file init");
 }

@@ -2,11 +2,72 @@
  * JL_Lib
  * Copyright (c) 2015 Jeron A. Lau 
 */
-/** \file
- * JLGRtext.c
- *	Draw text on screen.
- */
 #include "JLGRprivate.h"
+#include "la_text.h"
+#include "la_memory.h"
+
+#define COMPARE(towhat) ( strncmp(&temp[i], towhat, strlen(towhat)) == 0 )
+
+void la_text(la_window_t* window, const char* format, ...) {
+	va_list arglist;
+	float colors[] = { 1.f, 1.f, 1.f, 1.f }; // Color of the font.
+	jl_rect_t rc = { 0.f, 0.f, .0625f, .0625f };
+//	uint8_t bold;
+//	uint8_t italic;
+	int i = 0;
+	float tabsize = 8.f; // How many spaces are in a tab.
+	float distance = .75f; // X distance between letters ( X : Y )
+	jl_vec3_t tr = { 0., 0., 0. };
+
+	// Format the String...
+	va_start( arglist, format );
+	char temp[snprintf(NULL, 0, format, arglist) + 1];
+	vsprintf(temp, format, arglist);
+	va_end( arglist );
+
+	// Draw
+	jlgr_vo_set_image(window, &window->gl.temp_vo, rc, window->textures.font);
+//	la_print("TEXTSTART:");
+	while(1) {
+//		la_print("PRINTOUT: %d", temp[i]);
+		if(temp[i] == '\0') break;
+		if(COMPARE(LA_TEXT_CMD)) {
+			if(COMPARE(LA_TEXT_CONTROL)) {
+				i += 2;
+			}else if(COMPARE(LA_TEXT_IMAGE)) {
+				i += 2;
+			}else if(COMPARE(LA_TEXT_XY)) {
+				float* temp2;
+				i += 2;
+				temp2 = (void*) &temp[i];
+				tr.x += *temp2;
+				i += sizeof(float);
+				temp2 = (void*) &temp[i];
+				tr.y += *temp2;
+				i += sizeof(float);
+				la_print("%fx%f", tr.x, tr.y);
+			}else if(COMPARE(LA_TEXT_SIZE)) {
+				i += 2;
+			}else if(COMPARE(LA_TEXT_ALIGN)) {
+				i += 2;
+			}else if(COMPARE(LA_TEXT_WIDTH)) {
+				i += 2;
+			}
+		}else if(COMPARE("\n")) {
+			tr.x = 0, tr.y += rc.y;
+		}else if(COMPARE("\t")) {
+			tr.x += tabsize * rc.x * ( 3. / 4. );
+		}else{ // Single Byte Character.
+			// Set character
+			jlgr_vo_txmap(window,&window->gl.temp_vo,0,16,16,temp[i]);
+			// Draw character			
+			jlgr_effects_vo_hue(window,&window->gl.temp_vo, tr, colors);
+			// Advance cursor.
+			tr.x += rc.w * distance;
+			i++;
+		}
+	}
+}
 
 /**
  * Draw text on the current pre-renderer.
@@ -65,7 +126,4 @@ void jlgr_text_draw(la_window_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t
 		// Advance cursor.
 		tr.x += f.size * ( 3. / 4. );
 	}
-}
-
-void jlgr_text_init__(la_window_t* jlgr) {
 }

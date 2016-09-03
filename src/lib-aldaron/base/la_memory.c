@@ -58,6 +58,17 @@ void* la_memory_free(void* data) {
 	return NULL;
 }
 
+/*void* la_memory_format(const char* format, ...) {
+	void* output;
+	va_list arglist;
+
+	va_start(arglist, format);
+	output = la_memory_allocate(snprintf(NULL, 0, format, arglist) + 1);
+	vsprintf(output, format, arglist);
+	va_end(arglist);
+	return output;
+}*/
+
 /**
  * Format a string.
  * @param rtn: A variable to put the formated string.  It is assumed the size is

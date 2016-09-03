@@ -1,5 +1,7 @@
 #include "main.h"
 #include "la_effect.h"
+#include "la_text.h"
+#include "la_memory.h"
 
 static void ex_redraw(jl_t* jl) {
 	la_window_t* window = jl->jlgr;
@@ -15,6 +17,8 @@ static void ex_redraw(jl_t* jl) {
 	jlgr_vo_draw(window, &ctx->vo1);
 // Light
 	la_effect_light(&ctx->vo1, &light, 1, (jl_vec3_t) { 1.f, 1.f, 1.f });
+
+	la_text(window, LA_TEXT_MOVE "What's UP!", LA_TEXT_F2(0.5f, .2f));
 }
 
 void ex_down(la_window_t* jlgr, jlgr_input_t input) {

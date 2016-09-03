@@ -74,8 +74,6 @@ static void jlgr_thread_draw_init__(jl_t* jl, const char* name) {
 	// Initialize subsystems
 	la_print("Creating the window....");
 	jl_wm_init__(jlgr);
-	la_print("Creating font....");
-	jlgr_text_init__(jlgr);
 	la_print("Loading default graphics from package....");
 	jl_sg_init__(jlgr);
 	la_print("Setting up OpenGL....");

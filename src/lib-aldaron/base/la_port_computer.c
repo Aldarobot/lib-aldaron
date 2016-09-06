@@ -30,6 +30,8 @@ void la_port_input(la_window_t* window) {
 	window->input.text[0] = '\0';
 	window->input.scroll.x = 0.f;
 	window->input.scroll.y = 0.f;
+	window->input.drag.x = 0.f;
+	window->input.drag.y = 0.f;
 	// Read all events & update states.
 	while(SDL_PollEvent(&window->sdl_event)) {
 	 switch(window->sdl_event.type) {
@@ -122,6 +124,15 @@ void la_port_input(la_window_t* window) {
 			// Set location of virtual mouse.
 			la_safe_set_float(&window->mouse_x, x);
 			la_safe_set_float(&window->mouse_y, y * window->wm.ar);
+			// Drag event
+			if(window->input.mouse.p) {
+				window->input.drag.x =
+					(float)window->sdl_event.motion.xrel /
+						(float)window->wm.w;
+				window->input.drag.y =
+					window->sdl_event.motion.yrel /
+						(float)window->wm.h;
+			}
 			break;
 		}
 		case SDL_MOUSEWHEEL:;

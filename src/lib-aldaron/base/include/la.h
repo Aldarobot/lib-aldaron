@@ -157,7 +157,6 @@ void jl_data_clear(jl_t* jl, data_t* pa);
 void jl_data_init(jl_t* jl, data_t* a, uint32_t size);
 void jl_data_free(data_t* pstr);
 void jl_data_mkfrom_str(data_t* a, const char* string);
-void jl_data_mkfrom_data(jl_t* jl, data_t* a, uint32_t size, const void *data);
 void jl_data_data(jl_t *jl, data_t* a, const data_t* b, uint64_t bytes);
 void jl_data_merg(jl_t *jl, data_t* a, const data_t* b);
 void jl_data_trunc(jl_t *jl, data_t* a, uint32_t size);
@@ -168,7 +167,6 @@ void jl_data_delete_byte(jl_t *jl, data_t* pstr);
 void jl_data_resize(jl_t *jl, data_t* pstr, uint32_t newsize);
 void jl_data_insert_byte(jl_t *jl, data_t* pstr, uint8_t pvalue);
 void jl_data_insert_data(jl_t *jl, data_t* pstr, const void* data, uint32_t size);
-char* jl_data_tostring(jl_t* jl, data_t* a);
 uint8_t jl_data_test_next(data_t* script, const char* particle);
 void jl_data_read_upto(jl_t* jl, data_t* compiled, data_t* script, uint8_t end,
 	uint32_t psize);
@@ -186,10 +184,8 @@ void jl_mode_exit(jl_t* jl);
 
 // "JLfile.c"
 void jl_file_print(jl_t* jl, const char* fname, const char* msg);
-uint8_t jl_file_exist(jl_t* jl, const char* path);
 void jl_file_rm(jl_t* jl, const char* filename);
 void jl_file_save(jl_t* jl, const void *file, const char *name, uint32_t bytes);
-const char* jl_file_load(jl_t* jl, data_t* load, const char* file_name);
 char jl_file_pk_save(jl_t* jl, const char* packageFileName,
 	const char* fileName, void *data, uint64_t dataSize);
 char* jl_file_pk_compress(jl_t* jl, const char* folderName);
@@ -198,7 +194,6 @@ const char* jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 const char* jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
 	const char *filename);
 struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive);
-char* jl_file_get_resloc(jl_t* jl, const char* prg_folder, const char* fname);
 
 // "JLthread.c"
 void jl_thread_mutex_new(jl_t *jl, jl_mutex_t* mutex);

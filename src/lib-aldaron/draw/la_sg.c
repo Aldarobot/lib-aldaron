@@ -8,6 +8,7 @@
 **/
 #include "JLGRprivate.h"
 #include "SDL_image.h"
+#include "la_buffer.h"
 
 // SG Prototypes
 void jl_gl_draw_prendered(la_window_t* jlgr, jl_vo_t* pv);
@@ -73,7 +74,7 @@ void _jl_sg_load_jlpx(la_window_t* jlgr,data_t* data,void **pixels,int *w,int *h
 		}
 	}
 	//Set Return values
-	*pixels = jl_data_tostring(jlgr->jl, &pixel_data);
+	*pixels = la_buffer_tostring(&pixel_data);
 	*w = image->w;
 	*h = image->h;
 	// Clean-up

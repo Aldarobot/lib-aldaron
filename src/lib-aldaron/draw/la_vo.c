@@ -342,7 +342,11 @@ void jlgr_vo_draw(la_window_t* jlgr, jl_vo_t* vo) {
 **/
 void jlgr_vo_draw_pr(la_window_t* jlgr, jl_vo_t* vo) {
 	jlgr_vo_exit__(vo, "Can't Draw Pre-Rendered!");
-	jlgr_pr_draw(jlgr, &vo->pr, &vo->pr.cb.pos, 0);
+	jlgr_pr_draw(jlgr, &vo->pr, vo->pr.cb.pos, 0);
+}
+
+void la_vo_pr(la_window_t* window, jl_vo_t* vo, jl_fnct drawfn) {
+	jlgr_pr(window, &vo->pr, drawfn);
 }
 
 /**

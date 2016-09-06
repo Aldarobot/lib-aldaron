@@ -12,6 +12,7 @@
 #include "SDL_image.h"
 #undef HAVE_STDLIB_H
 #include "jpeglib.h"
+#include "la_buffer.h"
 
 typedef long unsigned int jpeg_long_int_t;
 
@@ -123,7 +124,7 @@ void jlvi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
 	jpeg_destroy_compress(&cinfo);
 
 	/* And we're done! */
-	jl_data_mkfrom_data(jl, rtn, data_size, data);
+	la_buffer_fdata(rtn, data, data_size);
 }
 
 //void memtester(jl_t* jl, str_t name);

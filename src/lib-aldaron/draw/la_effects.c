@@ -264,7 +264,7 @@ void jlgr_effects_vo_hue(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c
  * @param vo: The vertex object.
 **/
 void jlgr_effects_draw(la_window_t* jlgr, jl_vo_t* vo) {
-	jlgr_pr_draw(jlgr, &vo->pr, &vo->pr.cb.pos, 0);
+	jlgr_pr_draw(jlgr, &vo->pr, vo->pr.cb.pos, 0);
 }
 
 /**

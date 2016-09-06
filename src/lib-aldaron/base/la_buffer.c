@@ -58,13 +58,10 @@ void jl_data_free(data_t* pstr) {
 	free(pstr->data);
 }
 
-/**
- *
-*/
-void jl_data_mkfrom_data(jl_t* jl, data_t* a, uint32_t size, const void *data) {
-	jl_data_init(jl, a, size);
-	la_memory_copy(data, a->data, size);
-	a->data[size] = '\0'; // Null terminalte
+void la_buffer_fdata(la_buffer_t* a, const void *data, uint32_t size) {
+	a->curs = 0;
+	a->size = size;
+	a->data = la_memory_makecopy(data, size);
 }
 
 /**
@@ -73,16 +70,16 @@ void jl_data_mkfrom_data(jl_t* jl, data_t* a, uint32_t size, const void *data) {
  * @returns: new "strt" with same contents as "string".
 */
 void jl_data_mkfrom_str(data_t* a, const char* string) {
-	return jl_data_mkfrom_data(NULL, a, strlen(string), string);
+	return la_buffer_fdata(a, string, strlen(string));
 }
 
 void la_buffer_format(la_buffer_t* buffer, const char* format, ...) {
 	va_list arglist;
 
-	// Allocate twice as much space as format.
-	buffer->curs = strlen(format) * 2;
+	va_start(arglist, format);
+	buffer->curs = vsnprintf(NULL, 0, format, arglist);
+	va_end(arglist);
 	la_buffer_resize(buffer);
-	// Format
 	va_start(arglist, format);
 	vsnprintf((void*)buffer->data, buffer->size, format, arglist);
 	va_end(arglist);
@@ -105,17 +102,11 @@ uint8_t jl_data_get_byte(data_t* pstr) {
 	return *area;
 }
 
-/**
- * Get data at the cursor of "pstr", and increment the cursor value.
- * @param pstr: the string to read.
- * @param varsize: the size of variable pointed to by "var" in bytes (1,2,4,8).
- * @param var: the variable to save the data to.
-**/
-void jl_data_loadto(data_t* pstr, uint32_t varsize, void* var) {
-	void* area = ((void*)pstr->data) + pstr->curs;
+void la_buffer_read(void* var, uint32_t varsize, la_buffer_t* buffer) {
+	void* area = buffer->data + buffer->curs;
 
 	la_memory_copy(area, var, varsize);
-	jl_data_increment(pstr, varsize);
+	buffer->curs += varsize;
 }
 
 /**
@@ -272,9 +263,8 @@ void jl_data_trunc(jl_t *jl, data_t* a, uint32_t size) {
  * @param a: the 'strt' to convert to a string ( char * )
  * @returns: a new string (char *) with the same contents as "a"
 */
-char* jl_data_tostring(jl_t* jl, data_t* a) {
-	char *rtn = (void*)a->data;
-	return rtn;
+char* la_buffer_tostring(la_buffer_t* a) {
+	return (void*)a->data;
 }
 
 /**

@@ -25,9 +25,10 @@
 #endif
 
 static void* la_file_temp = NULL;
+static char la_file_string[256];
 
 // This function converts linux filenames to native filnames
-char* jl_file_convert__(jl_t* jl, const char* filename) {
+char* jl_file_convert__(const char* filename) {
 	char* newfilename = la_memory_makecopy(filename, strlen(filename));
 // #if // Windows:
 //	int i;
@@ -50,8 +51,9 @@ static int jl_file_save_(jl_t* jl, const void *file_data, const char *file_name,
 	else if(!file_data)
 		la_panic("Save[file_data]: file_data is NULL");
 
-	const char* converted_filename = jl_file_convert__(jl, file_name);
+	char* converted_filename = jl_file_convert__(file_name);
 	fd = open(converted_filename, O_RDWR | O_CREAT, JL_FL_PERMISSIONS);
+	la_memory_free(converted_filename);
 
 	if(fd <= 0) {
 		errsv = errno;
@@ -73,13 +75,7 @@ static int jl_file_save_(jl_t* jl, const void *file_data, const char *file_name,
 	return at;
 }
 
-static inline void jl_file_reset_cursor__(const char* file_name) {
-	int fd = open(file_name, O_RDWR);
-	lseek(fd, 0, SEEK_SET);
-	close(fd);
-}
-
-static char* jl_file_get_root__(jl_t * jl) {
+static char* jl_file_get_root__(void) {
 	data_t root_path;
 
 	la_buffer_init(&root_path);
@@ -93,20 +89,18 @@ static char* jl_file_get_root__(jl_t * jl) {
 		la_print((char*) root_path.data);
 		la_panic("mkdir: %s", error);
 	}
-	// Set paths.root & free root_path
-//	la_print("Root Path=\"%s\"", jl->fl.paths.root);
-	return jl_data_tostring(jl, &root_path);
+	return la_buffer_tostring(&root_path);
 }
 
-static char* jl_file_get_errf__(jl_t * jl) {
-	char* root = jl_file_get_root__(jl);
+static char* jl_file_get_errf__(void) {
+	char* root = jl_file_get_root__();
 	la_buffer_t buffer;
 
 	la_buffer_init(&buffer);
 	la_buffer_format(&buffer, "%s/log.txt", root);
 
 	la_memory_free(root);
-	return jl_data_tostring(jl, &buffer);
+	return la_buffer_tostring(&buffer);
 }
 
 // NON-STATIC Library Dependent Functions
@@ -133,19 +127,24 @@ const char* la_file_append(const char* filename, const void* data, size_t size){
 	if((error = la_file_mkdir(directory))) return error;
 	// Open, and write out.
 	if((fd = open(filename, O_RDWR | O_CREAT, JL_FL_PERMISSIONS)) <= 0) {
-		la_print("la_file_append fail open \"%s\" because\"%s\"",
-			filename, strerror(errno));
-		error = strerror(errno);
-		return error;
+		return la_error("Fail open \"%s\": \"%s\"", filename,
+			strerror(errno));
 	}
 	lseek(fd, 0, SEEK_END);
 	if(write(fd, data, size) <= 0) {
-		la_print("la_file_append fail write \"%s\" because\"%s\"",
-			filename, strerror(errno));
-		error = strerror(errno);
+		close(fd);
+		return la_error("Fail write \"%s\": \"%s\"", filename,
+			strerror(errno));
 	}
 	close(fd);
-	return error;
+	return NULL;
+}
+
+const char* la_file_truncate(const char* filename) {
+	if(truncate(filename, 0)) {
+		return la_error("Couldn't Truncate");
+	}
+	return NULL;
 }
 
 /**
@@ -160,33 +159,31 @@ void jl_file_print(jl_t* jl, const char* fname, const char* msg) {
 
 /**
  * Check whether a file or directory exists.
- * @param jl: The library context.
- * @param path: The path to the file to check.
  * @returns 0: If the file doesn't exist.
  * @returns 1: If the file does exist and is a directory.
  * @returns 2: If the file does exist and isn't a directory.
  * @returns 3: If the file exists and the user doesn't have permissions to open.
- * @returns 255: This should never happen.
 **/
-uint8_t jl_file_exist(jl_t* jl, const char* path) {
+uint8_t la_file_exist(const char* path) {
 	DIR *dir;
+	uint8_t rtn = FILE_TYPE_DIR;
+
 	if ((dir = opendir (path)) == NULL) {
 		//Couldn't open Directory
 		int errsv = errno;
 		if(errsv == ENOTDIR) //Not a directory - is a file
-			return 2;
+			rtn = FILE_TYPE_FILE;
 		else if(errsv == ENOENT) // Directory Doesn't Exist
-			return 0;
+			rtn = FILE_TYPE_NONE;
 		else if(errsv == EACCES) // Doesn't have permission
-			return 3;
-		else if((errsv == EMFILE) || (errsv == ENFILE) || (errsv == ENOMEM)) //Not enough memory!
-			la_panic("jl_file_exist: Out of Memory!");
+			rtn = FILE_TYPE_UNKNOWN;
+		else if((errsv == EMFILE)||(errsv == ENFILE)||(errsv == ENOMEM))
+			la_panic("file_exist: Out of Memory!");
 		else //Unknown error
-			la_panic("jl_file_exist: Unknown Error!");
-	}else{
-		return 1; // Directory Does exist
+			la_panic("file_exist: Unknown Error!");
 	}
-	return 255;
+	closedir(dir);
+	return rtn; // Directory Does exist
 }
 
 /**
@@ -195,9 +192,10 @@ uint8_t jl_file_exist(jl_t* jl, const char* path) {
  * @param filename: The path of the file to delete.
 **/
 void jl_file_rm(jl_t* jl, const char* filename) {
-	const char* converted_filename = jl_file_convert__(jl, filename);
+	char* converted_filename = jl_file_convert__(filename);
 
 	unlink(converted_filename);
+	la_memory_free(converted_filename);
 }
 
 /**
@@ -222,31 +220,25 @@ void jl_file_save(jl_t* jl, const void *file, const char *name, uint32_t bytes){
  * @param file_name: file to load
  * @returns A readable "strt" containing the bytes from the file.
  */
-const char* jl_file_load(jl_t* jl, data_t* load, const char* file_name) {
-	jl_file_reset_cursor__(file_name);
-	const char* converted_filename = jl_file_convert__(jl, file_name);
+const char* la_file_load(la_buffer_t* load, const char* file_name) {
+	char* converted_filename = jl_file_convert__(file_name);
 	int fd = open(converted_filename, O_RDWR);
 	int size = lseek(fd, 0, SEEK_END);
 	unsigned char *file = malloc(size);
+	int32_t bytes;
 	
-	//Open Block FLLD	
 	if(fd <= 0) {
 		int errsv = errno;
 
-		la_print("jl_file_load/open: ");
-		la_print("\tFailed to open file: \"%s\"", converted_filename);
-		la_print("\tLoad failed because: %s", strerror(errsv));
-		if(errsv != ENOENT)
-			la_panic("jl_file_load can't load a directory.");
-		return la_error("Couldn't Find File.");
+		la_print("\tFailed to load file: \"%s\"", converted_filename);
+		la_print("\tBecause: %s", strerror(errsv));
+		return la_error("file load failed");
 	}
-	int Read = read(fd, file, size);
-
-	la_print("jl_file_load(): read %d bytes", Read);
+	lseek(fd, 0, SEEK_SET);
+	if((bytes = read(fd, file, size)))
+		la_buffer_fdata(load, file, bytes);
 	close(fd);
-
-	if(Read) jl_data_mkfrom_data(jl, load, Read, file);
-
+	la_memory_free(converted_filename);
 	return NULL;
 }
 
@@ -264,7 +256,7 @@ const char* jl_file_load(jl_t* jl, data_t* load, const char* file_name) {
 char jl_file_pk_save(jl_t* jl, const char* packageFileName,
 	const char* fileName, void *data, uint64_t dataSize)
 {
-	const char* converted = jl_file_convert__(jl, packageFileName);
+	char* converted = jl_file_convert__(packageFileName);
 
 	la_print("opening \"%s\"....", converted);
 	struct zip *archive = zip_open(converted, ZIP_CREATE 
@@ -274,6 +266,7 @@ char jl_file_pk_save(jl_t* jl, const char* packageFileName,
 	}else{
 		la_print("opened package, \"%d\".", converted);
 	}
+	la_memory_free(converted);
 
 	struct zip_source *s;
 	if ((s=zip_source_buffer(archive, (void *)data, dataSize, 0)) == NULL) {
@@ -294,7 +287,7 @@ char jl_file_pk_save(jl_t* jl, const char* packageFileName,
 
 static void jl_file_pk_compress_iterate__(jl_t* jl, void* data) {
 	char* name = la_file_temp;
-	data_t read; jl_file_load(jl, &read, data);
+	data_t read; la_file_load(&read, data);
 
 	jl_file_pk_save(jl, name, data + strlen(name)-4, read.data, read.size);
 	la_print("\t%s", data);
@@ -404,7 +397,7 @@ const char* jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 	zip_close(zipfile);
 	la_print("closed file.");
 	// Make a data_t* from the data.
-	if(Read) jl_data_mkfrom_data(jl, rtn, Read, fileToLoad);
+	if(Read) la_buffer_fdata(rtn, fileToLoad, Read);
 	la_print("done.");
 	return NULL;
 }
@@ -425,19 +418,20 @@ const char* jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 const char* jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
 	const char *filename)
 {
-	const char* converted = jl_file_convert__(jl, packageFileName);
+	char* converted = jl_file_convert__(packageFileName);
 	const char* error;
 
 	la_print("loading package:\"%s\"...", converted);
 
 	data_t data;
 
-	if((error = jl_file_load(jl, &data, converted))) {
+	if((error = la_file_load(&data, converted))) {
 		la_print("!Package File doesn't exist!");
 		return error;
 	}
 	if(jl_file_pk_load_fdata(jl, rtn, &data, filename))
 		la_panic("jl_file_pk_load_fdata failed!");
+	la_memory_free(converted);
 	return NULL;
 }
 
@@ -525,14 +519,16 @@ static int8_t jl_file_dirls__(jl_t* jl,const char* filename,uint8_t recursive,
 **/
 struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive){
 	struct cl_list * filelist = cl_list_create();
-	char* converted_dirname = jl_file_convert__(jl, dirname);
+	char* converted_dirname = jl_file_convert__(dirname);
 	char* end_character = &converted_dirname[strlen(converted_dirname) - 1];
 	if(*end_character == '/') *end_character = '\0';
 
 	if(jl_file_dirls__(jl, converted_dirname, recursive, filelist)) {
+		la_memory_free(converted_dirname);
 		cl_list_destroy(filelist);
 		return NULL;
 	}else{
+		la_memory_free(converted_dirname);
 		return filelist;
 	}
 }
@@ -546,31 +542,37 @@ struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive){
  *	For an individual game developer "Jeron Lau" with game "Cool Game":
  *		Pass: "JeronLau_CG"
  *	If prg_folder is NULL, uses the program name from jl_start.
- * @param fname: Name Of Resource Pack
+ * @param rname: Name Of Resource File
  * @returns: The designated location for a resouce pack
 */
-char* jl_file_get_resloc(jl_t* jl, const char* prg_folder, const char* fname) {
-	char* root = jl_file_get_root__(jl);
+const char* la_file_resloc(const char* prg_folder, const char* rname) {
+	char* root = jl_file_get_root__();
 	char* pdir = NULL;
 	la_buffer_t buffer;
 
+	la_print("ROOT: %s", root);
 	la_buffer_init(&buffer);
 	la_buffer_format(&buffer, "%s/%s", root, prg_folder);
+	la_print("BUFFER: %s", (char*) buffer.data);
 
 	la_memory_free(root);
-	pdir = jl_data_tostring(jl, &buffer);
+	pdir = la_buffer_tostring(&buffer);
 
 	// Make 'prg_folder' if it doesn't already exist.
 	const char* error = NULL;
 	if((error = la_file_mkdir(pdir))) {
-		la_print("jl_file_get_resloc: couldn't make \"%s\"", pdir);
+		la_print("la_file_resloc: couldn't make \"%s\"", pdir);
 		la_panic("mkdir: %s", error);
 	}
-	return pdir;
+
+	// Format & Free
+	sprintf(la_file_string, "%s/%s", pdir, rname);
+	la_memory_free(pdir);
+	return la_file_string;
 }
 
 void jl_file_init_(jl_t * jl) {
 	la_print("file init");
-	truncate(jl_file_get_errf__(jl), 0);
+	truncate(jl_file_get_errf__(), 0);
 	la_print("finished file init");
 }

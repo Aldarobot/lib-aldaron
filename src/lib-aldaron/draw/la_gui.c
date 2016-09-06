@@ -2,12 +2,8 @@
  * JL_Lib
  * Copyright (c) 2015 Jeron A. Lau 
 */
-/** \file
- * JLGRgraphics.c
- *	A High Level Graphics Library that supports sprites, texture loading,
- *	2D rendering & 3D rendering.
- */
 #include "JLGRprivate.h"
+#include "la_buffer.h"
 
 void *jl_gem(void);
 uint32_t jl_gem_size(void);
@@ -574,7 +570,7 @@ void _jlgr_loopa(la_window_t* jlgr) {
 void jlgr_init__(la_window_t* jlgr) {
 	data_t packagedata;
 
-	jl_data_mkfrom_data(jlgr->jl, &packagedata, jl_gem_size(), jl_gem());
+	la_buffer_fdata(&packagedata, jl_gem(), jl_gem_size());
 	jlgr->textures.logo = jl_sg_add_image(jlgr, &packagedata,
 		"/images/JL_Lib.png");
 	la_print("Draw Loading Screen");
@@ -591,7 +587,7 @@ void jlgr_init__(la_window_t* jlgr) {
 	jlgr->font = (jl_font_t)
 		{ jlgr->textures.font, 0, jlgr->fontcolor, .04 };
 	// Draw message on the screen
-	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "LOADING JL_LIB....");
+	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "Loading Lib Aldaron....");
 	// Set other variables
 	jl_thread_mutex_lock(&jlgr->protected.mutex);
 	jlgr->protected.notification.timeTilVanish = 0.f;

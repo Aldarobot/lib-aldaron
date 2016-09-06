@@ -140,31 +140,18 @@ void jlgr_pr_resize(la_window_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w
  * @param vec: The vector of offset/translation.
  * @param orient: 1 for upside-down 0 for normal.
 **/
-void jlgr_pr_draw(la_window_t* jlgr, jl_pr_t* pr, jl_vec3_t* vec, uint8_t orient) {
+void jlgr_pr_draw(la_window_t* jlgr, jl_pr_t* pr, jl_vec3_t vec, uint8_t orient) {
 	// Initialize Framebuffer, if not already init'd
 	jlgr_pr_init__(jlgr, pr);
 	// Bind texture shader.
 	jlgr_opengl_draw1(jlgr, &jlgr->gl.prg.texture);
 	// Transform
-	if(vec == NULL) {
-		jlgr_opengl_matrix(jlgr, &jlgr->gl.prg.texture,
-			(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
-			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
-			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Translate
-			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
-			jl_gl_ar(jlgr));
-//		jlgr_opengl_transform_(jlgr, ,
-//			0.f, 0.f, 0.f, 1., 1., 1., jl_gl_ar(jlgr));
-	}else{
-		jlgr_opengl_matrix(jlgr, &jlgr->gl.prg.texture,
-			(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
-			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
-			(jl_vec3_t) { vec->x, vec->y, vec->z }, // Translate
-			(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
-			jl_gl_ar(jlgr));
-//		jlgr_opengl_transform_(jlgr, &jlgr->gl.prg.texture,
-//			vec->x, vec->y, vec->z, 1., 1., 1., jl_gl_ar(jlgr));
-	}
+	jlgr_opengl_matrix(jlgr, &jlgr->gl.prg.texture,
+		(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
+		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
+		(jl_vec3_t) { vec.x, vec.y, vec.z }, // Translate
+		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
+		jl_gl_ar(jlgr));
 	// Bind Texture Coordinates to shader
 	jlgr_opengl_setv(jlgr, orient
 		? &jlgr->gl.upsidedown_tc : &jlgr->gl.default_tc,

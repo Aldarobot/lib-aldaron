@@ -28,6 +28,8 @@ void la_port_input(la_window_t* window) {
 	window->input.keyboard.x = 0.f;
 	window->input.keyboard.y = 0.f;
 	window->input.text[0] = '\0';
+	window->input.scroll.x = 0.f;
+	window->input.scroll.y = 0.f;
 	// Read all events & update states.
 	while(SDL_PollEvent(&window->sdl_event)) {
 	 switch(window->sdl_event.type) {
@@ -122,23 +124,15 @@ void la_port_input(la_window_t* window) {
 			la_safe_set_float(&window->mouse_y, y * window->wm.ar);
 			break;
 		}
-		case SDL_MOUSEWHEEL: {
-//			uint8_t flip = (window->sdl_event.wheel.direction ==
-//				SDL_MOUSEWHEEL_FLIPPED) ? -1 : 1;
-//			int32_t x = flip * window->sdl_event.wheel.x;
-//			int32_t y = flip * window->sdl_event.wheel.y;
-			if (window->sdl_event.wheel.y > 0) {
-//				window->main.ct.input.scroll_up = (y > 0) ? y : -y;
-			} else if(window->sdl_event.wheel.y < 0) {
-//				window->main.ct.input.scroll_down = (y > 0) ? y : -y;
-			}
-			if (window->sdl_event.wheel.x > 0) {
-//				window->main.ct.input.scroll_right = (x > 0) ? x : -x;
-			} else if(window->sdl_event.wheel.x < 0) {
-//				window->main.ct.input.scroll_left = (x > 0) ? x : -x;
-			}
+		case SDL_MOUSEWHEEL:;
+			int8_t flip = (window->sdl_event.wheel.direction ==
+				SDL_MOUSEWHEEL_FLIPPED) ? -1 : 1;
+			int32_t x = flip * window->sdl_event.wheel.x;
+			int32_t y = flip * window->sdl_event.wheel.y;
+
+			window->input.scroll.y = y * 1.f;
+			window->input.scroll.x = x * 1.f;
 			break;
-		}
 		case SDL_WINDOWEVENT: {
 			switch(window->sdl_event.window.event) {
 				case SDL_WINDOWEVENT_RESIZED: {

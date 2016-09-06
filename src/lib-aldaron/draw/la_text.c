@@ -8,16 +8,26 @@
 
 #define COMPARE(towhat) ( strncmp(&temp[i], towhat, strlen(towhat)) == 0 )
 
+static inline float la_text_readfloat(const char* input) {
+	float* x = (void*)input;
+	return *x;
+}
+
 void la_text(la_window_t* window, const char* format, ...) {
 	va_list arglist;
 	float colors[] = { 1.f, 1.f, 1.f, 1.f }; // Color of the font.
+	float shadowcolor[] = { 0.5f, 0.5f, 0.5f, 1.f };
 	jl_rect_t rc = { 0.f, 0.f, .0625f, .0625f };
 //	uint8_t bold;
 //	uint8_t italic;
+	uint8_t shadow = 0;
 	int i = 0;
 	float tabsize = 8.f; // How many spaces are in a tab.
 	float distance = .75f; // X distance between letters ( X : Y )
+	float width = 1.f;
 	jl_vec3_t tr = { 0., 0., 0. };
+	float resetx = 0.f;
+//	float resety = 0.f;
 
 	// Format the String...
 	va_start( arglist, format );
@@ -27,9 +37,7 @@ void la_text(la_window_t* window, const char* format, ...) {
 
 	// Draw
 	jlgr_vo_set_image(window, &window->gl.temp_vo, rc, window->textures.font);
-//	la_print("TEXTSTART:");
 	while(1) {
-//		la_print("PRINTOUT: %d", temp[i]);
 		if(temp[i] == '\0') break;
 		if(COMPARE(LA_TEXT_CMD)) {
 			if(COMPARE(LA_TEXT_CONTROL)) {
@@ -41,26 +49,55 @@ void la_text(la_window_t* window, const char* format, ...) {
 				i += 2;
 				temp2 = (void*) &temp[i];
 				tr.x += *temp2;
+				resetx = *temp2;
 				i += sizeof(float);
 				temp2 = (void*) &temp[i];
 				tr.y += *temp2;
+//				resety = *temp2;
 				i += sizeof(float);
-				la_print("%fx%f", tr.x, tr.y);
-			}else if(COMPARE(LA_TEXT_SIZE)) {
+			}else if(COMPARE(LA_TEXT_WH)) {
 				i += 2;
+				rc.w = width * la_text_readfloat(&temp[i]);
+				rc.h = la_text_readfloat(&temp[i]);
+				i += sizeof(float);
+				jlgr_vo_set_image(window, &window->gl.temp_vo,
+					rc, window->textures.font);
 			}else if(COMPARE(LA_TEXT_ALIGN)) {
 				i += 2;
 			}else if(COMPARE(LA_TEXT_WIDTH)) {
 				i += 2;
+			}else if(COMPARE(LA_TEXT_COLOUR)) {
+				i += 2;
+				for(int k = 0; k < 4; k++) { // RGBA
+					colors[k] = la_text_readfloat(&temp[i]);
+					i += sizeof(float);
+				}
+			}else if(COMPARE(LA_TEXT_UNDERLAY)) {
+				i += 2;
+				for(int k = 0; k < 4; k++) { // RGBA
+					shadowcolor[k] = la_text_readfloat(&temp[i]);
+					i += sizeof(float);
+				}
+				shadow = 1;
+			}else if(COMPARE(LA_TEXT_SHADOWOFF)) {
+				shadow = 0;
 			}
 		}else if(COMPARE("\n")) {
-			tr.x = 0, tr.y += rc.y;
+			tr.x = resetx, tr.y += rc.h;
+			i++;
 		}else if(COMPARE("\t")) {
-			tr.x += tabsize * rc.x * ( 3. / 4. );
+			tr.x += tabsize * rc.w * ( 3. / 4. );
+			i++;
 		}else{ // Single Byte Character.
 			// Set character
 			jlgr_vo_txmap(window,&window->gl.temp_vo,0,16,16,temp[i]);
-			// Draw character			
+			// Effects
+			if(shadow) {
+				jlgr_effects_vo_hue(window, &window->gl.temp_vo,
+					(jl_vec3_t) { tr.x - 0.005, tr.y + 0.005,
+						0.f }, shadowcolor);
+			}
+			// Draw character
 			jlgr_effects_vo_hue(window,&window->gl.temp_vo, tr, colors);
 			// Advance cursor.
 			tr.x += rc.w * distance;

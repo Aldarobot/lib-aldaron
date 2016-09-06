@@ -82,7 +82,7 @@ void jlgr_sprite_draw(la_window_t* jlgr, jl_sprite_t *spr) {
 	if(spr->update) jlgr_sprite_redraw__(jlgr, spr);
 	// Draw onto screen
 	jl_thread_mutex_lock(&spr->mutex);
-	jlgr_pr_draw(jlgr, &spr->pr, &spr->pr.cb.pos, spr->rs);
+	jlgr_pr_draw(jlgr, &spr->pr, spr->pr.cb.pos, spr->rs);
 	jl_thread_mutex_unlock(&spr->mutex);
 }
 

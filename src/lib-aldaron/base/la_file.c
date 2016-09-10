@@ -29,7 +29,7 @@ static char la_file_string[256];
 
 // This function converts linux filenames to native filnames
 char* jl_file_convert__(const char* filename) {
-	char* newfilename = la_memory_makecopy(filename, strlen(filename));
+	char* newfilename = la_memory_makecopy(filename, strlen(filename) + 1);
 // #if // Windows:
 //	int i;
 // #else  // Linux:
@@ -565,9 +565,14 @@ const char* la_file_resloc(const char* prg_folder, const char* rname) {
 		la_panic("mkdir: %s", error);
 	}
 
+	la_print("rname = %s", rname);
+
 	// Format & Free
 	sprintf(la_file_string, "%s/%s", pdir, rname);
 	la_memory_free(pdir);
+
+	la_print("fname = %s", la_file_string);
+
 	return la_file_string;
 }
 

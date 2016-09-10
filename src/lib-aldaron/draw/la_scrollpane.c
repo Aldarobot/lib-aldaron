@@ -1,26 +1,28 @@
 #include "la_scrollpane.h"
 
 static la_gui_scrollpane_t* la_scrollpane = NULL;
+extern float la_banner_size;
 
 static void la_gui_scrollpane_draw__(jl_t* jl) {
 	la_window_t* window = jl->jlgr;
+	float banner_size = la_banner_size;
 
+	la_banner_size = la_safe_get_float(&la_scrollpane->scroller);
 	jl_gl_clear(window, 0.f, 0.f, 0.f, 0.f);
-	jlgr_vo_move(&la_scrollpane->internal, (jl_vec3_t) {
-		0.f, la_safe_get_float(&la_scrollpane->scroller), 0.f } );
-	jlgr_vo_draw_pr(window, &la_scrollpane->internal);
+	la_scrollpane->drawfn(jl);
+	la_banner_size = banner_size;
 }
 
 void la_gui_scrollpane_redraw(la_window_t* window, la_gui_scrollpane_t* sp,
 	jl_rect_t rc, float internal_height, jl_fnct drawfn)
 {
 	float colors[] = { 0.3f, 0.3f, 0.3f };
-	jl_rect_t irc = (jl_rect_t) { 0.f, 0.f, 1.f, internal_height };
+//	jl_rect_t irc = (jl_rect_t) { 0.f, 0.f, 1.f, internal_height };
 
 	jlgr_vo_set_rect(window, &sp->external, rc, colors, 0);
-	jlgr_vo_set_rect(window, &sp->internal, irc, colors, 0);
+//	jlgr_vo_set_rect(window, &sp->internal, irc, colors, 0);
 	sp->drawfn = drawfn;
-	la_vo_pr(window, &sp->internal, drawfn);
+//	la_vo_pr(window, &sp->internal, drawfn);
 	la_safe_set_float(&sp->scroller, 0.f);
 	la_safe_set_uint8(&sp->external_update, 1);
 	la_safe_set_float(&sp->internal_height, internal_height);

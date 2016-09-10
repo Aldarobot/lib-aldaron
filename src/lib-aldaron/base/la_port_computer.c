@@ -129,7 +129,7 @@ void la_port_input(la_window_t* window) {
 				window->input.drag.x =
 					(float)window->sdl_event.motion.xrel /
 						(float)window->wm.w;
-				window->input.drag.y =
+				window->input.drag.y = window->wm.ar *
 					window->sdl_event.motion.yrel /
 						(float)window->wm.h;
 			}

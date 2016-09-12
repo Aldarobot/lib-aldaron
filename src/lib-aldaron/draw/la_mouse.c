@@ -12,8 +12,8 @@
 void jlgr_mouse_resize__(la_window_t* jlgr) {
 	jl_rect_t rc = { 0.f, 0.f, .05f, .05f };
 
-	jlgr_vo_set_image(jlgr, &jlgr->mouse, rc, jlgr->textures.font);
-	jlgr_vo_txmap(jlgr, &jlgr->mouse, 0, 16, 16, 255);
+	jlgr_vo_set_image(jlgr, &jlgr->mouse, rc, jlgr->textures.cursor);
+	jlgr_vo_txmap(jlgr, &jlgr->mouse, 0, 4, 1, 0);
 	// Set the mouse's collision width and height to 0
 	jlgr->mouse.pr.cb.ofs.x = 0.f, jlgr->mouse.pr.cb.ofs.y = 0.f;
 }

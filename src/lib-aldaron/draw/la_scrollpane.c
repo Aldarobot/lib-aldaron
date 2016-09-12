@@ -41,6 +41,7 @@ void la_gui_scrollpane_draw(la_window_t* window, la_gui_scrollpane_t* sp) {
 void la_gui_scrollpane_loop(la_window_t* window, la_gui_scrollpane_t* sp) {
 	float limit = -(la_safe_get_float(&sp->internal_height) - la_safe_get_float(&sp->external_height));
 
+	if(limit > 0.f) return;
 	if(window->input.scroll.y || window->input.drag.y) {
 		float newvalue = la_safe_get_float(&sp->scroller)
 			+ (window->input.scroll.y * .05f) + window->input.drag.y;

@@ -10,8 +10,8 @@
 
 #include "la_thread.h"
 #include "la_memory.h"
+#include "la_file.h"
 
-void jl_file_init_(jl_t * jl);
 void jl_mode_init__(jl_t* jl);
 void jl_sdl_init__(jl_t* jl);
 
@@ -40,15 +40,11 @@ SDL_atomic_t la_rmcexit;
 static char la_errorv[256];
 
 static inline void jl_init_libs__(jl_t* jl) {
-	la_print("Initializing file system....");
-	jl_file_init_(jl);
-	la_print("Initializing modes....");
+	// Clear error file.
+	la_file_truncate(NULL);
 	jl_mode_init__(jl);
-	la_print("Initializing time....");
 	jl_sdl_init__(jl);
-	la_print("Initializing SDL....");
 	SDL_Init(0);
-	la_print("Initializing SDL 2.0....");
 }
 
 //return how many seconds passed since last call
@@ -81,7 +77,6 @@ static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 {
 	//
 	jl->loop = main_loop_;
-	la_print("Initializing subsystems....");
 	// Run the library's init function.
 	jl_init_libs__(jl);
 	// Allocate the program's context.
@@ -92,7 +87,6 @@ static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 	jl_mode_loop__(jl);
 	//
 	jl->time.timer = jl_time_get(jl);
-	la_print("Started JL_Lib on thread %X!", la_thread_current());
 }
 
 // EXPORT FUNCTIONS
@@ -156,7 +150,6 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 		jlgr_fl_init(jlgr);
 		la_print("Initialized file viewer!");
 	}
-	la_print("This is thread #%X!", la_thread_current());
 	// Run the Loop
 	while(SDL_AtomicGet(&la_rmc)) ((jl_fnct)jl->loop)(jl);
 	// Kill the program

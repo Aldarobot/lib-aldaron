@@ -5,8 +5,8 @@
 #include "JLGRprivate.h"
 #include "la_buffer.h"
 
-void *jl_gem(void);
-uint32_t jl_gem_size(void);
+void* aldaron_data(void);
+uint64_t aldaron_size(void);
 
 typedef struct {
 	jl_vec3_t where[2];
@@ -570,15 +570,15 @@ void _jlgr_loopa(la_window_t* jlgr) {
 void jlgr_init__(la_window_t* jlgr) {
 	data_t packagedata;
 
-	la_buffer_fdata(&packagedata, jl_gem(), jl_gem_size());
+	la_buffer_fdata(&packagedata, aldaron_data(), aldaron_size());
 	jlgr->textures.logo = jl_sg_add_image(jlgr, &packagedata,
-		"/images/JL_Lib.png");
+		"/logo.png");
 	la_print("Draw Loading Screen");
 	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, 0);
 	la_print("Drew Loading Screen");
 	// Load Graphics
 	jlgr->textures.font = jl_sg_add_image(jlgr, &packagedata,
-		"/images/font.png");
+		"/font.png");
 	// Create Font
 	jlgr->fontcolor[0] = 0.;
 	jlgr->fontcolor[1] = 0.;
@@ -594,9 +594,10 @@ void jlgr_init__(la_window_t* jlgr) {
 	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 	// Load other images....
 	jlgr->textures.icon = jl_sg_add_image(jlgr, &packagedata,
-		"/images/taskbar_items.png");
+		"/taskbar_items.png");
 	jlgr->textures.game = jl_sg_add_image(jlgr, &packagedata,
-		"/images/landscape.png");
+		"/landscape.png");
+	jlgr->textures.cursor = jl_sg_add_image(jlgr, &packagedata, "/cursor.png");
 }
 
 /**      @endcond      **/

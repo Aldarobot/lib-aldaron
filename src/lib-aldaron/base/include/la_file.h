@@ -15,3 +15,4 @@ uint8_t la_file_exist(const char* path);
 const char* la_file_load(la_buffer_t* load, const char* file_name);
 const char* la_file_mkdir(const char* path);
 const char* la_file_resloc(const char* prg_folder, const char* rname);
+void la_file_rm(const char* filename);

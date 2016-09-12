@@ -1,5 +1,5 @@
-#ifndef JLGR
-#define JLGR
+#ifndef LA_DRAW
+#define LA_DRAW
 
 #include "jl.h"
 

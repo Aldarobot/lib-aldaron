@@ -92,7 +92,7 @@ static char* jl_file_get_root__(void) {
 	return la_buffer_tostring(&root_path);
 }
 
-static char* jl_file_get_errf__(void) {
+static char* la_file_log__(void) {
 	char* root = jl_file_get_root__();
 	la_buffer_t buffer;
 
@@ -120,6 +120,9 @@ const char* la_file_basename(char* base, const char* filename) {
 const char* la_file_append(const char* filename, const void* data, size_t size){
 	int fd;
 	const char* error = NULL;
+	char* fname = filename ?
+		la_memory_makecopy(filename, strlen(filename) + 1) :
+		la_file_log__();
 	char directory[strlen(filename)];
 
 	// If parent directory doesn't exist, make it.
@@ -127,23 +130,31 @@ const char* la_file_append(const char* filename, const void* data, size_t size){
 	if((error = la_file_mkdir(directory))) return error;
 	// Open, and write out.
 	if((fd = open(filename, O_RDWR | O_CREAT, JL_FL_PERMISSIONS)) <= 0) {
+		la_memory_free(fname);
 		return la_error("Fail open \"%s\": \"%s\"", filename,
 			strerror(errno));
 	}
 	lseek(fd, 0, SEEK_END);
 	if(write(fd, data, size) <= 0) {
 		close(fd);
+		la_memory_free(fname);
 		return la_error("Fail write \"%s\": \"%s\"", filename,
 			strerror(errno));
 	}
 	close(fd);
+	la_memory_free(fname);
 	return NULL;
 }
 
 const char* la_file_truncate(const char* filename) {
-	if(truncate(filename, 0)) {
+	char* fname = filename ?
+		la_memory_makecopy(filename, strlen(filename) + 1) :
+		la_file_log__();
+	if(truncate(fname, 0)) {
+		la_memory_free(fname);
 		return la_error("Couldn't Truncate");
 	}
+	la_memory_free(fname);
 	return NULL;
 }
 
@@ -186,12 +197,7 @@ uint8_t la_file_exist(const char* path) {
 	return rtn; // Directory Does exist
 }
 
-/**
- * Delete a file.
- * @param jl: The library context.
- * @param filename: The path of the file to delete.
-**/
-void jl_file_rm(jl_t* jl, const char* filename) {
+void la_file_rm(const char* filename) {
 	char* converted_filename = jl_file_convert__(filename);
 
 	unlink(converted_filename);
@@ -208,7 +214,7 @@ void jl_file_rm(jl_t* jl, const char* filename) {
  */
 void jl_file_save(jl_t* jl, const void *file, const char *name, uint32_t bytes){
 	// delete file
-	jl_file_rm(jl, name);
+	la_file_rm(name);
 	// make file
 	jl_file_save_(jl, file, name, bytes);
 }
@@ -258,14 +264,10 @@ char jl_file_pk_save(jl_t* jl, const char* packageFileName,
 {
 	char* converted = jl_file_convert__(packageFileName);
 
-	la_print("opening \"%s\"....", converted);
 	struct zip *archive = zip_open(converted, ZIP_CREATE 
 		| ZIP_CHECKCONS, NULL);
-	if(archive == NULL) {
+	if(archive == NULL)
 		return 1;
-	}else{
-		la_print("opened package, \"%d\".", converted);
-	}
 	la_memory_free(converted);
 
 	struct zip_source *s;
@@ -275,13 +277,8 @@ char jl_file_pk_save(jl_t* jl, const char* packageFileName,
 			(char *)zip_strerror(archive));
 	}
 //	la_print("%d,%d,%d\n",archive,sb.index,s);
-	if(zip_file_add(archive, fileName, s, ZIP_FL_OVERWRITE)) {
-		la_print("add/err: \"%s\"", zip_strerror(archive));
-	}else{
-		la_print("added \"%s\" to file sys.", fileName);
-	}
+	zip_file_add(archive, fileName, s, ZIP_FL_OVERWRITE);
 	zip_close(archive);
-	la_print("DONE!");
 	return 0;
 }
 
@@ -317,7 +314,7 @@ char* jl_file_pk_compress(jl_t* jl, const char* folderName) {
 	cursor++;
 	pkName[cursor] = '\0';
 	// Overwrite any existing package with same name
-	jl_file_rm(jl, pkName);
+	la_file_rm(pkName);
 	//
 	la_file_temp = pkName;
 	// Find Filse
@@ -470,16 +467,15 @@ static int8_t jl_file_dirls__(jl_t* jl,const char* filename,uint8_t recursive,
 		while ((ent = readdir (dir)) != NULL) {
 			char *element = malloc(strlen(filename) +
 				strlen(ent->d_name) + 3);
-			element[0] = '!';
-			memcpy(1 + element, filename, strlen(filename));
-			element[1 + strlen(filename)] = '/';
-			memcpy(1 + element + strlen(filename) + 1, ent->d_name,
+			memcpy(element, filename, strlen(filename));
+			element[strlen(filename)] = '/';
+			memcpy(element + strlen(filename) + 1, ent->d_name,
 				strlen(ent->d_name));
-			element[1 + strlen(ent->d_name) + strlen(filename) + 1]
+			element[strlen(ent->d_name) + strlen(filename) + 1]
 				= '\0';
 			if(ent->d_name[0] == '.') continue;
 			// Open And Read if directory
-			if(jl_file_dirls__(jl, element+1, recursive, filelist)||
+			if(jl_file_dirls__(jl, element, recursive, filelist)||
 				!recursive)
 			{
 				// If wasn't directory nor recursive add file.
@@ -574,10 +570,4 @@ const char* la_file_resloc(const char* prg_folder, const char* rname) {
 	la_print("fname = %s", la_file_string);
 
 	return la_file_string;
-}
-
-void jl_file_init_(jl_t * jl) {
-	la_print("file init");
-	truncate(jl_file_get_errf__(), 0);
-	la_print("finished file init");
 }

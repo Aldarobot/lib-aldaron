@@ -10,6 +10,25 @@
 
 #include "la_safe.h"
 
+// Print 
+#define LA_PRESET "\x1B[0m"
+
+#define LA_PBOLD "\x1B[1m"
+#define LA_PBLINK "\x1B[5m"
+
+#define LA_PBLACK "\x1B[30m"
+#define LA_PRED "\x1B[31m"
+#define LA_PGREEN "\x1B[32m"
+#define LA_PYELLOW "\x1B[33m"
+#define LA_PBLUE "\x1B[34m"
+#define LA_PMAGENTA "\x1B[35m"
+#define LA_PCYAN "\x1B[36m"
+#define LA_PWHITE "\x1B[37m"
+
+//
+
+#ifdef LA_DRAW
+
 typedef struct{
 	float x; // X Location ( -1.f to 1.f )
 	float y; // Y Location ( -1.f to 1.f )
@@ -245,6 +264,7 @@ typedef struct {
 		uint32_t logo; // JL_Lib Loading Logo
 		uint32_t game; // Game Graphics
 		uint32_t icon; // Icons
+		uint32_t cursor;
 	}textures;
 
 	double timer;
@@ -261,6 +281,9 @@ typedef struct {
 // Poll for input: return 1 if back (escape) key pressed.
 void la_port_input(la_window_t* window);
 void la_port_swap_buffers(la_window_t* window);
+
+#endif
+
 void la_print(const char* format, ...);
 
 #endif

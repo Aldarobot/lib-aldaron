@@ -19,15 +19,15 @@ char *GMessage[3] = {
 
 static inline void jlgr_menubar_shadow__(la_window_t* window) {
 	// Clear Texture.
-	jl_gl_clear(window, 0., 0., 0., 0.);
+	jl_gl_clear(window, 0.f, 0.f, 0.f, 0.f);
 	// Draw Shadows.
 	for(window->menu.redraw = 0; window->menu.redraw < 10; window->menu.redraw++){
-		jl_vec3_t tr = { .9 - (.1 * window->menu.redraw), 0., 0. };
+		jl_vec3_t tr = { .895 - (.1 * window->menu.redraw), 0.005, 0. };
 		jlgr_fnct _draw_icon_ = window->menu.redrawfn[window->menu.redraw];
 
 		if(_draw_icon_ == NULL) break;
 		// Draw shadow
-		jlgr_vo_move(&window->menu.shadow, tr); 
+		jlgr_vo_move(&window->menu.shadow, tr);
 		jlgr_vo_draw(window, &window->menu.shadow);
 		// Draw Icon
 		_draw_icon_(window);
@@ -56,7 +56,7 @@ void jlgr_menubar_init__(la_window_t* window) {
 	jl_rect_t rc = { 0.f, 0.f, 1.f, .11f };
 	jl_rect_t rc_icon = { 0., 0., .1, .1};
 	jl_rect_t rc_shadow = { -.01, .01, .1, .1 };
-	float shadow_color[] = { 0.f, 0.f, 0.f, .5f };
+	float shadow_color[] = { 0.f, 0.f, 0.f, .75f };
 
 	jl_thread_mutex_new(window->jl, &window->menu.mutex);
 	jl_thread_mutex_lock(&window->menu.mutex);

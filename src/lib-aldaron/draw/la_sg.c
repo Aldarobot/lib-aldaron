@@ -52,19 +52,27 @@ uint32_t _jl_sg_gpix(/*in */ SDL_Surface* surface, int32_t x, int32_t y) {
 	return color;
 }
 
-void _jl_sg_load_jlpx(la_window_t* jlgr,data_t* data,void **pixels,int *w,int *h) {
+SDL_Surface* la_window_makesurface(la_window_t* jlgr, data_t* data) {
 	SDL_Surface *image;
 	SDL_RWops *rw;
+
+	la_print("File Size = %d", data->size);
+	rw = SDL_RWFromMem(data->data + data->curs, data->size);
+	if ((image = IMG_Load_RW(rw, 1)) == NULL)
+		la_panic("Couldn't load image: %s", IMG_GetError());
+
+	return image;
+}
+
+void _jl_sg_load_jlpx(la_window_t* jlgr,data_t* data,void **pixels,int *w,int *h) {
+	SDL_Surface *image;
 	uint32_t color = 0;
 	data_t pixel_data;
 	int i, j;
 
 	if(data->data[0] == 0) la_panic("NO DATA!");
 
-	la_print("File Size = %d", data->size);
-	rw = SDL_RWFromMem(data->data + data->curs, data->size);
-	if ((image = IMG_Load_RW(rw, 1)) == NULL)
-		la_panic("Couldn't load image: %s", IMG_GetError());
+	image = la_window_makesurface(jlgr, data);
 	// Covert SDL_Surface.
 	jl_data_init(jlgr->jl, &pixel_data, image->w * image->h * 4);
 	for(i = 0; i < image->h; i++) {
@@ -105,7 +113,7 @@ static inline uint32_t jl_sg_add_image__(la_window_t* jlgr, data_t* data) {
  * @returns: Texture object.
 */
 uint32_t jl_sg_add_image(la_window_t* jlgr, data_t* zipdata, const char* filename) {
-	data_t img;
+	la_buffer_t img;
 
 	// Load image into "img"
 	if(jl_file_pk_load_fdata(jlgr->jl, &img, zipdata, filename))
@@ -115,6 +123,20 @@ uint32_t jl_sg_add_image(la_window_t* jlgr, data_t* zipdata, const char* filenam
 	uint32_t rtn = jl_sg_add_image__(jlgr, &img);
 	la_print("Loaded Image!");
 	return rtn;
+}
+
+void la_window_icon(la_window_t* window,la_buffer_t* buffer,const char* fname) {
+	la_buffer_t img;
+
+	// Load data
+	if(jl_file_pk_load_fdata(window->jl, &img, buffer, fname))
+		la_panic("add-image: pk_load_fdata failed!");
+	// Load image
+	SDL_Surface* image = la_window_makesurface(window, &img);
+	// Set icon
+	SDL_SetWindowIcon(window->wm.window, image);
+	// Free image
+	SDL_free(image);
 }
 
 static void jl_sg_draw_up(jl_t* jl, uint8_t resize, void* data) {

@@ -270,12 +270,6 @@ uint8_t* jlgr_load_image(jl_t* jl, data_t* data, uint16_t* w, uint16_t* h);
 // SG
 uint32_t jl_sg_add_image(la_window_t* jlgr, data_t* zipdata, const char* filename);
 
-// JLGRfiles.c
-uint8_t jlgr_openfile_init(la_window_t* jlgr, const char* program_name,
-	void *newfiledata, uint64_t newfilesize);
-void jlgr_openfile_loop(la_window_t* jlgr);
-const char* jlgr_openfile_kill(la_window_t* jlgr);
-
 // JLGRwm.c
 void jlgr_wm_setfullscreen(la_window_t* jlgr, uint8_t is);
 void jlgr_wm_togglefullscreen(la_window_t* jlgr);

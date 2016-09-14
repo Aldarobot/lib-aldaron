@@ -20,7 +20,6 @@ void jlgr_kill(la_window_t* jlgr);
 
 void jl_mode_loop__(jl_t* jl);
 
-void jlgr_fl_init(la_window_t* jlgr);
 void la_window_init__(la_window_t* window, jl_fnct fn_, const char* name);
 
 #if JL_PLAT == JL_PLAT_PHONE
@@ -145,11 +144,6 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 	la_window_t* jlgr = ctx->jlgr;
 
 	SDL_AtomicSet(&la_rmcexit, 1);
-	if(jlgr) {
-		la_print("Initializing file viewer....");
-		jlgr_fl_init(jlgr);
-		la_print("Initialized file viewer!");
-	}
 	// Run the Loop
 	while(SDL_AtomicGet(&la_rmc)) ((jl_fnct)jl->loop)(jl);
 	// Kill the program

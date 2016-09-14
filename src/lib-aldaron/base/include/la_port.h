@@ -242,23 +242,6 @@ typedef struct {
 		float ar;
 	}wm;
 
-	// File Manager
-	struct {
-		struct cl_list *filelist; //List of all files in working dir.
-		int8_t cursor;
-		uint8_t cpage;
-		char *dirname;
-		char *selecteditem;
-		uint8_t returnit;
-		uint8_t drawupto;
-		uint8_t inloop;
-		jl_sprite_t btns[2];
-		void *newfiledata;
-		uint64_t newfilesize;
-		uint8_t prompt;
-		data_t* promptstring;
-	}fl;
-
 	struct {
 		uint32_t font; // JL_Lib font
 		uint32_t logo; // JL_Lib Loading Logo

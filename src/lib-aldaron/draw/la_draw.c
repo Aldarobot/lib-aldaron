@@ -144,7 +144,6 @@ void la_window_init__(la_window_t* window, jl_fnct fn_, const char* name) {
 	window->wm.fullscreen = 0;
 #endif
 	window->jl = jl;
-	window->fl.inloop = 1;
 	// Initialize Subsystem
 #ifndef LA_PHONE_ANDROID
 	SDL_VideoInit(NULL);
@@ -206,8 +205,6 @@ void jlgr_resz(la_window_t* jlgr, uint16_t w, uint16_t h) {
 **/
 void jlgr_kill(la_window_t* jlgr) {
 	while(SDL_AtomicGet(&la_rmcexit));
-	la_print("Removing clump filelist for fileviewer....");
-	jlgr_file_kill_(jlgr);
 #ifndef LA_PHONE_ANDROID
 	la_print("Destroying window....");
 	SDL_DestroyWindow(jlgr->wm.window);

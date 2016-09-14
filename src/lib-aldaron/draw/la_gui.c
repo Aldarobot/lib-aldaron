@@ -303,8 +303,6 @@ void jlgr_draw_msge__(jl_t* jl) {
  * @param draw_routine: Function that draws on screen.
 **/
 void jlgr_draw_loadscreen(la_window_t* jlgr, jl_fnct draw_routine) {
-	uint8_t inloop = jlgr->fl.inloop;
-
 	jl_thread_mutex_lock(&jlgr->protected.mutex);
 	jlgr_redraw_t old_redrawfns = jlgr->protected.functions.redraw;
 
@@ -315,7 +313,6 @@ void jlgr_draw_loadscreen(la_window_t* jlgr, jl_fnct draw_routine) {
 
 	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 
-	jlgr->fl.inloop = 1;
 	// Update events
 	la_port_input(jlgr);
 	// Redraw screen.
@@ -326,8 +323,6 @@ void jlgr_draw_loadscreen(la_window_t* jlgr, jl_fnct draw_routine) {
 	jl_thread_mutex_lock(&jlgr->protected.mutex);
 	jlgr->protected.functions.redraw = old_redrawfns;
 	jl_thread_mutex_unlock(&jlgr->protected.mutex);
-
-	jlgr->fl.inloop = inloop;
 }
 
 /**

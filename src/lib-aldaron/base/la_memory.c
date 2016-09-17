@@ -8,6 +8,7 @@
 
 #include "la_memory.h"
 #include "la.h"
+#include "la_safe.h"
 
 #include <malloc.h>
 #include <string.h>
@@ -166,4 +167,27 @@ uint32_t jl_mem_string_upto(const char* string, char chr) {
 		if(string[i] == chr) return i;
 	}
 	return strlen(string);
+}
+
+typedef struct{
+	char temp[256];
+}la_memory_collector_t;
+
+static la_memory_collector_t la_memory_collection[64];
+static safe_uint8_t la_memory_collection_index;
+
+void* la_memory_instant(void) {
+	uint8_t index = la_safe_get_uint8(&la_memory_collection_index);
+
+	la_safe_set_uint8(&la_memory_collection_index, index >= 63? 0: index+1);
+	return la_memory_collection[index].temp;
+}
+
+/**
+ * Convert a double to a string.
+**/
+const char* la_memory_dtostr(float value) {
+	void* instant = la_memory_instant();
+	sprintf(instant, "%f", value);
+	return instant;
 }

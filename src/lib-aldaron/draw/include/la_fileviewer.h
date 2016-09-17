@@ -19,6 +19,7 @@ typedef struct{
 	uint64_t newfilesize;
 	uint8_t prompt;
 	la_buffer_t promptstring;
+	jl_vo_t file;
 }la_fileviewer_t;
 
 uint8_t la_fileviewer_init(la_window_t* window, la_fileviewer_t* fileviewer,

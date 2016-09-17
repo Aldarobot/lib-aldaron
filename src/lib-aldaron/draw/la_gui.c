@@ -593,6 +593,7 @@ void jlgr_init__(la_window_t* jlgr) {
 	jlgr->textures.game = jl_sg_add_image(jlgr, &packagedata,
 		"/landscape.png");
 	jlgr->textures.cursor = jl_sg_add_image(jlgr, &packagedata, "/cursor.png");
+	jlgr->textures.backdrop = jl_sg_add_image(jlgr, &packagedata, "/backdrop.png");
 }
 
 /**      @endcond      **/

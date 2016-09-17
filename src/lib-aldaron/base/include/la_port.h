@@ -25,6 +25,13 @@
 #define LA_PCYAN "\x1B[36m"
 #define LA_PWHITE "\x1B[37m"
 
+// Print eXtension
+#define LA_PXSIZE(size) "\x1B[f" size ";"
+#define LA_PXMOVE(x, y) "\x1B[m" x "," y ";"
+#define LA_PXCOLOR(r, g, b) "\x1B[c" x "," y "," z ";"
+#define LA_PXWIDTH(width) "\x1B[w" width ";"
+#define LA_PXLIMIT(limit) "\x1B[l" limit ";"
+
 //
 
 #ifdef LA_DRAW
@@ -248,6 +255,7 @@ typedef struct {
 		uint32_t game; // Game Graphics
 		uint32_t icon; // Icons
 		uint32_t cursor;
+		uint32_t backdrop;
 	}textures;
 
 	double timer;

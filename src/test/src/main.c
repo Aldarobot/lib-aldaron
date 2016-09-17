@@ -18,7 +18,8 @@ static void ex_redraw(jl_t* jl) {
 // Light
 	la_effect_light(&ctx->vo1, &light, 1, (jl_vec3_t) { 1.f, 1.f, 1.f });
 
-	la_text(window, LA_TEXT_MOVE "What's UP!", LA_TEXT_F2(0.5f, .2f));
+	la_text(window, LA_PXMOVE("0.5", "0.1") LA_PXSIZE("0.1") LA_PRED "WHATS THAT");
+//	la_text(window, LA_TEXT_MOVE "What's UP!", LA_TEXT_F2(0.5f, .2f));
 }
 
 void ex_down(la_window_t* jlgr, jlgr_input_t input) {

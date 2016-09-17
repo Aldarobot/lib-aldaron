@@ -25,9 +25,10 @@ void la_text(la_window_t* window, const char* format, ...) {
 	float tabsize = 8.f; // How many spaces are in a tab.
 	float distance = .75f; // X distance between letters ( X : Y )
 	float width = 1.f;
-	jl_vec3_t tr = { 0., 0., 0. };
+	jl_vec3_t tr = { 0.f, 0.f, 0.f };
 	float resetx = 0.f;
 //	float resety = 0.f;
+	uint32_t limit = 0;
 
 	// Format the String...
 	va_start( arglist, format );
@@ -38,40 +39,68 @@ void la_text(la_window_t* window, const char* format, ...) {
 	// Draw
 	jlgr_vo_set_image(window, &window->gl.temp_vo, rc, window->textures.font);
 	while(1) {
+		if(limit && i > limit) break;
 		if(temp[i] == '\0') break;
-		if(COMPARE(LA_TEXT_CMD)) {
-			if(COMPARE(LA_TEXT_CONTROL)) {
-				i += 2;
-			}else if(COMPARE(LA_TEXT_IMAGE)) {
-				i += 2;
-			}else if(COMPARE(LA_TEXT_XY)) {
-				float* temp2;
-				i += 2;
-				temp2 = (void*) &temp[i];
-				tr.x += *temp2;
-				resetx = *temp2;
-				i += sizeof(float);
-				temp2 = (void*) &temp[i];
-				tr.y += *temp2;
-//				resety = *temp2;
-				i += sizeof(float);
-			}else if(COMPARE(LA_TEXT_WH)) {
-				i += 2;
-				rc.w = width * la_text_readfloat(&temp[i]);
-				rc.h = la_text_readfloat(&temp[i]);
-				i += sizeof(float);
+		if(COMPARE("\x1B[")) {
+			if(COMPARE(LA_PRED)) {
+				i += strlen(LA_PRED);
+				colors[0] = 1.f, colors[1] = 0.f, colors[2] = 0.f,
+				colors[3] = 1.f;
+			}else if(COMPARE(LA_PBLACK)) {
+				i += strlen(LA_PBLACK);
+				colors[0] = 0.f, colors[1] = 0.f, colors[2] = 0.f,
+				colors[3] = 1.f;
+			}else if(COMPARE("\x1B[f")) {
+				char* end;
+
+				i += strlen("\x1B[f");
+				rc.h = strtof(&temp[i], &end);
+				rc.w = width * rc.h;
+				i += end - &temp[i] + 1;
 				jlgr_vo_set_image(window, &window->gl.temp_vo,
 					rc, window->textures.font);
-			}else if(COMPARE(LA_TEXT_ALIGN)) {
+			}else if(COMPARE("\x1B[m")) {
+				char* end;
+
+				i += strlen("\x1B[m");
+				tr.x = strtof(&temp[i], &end);
+				i += end - &temp[i] + 1;
+				tr.y = strtof(&temp[i], &end);
+				i += end - &temp[i] + 1;
+			}else if(COMPARE("\x1B[c")) {
+				char* end;
+
+				i += strlen("\x1B[c");
+				colors[0] = strtof(&temp[i], &end);
+				i += end - &temp[i] + 1;
+				colors[1] = strtof(&temp[i], &end);
+				i += end - &temp[i] + 1;
+				colors[2] = strtof(&temp[i], &end);
+				i += end - &temp[i] + 1;
+				colors[3] = strtof(&temp[i], &end);
+				i += end - &temp[i] + 1;
+			}else if(COMPARE("\x1B[w")) {
+				char* end;
+
+				i += strlen("\x1B[w");
+				width = strtof(&temp[i], &end);
+				rc.w = width * rc.h;
+				i += end - &temp[i] + 1;
+				jlgr_vo_set_image(window, &window->gl.temp_vo,
+					rc, window->textures.font);
+			}else if(COMPARE("\x1B[l")) {
+				char* end;
+
+				i += strlen("\x1B[l");
+				limit = strtof(&temp[i], &end);
+				i += end - &temp[i] + 1;
+			}else{
+				la_print("%c", temp[i]);
+				la_panic("Unknown Ansi Escape Sequence");
+			}
+		}else if(COMPARE(LA_TEXT_CMD)) {
+			if(COMPARE(LA_TEXT_ALIGN)) {
 				i += 2;
-			}else if(COMPARE(LA_TEXT_WIDTH)) {
-				i += 2;
-			}else if(COMPARE(LA_TEXT_COLOUR)) {
-				i += 2;
-				for(int k = 0; k < 4; k++) { // RGBA
-					colors[k] = la_text_readfloat(&temp[i]);
-					i += sizeof(float);
-				}
 			}else if(COMPARE(LA_TEXT_UNDERLAY)) {
 				i += 2;
 				for(int k = 0; k < 4; k++) { // RGBA

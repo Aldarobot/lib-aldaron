@@ -11,6 +11,7 @@
 #include "la_thread.h"
 #include "la_memory.h"
 #include "la_file.h"
+#include "la_time.h"
 
 void jl_mode_init__(jl_t* jl);
 void jl_sdl_init__(jl_t* jl);
@@ -85,7 +86,7 @@ static inline void la_init__(jl_t* jl, jl_fnct _fnc_init_, const char* nm,
 	// Run the mode loop
 	jl_mode_loop__(jl);
 	//
-	jl->time.timer = jl_time_get(jl);
+	jl->time.timer = la_time();
 }
 
 // EXPORT FUNCTIONS

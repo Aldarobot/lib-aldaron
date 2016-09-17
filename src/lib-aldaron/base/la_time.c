@@ -17,7 +17,7 @@ void la_time_sleep(double seconds) {
  * Get time in seconds since the start of the program.
  * @param jl: The library context.
 **/
-double jl_time_get(jl_t* jl) {
+double la_time(void) {
 	struct timespec time;
 	clock_gettime(CLOCK_MONOTONIC, &time);
 	// Convert Nanoseconds to Seconds.
@@ -33,7 +33,7 @@ double jl_time_get(jl_t* jl) {
 double jl_sdl_timer(jl_t* jl, double* timer) {
 	double prev_tick = *timer; // Temporarily Save Old Value
 
-	*timer = jl_time_get(jl);
+	*timer = la_time();
 	return *timer - prev_tick; // Find difference In Seconds
 }
 
@@ -42,11 +42,11 @@ double jl_sdl_timer(jl_t* jl, double* timer) {
 **/
 double jl_time_regulatefps(jl_t* jl, double* timer, uint8_t* on_time) {
 	double prev_tick = *timer; // Temporarily Save Old Value
-	double this_tick = jl_time_get(jl);
+	double this_tick = la_time();
 
 	*on_time = this_tick < prev_tick + (1./60.);
 	la_time_sleep((1./60.6) - (this_tick - prev_tick));
-	*timer = jl_time_get(jl);
+	*timer = la_time();
 	return *timer - prev_tick; // Find difference In Seconds
 }
 

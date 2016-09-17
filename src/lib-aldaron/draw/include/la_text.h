@@ -1,3 +1,5 @@
+#include "la_port.h"
+
 #define LA_TEXT_CMD "\x04"
 
 // Special Character Sets

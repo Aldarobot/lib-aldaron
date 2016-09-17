@@ -44,4 +44,6 @@ static inline void jl_exit(jl_t* jl, const char* format, ...) {
 #define jl_mem_copyto(src, dest, size) la_memory_copy(src, dest, size)
 #define jl_mem_copy(jl, src, size) la_memory_makecopy(src, size)
 
+#define jl_time_get(jl) la_time()
+
 #endif

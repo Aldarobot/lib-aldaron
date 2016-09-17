@@ -8,3 +8,5 @@ void* la_memory_makecopy(const void* data, uint64_t size);
 void* la_memory_allocate(uint64_t size);
 void* la_memory_resize(void* data, uint64_t size);
 void* la_memory_free(void* data);
+void* la_memory_instant(void);
+const char* la_memory_dtostr(float value);

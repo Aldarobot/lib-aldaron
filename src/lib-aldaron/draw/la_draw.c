@@ -49,8 +49,6 @@ static void jlgr_thread_resize(la_window_t* jlgr, uint16_t w, uint16_t h) {
 	jlgr_thread_programsresize(jlgr);
 	la_print("Updating the size of the background....");
 	jl_sg_resz__(jlgr->jl);
-	la_print("Resizing the menubar....");
-	jlgr_menu_resize_(jlgr);
 	la_print("Resizing the mouse....");
 	jlgr_mouse_resize__(jlgr);
 	la_print("Resized.");
@@ -82,8 +80,6 @@ static void jlgr_thread_draw_init__(jl_t* jl, const char* name) {
 	jlgr_effects_init__(jlgr);
 	la_print("Load graphics....");
 	jlgr_init__(jlgr);
-	la_print("Creating Taskbar sprite....");
-	jlgr_menubar_init__(jlgr);
 	la_print("User's Init....");
 	SDL_AtomicSet(&la_rmc, 1);
 	jl_fnct program_init_;

@@ -19,7 +19,6 @@ static void ex_redraw(jl_t* jl) {
 	la_effect_light(&ctx->vo1, &light, 1, (jl_vec3_t) { 1.f, 1.f, 1.f });
 
 	la_text(window, LA_PXMOVE("0.5", "0.1") LA_PXSIZE("0.1") LA_PRED "WHATS THAT");
-//	la_text(window, LA_TEXT_MOVE "What's UP!", LA_TEXT_F2(0.5f, .2f));
 }
 
 void ex_down(la_window_t* jlgr, jlgr_input_t input) {
@@ -35,17 +34,20 @@ void ex_down(la_window_t* jlgr, jlgr_input_t input) {
 }
 
 void ex_edit_loop(jl_t* jl) {
-	jlgr_menu_loop(jl->jlgr);
+	ctx_t* ctx = la_context(jl);
+
+	la_menu_loop(&ctx->menu);
 }
 
 void ex_wdns(jl_t* jl) {
 	la_window_t* jlgr = jl->jlgr;
+	ctx_t* ctx = la_context(jl);
 
 	jlgr_text_draw(jlgr, "testing""\xCA""1234567890",
 		(jl_vec3_t) { 0., 0., 0. },
 		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, .0625f });
 	ex_redraw(jl);
-	jlgr_menu_draw(jlgr, 0);
+	la_menu_draw(&ctx->menu, 0);
 }
 
 void ex_wups(jl_t* jl) {
@@ -70,7 +72,7 @@ static void ex_edit_resz(jl_t* jl) {
 	la_print("EXXXXXXXXXXXXXXXXXXXXAMPLE Resizing Window....");
 	jlgr_vo_set_image(jlgr, &(ctx->vo1), rc1, jlgr->textures.game);
 	jlgr_vo_set_rect(jlgr, &(ctx->vo2), rc2, colors, 0);
-	jlgr_menu_draw(jlgr, 1);
+	la_menu_draw(&ctx->menu, 1);
 	la_print("EXXXXXXXXXXXXXXXXXXXXAMPLE Resize'd Window....");
 }
 
@@ -86,10 +88,13 @@ static inline void ex_init_modes(jl_t* jl) {
 	jl_mode_switch(jl, EX_MODE_EDIT);
 }
 
-static inline void ex_init_tasks(la_window_t* jlgr) {
-	jlgr_menu_addicon_flip(jlgr);
-	jlgr_menu_addicon_slow(jlgr);
-//	jlgr_menu_addicon_name(jl);
+static inline void ex_init_tasks(la_window_t* window) {
+	ctx_t* ctx = la_context(window->jl);
+
+	la_menu_init(&ctx->menu, window);
+	la_menu_addicon_flip(&ctx->menu);
+	la_menu_addicon_slow(&ctx->menu);
+//	la_menu_addicon_name(&ctx->menu);
 }
 
 static void ex_init(jl_t* jl) {

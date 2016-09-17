@@ -131,7 +131,7 @@ static void jl_fl_user_select_do__(la_window_t* jlgr, jlgr_input_t input) {
 	}
 }*/
 
-static void jl_fl_btn_makefile_press__(la_window_t* jlgr) {
+/*static void jl_fl_btn_makefile_press__(la_window_t* jlgr) {
 	la_fileviewer->prompt = 1;
 }
 
@@ -172,7 +172,7 @@ static void jl_fl_btn_makefolder_draw__(jl_t* jl, uint8_t resize, void* ctx) {
 	jlgr_vo_txmap(jlgr, &jlgr->gl.temp_vo, 0, 16, 16, 10);
 	jlgr_vo_move(&jlgr->gl.temp_vo, tr);
 	jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo);
-}
+}*/
 
 /**
  * Open directory for file viewer.
@@ -190,8 +190,6 @@ uint8_t la_fileviewer_init(la_window_t* window, la_fileviewer_t* fileviewer,
 	const char* directory, void *newfiledata, uint64_t newfilesize)
 {
 	char *path = directory ? la_memory_makecopy(directory, strlen(directory) + 1) : getenv("HOME");
-	jl_rect_t rc1 = { 0., 0., .1, .1 };
-	jl_rect_t rc2 = { 0., 0., .1, .1 };
 
 	fileviewer->window = window;
 	fileviewer->returnit = 0;
@@ -201,15 +199,11 @@ uint8_t la_fileviewer_init(la_window_t* window, la_fileviewer_t* fileviewer,
 	la_buffer_init(&fileviewer->promptstring);
 	fileviewer->filelist = cl_list_create();
 	//Create the variables
-	jlgr_sprite_init(window, &fileviewer->btns[0], rc1,
-		jl_fl_btn_makefile_loop__, jl_fl_btn_makefile_draw__,
-		NULL, 0, NULL, 0);
-	jlgr_sprite_init(window, &fileviewer->btns[1], rc2,
-		jl_fl_btn_makefolder_loop__, jl_fl_btn_makefolder_draw__,
-		NULL, 0, NULL, 0);
-	//
 	jlgr_vo_set_image(window, &fileviewer->file, (jl_rect_t) { 0., 0., .2, .2}, window->textures.icon);
 	la_fileviewer = fileviewer;
+	//
+	la_menu_init(&fileviewer->menu, window);
+//	la_menu_addicon(&fileviewer->menu, ..., ...);
 	return jl_fl_user_select_open_dir__(window, path);
 }
 

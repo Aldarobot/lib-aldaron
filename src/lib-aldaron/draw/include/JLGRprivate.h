@@ -60,14 +60,12 @@ float jl_sg_seconds_past_(jl_t* jlc);
 // Resize function
 void jl_sg_resz__(jl_t* jlc);
 void jlgr_resz(la_window_t* jlgr, uint16_t x, uint16_t y);
-void jlgr_menu_resize_(la_window_t* jlgr);
 // init functions.
 void jl_wm_init__(la_window_t* jlgr);
 void jlgr_text_init__(la_window_t* jlgr);
 void jl_sg_init__(la_window_t* jlgr);
 void jl_gl_init__(la_window_t* jlgr);
 void jlgr_init__(la_window_t* jlgr);
-void jlgr_menubar_init__(la_window_t* jlgr);
 void jlgr_effects_init__(la_window_t* jlgr);
 // loop
 void jl_wm_loop__(la_window_t* jlgr);

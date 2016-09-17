@@ -193,24 +193,6 @@ typedef struct {
 		jl_pr_t* cp; // Renderer currently being drawn on.
 	}gl;
 
-	struct {
-		jl_mutex_t mutex;
-		jl_vo_t menubar;
-
-		// Protected ....
-		// Used for all icons on the menubar.
-		jl_vo_t icon;
-		jl_vo_t shadow;
-		// Redraw Functions for 10 icons.
-		void* redrawfn[10];
-		// Loop Functions for 10 icons.
-		void* inputfn[10];
-		// Cursor
-		int8_t cursor;
-		// What needs redrawing - -1 nothing -2 all
-		int8_t redraw;
-	}menu;
-
 	// Gui
 	struct {
 		struct {

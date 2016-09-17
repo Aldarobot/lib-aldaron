@@ -4,6 +4,7 @@
 #include "la_draw.h"
 #include "clump.h"
 #include "la_buffer.h"
+#include "la_menu.h"
 
 typedef struct{
 	la_window_t* window;
@@ -14,12 +15,12 @@ typedef struct{
 	char *selecteditem;
 	uint8_t returnit;
 	uint8_t drawupto;
-	jl_sprite_t btns[2];
 	void *newfiledata;
 	uint64_t newfilesize;
 	uint8_t prompt;
 	la_buffer_t promptstring;
 	jl_vo_t file;
+	la_menu_t menu;
 }la_fileviewer_t;
 
 uint8_t la_fileviewer_init(la_window_t* window, la_fileviewer_t* fileviewer,

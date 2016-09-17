@@ -159,15 +159,6 @@ void jlgr_sprite_clamp(jl_vec3_t xyz, jl_area_t area, jl_vec3_t* rtn);
 void* jlgr_sprite_getcontext(jl_sprite_t *sprite);
 void* jlgr_sprite_getdrawctx(jl_sprite_t *sprite);
 
-// JLGRmenu.c
-void jlgr_menu_draw(la_window_t* jlgr, uint8_t resize);
-void jlgr_menu_loop(la_window_t* jlgr);
-void jlgr_menu_draw_icon(la_window_t* window, uint32_t tex, uint8_t c);
-void jlgr_menu_addicon(la_window_t* window, jlgr_fnct inputfn, jlgr_fnct rdr);
-void jlgr_menu_addicon_flip(la_window_t* jlgr);
-void jlgr_menu_addicon_slow(la_window_t* jlgr);
-void jlgr_menu_addicon_name(la_window_t* jlgr);
-
 // JLGRgraphics.c:
 void jlgr_dont(la_window_t* jlgr);
 void jlgr_fill_image_set(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, 

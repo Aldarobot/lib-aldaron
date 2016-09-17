@@ -72,7 +72,7 @@ void jlgr_wm_setwindowname(la_window_t* jlgr, const char* window_name) {
 		jlgr->wm.windowTitle[0][ii] = window_name[ii];
 		if(window_name[ii] == '\0') { break; }
 	}
-	jlgr->wm.windowTitle[0][15] = '\0';
+	jlgr->wm.windowTitle[0][16] = '\0';
 }
 
 //STATIC FUNCTIONS

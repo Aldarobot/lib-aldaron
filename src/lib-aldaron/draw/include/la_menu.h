@@ -26,6 +26,7 @@ void la_menu_init(la_menu_t* menu, la_window_t* window);
 void la_menu_draw(la_menu_t* menu, uint8_t resize);
 void la_menu_loop(la_menu_t* menu);
 void la_menu_drawicon(la_menu_t* menu, uint32_t tex, uint8_t c);
+void la_menu_dont(la_menu_t* menu);
 void la_menu_addicon(la_menu_t* menu, la_menu_fn_t inputfn, la_menu_fn_t rdr);
 void la_menu_addicon_flip(la_menu_t* menu);
 void la_menu_addicon_slow(la_menu_t* menu);

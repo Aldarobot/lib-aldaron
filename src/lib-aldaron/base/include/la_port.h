@@ -224,7 +224,7 @@ typedef struct {
 		SDL_Window* window;
 		SDL_GLContext* glcontext;
 	#endif
-		char windowTitle[2][16];
+		char windowTitle[2][17];
 		// The full width and height of the window.
 		int32_t w, h;
 		// Aspect Ratio of the window

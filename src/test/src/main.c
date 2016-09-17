@@ -94,7 +94,7 @@ static inline void ex_init_tasks(la_window_t* window) {
 	la_menu_init(&ctx->menu, window);
 	la_menu_addicon_flip(&ctx->menu);
 	la_menu_addicon_slow(&ctx->menu);
-//	la_menu_addicon_name(&ctx->menu);
+	la_menu_addicon_name(&ctx->menu);
 }
 
 static void ex_init(jl_t* jl) {

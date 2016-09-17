@@ -8,6 +8,7 @@
 **/
 #include "JLGRprivate.h"
 #include "la_menu.h"
+#include "la_text.h"
 
 #define MENU_REDRAW_NONE -1
 #define MENU_REDRAW_ALL -2
@@ -110,24 +111,20 @@ static void jlgr_menu_flip_press__(la_menu_t* menu) {
 	jlgr_resz(menu->window, 0, 0);
 }
 
-static void jlgr_menu_name_draw2__(la_menu_t* menu) {
-	la_menu_drawicon(menu, menu->window->textures.icon, JLGR_ID_UNKNOWN);
+static void la_menu_name_drawa__(la_menu_t* menu) {
+	la_menu_drawicon(menu, menu->window->textures.icon, 21);
 }
 
-static void jlgr_menu_name_draw__(la_menu_t* menu) {
-	float text_size = jl_gl_ar(menu->window) * .5;
+static void la_menu_name_drawb__(la_menu_t* menu) {
+	la_menu_drawicon(menu, menu->window->textures.icon, 16);
+}
 
-	jlgr_menu_name_draw2__(menu);
-	jlgr_text_draw(menu->window, menu->window->wm.windowTitle[0],
-		(jl_vec3_t) { 1. - (jl_gl_ar(menu->window) * (menu->redraw+1.)),
-			0., 0. },
-		(jl_font_t) { menu->window->textures.icon, 0,
-			menu->window->fontcolor, text_size});
-	jlgr_text_draw(menu->window, menu->window->wm.windowTitle[1],
-		(jl_vec3_t) { 1. - (jl_gl_ar(menu->window) * (menu->redraw+1.)),
-			text_size, 0. },
-		(jl_font_t) { menu->window->textures.icon, 0,
-			menu->window->fontcolor, text_size});
+static void la_menu_name_drawc__(la_menu_t* menu) {
+	float offset = .9f - (.1f * menu->redraw) + 0.005f;
+
+	la_menu_drawicon(menu, menu->window->textures.icon, 20);
+	la_text(menu->window, LA_PXSIZE("0.04") LA_PXMOVE("%f", "0.005") "%s", offset, menu->window->wm.windowTitle[0]);
+	la_text(menu->window, LA_PXSIZE("0.04") LA_PXMOVE("%f", "0.055") "%s", offset, menu->window->wm.windowTitle[1]);
 }
 
 static void jlgr_menu_slow_draw__(la_menu_t* menu) {
@@ -204,6 +201,8 @@ void la_menu_drawicon(la_menu_t* menu, uint32_t tex, uint8_t c) {
 	jlgr_vo_draw(menu->window, &menu->icon);
 }
 
+void la_menu_dont(la_menu_t* menu) { }
+
 /**
  * Add an icon to the menubar
  *
@@ -244,8 +243,8 @@ void la_menu_addicon_slow(la_menu_t* menu) {
 **/
 void la_menu_addicon_name(la_menu_t* menu) {
 	int i;
-	for(i = 0; i < 4; i++) {
-		la_menu_addicon(menu, NULL, jlgr_menu_name_draw2__);
-	}
-	la_menu_addicon(menu, NULL, jlgr_menu_name_draw__);
+	la_menu_addicon(menu, la_menu_dont, la_menu_name_drawa__);
+	for(i = 0; i < 3; i++)
+		la_menu_addicon(menu, la_menu_dont, la_menu_name_drawb__);
+	la_menu_addicon(menu, la_menu_dont, la_menu_name_drawc__);
 }

@@ -138,7 +138,7 @@ static void la_filemanager_new_draw(la_menu_t* menu) {
 static void la_filemanager_new_loop(la_menu_t* menu) {
 	if(!menu->window->input.mouse.h && !menu->window->input.touch.h) return;
 	if(!menu->window->input.mouse.p && !menu->window->input.touch.p) return;
-	la_fileviewer->prompt = 1;
+	la_safe_set_uint8(&la_fileviewer->prompt, 1);
 }
 
 static void la_filemanager_begin_draw(la_menu_t* menu) {
@@ -185,7 +185,7 @@ uint8_t la_fileviewer_init(la_window_t* window, la_fileviewer_t* fileviewer,
 	fileviewer->returnit = 0;
 	fileviewer->newfiledata = newfiledata;
 	fileviewer->newfilesize = newfilesize;
-	fileviewer->prompt = 0;
+	la_safe_set_uint8(&fileviewer->prompt, 0);
 	la_buffer_init(&fileviewer->promptstring);
 	fileviewer->filelist = cl_list_create();
 	//Create the variables

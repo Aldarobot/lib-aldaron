@@ -29,7 +29,7 @@ typedef struct {
 	char value[256];
 } safe_string_t;
 
-void la_safe_set(void* var, void* set, size_t size);
+void la_safe_set(void* var, const void* set, size_t size);
 void la_safe_get(void* var, void* set, size_t size);
 void la_safe_set_float(safe_float_t* var, float value);
 float la_safe_get_float(safe_float_t* var);

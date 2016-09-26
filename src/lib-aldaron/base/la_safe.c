@@ -3,7 +3,7 @@
 #include "la_safe.h"
 #include "la_memory.h"
 
-void la_safe_set(void* var, void* set, size_t size) {
+void la_safe_set(void* var, const void* set, size_t size) {
 	SDL_AtomicLock(var);
 	la_memory_copy(set, var + sizeof(SDL_SpinLock), size);
 	SDL_AtomicUnlock(var);
@@ -26,11 +26,14 @@ float la_safe_get_float(safe_float_t* var) {
 }
 
 void la_safe_set_uint8(safe_uint8_t* var, uint8_t value) {
-	la_safe_set(var, &value, sizeof(uint8_t));
+	SDL_AtomicLock(&var->lock);
+	var->value = value;
+	SDL_AtomicUnlock(&var->lock);
 }
 
 uint8_t la_safe_get_uint8(safe_uint8_t* var) {
 	uint8_t value;
+
 	la_safe_get(var, &value, sizeof(uint8_t));
 	return value;
 }

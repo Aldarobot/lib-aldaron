@@ -24,6 +24,11 @@ typedef struct {
 	float value;
 } safe_float_t;
 
+typedef struct {
+	SDL_SpinLock lock;
+	char value[256];
+} safe_string_t;
+
 void la_safe_set(void* var, void* set, size_t size);
 void la_safe_get(void* var, void* set, size_t size);
 void la_safe_set_float(safe_float_t* var, float value);

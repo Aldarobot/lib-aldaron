@@ -9,6 +9,7 @@
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
 
+#include "la_vo.h"
 #include "la_memory.h"
 
 extern float la_banner_size;
@@ -119,20 +120,16 @@ void jlgr_vo_exit__(jl_vo_t* vo, const char* error) {
  * @param vo: The vertex object.
  * @param rc: Rectangle to set it to.
 **/
-void jlgr_vo_rect(la_window_t* jlgr, jl_vo_t* vo, jl_rect_t* rc) {
-	jlgr_vo_init__(jlgr->jl, vo);
-	if(rc) {
-		float rectangle_coords[] = {
-			0.f,		rc->h,		0.f,
-			0.f,		0.f,		0.f,
-			rc->w,		0.f,		0.f,
-			rc->w,		rc->h,		0.f };
+void la_vo_rect(la_window_t* window, jl_vo_t* vo, float w, float h) {
+	float rectangle_coords[] = {
+		0.f,	h,	0.f,
+		0.f,	0.f,	0.f,
+		w,	0.f,	0.f,
+		w,	h,	0.f };
 
-		// Overwrite the vertex object
-		jlgr_vo_poly__(jlgr, vo, 4, rectangle_coords);
-		//
-		jlgr_vo_move(vo, (jl_vec3_t) { rc->x, rc->y, 0.f } );
-	}
+	jlgr_vo_init__(window->jl, vo);
+	// Overwrite the vertex object
+	jlgr_vo_poly__(window, vo, 4, rectangle_coords);
 }
 
 /**
@@ -167,10 +164,28 @@ void jlgr_vo_set_rect(la_window_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* color
 	uint8_t multicolor)
 {
 	jlgr_vo_init__(jlgr->jl, vo);
-	jlgr_vo_rect(jlgr, vo, &rc);
+	la_vo_rect(jlgr, vo, rc.w, rc.h);
 	// Texture the vertex object
 	if(multicolor) jlgr_vo_color_gradient(jlgr, vo, colors);
 	else jlgr_vo_color_solid(jlgr, vo, colors);
+}
+
+void la_vo_color_rect(la_window_t* window, la_vo_t* vo, float* colors,
+	float w, float h)
+{
+	jlgr_vo_init__(window->jl, vo);
+	la_vo_rect(window, vo, w, h);
+	// Texture the vertex object
+	jlgr_vo_color_gradient(window, vo, colors);
+}
+
+void la_vo_plain_rect(la_window_t* window, la_vo_t* vo, float* colors,
+	float w, float h)
+{
+	jlgr_vo_init__(window->jl, vo);
+	la_vo_rect(window, vo, w, h);
+	// Texture the vertex object
+	jlgr_vo_color_solid(window, vo, colors);
 }
 
 /**
@@ -279,7 +294,7 @@ void jlgr_vo_color_solid(la_window_t* jlgr, jl_vo_t* vo, float* rgba) {
  * @param vo: The vertex object.
  * @param pos: The new position.
 **/
-void jlgr_vo_move(jl_vo_t* vo, jl_vec3_t pos) {
+void la_vo_move(la_vo_t* vo, la_v3_t pos) {
 	jlgr_vo_exit__(vo, "Can't Move!");
 	vo->pr.cb.pos = pos;
 	vo->pr.cb.pos.y += la_banner_size;
@@ -333,6 +348,10 @@ void jlgr_vo_draw(la_window_t* jlgr, jl_vo_t* vo) {
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
 		jl_gl_ar(jlgr));
 	jlgr_vo_draw2(jlgr, vo, shader);
+}
+
+void la_vo_draw(la_vo_t* vo) {
+	jlgr_vo_draw(vo->jl->jlgr, vo);
 }
 
 /**

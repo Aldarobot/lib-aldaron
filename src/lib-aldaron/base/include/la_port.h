@@ -28,7 +28,7 @@
 // Print eXtension
 #define LA_PXSIZE(size) "\x1B[f" size ";"
 #define LA_PXMOVE(x, y) "\x1B[m" x "," y ";"
-#define LA_PXCOLOR(r, g, b) "\x1B[c" x "," y "," z ";"
+#define LA_PXCOLOR(r, g, b, a) "\x1B[c" r "," g "," b "," a ";"
 #define LA_PXWIDTH(width) "\x1B[w" width ";"
 #define LA_PXLIMIT(limit) "\x1B[l" limit ";"
 

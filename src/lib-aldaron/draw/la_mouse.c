@@ -7,6 +7,7 @@
  *	This file handles the mouse.
 **/
 #include "JLGRprivate.h"
+#include "la_vo.h"
 
 //#if JL_PLAT == JL_PLAT_COMPUTER // show mouse if computer
 void jlgr_mouse_resize__(la_window_t* jlgr) {
@@ -20,9 +21,9 @@ void jlgr_mouse_resize__(la_window_t* jlgr) {
 
 void jlgr_mouse_draw__(la_window_t* jlgr) {
 	if(jlgr->mouse.jl == NULL) return;
-	jlgr_vo_move(&jlgr->mouse, (jl_vec3_t) {
+	la_vo_move(&jlgr->mouse, (jl_vec3_t) {
 		la_safe_get_float(&jlgr->mouse_x),
 		la_safe_get_float(&jlgr->mouse_y), 0.f});
-	jlgr_vo_draw(jlgr, &jlgr->mouse);
+	la_vo_draw(&jlgr->mouse);
 }
 //#endif

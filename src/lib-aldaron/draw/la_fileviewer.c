@@ -141,6 +141,29 @@ static void la_filemanager_new_loop(la_menu_t* menu) {
 	la_fileviewer->prompt = 1;
 }
 
+static void la_filemanager_begin_draw(la_menu_t* menu) {
+	la_menu_drawicon(menu, menu->window->textures.icon, 20);
+	la_text(menu->window, LA_PXMOVE("0.01", "0.02") LA_PXCOLOR("0.4", "1.0", "0.5", "1.0") LA_PXSIZE("0.06") "FS-A");
+}
+
+static void la_filemanager_finish_draw(la_menu_t* menu) {
+	la_menu_drawicon(menu, menu->window->textures.icon, 21);
+}
+
+static void la_filemanager_separator_draw(la_menu_t* menu) {
+	la_menu_drawicon(menu, menu->window->textures.icon, 17);
+	la_text(menu->window, LA_PXMOVE("%f", "0.02") LA_PXCOLOR("0.", ".6", "0.5", "1.0") LA_PXSIZE("0.06") "FS-B", .9f - (.1f * menu->redraw) + 0.099f);
+}
+
+static void la_filemanager_separator2_draw(la_menu_t* menu) {
+	la_menu_drawicon(menu, menu->window->textures.icon, 17);
+	la_text(menu->window, LA_PXMOVE("%f", "0.02") LA_PXCOLOR("0.", ".6", "0.5", "1.0") LA_PXSIZE("0.06") "FS-C", .9f - (.1f * menu->redraw) + 0.099f);
+}
+
+static void la_filemanager_blank_draw(la_menu_t* menu) {
+	la_menu_drawicon(menu, menu->window->textures.icon, 16);
+}
+
 /**
  * Open directory for file viewer.
  * If '!' is put at the beginning of "program_name", then it's treated as a
@@ -172,7 +195,33 @@ uint8_t la_fileviewer_init(la_window_t* window, la_fileviewer_t* fileviewer,
 	la_menu_init(&fileviewer->menu, window);
 	la_menu_addicon(&fileviewer->menu, la_filemanager_new_loop,
 		la_filemanager_new_draw);
+	la_menu_addicon(&fileviewer->menu, la_menu_dont,
+		la_filemanager_finish_draw);
+	la_menu_addicon(&fileviewer->menu, la_menu_dont,
+		la_filemanager_blank_draw);
+	la_menu_addicon(&fileviewer->menu, la_menu_dont,
+		la_filemanager_separator2_draw);
+	la_menu_addicon(&fileviewer->menu, la_menu_dont,
+		la_filemanager_blank_draw);
+	la_menu_addicon(&fileviewer->menu, la_menu_dont,
+		la_filemanager_blank_draw);
+	la_menu_addicon(&fileviewer->menu, la_menu_dont,
+		la_filemanager_separator_draw);
+	la_menu_addicon(&fileviewer->menu, la_menu_dont,
+		la_filemanager_blank_draw);
+	la_menu_addicon(&fileviewer->menu, la_menu_dont,
+		la_filemanager_blank_draw);
+	la_menu_addicon(&fileviewer->menu, la_menu_dont,
+		la_filemanager_begin_draw);
 	la_menu_draw(&fileviewer->menu, 1);
+	//
+	float colors[] = {
+		.5f, .5f, 1.f, 1.f,
+		.5f, .5f, 1.f, 0.f,
+		.5f, .5f, 1.f, 0.f,
+		.5f, .5f, 1.f, 1.f
+	};
+	la_vo_color_rect(window, &fileviewer->fade, colors, 1.f, 0.07);
 	return jl_fl_user_select_open_dir__(window, path);
 }
 
@@ -234,7 +283,6 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 				16, 16, state == FILE_TYPE_DIR ? 12 : 11);
 			jlgr_vo_move(&fileviewer->file, (jl_vec3_t) { x * 0.2f, 0.1f + (y * 0.2f), 0.f});
 			jlgr_vo_draw(window, &fileviewer->file);
-		// (jl_vec3_t) { x * 0.2f, 0.1f + (y * 0.2f) }
 			la_text(window, LA_PXWIDTH("0.5") LA_PXSIZE("0.025") LA_PXMOVE("%f", "%f") LA_PBLACK "%s", .035 + (x * 0.2f), offset + (y * 0.2f), stringtoprint);
 			x++;
 			if(x > 4) x = 0, y++;
@@ -243,6 +291,9 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 	}
  	cl_list_iterator_destroy(iterator);
 	la_menu_draw(&fileviewer->menu, 0);
+	la_vo_move(&fileviewer->fade, (jl_vec3_t) { 0.f, window->wm.ar - .07f });
+	la_vo_draw(&fileviewer->fade);
+	la_text(window, LA_PXSIZE("0.05") LA_PXMOVE("0.0", "%f") "%s", window->wm.ar - .05f, la_fileviewer->dirname);
 	// Draw prompt
 //	if(la_fileviewer->prompt) {
 /*		if(jlgr_draw_textbox(jlgr, .02, jl_gl_ar(jlgr) - .06, .94, .02,

@@ -58,7 +58,6 @@ static void jlgr_menubar_draw_(jl_t* jl) {
 }
 
 void la_menu_init(la_menu_t* menu, la_window_t* window) {
-	jl_rect_t rc = { 0.f, 0.f, 1.f, .11f };
 	jl_rect_t rc_icon = { 0., 0., .1, .1};
 	jl_rect_t rc_shadow = { -.01, .01, .1, .1 };
 	float shadow_color[] = { 0.f, 0.f, 0.f, .75f };
@@ -79,7 +78,7 @@ void la_menu_init(la_menu_t* menu, la_window_t* window) {
 		menu->redrawfn[i] = NULL;
 	}
 	// Make the menubar.
-	jlgr_vo_rect(window, &menu->menubar, &rc);
+	la_vo_rect(window, &menu->menubar, 1.f, .11f);
 	jl_thread_mutex_unlock(&menu->mutex);
 
 	la_menu = menu;

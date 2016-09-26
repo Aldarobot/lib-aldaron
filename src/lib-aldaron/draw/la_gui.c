@@ -4,6 +4,7 @@
 */
 #include "JLGRprivate.h"
 #include "la_buffer.h"
+#include "la_vo.h"
 
 void* aldaron_data(void);
 uint64_t aldaron_size(void);
@@ -221,15 +222,15 @@ static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
 	// Draw Sliders
 	jlgr_vo_draw(jlgr, &(slider->vo[0]));
 	// Draw Slide 1
-	jlgr_vo_move(&slider->vo[2], slider->where[0]);
-	jlgr_vo_draw(jlgr, &slider->vo[2]);
-	jlgr_vo_move(&slider->vo[1], slider->where[0]);
-	jlgr_vo_draw(jlgr, &slider->vo[1]);
+	la_vo_move(&slider->vo[2], slider->where[0]);
+	la_vo_draw(&slider->vo[2]);
+	la_vo_move(&slider->vo[1], slider->where[0]);
+	la_vo_draw(&slider->vo[1]);
 	// Draw Slide 2
-	jlgr_vo_move(&slider->vo[2], slider->where[1]);
-	jlgr_vo_draw(jlgr, &slider->vo[2]);
-	jlgr_vo_move(&slider->vo[1], slider->where[1]);
-	jlgr_vo_draw(jlgr, &slider->vo[1]);
+	la_vo_move(&slider->vo[2], slider->where[1]);
+	la_vo_draw(&slider->vo[2]);
+	la_vo_move(&slider->vo[1], slider->where[1]);
+	la_vo_draw(&slider->vo[1]);
 }
 
 /**

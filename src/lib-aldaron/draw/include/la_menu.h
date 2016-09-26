@@ -1,15 +1,17 @@
 #ifndef LA_MENU
 #define LA_MENU
 
+#include "la_vo.h"
+
 typedef struct {
 	la_window_t* window;
 	jl_mutex_t mutex;
-	jl_vo_t menubar;
+	la_vo_t menubar;
 
 	// Protected ....
 	// Used for all icons on the menubar.
-	jl_vo_t icon;
-	jl_vo_t shadow;
+	la_vo_t icon;
+	la_vo_t shadow;
 	// Redraw Functions for 10 icons.
 	void* redrawfn[10];
 	// Loop Functions for 10 icons.

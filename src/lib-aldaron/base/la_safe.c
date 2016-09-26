@@ -54,3 +54,13 @@ uint32_t la_safe_get_uint32(safe_uint32_t* var) {
 	la_safe_get(var, &value, sizeof(uint32_t));
 	return value;
 }
+
+void la_safe_set_string(safe_string_t* var, const char* value) {
+	la_safe_set(var, value, 256);
+}
+
+const char* la_safe_get_string(safe_string_t* var) {
+	void* value = la_memory_instant();
+	la_safe_get(var, &value, 256);
+	return value;
+}

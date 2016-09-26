@@ -190,7 +190,6 @@ void jlgr_gui_slider(la_window_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle
 void jlgr_notify(la_window_t* jlgr, const char* notification, ...);
 
 // JLGRvo.c
-void jlgr_vo_rect(la_window_t* jlgr, jl_vo_t* vo, jl_rect_t* rc);
 void jlgr_vo_set_vg(la_window_t* jlgr, jl_vo_t *vo, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor);
 void jlgr_vo_set_rect(la_window_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,

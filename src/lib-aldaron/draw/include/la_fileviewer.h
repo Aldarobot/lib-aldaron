@@ -5,6 +5,7 @@
 #include "clump.h"
 #include "la_buffer.h"
 #include "la_menu.h"
+#include "la_safe.h"
 
 typedef struct{
 	la_window_t* window;
@@ -17,9 +18,10 @@ typedef struct{
 	uint8_t drawupto;
 	void *newfiledata;
 	uint64_t newfilesize;
-	uint8_t prompt;
+	safe_uint8_t prompt;
 	la_buffer_t promptstring;
 	jl_vo_t file;
+	jl_vo_t fade;
 	la_menu_t menu;
 }la_fileviewer_t;
 

@@ -1,4 +1,7 @@
-/** @cond **/
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "la.h"
 #include "SDL_filesystem.h"
 #include <sys/types.h>
@@ -24,7 +27,7 @@
 	extern const char* LA_FILE_ROOT;
 #endif
 
-static void* la_file_temp = NULL;
+//static void* la_file_temp = NULL;
 static char la_file_string[256];
 
 // This function converts linux filenames to native filnames
@@ -37,9 +40,8 @@ char* jl_file_convert__(const char* filename) {
 	return newfilename;
 }
 
-static int jl_file_save_(jl_t* jl, const void *file_data, const char *file_name,
-	uint32_t bytes)
-{
+/*static int
+jl_file_save_(const void *file_data, const char *file_name, uint32_t bytes) {
 	int errsv;
 	ssize_t n_bytes;
 	int fd;
@@ -73,7 +75,7 @@ static int jl_file_save_(jl_t* jl, const void *file_data, const char *file_name,
 	}
 	close(fd);
 	return at;
-}
+}*/
 
 static char* jl_file_get_root__(void) {
 	data_t root_path;
@@ -104,8 +106,6 @@ static char* la_file_log__(void) {
 }
 
 // NON-STATIC Library Dependent Functions
-
-/** @endcond **/
 
 const char* la_file_basename(char* base, const char* filename) {
 	int i;
@@ -159,16 +159,6 @@ const char* la_file_truncate(const char* filename) {
 }
 
 /**
- * Print text to a file.
- * @param jl: The library context.
- * @param fname: The name of the file to print to.
- * @param msg: The text to print.
-**/
-void jl_file_print(jl_t* jl, const char* fname, const char* msg) {
-	if(fname) jl_file_save_(jl, msg, fname, strlen(msg));
-}
-
-/**
  * Check whether a file or directory exists.
  * @returns 0: If the file doesn't exist.
  * @returns 1: If the file does exist and is a directory.
@@ -202,21 +192,6 @@ void la_file_rm(const char* filename) {
 
 	unlink(converted_filename);
 	la_memory_free(converted_filename);
-}
-
-/**
- * Save A File To The File System.  Save Data of "bytes" bytes in "file" to
- * file "name"
- * @param jl: Library Context
- * @param file: Data To Save To File
- * @param name: The Name Of The File to save to
- * @param bytes: Size of "File"
- */
-void jl_file_save(jl_t* jl, const void *file, const char *name, uint32_t bytes){
-	// delete file
-	la_file_rm(name);
-	// make file
-	jl_file_save_(jl, file, name, bytes);
 }
 
 /**
@@ -259,7 +234,7 @@ const char* la_file_load(la_buffer_t* load, const char* file_name) {
  * @returns 0: On success
  * @returns 1: If File is unable to be made.
  */
-char jl_file_pk_save(jl_t* jl, const char* packageFileName,
+/*char jl_file_pk_save(jl_t* jl, const char* packageFileName,
 	const char* fileName, void *data, uint64_t dataSize)
 {
 	char* converted = jl_file_convert__(packageFileName);
@@ -289,7 +264,7 @@ static void jl_file_pk_compress_iterate__(jl_t* jl, void* data) {
 	jl_file_pk_save(jl, name, data + strlen(name)-4, read.data, read.size);
 	la_print("\t%s", data);
 	jl_data_free(&read);
-}
+}*/
 
 /**
  * Compress a folder in a package.
@@ -297,7 +272,7 @@ static void jl_file_pk_compress_iterate__(jl_t* jl, void* data) {
  * @param folderName: Name of the folder to compress.
  * @returns: Name of package, needs to be free'd.
 **/
-char* jl_file_pk_compress(jl_t* jl, const char* folderName) {
+/*char* jl_file_pk_compress(jl_t* jl, const char* folderName) {
 	// If last character is '/', then overwrite.
 	uint32_t cursor = strlen(folderName);
 	if(folderName[cursor - 1] == '/') cursor--;
@@ -324,7 +299,7 @@ char* jl_file_pk_compress(jl_t* jl, const char* folderName) {
 	// Free 
 	cl_list_destroy(filelist);
 	return pkName;
-}
+}*/
 
 /**
  * Load a zip package from memory.
@@ -333,7 +308,7 @@ char* jl_file_pk_compress(jl_t* jl, const char* folderName) {
  * @param data: The data that contains the zip file.
  * @param file_name: The name of the file to load.
 **/
-const char* jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
+const char* la_file_loadzip(la_buffer_t* rtn, la_buffer_t* data,
 	const char* file_name)
 {
 	zip_error_t ze; ze.zip_err = ZIP_ER_OK;
@@ -358,7 +333,6 @@ const char* jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 		la_panic("because: \"%s\"", zip_error_strerror(&ze));
 	}
 
-//	struct zip *zipfile = zip_open(converted, ZIP_CHECKCONS, &zerror);
 	la_print("error check 3.");
 	if(zipfile == NULL) {
 		la_print("couldn't load zip because:");
@@ -390,45 +364,12 @@ const char* jl_file_pk_load_fdata(jl_t* jl, data_t* rtn, data_t* data,
 		la_print("empty file, returning NULL.");
 		return NULL;
 	}
-	la_print("jl_file_pk_load: read %d bytes", Read);
+	la_print("la_file_loadzip: read %d bytes", Read);
 	zip_close(zipfile);
 	la_print("closed file.");
 	// Make a data_t* from the data.
 	if(Read) la_buffer_fdata(rtn, fileToLoad, Read);
 	la_print("done.");
-	return NULL;
-}
-
-/**
- * Load file "filename" in package "packageFileName" & Return contents
- * May return NULL.  If it does jl->errf will be set.
- * -ERR:
- *	-ERR_NERR:	File is empty.
- *	-ERR_NONE:	Can't find filename in packageFileName. [ DNE ]
- *	-ERR_FIND:	Can't find packageFileName. [ DNE ]
- * @param jl: Library Context
- * @param rtn: Data structure to return.
- * @param packageFileName: Package to load file from
- * @param filename: file within package to load
- * @returns: contents of file ( "filename" ) in package ( "packageFileName" )
-*/
-const char* jl_file_pk_load(jl_t* jl, data_t* rtn, const char *packageFileName,
-	const char *filename)
-{
-	char* converted = jl_file_convert__(packageFileName);
-	const char* error;
-
-	la_print("loading package:\"%s\"...", converted);
-
-	data_t data;
-
-	if((error = la_file_load(&data, converted))) {
-		la_print("!Package File doesn't exist!");
-		return error;
-	}
-	if(jl_file_pk_load_fdata(jl, rtn, &data, filename))
-		la_panic("jl_file_pk_load_fdata failed!");
-	la_memory_free(converted);
 	return NULL;
 }
 
@@ -455,7 +396,7 @@ const char* la_file_mkdir(const char* path) {
 		return NULL;
 	}
 }
-
+/*
 static int8_t jl_file_dirls__(jl_t* jl,const char* filename,uint8_t recursive,
 	struct cl_list * filelist)
 {
@@ -463,7 +404,7 @@ static int8_t jl_file_dirls__(jl_t* jl,const char* filename,uint8_t recursive,
 	struct dirent *ent;
 
 	if ((dir = opendir (filename)) != NULL) {
-		/* print all the files and directories within directory */
+		// print all the files and directories within directory
 		while ((ent = readdir (dir)) != NULL) {
 			char *element = malloc(strlen(filename) +
 				strlen(ent->d_name) + 3);
@@ -501,7 +442,7 @@ static int8_t jl_file_dirls__(jl_t* jl,const char* filename,uint8_t recursive,
 		la_panic("Can't Open Directory: Unknown Error!\n");
 	}
 	return -1;
-}
+}*/
 
 /**
  * List all of the files in a directory.
@@ -513,7 +454,7 @@ static int8_t jl_file_dirls__(jl_t* jl,const char* filename,uint8_t recursive,
  * @returns: List of files inside of "dirname", needs to be freed with
  *	cl_list_destroy()
 **/
-struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive){
+/*struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive){
 	struct cl_list * filelist = cl_list_create();
 	char* converted_dirname = jl_file_convert__(dirname);
 	char* end_character = &converted_dirname[strlen(converted_dirname) - 1];
@@ -527,7 +468,7 @@ struct cl_list * jl_file_dir_ls(jl_t* jl,const char* dirname,uint8_t recursive){
 		la_memory_free(converted_dirname);
 		return filelist;
 	}
-}
+}*/
 
 /**
  * Get the designated location for a resource file. Resloc = Resource Location

@@ -1,15 +1,17 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "la_scrollpane.h"
 
 static la_gui_scrollpane_t* la_scrollpane = NULL;
 extern float la_banner_size;
 
-static void la_gui_scrollpane_draw__(jl_t* jl) {
-	la_window_t* window = jl->jlgr;
+static void la_gui_scrollpane_draw__(void* context) {
 	float banner_size = la_banner_size;
 
 	la_banner_size = la_safe_get_float(&la_scrollpane->scroller);
-	jl_gl_clear(window, 0.f, 0.f, 0.f, 0.f);
-	la_scrollpane->drawfn(jl);
+	la_scrollpane->drawfn(context);
 	la_banner_size = banner_size;
 }
 
@@ -29,10 +31,13 @@ void la_gui_scrollpane_redraw(la_window_t* window, la_gui_scrollpane_t* sp,
 	la_safe_set_float(&sp->external_height, rc.h);
 }
 
-void la_gui_scrollpane_draw(la_window_t* window, la_gui_scrollpane_t* sp) {
+void la_gui_scrollpane_draw(void* context, la_window_t* window,
+	la_gui_scrollpane_t* sp)
+{
 	if(la_safe_get_uint8(&sp->external_update)) {
 		la_scrollpane = sp;
-		la_vo_pr(window, &sp->external, la_gui_scrollpane_draw__);
+		la_vo_pr(context, window, &sp->external,
+			la_gui_scrollpane_draw__);
 	}
 	jlgr_vo_draw(window, &sp->external);
 	jlgr_vo_draw_pr(window, &sp->external);

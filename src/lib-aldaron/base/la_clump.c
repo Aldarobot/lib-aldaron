@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "la.h"
 
 static inline void *_jl_cl_list_alphabetize_lowest(struct cl_list *list) {
@@ -57,15 +61,15 @@ void jl_cl_list_alphabetize(struct cl_list *list) {
 
 /**
  * Iterate through a clump list.
- * @param jl: The library context.
+ * @param context: The library context.
  * @param list: The clump list.
  * @param fn: The function that reads the data.
 **/
-void jl_clump_list_iterate(jl_t* jl, struct cl_list *list, jl_data_fnct fn) {
+void jl_clump_list_iterate(void* context, struct cl_list *list, jl_data_fnct fn) {
 	int i;
 	struct cl_list_iterator *iterator = cl_list_iterator_create(list);
 
 	for(i = 0; i < cl_list_count(list); i++)
-		fn(jl, cl_list_iterator_next(iterator));
+		fn(context, cl_list_iterator_next(iterator));
 	cl_list_iterator_destroy(iterator);
 }

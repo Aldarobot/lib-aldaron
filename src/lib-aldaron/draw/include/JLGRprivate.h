@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "jlgr.h"
 
 // Full texture
@@ -53,13 +57,6 @@ void jlgr_opengl_vertices_(la_window_t* jlgr, const float *xyzw, uint8_t vertice
 	float* cv, uint32_t* gl);
 void jlgr_opengl_texture_bind_(la_window_t* jlgr, uint32_t tex);
 
-//DL
-void _jl_sg_loop(la_window_t* jlgr);
-float jl_sg_seconds_past_(jl_t* jlc);
-
-// Resize function
-void jl_sg_resz__(jl_t* jlc);
-void jlgr_resz(la_window_t* jlgr, uint16_t x, uint16_t y);
 // init functions.
 void jl_wm_init__(la_window_t* jlgr);
 void jlgr_text_init__(la_window_t* jlgr);

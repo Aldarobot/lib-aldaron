@@ -1,15 +1,18 @@
-/*
- * JLGRwm.c: upper level SDL2
- *	Window Manager - Manages creating / destroying / redrawing windows.
-*/
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
 
 #include "JLGRprivate.h"
+
+#include <la_time.h>
 
 #define JL_WM_FULLSCREEN SDL_WINDOW_FULLSCREEN_DESKTOP
 
 extern float la_banner_size;
 
-static void jl_wm_killedit(jl_t* jl, char *str) {
+void la_draw_resize(la_window_t *, uint32_t, uint32_t);
+
+static inline void jl_wm_killedit(const char *str) {
 	la_print(str);
 	la_panic(SDL_GetError());
 }
@@ -21,10 +24,10 @@ static void jlgr_wm_fscreen__(la_window_t* jlgr, uint8_t a) {
 	// Actually set whether fullscreen or not.
 	if(SDL_SetWindowFullscreen(jlgr->wm.window,
 	 jlgr->wm.fullscreen ? JL_WM_FULLSCREEN : 0))
-		jl_wm_killedit(jlgr->jl, "SDL_SetWindowFullscreen");
+		jl_wm_killedit("SDL_SetWindowFullscreen");
 	la_print("Switched fullscreen on/off");
 	// Resize window
-	jlgr_resz(jlgr, 0, 0);
+	la_draw_resize(jlgr, 0, 0);
 }
 #endif
 
@@ -91,14 +94,14 @@ static inline SDL_Window* jlgr_wm_mkwindow__(la_window_t* jlgr) {
 		SDL_WINDOWPOS_UNDEFINED,		// initial y position
 		640, 360, flags
 	);
-	if(rtn == NULL) jl_wm_killedit(jlgr->jl, "SDL_CreateWindow");
+	if(rtn == NULL) jl_wm_killedit("SDL_CreateWindow");
 	SDL_ShowCursor(SDL_DISABLE);
 	return rtn;
 }
 
 static inline SDL_GLContext* jl_wm_gl_context(la_window_t* jlgr) {
 	SDL_GLContext* rtn = SDL_GL_CreateContext(jlgr->wm.window);
-	if(rtn == NULL) jl_wm_killedit(jlgr->jl, "SDL_GL_CreateContext");
+	if(rtn == NULL) jl_wm_killedit("SDL_GL_CreateContext");
 	return rtn;
 }
 #endif
@@ -141,7 +144,7 @@ void jl_wm_loop__(la_window_t* jlgr) {
 	SDL_GL_SwapWindow(jlgr->wm.window); //end current draw
 #endif
 	// milliseconds / 1000 to get seconds
-	jlgr->psec=jl_time_regulatefps(jlgr->jl, &jlgr->timer, &jlgr->on_time);
+	jlgr->psec = la_time_regulatefps(&jlgr->timer, &jlgr->on_time);
 }
 
 void jl_wm_resz__(la_window_t* jlgr, uint16_t w, uint16_t h) {

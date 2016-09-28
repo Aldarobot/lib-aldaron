@@ -1,11 +1,7 @@
-/*
- * JL_Lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-/** \file
- * JLGRmouse.c
- *	This file handles the mouse.
-**/
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "JLGRprivate.h"
 #include "la_vo.h"
 
@@ -20,7 +16,7 @@ void jlgr_mouse_resize__(la_window_t* jlgr) {
 }
 
 void jlgr_mouse_draw__(la_window_t* jlgr) {
-	if(jlgr->mouse.jl == NULL) return;
+	if(jlgr->mouse.window == NULL) return;
 	la_vo_move(&jlgr->mouse, (jl_vec3_t) {
 		la_safe_get_float(&jlgr->mouse_x),
 		la_safe_get_float(&jlgr->mouse_y), 0.f});

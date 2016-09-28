@@ -1,8 +1,6 @@
-/*
- * Jeron A. Lau --- Lib-Aldaron (c) 2016
- * Lib-Aldaron-Comm is a library for using input & output to other devices.
- * It lets you send network packets.  It uses SDL_net.
-*/
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
 
 #include "la_network.h"
 #include "la_memory.h"
@@ -12,9 +10,8 @@
  * @param jl: The library context.
  * @param sockets: Number of sockets to allocate.
 **/
-aldc_t* aldc_init(jl_t* jl, uint8_t sockets) {
+aldc_t* aldc_init(uint8_t sockets) {
 	aldc_t* aldc = la_memory_allocate(sizeof(aldc_t));
-	aldc->jl = jl;
 	aldc->sockets = la_memory_allocate(sizeof(aldc_socket_t) * sockets);
 	SDLNet_Init();
 	aldc->set = SDLNet_AllocSocketSet(sockets);
@@ -93,6 +90,6 @@ uint8_t aldc_pull(aldc_t* aldc, void* data) {
 /**
  * Kill Lib-Aldaron-Comm
 **/
-void aldc_kill(jl_t* jl) {
+void aldc_kill(void) {
 	SDLNet_Quit();
 }

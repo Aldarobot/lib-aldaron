@@ -1,4 +1,6 @@
 /* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
 
 #include "la_safe.h"
 #include "la_memory.h"
@@ -65,5 +67,15 @@ void la_safe_set_string(safe_string_t* var, const char* value) {
 const char* la_safe_get_string(safe_string_t* var) {
 	void* value = la_memory_instant();
 	la_safe_get(var, &value, 256);
+	return value;
+}
+
+void la_safe_set_pointer(safe_pointer_t* var, const void* value) {
+	la_safe_set(var, &value, sizeof(void *));
+}
+
+const void* la_safe_get_pointer(safe_pointer_t* pointer) {
+	const void* value;
+	la_safe_get(pointer, &value, sizeof(void *));
 	return value;
 }

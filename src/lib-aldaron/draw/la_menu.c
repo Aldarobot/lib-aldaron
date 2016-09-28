@@ -1,14 +1,12 @@
-/*
- * JL_Lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-/** \file
- * JLGRmenu.c
- *	This file handles the menubar.
-**/
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "JLGRprivate.h"
 #include "la_menu.h"
 #include "la_text.h"
+
+#include <la_pr.h>
 
 #define MENU_REDRAW_NONE -1
 #define MENU_REDRAW_ALL -2
@@ -19,7 +17,7 @@ static char *GMessage[3] = {
 	"SCREEN: SINGLE"
 };
 
-static la_menu_t* la_menu = NULL;
+void la_draw_resize(la_window_t *, uint32_t, uint32_t);
 
 static inline void jlgr_menubar_shadow__(la_menu_t* menu) {
 	// Clear Texture.
@@ -40,10 +38,7 @@ static inline void jlgr_menubar_shadow__(la_menu_t* menu) {
 }
 
 // Run whenever a redraw is needed for an icon.
-static void jlgr_menubar_draw_(jl_t* jl) {
-	la_menu_t* menu = la_menu;
-
-	jl_thread_mutex_lock(&menu->mutex);
+static void jlgr_menubar_draw_(la_menu_t* menu) {
 	if(menu->redraw == MENU_REDRAW_ALL) {
 		// If needed, draw shadow.
 		jlgr_menubar_shadow__(menu);
@@ -54,7 +49,6 @@ static void jlgr_menubar_draw_(jl_t* jl) {
 	}
 	// Done.
 	menu->redraw = MENU_REDRAW_NONE;
-	jl_thread_mutex_unlock(&menu->mutex);
 }
 
 void la_menu_init(la_menu_t* menu, la_window_t* window) {
@@ -64,8 +58,6 @@ void la_menu_init(la_menu_t* menu, la_window_t* window) {
 	int i;
 
 	menu->window = window;
-	jl_thread_mutex_new(window->jl, &menu->mutex);
-	jl_thread_mutex_lock(&menu->mutex);
 
 	// Make the shadow vertex object.
 	jlgr_vo_set_rect(window, &menu->shadow, rc_shadow, shadow_color, 0);
@@ -79,10 +71,8 @@ void la_menu_init(la_menu_t* menu, la_window_t* window) {
 	}
 	// Make the menubar.
 	la_vo_rect(window, &menu->menubar, 1.f, .11f);
-	jl_thread_mutex_unlock(&menu->mutex);
 
-	la_menu = menu;
-	jlgr_pr(window, &menu->menubar.pr, jlgr_menubar_draw_);
+	la_pr(menu, window, &menu->menubar.pr, (jl_fnct) jlgr_menubar_draw_);
 }
 
 static void jlgr_menubar_text__(la_menu_t* menu, float* color, float y,
@@ -107,7 +97,7 @@ static void jlgr_menu_flip_press__(la_menu_t* menu) {
 	else if(menu->window->sg.cs == JL_SCR_DN) menu->window->sg.cs = JL_SCR_UP;
 	else menu->window->sg.cs = JL_SCR_DN;
 	jlgr_notify(menu->window, GMessage[menu->window->sg.cs]);
-	jlgr_resz(menu->window, 0, 0);
+	la_draw_resize(menu->window, 0, 0);
 }
 
 static void la_menu_name_drawa__(la_menu_t* menu) {
@@ -127,18 +117,17 @@ static void la_menu_name_drawc__(la_menu_t* menu) {
 }
 
 static void jlgr_menu_slow_draw__(la_menu_t* menu) {
-	jl_t* jl = menu->window->jl;
 	float color[] = { .5, .5, 1., 1. };
-	char formated[80];
+//	char formated[80];
 
 	// Draw the icon based on whether on time or not.
 	la_menu_drawicon(menu, menu->window->textures.icon,
-		menu->window->sg.on_time?JLGR_ID_GOOD_IMAGE:JLGR_ID_SLOW_IMAGE);
+		/*menu->window->sg.on_time?*/JLGR_ID_GOOD_IMAGE/*:JLGR_ID_SLOW_IMAGE*/);
 	// Report the seconds that passed.
-	jl_mem_format(formated, "DrawFPS:%d", (int)(round(1. / menu->window->psec)));
-	jlgr_menubar_text__(menu, color, 0., formated);
-	jl_mem_format(formated, "MainFPS:%d", (int)(round(1. / jl->time.psec)));
-	jlgr_menubar_text__(menu, color, .05, formated);
+//	jl_mem_format(formated, "DrawFPS:%d", (int)(round(1. / menu->window->psec)));
+	jlgr_menubar_text__(menu, color, 0., "DRAW");
+//	jl_mem_format(formated, "MainFPS:%d", (int)(round(1. / jl->time.psec)));
+	jlgr_menubar_text__(menu, color, .05, "MAIN");
 }
 
 static void jlgr_menu_slow_loop__(la_menu_t* menu) {
@@ -155,16 +144,12 @@ static void jlgr_menu_slow_loop__(la_menu_t* menu) {
  * @param resize: Is window is being resized?
 **/
 void la_menu_draw(la_menu_t* menu, uint8_t resize) {
-	uint8_t redraw;
-
-	jl_thread_mutex_lock(&menu->mutex);
 	if(resize) menu->redraw = MENU_REDRAW_ALL;
-	redraw = menu->redraw;
-	jl_thread_mutex_unlock(&menu->mutex);
+
 	// Pre-Render
-	if(redraw != MENU_REDRAW_NONE) {
-		la_menu = menu;
-		jlgr_pr(menu->window, &menu->menubar.pr, jlgr_menubar_draw_);
+	if(menu->redraw != MENU_REDRAW_NONE) {
+		la_pr(menu, menu->window, &menu->menubar.pr, (jl_fnct)
+			jlgr_menubar_draw_);
 	}
 	// Draw Pre-Rendered
 	jlgr_vo_draw_pr(menu->window, &menu->menubar);
@@ -175,7 +160,6 @@ void la_menu_draw(la_menu_t* menu, uint8_t resize) {
  * @param jlgr: The library context
 **/
 void la_menu_loop(la_menu_t* menu) {
-	jl_thread_mutex_lock(&menu->mutex);
 	const float mouse_x = la_safe_get_float(&menu->window->mouse_x);
 	const float mouse_y = la_safe_get_float(&menu->window->mouse_y);
 	const uint8_t selected = (uint8_t) ((1. - mouse_x) / .1);
@@ -187,7 +171,6 @@ void la_menu_loop(la_menu_t* menu) {
 		if(menu->cursor == selected && mouse_y < .1)
 			((la_menu_fn_t)menu->inputfn[menu->cursor])(menu);
 	}
-	jl_thread_mutex_unlock(&menu->mutex);
 }
 
 void la_menu_drawicon(la_menu_t* menu, uint32_t tex, uint8_t c) {
@@ -212,12 +195,10 @@ void la_menu_dont(la_menu_t* menu) { }
 void la_menu_addicon(la_menu_t* menu, la_menu_fn_t inputfn, la_menu_fn_t rdr) {
 	uint8_t i;
 
-	jl_thread_mutex_lock(&menu->mutex);
 	for(i = 0; i < 10; i++) if(!menu->inputfn[i]) break;
 	// Set functions for: draw, press, not press
 	menu->inputfn[i] = inputfn;
 	menu->redrawfn[i] = rdr;
-	jl_thread_mutex_unlock(&menu->mutex);
 }
 
 /**

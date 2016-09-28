@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "la.h"
 #include <time.h>
 
@@ -30,7 +34,7 @@ double la_time(void) {
  * @param timer: Pointer to timer variable.
  * @returns: Seconds passed since last call.
 **/
-double jl_sdl_timer(jl_t* jl, double* timer) {
+double la_time_timer(double* timer) {
 	double prev_tick = *timer; // Temporarily Save Old Value
 
 	*timer = la_time();
@@ -40,7 +44,7 @@ double jl_sdl_timer(jl_t* jl, double* timer) {
 /**
  * 
 **/
-double jl_time_regulatefps(jl_t* jl, double* timer, uint8_t* on_time) {
+double la_time_regulatefps(double* timer, uint8_t* on_time) {
 	double prev_tick = *timer; // Temporarily Save Old Value
 	double this_tick = la_time();
 
@@ -52,8 +56,7 @@ double jl_time_regulatefps(jl_t* jl, double* timer, uint8_t* on_time) {
 
 // internal functions:
 
-void jl_sdl_init__(jl_t* jl) {
-	jl->time.psec = 0.f;
+void la_time_init__(void) {
 	// Reset time.
 	struct timespec time;
 	time.tv_sec = 0;

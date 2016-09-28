@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "JLGRprivate.h"
 #include "SDL_filesystem.h"
 
@@ -59,8 +63,6 @@ static uint8_t jl_fl_user_select_open_dir__(la_window_t* jlgr, char *dirname) {
 		if(errsv == ENOTDIR) { //Not a directory - is a file
 			la_fileviewer->returnit = 1;
 			la_fileviewer->dirname[strlen(dirname)-1] = '\0';
-			// Exit this mode.
-			jl_mode_switch(jlgr->jl, jlgr->jl->mode.which);
 		}else if(errsv == ENOENT) { // Directory Doesn't Exist
 			return 1;
 		}else if(errsv == EACCES) { // Doesn't have permission

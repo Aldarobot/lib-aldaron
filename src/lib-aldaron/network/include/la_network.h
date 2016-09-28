@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "jl.h"
 #include "SDL_net.h"
 
@@ -16,7 +20,6 @@ typedef struct {
 } aldc_socket_t;
 
 typedef struct {
-	jl_t* jl;
 	SDLNet_SocketSet set;
 	uint8_t numSockets;
 	aldc_socket_t* sockets;

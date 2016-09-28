@@ -2,9 +2,6 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
-#ifndef LA_WINDOW
-#define LA_WINDOW
+#include <la_port.h>
 
-void la_window_icon(la_window_t* window,la_buffer_t* buffer,const char* fname);
-
-#endif
+void la_pr(void* context, la_window_t* window, jl_pr_t* pr, jl_fnct redrawfn);

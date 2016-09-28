@@ -1,124 +1,92 @@
-/*
- * JL_Lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-/** \file
- * JLGR.c
- *	A High Level Graphics Library that supports sprites, texture loading,
- *	2D rendering & 3D rendering.
- */
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "JLGRprivate.h"
 #include "la_memory.h"
 
-void main_loop_(jl_t* jl);
-
-extern jl_t* la_jl_deprecated;
 extern SDL_atomic_t la_rmc;
 extern SDL_atomic_t la_rmcexit;
 
-static void jlgr_loop_(jl_t* jl) {
-	la_window_t* window = jl->jlgr;
-
-	// Update events.
-	la_port_input(jl->jlgr);
-		if(window->input.touch.h && window->input.touch.p)
-			la_print("oh yeah.");
-	// Run Main Loop
-	main_loop_(jl);
-}
-
 void jlgr_mouse_resize__(la_window_t* jlgr);
-void jl_mode_loop__(jl_t* jl);
 void jl_wm_resz__(la_window_t* jlgr, uint16_t w, uint16_t h);
 
-jl_mutex_t* la_mutex;
+void la_window_draw__(void* context, la_window_t* window);
 
-static void jlgr_thread_programsresize(la_window_t* jlgr) {
-	jl_thread_mutex_lock(&jlgr->protected.mutex);
-	jl_fnct resize_ = jlgr->protected.functions.redraw.resize;
-	jl_thread_mutex_unlock(&jlgr->protected.mutex);
-	resize_(jlgr->jl);
+static void jlgr_thread_programsresize(void* context, la_window_t* window) {
+	jl_fnct resize=la_safe_get_pointer(&window->protected.functions.resize);
+	resize(context);
 }
 
-static void jlgr_thread_resize(la_window_t* jlgr, uint16_t w, uint16_t h) {
+static void
+jlgr_thread_resize(void* context, la_window_t* window, uint32_t w, uint32_t h) {
 	la_print("Resizing to %dx%d....", w, h);
-	jl_wm_resz__(jlgr, w, h);
-	la_print("Load the stuff....");
-	jl_mode_loop__(jlgr->jl);
+	jl_wm_resz__(window, w, h);
 	la_print("User's resize....");
-	jlgr_thread_programsresize(jlgr);
-	la_print("Updating the size of the background....");
-	jl_sg_resz__(jlgr->jl);
+	jlgr_thread_programsresize(context, window);
 	la_print("Resizing the mouse....");
-	jlgr_mouse_resize__(jlgr);
+	jlgr_mouse_resize__(window);
 	la_print("Resized.");
 }
 
-static void jlgr_thread_windowresize(la_window_t* jlgr) {
-	jl_thread_mutex_lock(&jlgr->protected.mutex);
-	uint16_t w = jlgr->protected.set_width;
-	uint16_t h = jlgr->protected.set_height;
-	jl_thread_mutex_unlock(&jlgr->protected.mutex);
+static inline void la_draw_windowresize__(void* context, la_window_t* window) {
+	uint32_t w = la_safe_get_uint32(&window->protected.set_width);
+	uint32_t h = la_safe_get_uint32(&window->protected.set_height);
 
-	jl_wm_updatewh_(jlgr);
-	if(w == 0) w = jlgr_wm_getw(jlgr);
-	if(h == 0) h = jlgr_wm_geth(jlgr);
-	jlgr_thread_resize(jlgr, w, h);
+	jl_wm_updatewh_(window);
+	if(w == 0) w = jlgr_wm_getw(window);
+	if(h == 0) h = jlgr_wm_geth(window);
+	jlgr_thread_resize(context, window, w, h);
 }
 
-static void jlgr_thread_draw_init__(jl_t* jl, const char* name) {
-	la_window_t* jlgr = jl->jlgr;
-
+static inline void
+la_draw_init__(void* context, la_window_t* window, const char* name) {
 	// Initialize subsystems
 	la_print("Creating the window....");
-	jl_wm_init__(jlgr);
+	jl_wm_init__(window);
 	la_print("Loading default graphics from package....");
-	jl_sg_init__(jlgr);
+	jl_sg_init__(window);
 	la_print("Setting up OpenGL....");
-	jl_gl_init__(jlgr);
+	jl_gl_init__(window);
 	la_print("Setting up effects....");
-	jlgr_effects_init__(jlgr);
+	jlgr_effects_init__(window);
 	la_print("Load graphics....");
-	jlgr_init__(jlgr);
+	jlgr_init__(window);
 	la_print("User's Init....");
 	SDL_AtomicSet(&la_rmc, 1);
-	jl_fnct program_init_;
-	jl_thread_mutex_lock(&jlgr->protected.mutex);
-	jlgr->protected.needs_resize = 1;
-	program_init_ = jlgr->protected.functions.fn;
-	jl_thread_mutex_unlock(&jlgr->protected.mutex);
-	program_init_(jl);
-	jlgr_thread_resize(jlgr, jlgr_wm_getw(jlgr), jlgr_wm_geth(jlgr));
-	jlgr_wm_setwindowname(jlgr, name);
+	la_draw_fn_t program_init_;
+	la_safe_set_uint8(&window->protected.needs_resize, 1);
+	program_init_ = la_safe_get_pointer(&window->protected.functions.fn);
+	program_init_(context, window);
+	jlgr_thread_resize(context, window, jlgr_wm_getw(window),
+		jlgr_wm_geth(window));
+	jlgr_wm_setwindowname(window, name);
 	la_print("Window Created!");
 }
 
-void jlgr_thead_check_resize(la_window_t* jlgr) {
-	uint8_t should_resize;
+void la_draw_dont(void* context, la_window_t* window) { return; }
 
-	jl_thread_mutex_lock(&jlgr->protected.mutex);
-	should_resize = jlgr->protected.needs_resize;
-	jlgr->protected.needs_resize = 0;
-	jl_thread_mutex_unlock(&jlgr->protected.mutex);
+void jlgr_thead_check_resize(void* context, la_window_t* window) {
+	uint8_t should_resize =
+		la_safe_get_uint8(&window->protected.needs_resize);
+	la_safe_set_uint8(&window->protected.needs_resize, 0);
 
-	if(should_resize == 1) jlgr_thread_programsresize(jlgr);
-	if(should_resize == 2) jlgr_thread_windowresize(jlgr);
+	if(should_resize == 1) jlgr_thread_programsresize(context, window);
+	if(should_resize == 2) la_draw_windowresize__(context, window);
 }
 
-void la_window_loop__(la_window_t* window) {
+void la_window_loop__(void* context, la_window_t* window) {
 	// Check for resize
-	jlgr_thead_check_resize(window);
+	jlgr_thead_check_resize(context, window);
 	// Deselect any pre-renderer.
 	window->gl.cp = NULL;
 	//Redraw screen.
-	_jl_sg_loop(window);
+	la_window_draw__(context, window);
 	//Update Screen.
 	jl_wm_loop__(window);
 }
 
 void la_window_kill__(la_window_t* window) {
-	jlgr_sprite_free(window, &window->sg.bg.up);
-	jlgr_sprite_free(window, &window->sg.bg.dn);
 	SDL_AtomicSet(&la_rmc, 0);
 }
 
@@ -131,32 +99,22 @@ void la_window_kill__(la_window_t* window) {
  * @param window: The window.
  * @param fn_: Graphic initialization function run on graphical thread.
 **/
-void la_window_init__(la_window_t* window, jl_fnct fn_, const char* name) {
-	jl_t* jl = la_jl_deprecated;
-
-	jl->jlgr = window;
-	jl->loop = jlgr_loop_;
+void la_window_init__(void* context, la_window_t* window, la_draw_fn_t fn_,
+	const char* name)
+{
 #if JL_PLAT == JL_PLAT_COMPUTER
 	window->wm.fullscreen = 0;
-#endif
-	window->jl = jl;
-	// Initialize Subsystem
-#ifndef LA_PHONE_ANDROID
+	// Initialize video subsytem.
 	SDL_VideoInit(NULL);
 #endif
-
-	jl_thread_mutex_new(jl, &window->protected.mutex);
-	la_mutex = &window->protected.mutex;
 	// Set init function
-	jl_thread_mutex_lock(&window->protected.mutex);
-	window->protected.functions.fn = fn_;
-	jl_thread_mutex_unlock(&window->protected.mutex);
+	la_safe_set_pointer(&window->protected.functions.fn, fn_);
 	// Initialize subsystems
-	jlgr_thread_draw_init__(jl, name);
+	la_draw_init__(context, window, name);
 #ifndef LA_PHONE_ANDROID
 	// Redraw loop
 	while(SDL_AtomicGet(&la_rmc))
-		la_window_loop__(window);
+		la_window_loop__(context, window);
 	// Free stuff.
 	la_window_kill__(window);
 #endif
@@ -171,28 +129,23 @@ void la_window_init__(la_window_t* window, jl_fnct fn_, const char* name) {
  * @param downscreen: The function to redraw the lower or secondary display.
  * @param resize: The function called when window is resized.
 **/
-void jlgr_loop_set(la_window_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
-	jl_fnct downscreen, jl_fnct resize)
+void la_draw_fnchange(la_window_t* window, jl_fnct primary, jl_fnct secondary,
+	jl_fnct resize)
 {
-	jl_thread_mutex_lock(&jlgr->protected.mutex);
-	jlgr->protected.functions.redraw.single = onescreen;
-	jlgr->protected.functions.redraw.upper = upscreen;
-	jlgr->protected.functions.redraw.lower = downscreen;
-	jlgr->protected.functions.redraw.resize = resize;
-	jlgr->protected.needs_resize = 1;
-	jl_thread_mutex_unlock(&jlgr->protected.mutex);
+	la_safe_set_pointer(&window->protected.functions.primary, primary);
+	la_safe_set_pointer(&window->protected.functions.secondary, secondary);
+	la_safe_set_pointer(&window->protected.functions.resize, resize);
+	la_safe_set_uint8(&window->protected.needs_resize, 1);
 }
 
 /**
  * Resize the window.
  * @param jlgr: The library context.
 **/
-void jlgr_resz(la_window_t* jlgr, uint16_t w, uint16_t h) {
-	jl_thread_mutex_lock(&jlgr->protected.mutex);
-	jlgr->protected.needs_resize = 2;
-	jlgr->protected.set_width = w;
-	jlgr->protected.set_height = h;
-	jl_thread_mutex_unlock(&jlgr->protected.mutex);
+void la_draw_resize(la_window_t* window, uint32_t w, uint32_t h) {
+	la_safe_set_uint32(&window->protected.set_width, w);
+	la_safe_set_uint32(&window->protected.set_height, h);
+	la_safe_set_uint8(&window->protected.needs_resize, 2);
 }
 
 /**

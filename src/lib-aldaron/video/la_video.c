@@ -1,18 +1,13 @@
-/*
- * JL_lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-/** \file
- * JLVI.c
- * 	This module edits sounds and graphics.
- */
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
 
 #include "la_memory.h"
 #include "JLGRprivate.h"
 #include "SDL_image.h"
 #undef HAVE_STDLIB_H
 #include "jpeglib.h"
-#include "la_buffer.h"
+#include "la_video.h"
 
 typedef long unsigned int jpeg_long_int_t;
 
@@ -26,7 +21,7 @@ typedef long unsigned int jpeg_long_int_t;
  * @param h: THe height
  * @returns: The data.
 **/
-void jlvi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
+void la_video_make_jpeg(data_t* rtn, uint8_t quality, uint8_t* pxdata,
 	uint16_t w, uint16_t h)
 {
 	uint8_t* data = NULL;
@@ -138,10 +133,10 @@ void jlvi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
  * @param w: Pointer to the width variable.
  * @param h: Pointer to the height variable.
 **/
-void la_video_load_jpeg(jl_t* jl, void* output, void* data, size_t size,
-	uint16_t* w, uint16_t* h)
+void la_video_load_jpeg(void* output, void* data, size_t size, uint16_t* w,
+	uint16_t* h)
 {
-	SDL_Surface *image; //  Free'd by SDL_free(image);
+/*	SDL_Surface *image; //  Free'd by SDL_free(image);
 	SDL_RWops *rw; // Free'd by SDL_RWFromMem
 	data_t pixel_data; // Free'd by jl_mem_string_fstrt
 	uint32_t color = 0;
@@ -165,5 +160,5 @@ void la_video_load_jpeg(jl_t* jl, void* output, void* data, size_t size,
 	*h = image->h;
 	// Clean-up
 	SDL_FreeSurface(image);
-	SDL_free(rw);
+	SDL_free(rw);*/
 }

@@ -17,14 +17,9 @@ static inline int32_t jl_start(jl_fnct a, const char* b, uint64_t c) {
 	return -1;
 }
 
-static inline void* jl_get_context(jl_t* jl) {
-	la_deprecated("jl_get_context", "la_context");
-	return la_context(jl);
-}
-
 #define jl_dont la_dont
 
-static inline void jl_exit(jl_t* jl, const char* format, ...) {
+static inline void jl_exit(void* jl, const char* format, ...) {
 	la_deprecated("jl_exit", "la_panic");
 
 	va_list arglist;

@@ -3,9 +3,9 @@
 #include "la_text.h"
 #include "la_memory.h"
 
-static void ex_redraw(jl_t* jl) {
-	la_window_t* window = jl->jlgr;
-	ctx_t* ctx = la_context(jl);
+static void ex_redraw(ctx_t* ctx) {
+	la_window_t* window = ctx->window;
+
 	la_light_t light = {
 		(jl_vec3_t) { la_safe_get_float(&window->mouse_x),
 			la_safe_get_float(&window->mouse_y) },
@@ -21,37 +21,22 @@ static void ex_redraw(jl_t* jl) {
 	la_text(window, LA_PXMOVE("0.5", "0.1") LA_PXSIZE("0.1") LA_PRED "WHATS THAT");
 }
 
-void ex_down(la_window_t* jlgr, jlgr_input_t input) {
-	if(input.h == 1) {
-		ctx_t* ctx = la_context(jlgr->jl);
-
-		if(ctx->hasMenu) {
-			ctx->hasMenu = 0;
-		}else{
-			ctx->hasMenu = 1;
-		}
-	}
-}
-
-void ex_edit_loop(jl_t* jl) {
-	ctx_t* ctx = la_context(jl);
-
+void ex_edit_loop(ctx_t* ctx) {
 	la_menu_loop(&ctx->menu);
 }
 
-void ex_wdns(jl_t* jl) {
-	la_window_t* jlgr = jl->jlgr;
-	ctx_t* ctx = la_context(jl);
+void ex_wdns(ctx_t* ctx) {
+	la_window_t* jlgr = ctx->window;
 
 	jlgr_text_draw(jlgr, "testing""\xCA""1234567890",
 		(jl_vec3_t) { 0., 0., 0. },
 		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, .0625f });
-	ex_redraw(jl);
+	ex_redraw(ctx);
 	la_menu_draw(&ctx->menu, 0);
 }
 
-void ex_wups(jl_t* jl) {
-	la_window_t* jlgr = jl->jlgr;
+void ex_wups(ctx_t* ctx) {
+	la_window_t* jlgr = ctx->window;
 
 	float fontcolor[] = { 0.f, 0.f, 0.f, 1.f };
 
@@ -62,10 +47,9 @@ void ex_wups(jl_t* jl) {
 }
 
 // Called when window is made/resized.
-static void ex_edit_resz(jl_t* jl) {
-	ctx_t* ctx = la_context(jl);
-	la_window_t* jlgr = jl->jlgr;
-	jl_rect_t rc1 = { 0.f, 0.f, 1.f, jl_gl_ar(jl->jlgr) };
+static void ex_edit_resz(ctx_t* ctx) {
+	la_window_t* jlgr = ctx->window;
+	jl_rect_t rc1 = { 0.f, 0.f, 1.f, jl_gl_ar(jlgr) };
 	jl_rect_t rc2 = { 0.f, 0.f, 2.f, 1.f };
 	float colors[] = { 1.f, 1.f, 1.f, 1.f };
 
@@ -76,20 +60,13 @@ static void ex_edit_resz(jl_t* jl) {
 	la_print("EXXXXXXXXXXXXXXXXXXXXAMPLE Resize'd Window....");
 }
 
-void ex_edit_init(jl_t* jl) {
-	jlgr_loop_set(jl->jlgr, ex_wdns, ex_wups, ex_wdns, ex_edit_resz);
+void ex_edit_init(ctx_t* ctx) {
+	la_draw_fnchange(ctx->window, (jl_fnct) ex_wups, (jl_fnct) ex_wdns,
+		(jl_fnct) ex_edit_resz);
 }
 
-static inline void ex_init_modes(jl_t* jl) {
-	// Initialize a mode.
-	jl_mode_set(jl, EX_MODE_EDIT,
-		(jl_mode_t) { ex_edit_init, ex_edit_loop, jl_dont });
-	// Switch to the mode.
-	jl_mode_switch(jl, EX_MODE_EDIT);
-}
-
-static inline void ex_init_tasks(la_window_t* window) {
-	ctx_t* ctx = la_context(window->jl);
+static inline void ex_init_tasks(ctx_t* ctx) {
+	la_window_t* window = ctx->window;
 
 	la_menu_init(&ctx->menu, window);
 	la_menu_addicon_flip(&ctx->menu);
@@ -97,15 +74,18 @@ static inline void ex_init_tasks(la_window_t* window) {
 	la_menu_addicon_name(&ctx->menu);
 }
 
-static void ex_init(jl_t* jl) {
-	la_window_t* jlgr = jl->jlgr;
+static void ex_loop(ctx_t* ctx) {
+	la_mode_run(ctx, ctx->mode);
+}
 
-	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "Initializing");
-	ex_init_tasks(jlgr);
-	ex_init_modes(jl);
+static void ex_init(ctx_t* ctx, la_window_t* window) {
+	ctx->window = window;
+	jlgr_draw_msge(window, window->textures.logo, 0, "Initializing");
+	ex_init_tasks(ctx);
+	ctx->mode = (la_mode_t) { ex_edit_loop, ex_edit_init, jl_dont };
 }
 
 int main(int argc, char* argv[]) {
-	return la_start(ex_init, la_dont, 1, "Lib Aldaron Test Program",
-		sizeof(ctx_t));
+	return la_start((jl_fnct) ex_init, (jl_fnct) ex_loop, la_dont, 1,
+		"Lib Aldaron Test Program", sizeof(ctx_t));
 }

@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #ifndef LA_DRAW
 #define LA_DRAW
 
@@ -75,7 +79,7 @@ typedef struct{
 
 //Vertex Object
 typedef struct{
-	jl_t* jl;	// The library context.
+	void* window;	// Window
 	// Basic:
 	uint8_t rs;	// Rendering Style 0=GL_TRIANGLE_FAN 1=GL_TRIANGLES
 	uint32_t gl;	// GL Vertex Buffer Object [ 0 = Not Enabled ]
@@ -119,32 +123,29 @@ typedef struct{
 	uint8_t resize;
 }jl_sprite_t;
 
-typedef void (*jlgr_sprite_draw_fnt)(jl_t* jl, uint8_t resize, void* ctx_draw);
-typedef void (*jlgr_sprite_loop_fnt)(jl_t* jl, jl_sprite_t* spr);
+typedef void (*jlgr_sprite_draw_fnt)(void* ctx, uint8_t resize, void* ctx_draw);
+typedef void (*jlgr_sprite_loop_fnt)(void* ctx, jl_sprite_t* spr);
 
 typedef struct{
 	char *opt;
 	jl_fnct run;
 }jl_popup_button_t;
 
-typedef struct{
-	void* single;
-	void* upper;
-	void* lower;
-	void* resize;
-}jlgr_redraw_t;
-
 #include "la_port.h"
 
-typedef void(*jlgr_fnct)(la_window_t* window);
+typedef void (*la_draw_fn_t)(void* context, la_window_t* window);
+typedef void (*jlgr_fnct)(la_window_t* window);
+
+// la_draw.c
+void la_draw_dont(void* context, la_window_t* window);
 
 // JLGR.c:
 float la_window_h(la_window_t* window);
-void jlgr_loop_set(la_window_t* jlgr, jl_fnct onescreen, jl_fnct upscreen,
-	jl_fnct downscreen, jl_fnct resize);
+void la_draw_fnchange(la_window_t* window, jl_fnct primary, jl_fnct secondary,
+	jl_fnct resize);
 
 // JLGRsprite.c
-void jlgr_sprite_dont(jl_t* jl, jl_sprite_t* sprite);
+void jlgr_sprite_dont(void* context, jl_sprite_t* sprite);
 void jlgr_sprite_redraw(la_window_t* jlgr, jl_sprite_t *spr, void* ctx);
 void jlgr_sprite_resize(la_window_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc);
 void jlgr_sprite_loop(la_window_t* jlgr, jl_sprite_t *spr);
@@ -173,7 +174,7 @@ void jlgr_draw_dec(la_window_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
 	jl_font_t f);
 void jlgr_text_draw_area(la_window_t* jlgr, jl_sprite_t * spr, const char* txt);
 void jlgr_draw_text_sprite(la_window_t* jlgr, jl_sprite_t* spr, const char* txt);
-void jlgr_draw_ctxt(la_window_t* jlgr, char *str, float yy, float* color);
+void jlgr_draw_ctxt(la_window_t* jlgr, const char *str, float yy, float* color);
 void jlgr_draw_loadscreen(la_window_t* jlgr, jl_fnct draw_routine);
 void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ...);
 void jlgr_term_msge(la_window_t* jlgr, char* message);
@@ -210,7 +211,6 @@ void jlgr_vo_free(la_window_t* jlgr, jl_vo_t *vo);
 void jlgr_pr_off(la_window_t* jlgr);
 void jlgr_pr_resize(la_window_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
 void jlgr_pr_draw(la_window_t* jlgr, jl_pr_t* pr, jl_vec3_t vec, uint8_t orient);
-void jlgr_pr(la_window_t* jlgr, jl_pr_t * pr, jl_fnct par__redraw);
 
 // OpenGL
 uint32_t la_texture_new(la_window_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,
@@ -251,11 +251,6 @@ void jlgr_effects_light_clear(la_window_t* jlgr);
 void jlgr_effects_light_add(la_window_t* jlgr, jl_vec3_t point, float ambient[],
 	float diffuse[], float specular[], float power);
 void jlgr_effects_light_update(la_window_t* jlgr);
-
-// video
-void jl_vi_make_jpeg(jl_t* jl, data_t* rtn, uint8_t quality, uint8_t* pxdata,
-	uint16_t w, uint16_t h);
-uint8_t* jlgr_load_image(jl_t* jl, data_t* data, uint16_t* w, uint16_t* h);
 
 // SG
 uint32_t jl_sg_add_image(la_window_t* jlgr, data_t* zipdata, const char* filename);

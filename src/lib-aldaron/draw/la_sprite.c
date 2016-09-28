@@ -1,12 +1,8 @@
-/*
- * JL_Lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-/** \file
- * JLGRsprite.c
- *	Handles the sprites.
- */
-#include "JLGRprivate.h"
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
+/*#include "JLGRprivate.h"
 
 #include "la_memory.h"
 
@@ -45,22 +41,22 @@ static inline void jlgr_sprite_sync__(jl_t* jl, jl_sprite_t *spr, void* ctx) {
 // Exported Functions
 //
 
-/**
+
  * THREAD: Any thread.
  * Empty sprite loop. ( Don't do anything )
  * @param jl: The library context
  * @param sprite: The sprite
-**/
+
 void jlgr_sprite_dont(jl_t* jl, jl_sprite_t* sprite) { }
 
-/**
+
  * THREAD: Main thread only.
  * Run a sprite's draw routine to draw on it's pre-rendered texture.
  *
  * @param jl: The library context
  * @param spr: Which sprite to draw.
  * @param ctx: Data to copy to drawing thread's context.
-**/
+
 void jlgr_sprite_redraw(la_window_t* jlgr, jl_sprite_t *spr, void* ctx) {
 	// Tell drawing thread to redraw.
 	jl_thread_mutex_lock(&spr->mutex);
@@ -70,13 +66,13 @@ void jlgr_sprite_redraw(la_window_t* jlgr, jl_sprite_t *spr, void* ctx) {
 	if(ctx) jlgr_sprite_sync__(jlgr->jl, spr, ctx);
 }
 
-/**
+
  * THREAD: Draw thread only.
  * Render a sprite's pre-rendered texture onto the screen.
  *
  * @param jl: The library context.
  * @param spr: The sprite.
-**/
+
 void jlgr_sprite_draw(la_window_t* jlgr, jl_sprite_t *spr) {
 	// Redraw if needed.
 	if(spr->update) jlgr_sprite_redraw__(jlgr, spr);
@@ -86,12 +82,12 @@ void jlgr_sprite_draw(la_window_t* jlgr, jl_sprite_t *spr) {
 	jl_thread_mutex_unlock(&spr->mutex);
 }
 
-/**
+
  * THREAD: Draw thread only.
  * Resize a sprite to the current window - and redraw.
  * @param jlgr: The library context.
  * @param spr: The sprite to use.
-**/
+
 void jlgr_sprite_resize(la_window_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc) {
 	jl_thread_mutex_lock(&spr->mutex);
 	if(rc) {
@@ -112,17 +108,17 @@ void jlgr_sprite_resize(la_window_t* jlgr, jl_sprite_t *spr, jl_rect_t* rc) {
 	//
 }
 
-/**
+
  * THREAD: Main thread only.
  * Run a sprite's loop.
  * @param jl: The library context.
  * @param spr: Which sprite to loop.
-**/
+
 void jlgr_sprite_loop(la_window_t* jlgr, jl_sprite_t *spr) {
 	((jlgr_sprite_loop_fnt)spr->loop)(jlgr->jl, spr);
 }
 
-/**
+
  * THREAD: Main thread only.
  * Create a new sprite.
  *
@@ -134,7 +130,7 @@ void jlgr_sprite_loop(la_window_t* jlgr, jl_sprite_t *spr) {
  * @param main_ctx_size: how many bytes to allocate for the main context.
  * @param draw_ctx_size: how many bytes to allocate for the draw context.
  * @returns: the new sprite
-**/
+
 void jlgr_sprite_init(la_window_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	jlgr_sprite_loop_fnt loopfn, jlgr_sprite_draw_fnt drawfn,
 	void* main_ctx, uint32_t main_ctx_size,
@@ -164,13 +160,13 @@ void jlgr_sprite_init(la_window_t* jlgr, jl_sprite_t* sprite, jl_rect_t rc,
 	sprite->rs = 0;
 }
 
-/**
+
  * THREAD: Main thread only.
-**/
+
 void jlgr_sprite_free(la_window_t* jlgr, jl_sprite_t* sprite) {
 }
 
-/**
+
  * THREAD: Main thread only.
  * test if 2 sprites collide.
  *
@@ -179,7 +175,7 @@ void jlgr_sprite_free(la_window_t* jlgr, jl_sprite_t* sprite) {
  * @param 'spr2': sprite 2
  * @return 0: if the sprites don't collide in their bounding boxes.
  * @return 1: if the sprites do collide in their bounding boxes.
-**/
+
 uint8_t jlgr_sprite_collide(la_window_t* jlgr, jl_pr_t *pr1, jl_pr_t *pr2) {
 	if (
 		(pr1->cb.pos.y >= (pr2->cb.pos.y+pr2->cb.ofs.y)) ||
@@ -193,12 +189,12 @@ uint8_t jlgr_sprite_collide(la_window_t* jlgr, jl_pr_t *pr1, jl_pr_t *pr2) {
 	}
 }
 
-/**
+
  * Clamp a coordinate to an area.
  * @param xyz: The vertex to clamp.
  * @param area: The area to clamp it to.
  * @param rtn: The return vector.
-**/
+
 void jlgr_sprite_clamp(jl_vec3_t xyz, jl_area_t area, jl_vec3_t* rtn) {
 	xyz.x -= area.pos.x;
 	if(area.ofs.x != 0.f) xyz.x /= area.ofs.x;
@@ -213,10 +209,11 @@ void* jlgr_sprite_getcontext(jl_sprite_t *sprite) {
 	return sprite->ctx_main;
 }
 
-/**
+
  * THREAD: Draw thread only.
  * @parm sprite: The sprite to get the  contxt from.
-**/
+
 void* jlgr_sprite_getdrawctx(jl_sprite_t *sprite) {
 	return sprite->ctx_draw;
-}
+}*/
+

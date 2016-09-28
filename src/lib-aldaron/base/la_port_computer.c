@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "la_draw.h"
 
 #ifdef LA_COMPUTER
@@ -6,7 +10,7 @@
 #include "la_memory.h"
 #include <stdio.h>
 
-void jlgr_resz(la_window_t* jlgr, uint16_t x, uint16_t y);
+void la_draw_resize(la_window_t *, uint32_t, uint32_t);
 
 void la_print(const char* format, ...) {
 	char temp[256];
@@ -86,7 +90,8 @@ void la_port_input(la_window_t* window) {
 					break;
 				case SDL_SCANCODE_ESCAPE:
 					la_print("back due to escape");
-					jl_mode_exit(window->jl);
+					la_print("unimplemented");
+					exit(-1);
 					break;
 				case SDL_SCANCODE_F11:
 					jlgr_wm_togglefullscreen(window);
@@ -147,13 +152,14 @@ void la_port_input(la_window_t* window) {
 		case SDL_WINDOWEVENT: {
 			switch(window->sdl_event.window.event) {
 				case SDL_WINDOWEVENT_RESIZED: {
-					jlgr_resz(window,
+					la_draw_resize(window,
 						window->sdl_event.window.data1,
 						window->sdl_event.window.data2);
 					break;
 				} case SDL_WINDOWEVENT_CLOSE: {
 					la_print("back due to close");
-					jl_mode_exit(window->jl);
+					la_print("unimplemented");
+					exit(-1);
 					break;
 				} default: {
 					break;

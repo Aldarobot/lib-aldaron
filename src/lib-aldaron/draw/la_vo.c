@@ -1,16 +1,13 @@
-/*
- * JL_Lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-/** \file
- * JLGRvo.c
- *	Vertex Buffer Objects -> draw things on the screen.
- */
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
 
-#include "la_vo.h"
-#include "la_memory.h"
+#include <la_pr.h>
+#include <la_vo.h>
+#include <la_memory.h>
 
 extern float la_banner_size;
 
@@ -89,11 +86,11 @@ static void jlgr_vo_poly__(la_window_t* jlgr, jl_vo_t* vo, uint32_t vertices,
 	jlgr_vo_vertices__(jlgr, vo, xyzw, vertices);
 }
 
-void jlgr_vo_init__(jl_t* jl, jl_vo_t* vo) {
+void jlgr_vo_init__(la_window_t* window, jl_vo_t* vo) {
 	// Don't do anything if already init'd
-	if(vo->jl) return;
+	if(vo->window) return;
 	//
-	vo->jl = jl;
+	vo->window = window;
 	// GL VBO
 	vo->gl = 0;
 	// GL Texture Coordinate Buffer
@@ -111,7 +108,7 @@ void jlgr_vo_init__(jl_t* jl, jl_vo_t* vo) {
 }
 
 void jlgr_vo_exit__(jl_vo_t* vo, const char* error) {
-	if(vo->jl == NULL) la_panic("Vertex object uninit'd: %s\n", error);
+	if(vo->window == NULL) la_panic("Vertex object uninit'd: %s\n", error);
 }
 
 /**
@@ -127,7 +124,7 @@ void la_vo_rect(la_window_t* window, jl_vo_t* vo, float w, float h) {
 		w,	0.f,	0.f,
 		w,	h,	0.f };
 
-	jlgr_vo_init__(window->jl, vo);
+	jlgr_vo_init__(window, vo);
 	// Overwrite the vertex object
 	jlgr_vo_poly__(window, vo, 4, rectangle_coords);
 }
@@ -140,7 +137,7 @@ void la_vo_rect(la_window_t* window, jl_vo_t* vo, float w, float h) {
 void jlgr_vo_set_vg(la_window_t* jlgr, jl_vo_t *vo, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor)
 {
-	jlgr_vo_init__(jlgr->jl, vo);
+	jlgr_vo_init__(jlgr, vo);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	// Rendering Style = triangles
 	vo->rs = 1;
@@ -163,7 +160,7 @@ void jlgr_vo_set_vg(la_window_t* jlgr, jl_vo_t *vo, uint16_t tricount,
 void jlgr_vo_set_rect(la_window_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* colors,
 	uint8_t multicolor)
 {
-	jlgr_vo_init__(jlgr->jl, vo);
+	jlgr_vo_init__(jlgr, vo);
 	la_vo_rect(jlgr, vo, rc.w, rc.h);
 	// Texture the vertex object
 	if(multicolor) jlgr_vo_color_gradient(jlgr, vo, colors);
@@ -173,7 +170,7 @@ void jlgr_vo_set_rect(la_window_t* jlgr, jl_vo_t *vo, jl_rect_t rc, float* color
 void la_vo_color_rect(la_window_t* window, la_vo_t* vo, float* colors,
 	float w, float h)
 {
-	jlgr_vo_init__(window->jl, vo);
+	jlgr_vo_init__(window, vo);
 	la_vo_rect(window, vo, w, h);
 	// Texture the vertex object
 	jlgr_vo_color_gradient(window, vo, colors);
@@ -182,7 +179,7 @@ void la_vo_color_rect(la_window_t* window, la_vo_t* vo, float* colors,
 void la_vo_plain_rect(la_window_t* window, la_vo_t* vo, float* colors,
 	float w, float h)
 {
-	jlgr_vo_init__(window->jl, vo);
+	jlgr_vo_init__(window, vo);
 	la_vo_rect(window, vo, w, h);
 	// Texture the vertex object
 	jlgr_vo_color_solid(window, vo, colors);
@@ -195,7 +192,7 @@ void la_vo_plain_rect(la_window_t* window, la_vo_t* vo, float* colors,
  * @param img: The image to display on the vertex object.
 **/
 void jlgr_vo_image(la_window_t* jlgr, jl_vo_t *vo, uint32_t img) {
-	jlgr_vo_init__(jlgr->jl, vo);
+	jlgr_vo_init__(jlgr, vo);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	// Make sure non-textured colors aren't attempted
 	vo->tx = img;
@@ -214,7 +211,7 @@ void jlgr_vo_image(la_window_t* jlgr, jl_vo_t *vo, uint32_t img) {
  * @param tex:  the ID of the image.
 **/
 void jlgr_vo_set_image(la_window_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t tex) {
-	jlgr_vo_init__(jlgr->jl, vo);
+	jlgr_vo_init__(jlgr, vo);
 	//From bottom left & clockwise
 	float Oone[] = {
 		rc.x,		rc.y + rc.h,	0.f,
@@ -238,7 +235,7 @@ void jlgr_vo_set_image(la_window_t* jlgr, jl_vo_t *vo, jl_rect_t rc, uint32_t te
 void jlgr_vo_txmap(la_window_t* jlgr, jl_vo_t* vo, uint8_t orientation,
 	uint8_t w, uint8_t h, int16_t map)
 {
-	jlgr_vo_init__(jlgr->jl, vo);
+	jlgr_vo_init__(jlgr, vo);
 	const float *tc = orientation ?
 		( orientation == 1 ? UPSIDEDOWN_TC : BACKWARD_TC )
 		: DEFAULT_TC;
@@ -266,7 +263,7 @@ void jlgr_vo_txmap(la_window_t* jlgr, jl_vo_t* vo, uint8_t orientation,
  * @param rgba: { (4 * vertex count) values }
 **/
 void jlgr_vo_color_gradient(la_window_t* jlgr, jl_vo_t* vo, float* rgba) {
-	jlgr_vo_init__(jlgr->jl, vo);
+	jlgr_vo_init__(jlgr, vo);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	jlgr_vo_color_buffer__(jlgr, vo, rgba);
 }
@@ -278,7 +275,7 @@ void jlgr_vo_color_gradient(la_window_t* jlgr, jl_vo_t* vo, float* rgba) {
  * @param rgba: { 4 values }
 **/
 void jlgr_vo_color_solid(la_window_t* jlgr, jl_vo_t* vo, float* rgba) {
-	jlgr_vo_init__(jlgr->jl, vo);
+	jlgr_vo_init__(jlgr, vo);
 	if(vo == NULL) vo = &jlgr->gl.temp_vo;
 	float rgbav[4 * vo->vc];
 	uint32_t i;
@@ -335,7 +332,7 @@ void jlgr_vo_draw2(la_window_t* jlgr, jl_vo_t* vo, jlgr_glsl_t* sh) {
  * @param vo: The vertex object to draw.
 **/
 void jlgr_vo_draw(la_window_t* jlgr, jl_vo_t* vo) {
-	if(vo->jl == NULL) la_panic("Can't Draw");
+	if(vo->window == NULL) la_panic("Can't Draw");
 	jlgr_vo_exit__(vo, "Can't Draw!");
 	jlgr_glsl_t* shader = vo->tx ?
 		&jlgr->gl.prg.texture : &jlgr->gl.prg.color;
@@ -351,7 +348,7 @@ void jlgr_vo_draw(la_window_t* jlgr, jl_vo_t* vo) {
 }
 
 void la_vo_draw(la_vo_t* vo) {
-	jlgr_vo_draw(vo->jl->jlgr, vo);
+	jlgr_vo_draw(vo->window, vo);
 }
 
 /**
@@ -364,8 +361,8 @@ void jlgr_vo_draw_pr(la_window_t* jlgr, jl_vo_t* vo) {
 	jlgr_pr_draw(jlgr, &vo->pr, vo->pr.cb.pos, 0);
 }
 
-void la_vo_pr(la_window_t* window, jl_vo_t* vo, jl_fnct drawfn) {
-	jlgr_pr(window, &vo->pr, drawfn);
+void la_vo_pr(void* context, la_window_t* window, jl_vo_t* vo, jl_fnct drawfn) {
+	la_pr(context, window, &vo->pr, drawfn);
 }
 
 /**

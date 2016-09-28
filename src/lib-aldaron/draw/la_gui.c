@@ -1,7 +1,7 @@
-/*
- * JL_Lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "JLGRprivate.h"
 #include "la_buffer.h"
 #include "la_vo.h"
@@ -26,9 +26,6 @@ typedef struct {
 void jlgr_mouse_draw__(la_window_t* jlgr);
 
 extern float la_banner_size;
-
-static void _jlgr_popup_loop(jl_t *jl) {
-}
 
 /*static void jlgr_gui_textbox_cursor__(la_window_t* jlgr, jlgr_input_t input) {
 	if(input.h == 2) jlgr->gui.textbox.counter += jlgr->jl->time.psec;
@@ -151,7 +148,7 @@ void jlgr_draw_text_sprite(la_window_t* jlgr, jl_sprite_t* spr, const char* txt)
  * @param 'yy': y coordinate to draw it at
  * @param 'color': 1.f = opaque, 0.f = invisible
  */
-void jlgr_draw_ctxt(la_window_t* jlgr, char *str, float yy, float* color) {
+void jlgr_draw_ctxt(la_window_t* jlgr, const char *str, float yy, float* color) {
 	jlgr_text_draw(jlgr, str,
 		(jl_vec3_t) { 0., yy, 0. },
 		(jl_font_t) { jlgr->textures.icon, 0, color, 
@@ -193,17 +190,17 @@ void jlgr_draw_ctxt(la_window_t* jlgr, char *str, float yy, float* color) {
 	jlgr_sprite_redraw(jlgr, spr, &slider->draw);
 }*/
 
-static void jlgr_gui_slider_singleloop(jl_t* jl, jl_sprite_t* spr) {
+//static void jlgr_gui_slider_singleloop(void* jl, jl_sprite_t* spr) {
 //	jlgr_input_do(jl->jlgr, JL_INPUT_PRESS, jlgr_gui_slider_touch, spr);
-}
+//}
 
-static void jlgr_gui_slider_doubleloop(jl_t* jl, jl_sprite_t* spr) {
+//static void jlgr_gui_slider_doubleloop(void* jl, jl_sprite_t* spr) {
 //	jlgr_input_do(jl->jlgr, JL_INPUT_PRESS, jlgr_gui_slider_touch, spr);
-}
+//}
 
-static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
+/*static void jlgr_gui_slider_draw(void* d2, uint8_t resize, void* data){
+	la_window_t* jlgr = d2;
 	jl_gui_slider_draw* slider = data;
-	la_window_t* jlgr = jl->jlgr;
 
 	jl_rect_t rc = { 0.005, 0.005, .99, jl_gl_ar(jlgr) - .01 };
 	jl_rect_t rc1 = { 0.0012, 0.0012, (jl_gl_ar(jlgr) * .5) + .0075,
@@ -231,7 +228,7 @@ static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
 	la_vo_draw(&slider->vo[2]);
 	la_vo_move(&slider->vo[1], slider->where[1]);
 	la_vo_draw(&slider->vo[1]);
-}
+}*/
 
 /**
  * Create a slider sprite.
@@ -248,13 +245,13 @@ static void jlgr_gui_slider_draw(jl_t* jl, uint8_t resize, void* data) {
 void jlgr_gui_slider(la_window_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 	uint8_t isdouble, float* x1, float* x2)
 {
-	jlgr_sprite_loop_fnt jlgr_gui_slider_loop;
+//	jlgr_sprite_loop_fnt jlgr_gui_slider_loop;
 
-	if(isdouble) {
-		jlgr_gui_slider_loop = jlgr_gui_slider_doubleloop;
-	}else{
-		jlgr_gui_slider_loop = jlgr_gui_slider_singleloop;
-	}
+//	if(isdouble) {
+//		jlgr_gui_slider_loop = jlgr_gui_slider_doubleloop;
+//	}else{
+//		jlgr_gui_slider_loop = jlgr_gui_slider_singleloop;
+//	}
 
 	jl_gui_slider_main slider;
 
@@ -266,10 +263,10 @@ void jlgr_gui_slider(la_window_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle
 	(*slider.x2) = 1.;
 	slider.isRange = isdouble;
 
-	jlgr_sprite_init(jlgr, sprite, rectangle,
-		jlgr_gui_slider_loop, jlgr_gui_slider_draw,
-		&slider, sizeof(jl_gui_slider_main),
-		&slider.draw, sizeof(jl_gui_slider_draw));
+//	jlgr_sprite_init(jlgr, sprite, rectangle,
+//		jlgr_gui_slider_loop, jlgr_gui_slider_draw,
+//		&slider, sizeof(jl_gui_slider_main),
+//		&slider.draw, sizeof(jl_gui_slider_draw));
 }
 
 /**
@@ -289,13 +286,11 @@ void jlgr_draw_loadingbar(la_window_t* jlgr, double loaded) {
 }
 
 //TODO: MOVE
-void jlgr_draw_msge__(jl_t* jl) {
-	la_window_t* jlgr = jl->jlgr;
-
-	jlgr_draw_bg(jlgr, jlgr->gui.msge.t, 16, 16, jlgr->gui.msge.c);
-	if(jlgr->gui.msge.message[0])
-		jlgr_draw_ctxt(jlgr, jlgr->gui.msge.message, 9./32.,
-			jlgr->fontcolor);
+static void jlgr_draw_msge__(la_window_t* window) {
+	jlgr_draw_bg(window, window->gui.msge.t, 16, 16, window->gui.msge.c);
+	if(window->gui.msge.message[0])
+		jlgr_draw_ctxt(window, window->gui.msge.message, 9./32.,
+			window->fontcolor);
 }
 
 /**
@@ -303,8 +298,8 @@ void jlgr_draw_msge__(jl_t* jl) {
  * @param jlgr: The library context.
  * @param draw_routine: Function that draws on screen.
 **/
-void jlgr_draw_loadscreen(la_window_t* jlgr, jl_fnct draw_routine) {
-	jl_thread_mutex_lock(&jlgr->protected.mutex);
+void jlgr_draw_loadscreen(la_window_t* window, jl_fnct draw_routine) {
+/*	jl_thread_mutex_lock(&jlgr->protected.mutex);
 	jlgr_redraw_t old_redrawfns = jlgr->protected.functions.redraw;
 
 	// Set Graphical loops.
@@ -317,13 +312,13 @@ void jlgr_draw_loadscreen(la_window_t* jlgr, jl_fnct draw_routine) {
 	// Update events
 	la_port_input(jlgr);
 	// Redraw screen.
-	_jl_sg_loop(jlgr);
+	la_window_loop(context, jlgr);
 	// Update Screen.
 	jl_wm_loop__(jlgr);
 	//
 	jl_thread_mutex_lock(&jlgr->protected.mutex);
 	jlgr->protected.functions.redraw = old_redrawfns;
-	jl_thread_mutex_unlock(&jlgr->protected.mutex);
+	jl_thread_mutex_unlock(&jlgr->protected.mutex);*/
 }
 
 /**
@@ -349,7 +344,7 @@ void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ..
 	jlgr->gui.msge.c = c;
 	la_print("DRAW LOADSCREEN");
 	
-	jlgr_draw_loadscreen(jlgr, jlgr_draw_msge__);
+	jlgr_draw_loadscreen(jlgr, (jl_fnct) jlgr_draw_msge__);
 	la_print("DREW LOADSCREEN");
 }
 
@@ -372,8 +367,6 @@ void jlgr_popup(la_window_t* jlgr, char *name, char *message,
 	jlgr->gui.popup.window_name = name;
 	jlgr->gui.popup.message = message;
 	jlgr->gui.popup.btns = btns;
-	jl_mode_override(jlgr->jl, (jl_mode_t)
-		{jl_mode_exit, _jlgr_popup_loop, jl_dont});
 }
 
 /**
@@ -403,7 +396,7 @@ void jlgr_slidebtn_loop(la_window_t* jlgr, jl_sprite_t * spr, float defaultx,
 //		jlgr_input_do(jlgr, JL_INPUT_PRESS, prun, NULL);
 //		spr->pr.cb.pos.x = defaultx + slidex;
 //	}
-	jlgr_sprite_draw(jlgr, spr);
+//	jlgr_sprite_draw(jlgr, spr);
 }
 
 /**
@@ -417,7 +410,7 @@ void jlgr_glow_button_draw(la_window_t* jlgr, jl_sprite_t * spr,
 	char *txt, jlgr_fnct prun)
 {
 //		jlgr_sprite_redraw(jlgr, spr);
-	jlgr_sprite_draw(jlgr, spr);
+//	jlgr_sprite_draw(jlgr, spr);
 /*	if(jlgr_sprite_collide(jlgr, &jlgr->mouse.pr, &spr->pr)) {
 		jl_rect_t rc = { spr->pr.cb.pos.x, spr->pr.cb.pos.y,
 			spr->pr.cb.ofs.x, spr->pr.cb.ofs.y };
@@ -456,7 +449,7 @@ void jlgr_gui_textbox_init(la_window_t* jlgr, data_t* string) {
 uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr) {
 	int i;
 
-	jlgr->gui.textbox.counter += jlgr->jl->time.psec;
+//	jlgr->gui.textbox.counter += jlgr->jl->time.psec;
 	if(jlgr->gui.textbox.counter > .5) {
 		jlgr->gui.textbox.counter -= .5;
 		jlgr->gui.textbox.do_it = 1;
@@ -469,7 +462,7 @@ uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr) {
 //	jlgr_input_do(jlgr, JL_INPUT_JOYC, jlgr_gui_textbox_cursor__, NULL);
 #endif
 	for(i = 0; i < strlen(jlgr->input.text); i++) {
-		jl_data_insert_byte(jlgr->jl, jlgr->gui.textbox.string,
+		la_buffer_ins(jlgr->gui.textbox.string,
 			jlgr->input.text[i]);
 	}
 	if(jlgr->input.keyboard.h && jlgr->input.keyboard.p) {
@@ -477,10 +470,10 @@ uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr) {
 		case '\b':
 			if(jlgr->gui.textbox.string->curs == 0) return 0;
 			jlgr->gui.textbox.string->curs--;
-			jl_data_delete_byte(jlgr->jl, jlgr->gui.textbox.string);
+			la_buffer_del(jlgr->gui.textbox.string);
 			break;
 		case '\02':
-			jl_data_delete_byte(jlgr->jl, jlgr->gui.textbox.string);
+			la_buffer_del(jlgr->gui.textbox.string);
 			break;
 		case '\n':
 			return 1;
@@ -519,15 +512,15 @@ void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc){
  * @param notification: The message to display.
 */
 void jlgr_notify(la_window_t* jlgr, const char* notification, ...) {
-	jl_thread_mutex_lock(&jlgr->protected.mutex);
+	char message[256];
 	va_list arglist;
 
 	va_start( arglist, notification );
-	vsprintf( jlgr->protected.notification.message, notification, arglist );
+	vsprintf( message, notification, arglist );
 	va_end( arglist );
-	jlgr->protected.notification.timeTilVanish = 4.5;
 
-	jl_thread_mutex_unlock(&jlgr->protected.mutex);
+	la_safe_set_string(&jlgr->protected.notification.message, message);
+	la_safe_set_float(&jlgr->protected.notification.timeTilVanish, 4.5);
 }
 
 /***      @cond       ***/
@@ -536,22 +529,22 @@ void jlgr_notify(la_window_t* jlgr, const char* notification, ...) {
 /************************/
 
 void _jlgr_loopb(la_window_t* jlgr) {
+	float time_until_vanish =
+		la_safe_get_float(&jlgr->protected.notification.timeTilVanish);
 	//Message Display
-	jl_thread_mutex_lock(&jlgr->protected.mutex);
-	if(jlgr->protected.notification.timeTilVanish > 0.f) {
-		if(jlgr->protected.notification.timeTilVanish > .5) {
+	if(time_until_vanish > 0.f) {
+		if(time_until_vanish > .5) {
 			float color[] = { 1., 1., 1., 1. };
-			jlgr_draw_ctxt(jlgr, jlgr->protected.notification.message, 0,
-				color);
+			jlgr_draw_ctxt(jlgr, la_safe_get_string(
+				&jlgr->protected.notification.message),0,color);
 		}else{
-			float color[] = { 1., 1., 1.,
-				(jlgr->protected.notification.timeTilVanish / .5)};
-			jlgr_draw_ctxt(jlgr, jlgr->protected.notification.message, 0,
-				color);
+			float color[] = { 1., 1., 1., (time_until_vanish / .5)};
+			jlgr_draw_ctxt(jlgr, la_safe_get_string(
+				&jlgr->protected.notification.message),0,color);
 		}
-		jlgr->protected.notification.timeTilVanish-=jlgr->psec;
+		la_safe_set_float(&jlgr->protected.notification.timeTilVanish,
+			time_until_vanish - jlgr->psec);
 	}
-	jl_thread_mutex_unlock(&jlgr->protected.mutex);
 }
 
 void _jlgr_loopa(la_window_t* jlgr) {
@@ -585,9 +578,7 @@ void jlgr_init__(la_window_t* jlgr) {
 	// Draw message on the screen
 	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "Loading Lib Aldaron....");
 	// Set other variables
-	jl_thread_mutex_lock(&jlgr->protected.mutex);
-	jlgr->protected.notification.timeTilVanish = 0.f;
-	jl_thread_mutex_unlock(&jlgr->protected.mutex);
+	la_safe_set_float(&jlgr->protected.notification.timeTilVanish, 0.f);
 	// Load other images....
 	jlgr->textures.icon = jl_sg_add_image(jlgr, &packagedata,
 		"/taskbar_items.png");

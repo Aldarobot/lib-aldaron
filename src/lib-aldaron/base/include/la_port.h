@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #ifndef LA_PORT
 #define LA_PORT
 
@@ -90,7 +94,6 @@ typedef struct {
 	} input;
 
 // from JLGR.h
-	jl_t* jl;
 
 	// For Programer's Use
 	float fontcolor[4];
@@ -98,39 +101,32 @@ typedef struct {
 	jl_vo_t mouse;
 
 	struct {
-		jl_mutex_t mutex;
-
 		struct {
-			float timeTilVanish;
-			char message[256];
+			safe_float_t timeTilVanish;
+			safe_string_t message;
 		} notification;
 
 		struct {
-			jl_fnct fn;
-			jlgr_redraw_t redraw;
+			safe_pointer_t fn;
+			safe_pointer_t resize;
+			safe_pointer_t primary;
+			safe_pointer_t secondary;
 		} functions;
 
-		uint8_t needs_resize;
-		uint16_t set_width;
-		uint16_t set_height;
+		safe_uint8_t needs_resize;
+		safe_uint32_t set_width;
+		safe_uint32_t set_height;
 	} protected;
 
 	// Window Info
 	struct {
-		uint32_t taskbar[5];
-		uint32_t init_image_location;
+//		uint32_t taskbar[5];
+//		uint32_t init_image_location;
 
 		// If Matching FPS
-		uint8_t on_time;
-		uint8_t changed;
-		
-		// Each screen is a sprite.
-		struct {
-			jl_sprite_t up;
-			jl_sprite_t dn;
-		}bg;
+//		uint8_t on_time;
+//		uint8_t changed;
 
-		void* loop; // ( jlgr_fnct ) For upper or lower screen.
 		uint8_t cs; // The current screen "jlgr_which_screen_t"
 	}sg;
 

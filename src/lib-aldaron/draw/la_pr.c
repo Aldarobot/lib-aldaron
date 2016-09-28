@@ -1,13 +1,11 @@
-/*
- * JL_Lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
-/** \file
- * JLGRpr.c
- *	Pre-Renderer object ( framebuffer ).
- */
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
+
+#include <la_pr.h>
 
 /** @cond */
 
@@ -164,15 +162,14 @@ void jlgr_pr_draw(la_window_t* jlgr, jl_pr_t* pr, jl_vec3_t vec, uint8_t orient)
 	jlgr_opengl_draw_arrays_(jlgr, GL_TRIANGLE_FAN, 4);
 }
 
-void jlgr_pr(la_window_t* jlgr, jl_pr_t* pr, jl_fnct par__redraw) {
-	jl_t* jl = jlgr->jl;
-	jl_pr_t* oldpr = jlgr->gl.cp;
+void la_pr(void* context, la_window_t* window, jl_pr_t* pr, jl_fnct redrawfn) {
+	jl_pr_t* oldpr = window->gl.cp;
 
 	if(!pr) la_panic("Drawing on lost pre-renderer.");
 	// Use the vo's pr
-	jlgr_pr_use2__(jlgr, pr);
+	jlgr_pr_use2__(window, pr);
 	// Render to the pr.
-	par__redraw(jl);
+	redrawfn(context);
 	// Go back to the previous pre-renderer.
-	jlgr_pr_use2__(jlgr, oldpr);
+	jlgr_pr_use2__(window, oldpr);
 }

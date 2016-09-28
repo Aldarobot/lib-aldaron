@@ -1,7 +1,13 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
 #include "la_effect.h"
 #include "la_memory.h"
+
+#include <la_pr.h>
 
 /** @cond */
 
@@ -178,9 +184,7 @@ const char* JL_EFFECT_LIGHTV =
 	"	gl_Position = project_scene * rotate_camera * pos;\n"
 	"}";
 
-static void jlgr_effect_pr_hue__(jl_t* jl) {
-	la_window_t* jlgr = jl->jlgr;
-
+static void jlgr_effect_pr_hue__(la_window_t* jlgr) {
 	jlgr_opengl_framebuffer_subtx_(jlgr);
 	jlgr_vo_set_image(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
 		0., 0., 1., jl_gl_ar(jlgr) }, jlgr->gl.cp->tx);
@@ -189,9 +193,7 @@ static void jlgr_effect_pr_hue__(jl_t* jl) {
 		0.f, 0.f, 0.f }, jlgr->effects.colors);
 }
 
-static void jlgr_effect_pr_light__(jl_t* jl) {
-	la_window_t* jlgr = jl->jlgr;
-
+static void jlgr_effect_pr_light__(la_window_t* jlgr) {
 	jlgr_opengl_framebuffer_subtx_(jlgr);
 	jlgr_vo_set_image(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
 		0., 0., 1., jl_gl_ar(jlgr) }, jlgr->gl.cp->tx);
@@ -200,14 +202,14 @@ static void jlgr_effect_pr_light__(jl_t* jl) {
 		(jl_vec3_t) { 0.f, 0.f, 0.f }, jlgr->effects.vec3);
 }
 
-static void jlgr_effects_clear__(jl_t* jl) {
-	jl_gl_clear(jl->jlgr, 0.f, 0.f, 0.f, 0.f);
+static void jlgr_effects_clear__(la_window_t* window) {
+	jl_gl_clear(window, 0.f, 0.f, 0.f, 0.f);
 }
 
 /** @endcond */
 
-void jlgr_effects_clear(la_window_t* jlgr, jl_vo_t* vo) {
-	jlgr_pr(jlgr, &vo->pr, jlgr_effects_clear__);
+void jlgr_effects_clear(la_window_t* window, jl_vo_t* vo) {
+	la_pr(window, window, &vo->pr, (jl_fnct) jlgr_effects_clear__);
 }
 
 /**
@@ -277,7 +279,7 @@ void jlgr_effects_draw(la_window_t* jlgr, jl_vo_t* vo) {
 void la_effect_light(jl_vo_t* vo, la_light_t* lights, uint8_t light_count,
 	jl_vec3_t material_brightness)
 {
-	la_window_t* jlgr = vo->jl->jlgr;
+	la_window_t* jlgr = vo->window;
 	int i;
 	jlgr_glsl_t* shader = &jlgr->effect.shader_laa[light_count];
 	float ar = jl_gl_ar(jlgr);
@@ -376,7 +378,7 @@ void jlgr_effects_vo_light(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
 **/
 void jlgr_effects_hue(la_window_t* jlgr, float c[]) {
 	jl_mem_copyto(c, jlgr->effects.colors, sizeof(float) * 4);
-	jlgr_pr(jlgr, jlgr->gl.cp, jlgr_effect_pr_hue__);
+	la_pr(jlgr, jlgr, jlgr->gl.cp, (jl_fnct) jlgr_effect_pr_hue__);
 }
 
 /**
@@ -384,7 +386,7 @@ void jlgr_effects_hue(la_window_t* jlgr, float c[]) {
 **/
 void jlgr_effects_light(la_window_t* jlgr, jl_vec3_t* material) {
 	jlgr->effects.vec3 = material;
-	jlgr_pr(jlgr, jlgr->gl.cp, jlgr_effect_pr_light__);
+	la_pr(jlgr, jlgr, jlgr->gl.cp, (jl_fnct) jlgr_effect_pr_light__);
 }
 
 /**

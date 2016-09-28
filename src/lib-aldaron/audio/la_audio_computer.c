@@ -1,8 +1,14 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "la.h"
 
 #ifdef LA_COMPUTER
 #include "la_audio.h"
 #include "la_memory.h"
+
+#include <la_file.h>
 
 #define JLAU_CHANNEL_MUSIC -2
 #define JLAU_CHANNEL_SOUND -3
@@ -152,17 +158,14 @@ void jlau_add_audio(jlau_t* jlau, jlau_audio_t* audio, data_t* zipdata,
 {
 	data_t aud;
 
-	jl_file_pk_load_fdata(jlau->jl, &aud, zipdata, filename);
+	la_file_loadzip(&aud, zipdata, filename);
 	la_print("Loading audiostuffs....");
 	jlau_load(jlau, audio, 255, aud.data, aud.size, music);
 	la_print("Loaded audiostuffs!");
 }
 
-jlau_t* jlau_init(jl_t* jl) {
+jlau_t* jlau_init(void) {
 	jlau_t* jlau = la_memory_allocate(sizeof(jlau_t));
-
-	jlau->jl = jl;
-	jl->jlau = jlau;
 
 	jlau->num_channels = 0;
 	// Open the audio device

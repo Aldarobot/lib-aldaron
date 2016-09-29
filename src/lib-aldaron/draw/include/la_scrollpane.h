@@ -3,7 +3,7 @@
 #include "la_draw.h"
 
 typedef struct {
-	jl_vo_t external;
+	la_vo_t external;
 	safe_float_t scroller;
 	safe_float_t internal_height;
 	safe_float_t external_height;

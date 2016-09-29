@@ -7,6 +7,7 @@
 #include "la_buffer.h"
 
 #include <la_file.h>
+#include <la_vo.h>
 
 // Constants
 	//ALL IMAGES: 1024x1024
@@ -140,16 +141,29 @@ void la_window_icon(la_window_t* window,la_buffer_t* buffer,const char* fname) {
 	SDL_free(image);
 }
 
-void la_window_draw__(void* context, la_window_t* window) {
+typedef struct{
+	void* context;
+	la_window_t* window;
+}la_window_draw_t;
+
+static void la_window_draw_flipped(la_window_draw_t* param) {
 	jl_fnct redraw = la_safe_get_pointer(
-		&window->protected.functions.secondary);
+		&param->window->protected.functions.primary);
 
 	// Clear the screen.
-	jl_gl_clear(window, 0., .5, .66, 1.);
+	jl_gl_clear(param->window, 0., .5, .66, 1.);
 	// Run the screen's redraw function
-	redraw(context);
+	redraw(param->context);
 	// Draw Menu Bar & Mouse
-	_jlgr_loopa(window);
+	_jlgr_loopa(param->window);
+}
+
+void la_window_draw__(void* context, la_window_t* window) {
+	la_window_draw_t pass = (la_window_draw_t) { context, window };
+
+	// Draw over it.
+	la_vo_pr(&pass, window, &window->screen, (la_fn_t) la_window_draw_flipped);
+	la_vo_pr_draw(&window->screen, 1);
 }
 
 void jl_sg_init__(la_window_t* window) {

@@ -17,7 +17,7 @@ typedef struct {
 extern SDL_atomic_t la_rmcexit;
 
 void jlgr_mouse_resize__(la_window_t* jlgr);
-void jl_wm_resz__(la_window_t* jlgr, uint16_t w, uint16_t h);
+void la_window_resize__(la_window_t* window, uint32_t w, uint32_t h);
 
 void la_window_draw__(void* context, la_window_t* window);
 
@@ -29,7 +29,7 @@ static void jlgr_thread_programsresize(void* context, la_window_t* window) {
 static void
 jlgr_thread_resize(void* context, la_window_t* window, uint32_t w, uint32_t h) {
 	la_print("Resizing to %dx%d....", w, h);
-	jl_wm_resz__(window, w, h);
+	la_window_resize__(window, w, h);
 	la_print("User's resize....");
 	jlgr_thread_programsresize(context, window);
 	la_print("Resizing the mouse....");

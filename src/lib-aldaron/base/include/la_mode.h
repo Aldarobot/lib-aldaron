@@ -8,5 +8,6 @@ typedef struct {
 	void* kill;
 }la_mode_t;
 
+void la_mode_init(void* context, la_mode_t* mode, la_mode_t newmode);
 void la_mode_change(void* context, la_mode_t* mode, la_mode_t newmode);
 void la_mode_run(void* context, la_mode_t mode);

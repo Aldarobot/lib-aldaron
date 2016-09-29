@@ -4,14 +4,15 @@
 
 #include "JLGRprivate.h"
 #include "la_buffer.h"
-#include "la_vo.h"
+
+#include <la_vo.h>
 
 void* aldaron_data(void);
 uint64_t aldaron_size(void);
 
 typedef struct {
-	jl_vec3_t where[2];
-	jl_vo_t vo[3]; // Vertex object [ Full, Slider 1, Slider 2 ].
+	la_v3_t where[2];
+	la_vo_t vo[3]; // Vertex object [ Full, Slider 1, Slider 2 ].
 }jl_gui_slider_draw;
 
 typedef struct {
@@ -121,13 +122,13 @@ void jlgr_draw_dec(la_window_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
  * @param 'spr': the boundary sprite
  * @param 'txt': the text to draw
 **/
-void jlgr_text_draw_area(la_window_t* jlgr, jl_sprite_t * spr, const char* txt) {
+/*void jlgr_text_draw_area(la_window_t* jlgr, jl_sprite_t * spr, const char* txt) {
 	float fontsize = .9 / strlen(txt);
 	jlgr_text_draw(jlgr, txt,
 		(jl_vec3_t) { .05,.5 * (jl_gl_ar(jlgr) - fontsize),0. },
 		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, 
 			fontsize});
-}
+}*/
 
 /**
  * Draw a sprite, then draw text within the boundary of a sprite
@@ -135,11 +136,11 @@ void jlgr_text_draw_area(la_window_t* jlgr, jl_sprite_t * spr, const char* txt) 
  * @param 'spr': the boundary sprite
  * @param 'txt': the text to draw
 **/
-void jlgr_draw_text_sprite(la_window_t* jlgr, jl_sprite_t* spr, const char* txt) {
+/*void jlgr_draw_text_sprite(la_window_t* jlgr, jl_sprite_t* spr, const char* txt) {
 	jlgr_fill_image_set(jlgr, jlgr->textures.icon, 16, 16, 1);
 	jlgr_fill_image_draw(jlgr);
 	jlgr_text_draw_area(jlgr, spr, txt);
-}
+}*/
 
 /**
  * Draw centered text across screen
@@ -242,7 +243,7 @@ void jlgr_draw_ctxt(la_window_t* jlgr, const char *str, float yy, float* color) 
 	value.  Ignored if #isdouble is 0.
  * @returns: The slider sprite.
 **/
-void jlgr_gui_slider(la_window_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
+/*void jlgr_gui_slider(la_window_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
 	uint8_t isdouble, float* x1, float* x2)
 {
 //	jlgr_sprite_loop_fnt jlgr_gui_slider_loop;
@@ -267,7 +268,7 @@ void jlgr_gui_slider(la_window_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle
 //		jlgr_gui_slider_loop, jlgr_gui_slider_draw,
 //		&slider, sizeof(jl_gui_slider_main),
 //		&slider.draw, sizeof(jl_gui_slider_draw));
-}
+}*/
 
 /**
  * Draw a background on the screen
@@ -375,9 +376,9 @@ void jlgr_popup(la_window_t* jlgr, char *name, char *message,
  * @param spr: The slide button sprite.
  * @param txt: The text to draw on the button.
 **/
-void jlgr_slidebtn_rsz(la_window_t* jlgr, jl_sprite_t * spr, const char* txt) {
+/*void jlgr_slidebtn_rsz(la_window_t* jlgr, jl_sprite_t * spr, const char* txt) {
 	jlgr_draw_text_sprite(jlgr, spr, txt);
-}
+}*/
 
 /**
  * Run the Slide Button loop. ( activated when pressed, moved when
@@ -388,7 +389,7 @@ void jlgr_slidebtn_rsz(la_window_t* jlgr, jl_sprite_t * spr, const char* txt) {
  * @param 'slidex': how much the x should change when hovered above.
  * @param 'prun': the function to run when pressed.
 **/
-void jlgr_slidebtn_loop(la_window_t* jlgr, jl_sprite_t * spr, float defaultx,
+/*void jlgr_slidebtn_loop(la_window_t* jlgr, jl_sprite_t * spr, float defaultx,
 	float slidex, jlgr_fnct prun)
 {
 	spr->pr.cb.pos.x = defaultx;
@@ -397,7 +398,7 @@ void jlgr_slidebtn_loop(la_window_t* jlgr, jl_sprite_t * spr, float defaultx,
 //		spr->pr.cb.pos.x = defaultx + slidex;
 //	}
 //	jlgr_sprite_draw(jlgr, spr);
-}
+}*/
 
 /**
  * Draw a glow button, and activate if it is pressed.
@@ -406,12 +407,12 @@ void jlgr_slidebtn_loop(la_window_t* jlgr, jl_sprite_t * spr, float defaultx,
  * @param 'txt': the text to draw on the button.
  * @param 'prun': the function to run when pressed.
 **/
-void jlgr_glow_button_draw(la_window_t* jlgr, jl_sprite_t * spr,
+/*void jlgr_glow_button_draw(la_window_t* jlgr, jl_sprite_t * spr,
 	char *txt, jlgr_fnct prun)
 {
 //		jlgr_sprite_redraw(jlgr, spr);
 //	jlgr_sprite_draw(jlgr, spr);
-/*	if(jlgr_sprite_collide(jlgr, &jlgr->mouse.pr, &spr->pr)) {
+	if(jlgr_sprite_collide(jlgr, &jlgr->mouse.pr, &spr->pr)) {
 		jl_rect_t rc = { spr->pr.cb.pos.x, spr->pr.cb.pos.y,
 			spr->pr.cb.ofs.x, spr->pr.cb.ofs.y };
 		float glow_color[] = { 1., 1., 1., .25 };
@@ -427,8 +428,8 @@ void jlgr_glow_button_draw(la_window_t* jlgr, jl_sprite_t * spr,
 				jlgr->fontcolor, .05 });
 		// Run if press
 //		jlgr_input_do(jlgr, JL_INPUT_PRESS, prun, NULL);
-	}*/
-}
+	}
+}*/
 
 /**
  * Set the data string for a textbox.

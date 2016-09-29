@@ -5,6 +5,7 @@
 #include "JLGRprivate.h"
 
 #include <la_time.h>
+#include <la_vo.h>
 
 #define JL_WM_FULLSCREEN SDL_WINDOW_FULLSCREEN_DESKTOP
 
@@ -147,11 +148,12 @@ void jl_wm_loop__(la_window_t* jlgr) {
 	jlgr->psec = la_time_regulatefps(&jlgr->timer, &jlgr->on_time);
 }
 
-void jl_wm_resz__(la_window_t* jlgr, uint16_t w, uint16_t h) {
-	jlgr->wm.w = w;
-	jlgr->wm.h = h;
-	jlgr->wm.ar = ((float)h) / ((float)w);
-	jl_gl_viewport_screen(jlgr);
+void la_window_resize__(la_window_t* window, uint32_t w, uint32_t h) {
+	window->wm.w = w;
+	window->wm.h = h;
+	window->wm.ar = ((float)h) / ((float)w);
+	jl_gl_viewport_screen(window);
+	la_vo_rect(window, &window->screen, 1.f, window->wm.ar);
 }
 
 void jl_wm_init__(la_window_t* jlgr) {

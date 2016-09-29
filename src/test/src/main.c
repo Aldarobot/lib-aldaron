@@ -47,7 +47,7 @@ void ex_wups(ctx_t* ctx) {
 }
 
 // Called when window is made/resized.
-static void ex_edit_resz(ctx_t* ctx) {
+static void test_resize(ctx_t* ctx) {
 	la_window_t* jlgr = ctx->window;
 	jl_rect_t rc1 = { 0.f, 0.f, 1.f, jl_gl_ar(jlgr) };
 	jl_rect_t rc2 = { 0.f, 0.f, 2.f, 1.f };
@@ -61,8 +61,8 @@ static void ex_edit_resz(ctx_t* ctx) {
 }
 
 void ex_edit_init(ctx_t* ctx) {
-	la_draw_fnchange(ctx->window, (jl_fnct) ex_wups, (jl_fnct) ex_wdns,
-		(jl_fnct) ex_edit_resz);
+	la_draw_fnchange(ctx->window, (jl_fnct) ex_wdns, (jl_fnct) ex_wups,
+		(jl_fnct) test_resize);
 }
 
 static inline void ex_init_tasks(ctx_t* ctx) {
@@ -79,11 +79,11 @@ static void ex_loop(ctx_t* ctx) {
 }
 
 static void ex_init(ctx_t* ctx, la_window_t* window) {
-	la_print("ex_INT");
 	ctx->window = window;
 	jlgr_draw_msge(window, window->textures.logo, 0, "Initializing");
 	ex_init_tasks(ctx);
-	ctx->mode = (la_mode_t) { ex_edit_loop, ex_edit_init, jl_dont };
+	la_mode_init(ctx, &ctx->mode, (la_mode_t)
+		{ ex_edit_loop, ex_edit_init, jl_dont } );
 }
 
 int main(int argc, char* argv[]) {

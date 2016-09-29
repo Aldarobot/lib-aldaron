@@ -98,7 +98,8 @@ typedef struct {
 	// For Programer's Use
 	float fontcolor[4];
 	jl_font_t font;
-	jl_vo_t mouse;
+	la_vo_t mouse;
+	la_vo_t screen;
 
 	struct {
 		struct {
@@ -120,13 +121,6 @@ typedef struct {
 
 	// Window Info
 	struct {
-//		uint32_t taskbar[5];
-//		uint32_t init_image_location;
-
-		// If Matching FPS
-//		uint8_t on_time;
-//		uint8_t changed;
-
 		uint8_t cs; // The current screen "jlgr_which_screen_t"
 	}sg;
 
@@ -164,7 +158,7 @@ typedef struct {
 
 		float colors[4];
 		jl_vec3_t* vec3;
-		jl_vo_t* vo;
+		la_vo_t* vo;
 
 		jlgr_effects_light_t lights;
 	}effects;
@@ -181,7 +175,7 @@ typedef struct {
 			jlgr_glsl_t color;
 		}prg;
 
-		jl_vo_t temp_vo;
+		la_vo_t temp_vo;
 		// Default texture coordinates.
 		uint32_t default_tc;
 		uint32_t upsidedown_tc;
@@ -197,7 +191,7 @@ typedef struct {
 			jl_popup_button_t* btns;
 		}popup;
 		struct {
-			jl_vo_t whole_screen;
+			la_vo_t whole_screen;
 		}vos;
 		struct {
 			char message[256];

@@ -40,7 +40,7 @@ void la_gui_scrollpane_draw(void* context, la_window_t* window,
 			la_gui_scrollpane_draw__);
 	}
 	jlgr_vo_draw(window, &sp->external);
-	jlgr_vo_draw_pr(window, &sp->external);
+	la_vo_pr_draw(&sp->external, 0);
 }
 
 void la_gui_scrollpane_loop(la_window_t* window, la_gui_scrollpane_t* sp) {

@@ -4,9 +4,10 @@
 
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
-#include "la_effect.h"
+
 #include "la_memory.h"
 
+#include <la_effect.h>
 #include <la_pr.h>
 
 /** @cond */
@@ -208,7 +209,7 @@ static void jlgr_effects_clear__(la_window_t* window) {
 
 /** @endcond */
 
-void jlgr_effects_clear(la_window_t* window, jl_vo_t* vo) {
+void jlgr_effects_clear(la_window_t* window, la_vo_t* vo) {
 	la_pr(window, window, &vo->pr, (jl_fnct) jlgr_effects_clear__);
 }
 
@@ -219,7 +220,7 @@ void jlgr_effects_clear(la_window_t* window, jl_vo_t* vo) {
  * @param offs: The offset vector to translate by.
  * @param a: The alpha value to multiply each pixel by. [ 0.f - 1.f ]
 **/
-void jlgr_effects_vo_alpha(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float a) {
+void jlgr_effects_vo_alpha(la_window_t* jlgr, la_vo_t* vo, jl_vec3_t offs, float a) {
 	if(a < 0.f) a = 0.f;
 	if(a > 1.f) a = 1.f;
 	// Bind shader
@@ -244,7 +245,7 @@ void jlgr_effects_vo_alpha(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float
  * @param offs: The offset to draw it at.
  * @param c: The new hue ( r, g, b, a ) [ 0.f - 1.f ]
 **/
-void jlgr_effects_vo_hue(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c[]) {
+void jlgr_effects_vo_hue(la_window_t* jlgr, la_vo_t* vo, jl_vec3_t offs, float c[]) {
 	// Bind shader
 	jlgr_opengl_draw1(jlgr, &jlgr->effects.hue.shader);
 	// Translate by offset vector
@@ -265,7 +266,7 @@ void jlgr_effects_vo_hue(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs, float c
  * @param jlgr: The library context.
  * @param vo: The vertex object.
 **/
-void jlgr_effects_draw(la_window_t* jlgr, jl_vo_t* vo) {
+void jlgr_effects_draw(la_window_t* jlgr, la_vo_t* vo) {
 	jlgr_pr_draw(jlgr, &vo->pr, vo->pr.cb.pos, 0);
 }
 
@@ -276,7 +277,7 @@ void jlgr_effects_draw(la_window_t* jlgr, jl_vo_t* vo) {
  * @param light_count: How many lights are in the array "lights".
  * @param material_brightness: Maximum R, G, and B values.
 **/
-void la_effect_light(jl_vo_t* vo, la_light_t* lights, uint8_t light_count,
+void la_effect_light(la_vo_t* vo, la_light_t* lights, uint8_t light_count,
 	jl_vec3_t material_brightness)
 {
 	la_window_t* jlgr = vo->window;
@@ -340,7 +341,7 @@ void la_effect_light(jl_vo_t* vo, la_light_t* lights, uint8_t light_count,
  *  ( shininess, max brightness, unused )
  *  or null for default material ( 32.f, 1.f, 0.f )
 **/
-void jlgr_effects_vo_light(la_window_t* jlgr, jl_vo_t* vo, jl_vec3_t offs,
+void jlgr_effects_vo_light(la_window_t* jlgr, la_vo_t* vo, jl_vec3_t offs,
 	jl_vec3_t* material)
 {
 	jl_vec3_t default_material = (jl_vec3_t) { 32.f, 1.f, 0.f };

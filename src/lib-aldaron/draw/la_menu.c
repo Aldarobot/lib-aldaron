@@ -152,7 +152,7 @@ void la_menu_draw(la_menu_t* menu, uint8_t resize) {
 			jlgr_menubar_draw_);
 	}
 	// Draw Pre-Rendered
-	jlgr_vo_draw_pr(menu->window, &menu->menubar);
+	la_vo_pr_draw(&menu->menubar, 0);
 }
 
 /**

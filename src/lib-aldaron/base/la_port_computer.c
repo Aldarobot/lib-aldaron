@@ -12,6 +12,8 @@
 
 void la_draw_resize(la_window_t *, uint32_t, uint32_t);
 
+extern SDL_atomic_t la_rmcexit;
+
 void la_print(const char* format, ...) {
 	char temp[256];
 	va_list arglist;
@@ -89,9 +91,7 @@ void la_port_input(la_window_t* window) {
 					window->input.keyboard.x = -1.f;
 					break;
 				case SDL_SCANCODE_ESCAPE:
-					la_print("back due to escape");
-					la_print("unimplemented");
-					exit(-1);
+					SDL_AtomicSet(&la_rmcexit, 0);
 					break;
 				case SDL_SCANCODE_F11:
 					jlgr_wm_togglefullscreen(window);
@@ -157,9 +157,7 @@ void la_port_input(la_window_t* window) {
 						window->sdl_event.window.data2);
 					break;
 				} case SDL_WINDOWEVENT_CLOSE: {
-					la_print("back due to close");
-					la_print("unimplemented");
-					exit(-1);
+					SDL_AtomicSet(&la_rmcexit, 0);
 					break;
 				} default: {
 					break;

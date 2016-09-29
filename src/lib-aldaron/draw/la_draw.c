@@ -5,7 +5,15 @@
 #include "JLGRprivate.h"
 #include "la_memory.h"
 
-extern SDL_atomic_t la_rmc;
+#include <la_thread.h>
+
+typedef struct {
+	void* context;
+	la_window_t* window;
+	jl_fnct loop;
+	jl_fnct kill;
+} la_main_thread_t;
+
 extern SDL_atomic_t la_rmcexit;
 
 void jlgr_mouse_resize__(la_window_t* jlgr);
@@ -53,7 +61,6 @@ la_draw_init__(void* context, la_window_t* window, const char* name) {
 	la_print("Load graphics....");
 	jlgr_init__(window);
 	la_print("User's Init....");
-	SDL_AtomicSet(&la_rmc, 1);
 	la_draw_fn_t program_init_;
 	la_safe_set_uint8(&window->protected.needs_resize, 1);
 	program_init_ = la_safe_get_pointer(&window->protected.functions.fn);
@@ -87,7 +94,20 @@ void la_window_loop__(void* context, la_window_t* window) {
 }
 
 void la_window_kill__(la_window_t* window) {
-	SDL_AtomicSet(&la_rmc, 0);
+	SDL_AtomicSet(&la_rmcexit, 0);
+}
+
+static int32_t la_main_thread(la_main_thread_t* ctx) {
+	while(SDL_AtomicGet(&la_rmcexit)) {
+		// Poll For Input & Regulate FPS
+		la_port_input(ctx->window);
+		// Program loop
+		ctx->loop(ctx->context);
+	}
+	// Kill the loop.
+	ctx->kill(ctx->context);
+	la_print("Exit Program -> 0.");
+	return 0;
 }
 
 //
@@ -99,8 +119,8 @@ void la_window_kill__(la_window_t* window) {
  * @param window: The window.
  * @param fn_: Graphic initialization function run on graphical thread.
 **/
-void la_window_init__(void* context, la_window_t* window, la_draw_fn_t fn_,
-	const char* name)
+void la_window_start__(void* context, la_window_t* window, la_draw_fn_t fn_,
+	la_fn_t fnc_loop, la_fn_t fnc_kill, const char* name)
 {
 #if JL_PLAT == JL_PLAT_COMPUTER
 	window->wm.fullscreen = 0;
@@ -111,9 +131,13 @@ void la_window_init__(void* context, la_window_t* window, la_draw_fn_t fn_,
 	la_safe_set_pointer(&window->protected.functions.fn, fn_);
 	// Initialize subsystems
 	la_draw_init__(context, window, name);
+	// Branch a new thread.
+	la_main_thread_t ctx = (la_main_thread_t) { context, window,
+		fnc_loop, fnc_kill };
+	la_thread_new(NULL, (la_thread_fn_t)la_main_thread, "la_main", &ctx);
 #ifndef LA_PHONE_ANDROID
 	// Redraw loop
-	while(SDL_AtomicGet(&la_rmc))
+	while(SDL_AtomicGet(&la_rmcexit))
 		la_window_loop__(context, window);
 	// Free stuff.
 	la_window_kill__(window);
@@ -153,7 +177,7 @@ void la_draw_resize(la_window_t* window, uint32_t w, uint32_t h) {
  * @param jlgr: The jlgr library context.
 **/
 void jlgr_kill(la_window_t* jlgr) {
-	while(SDL_AtomicGet(&la_rmcexit));
+	while(SDL_AtomicGet(&la_rmcexit)); // TODO: Is needed?
 #ifndef LA_PHONE_ANDROID
 	la_print("Destroying window....");
 	SDL_DestroyWindow(jlgr->wm.window);

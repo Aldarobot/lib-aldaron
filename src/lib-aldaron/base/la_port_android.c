@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "la_draw.h"
 
 #ifdef LA_PHONE_ANDROID
@@ -24,7 +28,7 @@ void la_window_kill__(la_window_t* window);
 extern const char* LA_FILE_ROOT;
 extern const char* LA_FILE_LOG;
 extern float la_banner_size;
-extern SDL_atomic_t la_rmc;
+extern SDL_atomic_t la_rmcexit;
 la_window_t* la_window = NULL;
 
 /**
@@ -242,9 +246,10 @@ void android_main(struct android_app* state) {
 	// Run main():
 	la_window = window;
 
-	SDL_AtomicSet(&la_rmc, 1);
+	// TODO: is needed?
+	SDL_AtomicSet(&la_rmcexit, 1);
 	// Window thread ( Drawing + Events ).
-	while (SDL_AtomicGet(&la_rmc)) {
+	while (SDL_AtomicGet(&la_rmcexit)) {
 		// Poll Events
 		ident = ALooper_pollAll(0, NULL, &events, (void**)&source);
 
@@ -340,7 +345,7 @@ Java_com_libaldaron_LibAldaronActivity_nativeLaFraction(JNIEnv *env, jobject obj
 JNIEXPORT jint JNICALL
 Java_com_libaldaron_LibAldaronActivity_nativeLaDraw(JNIEnv *env, jobject obj) {
 	la_window_loop__(la_window);
-	if(SDL_AtomicGet(&la_rmc) == 0) return 100;
+	if(SDL_AtomicGet(&la_rmcexit) == 0) return 100;
 	else return 0;
 }
 

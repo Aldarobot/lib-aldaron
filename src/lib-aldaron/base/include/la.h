@@ -101,6 +101,7 @@ typedef struct{
 	size_t size;		/** Size of "data" */
 }jl_pvar_t;
 
+typedef void(*la_fn_t)(void* context);
 typedef void(*jl_fnct)(void* context);
 typedef void(*jl_data_fnct)(void* context, void* data);
 typedef void(*jl_print_fnt)(void* context, const char * print);

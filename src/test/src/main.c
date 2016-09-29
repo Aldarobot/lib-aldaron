@@ -79,6 +79,7 @@ static void ex_loop(ctx_t* ctx) {
 }
 
 static void ex_init(ctx_t* ctx, la_window_t* window) {
+	la_print("ex_INT");
 	ctx->window = window;
 	jlgr_draw_msge(window, window->textures.logo, 0, "Initializing");
 	ex_init_tasks(ctx);

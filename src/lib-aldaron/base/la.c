@@ -11,7 +11,6 @@
 #include "SDL.h"
 #endif
 
-#include "la_thread.h"
 #include "la_memory.h"
 #include "la_time.h"
 
@@ -24,8 +23,8 @@ void la_time_init__(void);
 void jlau_kill(jlau_t* jlau);
 void jlgr_kill(la_window_t* jlgr);
 
-void la_window_init__(void* context, la_window_t* window, la_draw_fn_t fn_,
-	const char* name);
+void la_window_start__(void*,la_window_t*,la_draw_fn_t,la_fn_t,la_fn_t,
+	const char*);
 
 #if JL_PLAT == JL_PLAT_PHONE
 	#include <jni.h>
@@ -38,7 +37,6 @@ void la_window_init__(void* context, la_window_t* window, la_draw_fn_t fn_,
 #endif
 
 float la_banner_size = 0.f;
-SDL_atomic_t la_rmc; // running / mode count
 SDL_atomic_t la_rmcexit;
 static char la_errorv[256];
 
@@ -52,18 +50,6 @@ static inline void jl_seconds_passed__(la_window_t* window) {
 		if((window->sg.changed = ( window->sg.on_time != isOnTime)))
 			window->sg.on_time = isOnTime;
 	}*/
-}
-
-static void main_loop_(void* context, la_window_t* window) {
-	// Check the amount of time passed since last frame.
-	//jl_seconds_passed__(window);
-}
-
-static void jlgr_loop_(void* context, la_window_t* window) {
-	// Update events.
-	la_port_input(window);
-	// Run Main Loop
-	main_loop_(context, window);
 }
 
 static inline void* la_init__(const char* nm, uint64_t ctx1s) {
@@ -114,37 +100,6 @@ const char* la_error(const char* format, ...) {
 	return la_errorv;
 }
 
-typedef struct {
-	void* context;
-	void(*libloop)(void* context, la_window_t* window);
-	la_window_t* window;
-	jl_fnct loop;
-	jl_fnct kill;
-} la_main_thread_t;
-
-static int32_t la_main_thread(la_main_thread_t* ctx) {
-	void* context = ctx->context;
-	la_window_t* window = ctx->window;
-
-	SDL_AtomicSet(&la_rmcexit, 1);
-	// Run the Loop
-	while(SDL_AtomicGet(&la_rmc)) {
-		// Library loop
-		ctx->libloop(context, window);
-		// Program loop
-		ctx->loop(context);
-	}
-	// Kill the program
-/*	if(jl->jlau) {
-		la_print("Kill Audio....");
-		jlau_kill(jl->jlau);
-	}*/
-	ctx->kill(context);
-	la_print("Killed Program!");
-	SDL_AtomicSet(&la_rmcexit, 0);
-	return 0;
-}
-
 /**
  * Start Lib-Aldaron on a separate thread.
  * @param fnc_init: The function initialize the program.
@@ -155,29 +110,28 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 int32_t la_start(void* fnc_init, jl_fnct fnc_loop, jl_fnct fnc_kill,
 	uint8_t openwindow, const char* name, size_t ctx_size)
 {
-	la_thread_t la_main;
+	SDL_AtomicSet(&la_rmcexit, 1);
 
-// Terminal application support
 #ifndef LA_PHONE_ANDROID
 	la_window_t* la_window = openwindow ?
 		la_memory_allocate(sizeof(la_window_t)) : NULL;
+#endif
 
 	// Initialize Lib Aldaron!
 	void* context = la_init__(name, ctx_size);
 
-	// If Terminal Only...
-	if(!openwindow) ((jl_fnct) fnc_init)(context);
-#else
-	void* context = la_init__(name, ctx_size);
-#endif
-	// Start a new thread.
-	la_main_thread_t ctx = (la_main_thread_t) { context, openwindow ?
-		jlgr_loop_ : main_loop_, la_window, fnc_loop, fnc_kill };
-	la_thread_new(&la_main, (la_thread_fn_t)la_main_thread, "la_main", &ctx);
 	// Open a window, if "openwindow" is set.
+	if(openwindow) {
+		la_window_start__(context, la_window, fnc_init, fnc_loop,
+			fnc_kill, name);
+	}else{
+		((jl_fnct) fnc_init)(context);
+		while(SDL_AtomicGet(&la_rmcexit))
+			fnc_loop(context);
+		fnc_kill(context);
+	}
 #ifndef LA_PHONE_ANDROID
-	if(openwindow) la_window_init__(context, la_window, fnc_init, name);
-	// Wait for the thread to finish.
+	// Exit.
 	la_print("Kill Window....");
 	if(openwindow) jlgr_kill(la_window);
 	la_print("SDL_Quit()");
@@ -185,9 +139,6 @@ int32_t la_start(void* fnc_init, jl_fnct fnc_loop, jl_fnct fnc_kill,
 	la_print("Free Context....");
 	free(context);
 	la_print("| success |");
-#else
-	la_print("android pre init %d %d", la_window->width, la_window->height);
-	la_window_init__(context, la_window, fnc_init, name);
 #endif
 	return 0;
 }

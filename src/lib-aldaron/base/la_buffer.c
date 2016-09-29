@@ -145,7 +145,6 @@ void la_buffer_resize(la_buffer_t* buffer) {
 		uint64_t oldsize = buffer->size;
 
 		buffer->size *= 2;
-		printf("%ld %p\n", buffer->size, buffer->data);
 		buffer->data = la_memory_resize(buffer->data, buffer->size);
 		la_memory_clear(buffer->data + oldsize, oldsize);
 		goto LA_BUFFER_RESIZE;

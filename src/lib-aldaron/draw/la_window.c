@@ -156,11 +156,13 @@ void la_window_resize__(la_window_t* window, uint32_t w, uint32_t h) {
 	la_vo_rect(window, &window->screen, 1.f, window->wm.ar);
 }
 
-void jl_wm_init__(la_window_t* jlgr) {
+void jl_wm_init__(la_window_t* window) {
 	// Create Window
-	jlgr_wm_create__(jlgr);
+	jlgr_wm_create__(window);
 	// Get Resize Event
-	la_port_input(jlgr);
+	la_port_input(window);
 	// Get Window Size
-	jl_wm_updatewh_(jlgr);
+	jl_wm_updatewh_(window);
+	// Set default values
+	la_safe_set_uint8(&window->has_2_screens, 0);
 }

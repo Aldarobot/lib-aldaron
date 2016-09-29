@@ -20,12 +20,6 @@
 #define JLGR_TEXT_ALIGNR JLGR_TEXT_CMD "\x12"
 #define JLGR_TEXT_ALIGNJ JLGR_TEXT_CMD "\x13"
 
-typedef enum {
-	JL_SCR_UP,
-	JL_SCR_DN,
-	JL_SCR_SS,
-}jlgr_which_screen_t;
-
 // Types:
 
 // Coordinate Structures

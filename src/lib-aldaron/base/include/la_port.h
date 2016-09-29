@@ -100,6 +100,7 @@ typedef struct {
 	jl_font_t font;
 	la_vo_t mouse;
 	la_vo_t screen;
+	safe_uint8_t has_2_screens; // If 2 screens are hooked up.
 
 	struct {
 		struct {
@@ -118,11 +119,6 @@ typedef struct {
 		safe_uint32_t set_width;
 		safe_uint32_t set_height;
 	} protected;
-
-	// Window Info
-	struct {
-		uint8_t cs; // The current screen "jlgr_which_screen_t"
-	}sg;
 
 	struct {
 		struct {

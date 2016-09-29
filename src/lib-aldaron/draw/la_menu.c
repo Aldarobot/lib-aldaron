@@ -11,12 +11,6 @@
 #define MENU_REDRAW_NONE -1
 #define MENU_REDRAW_ALL -2
 
-static char *GMessage[3] = {
-	"SCREEN: UPPER",
-	"SCREEN: LOWER",
-	"SCREEN: SINGLE"
-};
-
 void la_draw_resize(la_window_t *, uint32_t, uint32_t);
 
 static inline void jlgr_menubar_shadow__(la_menu_t* menu) {
@@ -92,12 +86,17 @@ static void jlgr_menu_flip_draw__(la_menu_t* menu) {
 static void jlgr_menu_flip_press__(la_menu_t* menu) {
 	if(!menu->window->input.mouse.h && !menu->window->input.touch.h) return;
 	if(!menu->window->input.mouse.p && !menu->window->input.touch.p) return;
-	// Actually Flip the screen.
-	if(menu->window->sg.cs == JL_SCR_UP) menu->window->sg.cs = JL_SCR_SS;
-	else if(menu->window->sg.cs == JL_SCR_DN) menu->window->sg.cs = JL_SCR_UP;
-	else menu->window->sg.cs = JL_SCR_DN;
-	jlgr_notify(menu->window, GMessage[menu->window->sg.cs]);
-	la_draw_resize(menu->window, 0, 0);
+//
+	const void* primary = la_safe_get_pointer(&menu->window->protected
+		.functions.primary);
+	const void* secondary = la_safe_get_pointer(&menu->window->protected
+		.functions.secondary);
+
+	la_safe_set_pointer(&menu->window->protected.functions.primary,
+		secondary);
+	la_safe_set_pointer(&menu->window->protected.functions.secondary,
+		primary);
+//	jlgr_notify(menu->window, GMessage[menu->window->sg.cs]);
 }
 
 static void la_menu_name_drawa__(la_menu_t* menu) {

@@ -44,6 +44,7 @@ void ex_wups(ctx_t* ctx) {
 	jlgr_text_draw(jlgr, "this IS upper",
 		(jl_vec3_t) { 0., 0., 0. },
 		(jl_font_t) { jlgr->textures.icon, 0, fontcolor, .0625f});
+	la_menu_draw(&ctx->menu, 0);
 }
 
 // Called when window is made/resized.

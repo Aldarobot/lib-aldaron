@@ -147,7 +147,7 @@ typedef struct{
 }la_window_draw_t;
 
 static void la_window_draw_flipped(la_window_draw_t* param) {
-	jl_fnct redraw = la_safe_get_pointer(
+	la_fn_t redraw = la_safe_get_pointer(
 		&param->window->protected.functions.primary);
 
 	// Clear the screen.
@@ -171,6 +171,4 @@ void jl_sg_init__(la_window_t* window) {
 	la_safe_set_pointer(&window->protected.functions.primary, jl_dont);
 	la_safe_set_pointer(&window->protected.functions.secondary, jl_dont);
 	la_safe_set_pointer(&window->protected.functions.resize, jl_dont);
-	// Resize.
-	window->sg.cs = JL_SCR_SS; // JL_SCR_DN
 }

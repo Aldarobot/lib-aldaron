@@ -18,7 +18,7 @@ static void ex_redraw(ctx_t* ctx) {
 // Light
 	la_effect_light(&ctx->vo1, &light, 1, (jl_vec3_t) { 1.f, 1.f, 1.f });
 
-	la_text(window, LA_PXMOVE("0.5", "0.1") LA_PXSIZE("0.1") LA_PRED "WHATS THAT");
+	la_text(window, LA_PXMOVE("0.1", "0.1") LA_PXSIZE("0.1") LA_PRED "WHATS THAT");
 }
 
 void ex_edit_loop(ctx_t* ctx) {

@@ -29,11 +29,11 @@ void la_text(la_window_t* window, const char* format, ...) {
 	float resetx = 0.f;
 //	float resety = 0.f;
 	uint32_t limit = 0;
+	char temp[1024 + 1];
 
 	// Format the String...
 	va_start( arglist, format );
-	char temp[snprintf(NULL, 0, format, arglist) + 1];
-	vsprintf(temp, format, arglist);
+	vsnprintf(temp, 1024, format, arglist);
 	va_end( arglist );
 
 	// Draw
@@ -98,19 +98,19 @@ void la_text(la_window_t* window, const char* format, ...) {
 				la_print("%c", temp[i]);
 				la_panic("Unknown Ansi Escape Sequence");
 			}
-		}else if(COMPARE(LA_TEXT_CMD)) {
-			if(COMPARE(LA_TEXT_ALIGN)) {
-				i += 2;
-			}else if(COMPARE(LA_TEXT_UNDERLAY)) {
-				i += 2;
-				for(int k = 0; k < 4; k++) { // RGBA
-					shadowcolor[k] = la_text_readfloat(&temp[i]);
-					i += sizeof(float);
-				}
-				shadow = 1;
-			}else if(COMPARE(LA_TEXT_SHADOWOFF)) {
-				shadow = 0;
-			}
+//		}else if(COMPARE(LA_TEXT_CMD)) {
+//			if(COMPARE(LA_TEXT_ALIGN)) {
+//				i += 2;
+//			}else if(COMPARE(LA_TEXT_UNDERLAY)) {
+//				i += 2;
+//				for(int k = 0; k < 4; k++) { // RGBA
+//					shadowcolor[k] = la_text_readfloat(&temp[i]);
+//					i += sizeof(float);
+//				}
+//				shadow = 1;
+//			}else if(COMPARE(LA_TEXT_SHADOWOFF)) {
+//				shadow = 0;
+//			}
 		}else if(COMPARE("\n")) {
 			tr.x = resetx, tr.y += rc.h;
 			i++;

@@ -299,7 +299,7 @@ static void jlgr_draw_msge__(la_window_t* window) {
  * @param jlgr: The library context.
  * @param draw_routine: Function that draws on screen.
 **/
-void jlgr_draw_loadscreen(la_window_t* window, jl_fnct draw_routine) {
+void jlgr_draw_loadscreen(la_window_t* window, la_fn_t draw_routine) {
 /*	jl_thread_mutex_lock(&jlgr->protected.mutex);
 	jlgr_redraw_t old_redrawfns = jlgr->protected.functions.redraw;
 
@@ -345,7 +345,7 @@ void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ..
 	jlgr->gui.msge.c = c;
 	la_print("DRAW LOADSCREEN");
 	
-	jlgr_draw_loadscreen(jlgr, (jl_fnct) jlgr_draw_msge__);
+	jlgr_draw_loadscreen(jlgr, (la_fn_t) jlgr_draw_msge__);
 	la_print("DREW LOADSCREEN");
 }
 

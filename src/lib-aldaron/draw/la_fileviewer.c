@@ -5,6 +5,8 @@
 #include "JLGRprivate.h"
 #include "SDL_filesystem.h"
 
+#include <la_list.h>
+
 #include "la_memory.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -56,7 +58,7 @@ static uint8_t jl_fl_user_select_open_dir__(la_window_t* jlgr, char *dirname) {
 			cl_list_add(la_fileviewer->filelist, element);
 		}
 		closedir(dir);
-		jl_cl_list_alphabetize(la_fileviewer->filelist);
+		la_list_alphabetize(la_fileviewer->filelist);
 	} else {
 		//Couldn't open Directory
 		int errsv = errno;

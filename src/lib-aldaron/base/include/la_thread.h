@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#ifndef LA_THREAD
+#define LA_THREAD
+
 #include <stdint.h>
 
 typedef int (*la_thread_fn_t)(void* data);
@@ -14,5 +17,7 @@ typedef struct {
 
 const char* la_thread_new(la_thread_t* thread, la_thread_fn_t fn,
 	const char* name, void* data);
-uint64_t la_thread_current(void);
 int32_t la_thread_old(la_thread_t* thread);
+uint64_t la_thread_current(void);
+
+#endif

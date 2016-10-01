@@ -10,8 +10,8 @@
 typedef struct {
 	void* context;
 	la_window_t* window;
-	jl_fnct loop;
-	jl_fnct kill;
+	la_fn_t loop;
+	la_fn_t kill;
 } la_main_thread_t;
 
 extern SDL_atomic_t la_rmcexit;
@@ -22,7 +22,7 @@ void la_window_resize__(la_window_t* window, uint32_t w, uint32_t h);
 void la_window_draw__(void* context, la_window_t* window);
 
 static void jlgr_thread_programsresize(void* context, la_window_t* window) {
-	jl_fnct resize=la_safe_get_pointer(&window->protected.functions.resize);
+	la_fn_t resize=la_safe_get_pointer(&window->protected.functions.resize);
 	resize(context);
 }
 
@@ -153,8 +153,8 @@ void la_window_start__(void* context, la_window_t* window, la_draw_fn_t fn_,
  * @param downscreen: The function to redraw the lower or secondary display.
  * @param resize: The function called when window is resized.
 **/
-void la_draw_fnchange(la_window_t* window, jl_fnct primary, jl_fnct secondary,
-	jl_fnct resize)
+void la_draw_fnchange(la_window_t* window, la_fn_t primary, la_fn_t secondary,
+	la_fn_t resize)
 {
 	la_safe_set_pointer(&window->protected.functions.primary, primary);
 	la_safe_set_pointer(&window->protected.functions.secondary, secondary);

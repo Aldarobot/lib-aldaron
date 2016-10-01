@@ -62,8 +62,8 @@ static void test_resize(ctx_t* ctx) {
 }
 
 void ex_edit_init(ctx_t* ctx) {
-	la_draw_fnchange(ctx->window, (jl_fnct) ex_wdns, (jl_fnct) ex_wups,
-		(jl_fnct) test_resize);
+	la_draw_fnchange(ctx->window, (la_fn_t) ex_wdns, (la_fn_t) ex_wups,
+		(la_fn_t) test_resize);
 }
 
 static inline void ex_init_tasks(ctx_t* ctx) {
@@ -88,6 +88,6 @@ static void ex_init(ctx_t* ctx, la_window_t* window) {
 }
 
 int main(int argc, char* argv[]) {
-	return la_start((jl_fnct) ex_init, (jl_fnct) ex_loop, la_dont, 1,
+	return la_start((la_fn_t) ex_init, (la_fn_t) ex_loop, la_dont, 1,
 		"Lib Aldaron Test Program", sizeof(ctx_t));
 }

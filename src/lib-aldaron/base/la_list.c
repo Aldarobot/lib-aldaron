@@ -2,7 +2,8 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
-#include "la.h"
+#include <la_list.h>
+#include <la.h>
 
 static inline void *_jl_cl_list_alphabetize_lowest(struct cl_list *list) {
 	int i, j, k;
@@ -41,7 +42,7 @@ static inline void *_jl_cl_list_alphabetize_lowest(struct cl_list *list) {
 	return rtn;
 }
 
-void jl_cl_list_alphabetize(struct cl_list *list) {
+void la_list_alphabetize(la_list_t *list) {
 	int i;
 
 	struct cl_list *alphabetized = cl_list_create();
@@ -59,13 +60,7 @@ void jl_cl_list_alphabetize(struct cl_list *list) {
 	cl_list_destroy(alphabetized);
 }
 
-/**
- * Iterate through a clump list.
- * @param context: The library context.
- * @param list: The clump list.
- * @param fn: The function that reads the data.
-**/
-void jl_clump_list_iterate(void* context, struct cl_list *list, jl_data_fnct fn) {
+void la_list_iterate(void* context, la_list_t *list, la_iterator_fn_t fn) {
 	int i;
 	struct cl_list_iterator *iterator = cl_list_iterator_create(list);
 

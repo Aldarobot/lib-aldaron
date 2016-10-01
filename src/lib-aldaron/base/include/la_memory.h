@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#ifndef LA_MEMORY
+#define LA_MEMORY
+
 #include <stdint.h>
 
 uint64_t la_memory_used(void);
@@ -13,3 +16,5 @@ void* la_memory_allocate(uint64_t size);
 void* la_memory_resize(void* data, uint64_t size);
 void* la_memory_free(void* data);
 void* la_memory_instant(void);
+
+#endif

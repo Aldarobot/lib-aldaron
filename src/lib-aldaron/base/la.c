@@ -107,7 +107,7 @@ const char* la_error(const char* format, ...) {
  * @param name: The name of the program, used for storage / window name etc.
  * @param ctx_size: The size of the program context.
 **/
-int32_t la_start(void* fnc_init, jl_fnct fnc_loop, jl_fnct fnc_kill,
+int32_t la_start(void* fnc_init, la_fn_t fnc_loop, la_fn_t fnc_kill,
 	uint8_t openwindow, const char* name, size_t ctx_size)
 {
 	SDL_AtomicSet(&la_rmcexit, 1);
@@ -125,7 +125,7 @@ int32_t la_start(void* fnc_init, jl_fnct fnc_loop, jl_fnct fnc_kill,
 		la_window_start__(context, la_window, fnc_init, fnc_loop,
 			fnc_kill, name);
 	}else{
-		((jl_fnct) fnc_init)(context);
+		((la_fn_t) fnc_init)(context);
 		while(SDL_AtomicGet(&la_rmcexit))
 			fnc_loop(context);
 		fnc_kill(context);

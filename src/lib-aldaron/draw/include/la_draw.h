@@ -106,7 +106,7 @@ typedef struct {
 
 typedef struct{
 	char *opt;
-	jl_fnct run;
+	la_fn_t run;
 }jl_popup_button_t;
 
 #include "la_port.h"
@@ -119,8 +119,8 @@ void la_draw_dont(void* context, la_window_t* window);
 
 // JLGR.c:
 float la_window_h(la_window_t* window);
-void la_draw_fnchange(la_window_t* window, jl_fnct primary, jl_fnct secondary,
-	jl_fnct resize);
+void la_draw_fnchange(la_window_t* window, la_fn_t primary, la_fn_t secondary,
+	la_fn_t resize);
 
 // JLGRgraphics.c:
 void jlgr_dont(la_window_t* jlgr);
@@ -135,7 +135,7 @@ void jlgr_draw_int(la_window_t* jlgr, int64_t num, la_v3_t loc, jl_font_t f);
 void jlgr_draw_dec(la_window_t* jlgr, double num, uint8_t dec, la_v3_t loc,
 	jl_font_t f);
 void jlgr_draw_ctxt(la_window_t* jlgr, const char *str, float yy, float* color);
-void jlgr_draw_loadscreen(la_window_t* jlgr, jl_fnct draw_routine);
+void jlgr_draw_loadscreen(la_window_t* jlgr, la_fn_t draw_routine);
 void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ...);
 void jlgr_term_msge(la_window_t* jlgr, char* message);
 void jlgr_gui_textbox_init(la_window_t* jlgr, la_buffer_t* string);

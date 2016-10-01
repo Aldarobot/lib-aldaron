@@ -67,19 +67,12 @@ typedef enum{
 }jl_thread_pp_t;
 
 typedef void(*la_fn_t)(void* context);
-typedef void(*jl_fnct)(void* context);
-typedef void(*jl_data_fnct)(void* context, void* data);
-typedef void(*jl_print_fnt)(void* context, const char * print);
 
 void la_print(const char* format, ...);
 void la_panic(const char* format, ...);
 void la_dont(void* context);
 const char* la_error(const char* format, ...);
-int32_t la_start(void* fnc_init, jl_fnct fnc_loop, jl_fnct fnc_kill,
+int32_t la_start(void* fnc_init, la_fn_t fnc_loop, la_fn_t fnc_kill,
 	uint8_t openwindow, const char* name, size_t ctx_size);
-
-// "cl.c"
-void jl_cl_list_alphabetize(struct cl_list *list);
-void jl_clump_list_iterate(void* context, struct cl_list *list, jl_data_fnct fn);
 
 #endif

@@ -16,7 +16,7 @@ static void la_gui_scrollpane_draw__(void* context) {
 }
 
 void la_gui_scrollpane_redraw(la_window_t* window, la_gui_scrollpane_t* sp,
-	jl_rect_t rc, float internal_height, jl_fnct drawfn)
+	jl_rect_t rc, float internal_height, la_fn_t drawfn)
 {
 	float colors[] = { 0.3f, 0.3f, 0.3f };
 //	jl_rect_t irc = (jl_rect_t) { 0.f, 0.f, 1.f, internal_height };

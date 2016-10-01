@@ -162,7 +162,7 @@ void jlgr_pr_draw(la_window_t* jlgr, jl_pr_t* pr, la_v3_t vec, uint8_t orient) {
 	jlgr_opengl_draw_arrays_(jlgr, GL_TRIANGLE_FAN, 4);
 }
 
-void la_pr(void* context, la_window_t* window, jl_pr_t* pr, jl_fnct redrawfn) {
+void la_pr(void* context, la_window_t* window, jl_pr_t* pr, la_fn_t redrawfn) {
 	jl_pr_t* oldpr = window->gl.cp;
 
 	if(!pr) la_panic("Drawing on lost pre-renderer.");

@@ -218,7 +218,7 @@ static void jlgr_effects_clear__(la_window_t* window) {
 /** @endcond */
 
 void jlgr_effects_clear(la_window_t* window, la_vo_t* vo) {
-	la_pr(window, window, &vo->pr, (jl_fnct) jlgr_effects_clear__);
+	la_pr(window, window, &vo->pr, (la_fn_t) jlgr_effects_clear__);
 }
 
 /**
@@ -387,7 +387,7 @@ void jlgr_effects_vo_light(la_window_t* jlgr, la_vo_t* vo, la_v3_t offs,
 **/
 void jlgr_effects_hue(la_window_t* jlgr, float c[]) {
 	la_memory_copy(c, jlgr->effects.colors, sizeof(float) * 4);
-	la_pr(jlgr, jlgr, jlgr->gl.cp, (jl_fnct) jlgr_effect_pr_hue__);
+	la_pr(jlgr, jlgr, jlgr->gl.cp, (la_fn_t) jlgr_effect_pr_hue__);
 }
 
 /**
@@ -395,7 +395,7 @@ void jlgr_effects_hue(la_window_t* jlgr, float c[]) {
 **/
 void jlgr_effects_light(la_window_t* jlgr, la_v3_t* material) {
 	jlgr->effects.vec3 = material;
-	la_pr(jlgr, jlgr, jlgr->gl.cp, (jl_fnct) jlgr_effect_pr_light__);
+	la_pr(jlgr, jlgr, jlgr->gl.cp, (la_fn_t) jlgr_effect_pr_light__);
 }
 
 /**

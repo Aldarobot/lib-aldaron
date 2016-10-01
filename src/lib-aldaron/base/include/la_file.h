@@ -2,8 +2,11 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#ifndef LA_FILE
+#define LA_FILE
+
 #include <stdint.h>
-#include "la_buffer.h"
+#include <la_buffer.h>
 
 enum {
 	FILE_TYPE_NONE,
@@ -22,3 +25,5 @@ const char* la_file_resloc(const char* prg_folder, const char* rname);
 void la_file_rm(const char* filename);
 const char* la_file_loadzip(la_buffer_t* rtn, la_buffer_t* data,
 	const char* file_name);
+
+#endif

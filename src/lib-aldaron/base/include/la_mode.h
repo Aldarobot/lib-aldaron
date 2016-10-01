@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#ifndef LA_MODE
+#define LA_MODE
+
 typedef struct {
 	void* loop;
 	void* init;
@@ -11,3 +14,5 @@ typedef struct {
 void la_mode_init(void* context, la_mode_t* mode, la_mode_t newmode);
 void la_mode_change(void* context, la_mode_t* mode, la_mode_t newmode);
 void la_mode_run(void* context, la_mode_t mode);
+
+#endif

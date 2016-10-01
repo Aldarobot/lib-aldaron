@@ -6,3 +6,4 @@
 
 const char* la_string_ffloat(float value);
 uint32_t la_string_upto(const char* string, char chr);
+uint8_t la_string_next(const char* string, const char* match);

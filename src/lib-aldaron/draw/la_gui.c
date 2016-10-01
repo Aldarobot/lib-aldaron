@@ -560,7 +560,7 @@ void _jlgr_loopa(la_window_t* jlgr) {
 void jlgr_init__(la_window_t* jlgr) {
 	la_buffer_t packagedata;
 
-	la_buffer_fdata(&packagedata, aldaron_data(), aldaron_size());
+	la_buffer_fromdata(&packagedata, aldaron_data(), aldaron_size());
 	jlgr->textures.logo = jl_sg_add_image(jlgr, &packagedata,
 		"/logo.png");
 	la_print("Draw Loading Screen");

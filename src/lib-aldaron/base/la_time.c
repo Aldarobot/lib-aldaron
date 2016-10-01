@@ -2,14 +2,10 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
-#include "la.h"
+#include <la_time.h>
+
 #include <time.h>
 
-/**
- * Sleep for specified number of seconds.
- * @param jl: The library context.
- * @param seconds: The amount of seconds to sleep.
-**/
 void la_time_sleep(double seconds) {
 	struct timespec time;
 	time.tv_sec = (int)seconds;
@@ -17,10 +13,6 @@ void la_time_sleep(double seconds) {
 	nanosleep(&time, NULL);
 }
 
-/**
- * Get time in seconds since the start of the program.
- * @param jl: The library context.
-**/
 double la_time(void) {
 	struct timespec time;
 	clock_gettime(CLOCK_MONOTONIC, &time);
@@ -35,12 +27,6 @@ double la_time_pulse(void) {
 	return ((double)time.tv_nsec) * 0.000000001;
 }
 
-/**
- * Time things up to a second.
- * @param jl: The library context.
- * @param timer: Pointer to timer variable.
- * @returns: Seconds passed since last call.
-**/
 double la_time_timer(double* timer) {
 	double prev_tick = *timer; // Temporarily Save Old Value
 
@@ -48,9 +34,6 @@ double la_time_timer(double* timer) {
 	return *timer - prev_tick; // Find difference In Seconds
 }
 
-/**
- * 
-**/
 double la_time_regulatefps(double* timer, uint8_t* on_time) {
 	double prev_tick = *timer; // Temporarily Save Old Value
 	double this_tick = la_time();

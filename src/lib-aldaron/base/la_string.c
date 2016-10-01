@@ -22,3 +22,7 @@ uint32_t la_string_upto(const char* string, char chr) {
 	}
 	return strlen(string);
 }
+
+uint8_t la_string_next(const char* string, const char* match) {
+	return strstr(string, match) == string;
+}

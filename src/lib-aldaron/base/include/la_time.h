@@ -5,6 +5,8 @@
 #ifndef LA_TIME
 #define LA_TIME
 
+#include <stdint.h>
+
 void la_time_sleep(double seconds);
 double la_time(void);
 double la_time_pulse(void);

@@ -80,7 +80,7 @@ void _jl_sg_load_jlpx(la_window_t* jlgr,la_buffer_t* data,void **pixels,int *w,i
 	for(i = 0; i < image->h; i++) {
 		for(j = 0; j < image->w; j++) {
 			color = _jl_sg_gpix(image, j, i);
-			la_buffer_add(&pixel_data, &color, 4);
+			la_buffer_write(&pixel_data, &color, 4);
 		}
 	}
 	//Set Return values

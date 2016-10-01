@@ -217,7 +217,7 @@ const char* la_file_load(la_buffer_t* load, const char* file_name) {
 	}
 	lseek(fd, 0, SEEK_SET);
 	if((bytes = read(fd, file, size)))
-		la_buffer_fdata(load, file, bytes);
+		la_buffer_fromdata(load, file, bytes);
 	close(fd);
 	la_memory_free(converted_filename);
 	return NULL;
@@ -368,7 +368,7 @@ const char* la_file_loadzip(la_buffer_t* rtn, la_buffer_t* data,
 	zip_close(zipfile);
 	la_print("closed file.");
 	// Make a data_t* from the data.
-	if(Read) la_buffer_fdata(rtn, fileToLoad, Read);
+	if(Read) la_buffer_fromdata(rtn, fileToLoad, Read);
 	la_print("done.");
 	return NULL;
 }

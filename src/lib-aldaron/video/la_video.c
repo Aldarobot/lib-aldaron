@@ -119,7 +119,7 @@ void la_video_make_jpeg(la_buffer_t* rtn, uint8_t quality, uint8_t* pxdata,
 	jpeg_destroy_compress(&cinfo);
 
 	/* And we're done! */
-	la_buffer_fdata(rtn, data, data_size);
+	la_buffer_fromdata(rtn, data, data_size);
 }
 
 //void memtester(jl_t* jl, str_t name);

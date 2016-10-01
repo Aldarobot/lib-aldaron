@@ -2,8 +2,8 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
-#include "la_safe.h"
-#include "la_memory.h"
+#include <la_safe.h>
+#include <la_memory.h>
 
 void la_safe_set(void* var, const void* set, size_t size) {
 	SDL_AtomicLock(var);

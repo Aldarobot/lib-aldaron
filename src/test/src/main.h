@@ -1,5 +1,3 @@
-#include <jl.h>
-#include <jlgr.h>
 #include <la_menu.h>
 #include <la_mode.h>
 

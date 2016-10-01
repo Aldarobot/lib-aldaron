@@ -283,7 +283,7 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 
 			jlgr_vo_txmap(window, &fileviewer->file, 0,
 				16, 16, state == FILE_TYPE_DIR ? 12 : 11);
-			jlgr_vo_move(&fileviewer->file, (jl_vec3_t) { x * 0.2f, 0.1f + (y * 0.2f), 0.f});
+			la_vo_move(&fileviewer->file, (jl_vec3_t) { x * 0.2f, 0.1f + (y * 0.2f), 0.f});
 			jlgr_vo_draw(window, &fileviewer->file);
 			la_text(window, LA_PXWIDTH("0.5") LA_PXSIZE("0.025") LA_PXMOVE("%f", "%f") LA_PBLACK "%s", .035 + (x * 0.2f), offset + (y * 0.2f), stringtoprint);
 			x++;

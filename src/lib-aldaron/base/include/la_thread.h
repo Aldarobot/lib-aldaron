@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 typedef int (*la_thread_fn_t)(void* data);
 
 typedef struct {

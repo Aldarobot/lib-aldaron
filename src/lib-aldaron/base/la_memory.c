@@ -1,10 +1,6 @@
-/*
- * me: memory manager
- * 
- * A simple memory library.  Includes creating variables, setting and
- * getting variables, and doing simple and complicated math functions on
- * the variables.  Has a specialized string type.
-*/
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
 
 #include "la_memory.h"
 #include "la.h"
@@ -13,10 +9,6 @@
 #include <malloc.h>
 #include <string.h>
 
-/**
- * Return Amount Of Total Memory Being Used
- * @returns The total amount of memory being used in bytes.
-**/
 uint64_t la_memory_used(void) {
 	struct mallinfo mi;
 
@@ -58,17 +50,6 @@ void* la_memory_free(void* data) {
 	free(data);
 	return NULL;
 }
-
-/*void* la_memory_format(const char* format, ...) {
-	void* output;
-	va_list arglist;
-
-	va_start(arglist, format);
-	output = la_memory_allocate(snprintf(NULL, 0, format, arglist) + 1);
-	vsprintf(output, format, arglist);
-	va_end(arglist);
-	return output;
-}*/
 
 /**
  * Format a string.
@@ -183,9 +164,6 @@ void* la_memory_instant(void) {
 	return la_memory_collection[index].temp;
 }
 
-/**
- * Convert a double to a string.
-**/
 const char* la_memory_dtostr(float value) {
 	void* instant = la_memory_instant();
 	sprintf(instant, "%f", value);

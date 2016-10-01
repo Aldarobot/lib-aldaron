@@ -57,12 +57,12 @@ static void jlgr_vo_vertices__(la_window_t* jlgr, la_vo_t* vo, const float *xyzw
 		jlgr_pr_resize(jlgr, &vo->pr, vo->pr.cb.ofs.x, vo->pr.cb.ofs.y,
 			jlgr->wm.w * vo->pr.cb.ofs.x);
 	}
-	jlgr_vo_move(vo, (jl_vec3_t) { 0.f, 0.f, 0.f });
+	la_vo_move(vo, (jl_vec3_t) { 0.f, 0.f, 0.f });
 }
 
 static void jlgr_vo_color_buffer__(la_window_t* jlgr, la_vo_t* vo, float* cc) {
 	vo->tx = 0;
-	jl_mem_copyto(cc, vo->cc, vo->vc * 4 * sizeof(float));
+	la_memory_copy(cc, vo->cc, vo->vc * 4 * sizeof(float));
 	// Set Color Buffer "vo->bt" to "vo->cc"
 	jlgr_opengl_buffer_set_(jlgr, &vo->bt, vo->cc, vo->vc * 4);
 }
@@ -281,7 +281,7 @@ void jlgr_vo_color_solid(la_window_t* jlgr, la_vo_t* vo, float* rgba) {
 	uint32_t i;
 
 	for(i = 0; i < vo->vc; i++) {
-		jl_mem_copyto(rgba, &(rgbav[i * 4]), 4 * sizeof(float));
+		la_memory_copy(rgba, &(rgbav[i * 4]), 4 * sizeof(float));
 	}
 	jlgr_vo_color_buffer__(jlgr, vo, rgbav);
 }

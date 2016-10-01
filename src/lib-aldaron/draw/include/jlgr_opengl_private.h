@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #if JL_GLTYPE == JL_GLTYPE_SDL_GL2  // SDL OpenGL 2
 	#include "SDL_opengl.h"
 	#include "SDL_opengl_glext.h"

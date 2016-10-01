@@ -23,7 +23,7 @@ static inline void jlgr_menubar_shadow__(la_menu_t* menu) {
 			break;
 
 		// Draw shadow
-		jlgr_vo_move(&menu->shadow, (jl_vec3_t) {
+		la_vo_move(&menu->shadow, (jl_vec3_t) {
 			.895 - (.1 * menu->redraw), 0.005, 0. });
 		jlgr_vo_draw(menu->window, &menu->shadow);
 		// Draw Icon
@@ -178,7 +178,7 @@ void la_menu_drawicon(la_menu_t* menu, uint32_t tex, uint8_t c) {
 
 	jlgr_vo_set_image(menu->window, &menu->icon, rc_icon, tex);
 	jlgr_vo_txmap(menu->window, &menu->icon, 0, 16, 16, c);
-	jlgr_vo_move(&menu->icon, tr);
+	la_vo_move(&menu->icon, tr);
 	jlgr_vo_draw(menu->window, &menu->icon);
 }
 

@@ -2,7 +2,7 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
-#include "jlgr.h"
+#include <la_draw.h>
 
 // Full texture
 #define DEFAULT_TC (const float[]) { \

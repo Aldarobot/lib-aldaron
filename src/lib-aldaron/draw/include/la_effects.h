@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #ifdef JLGR_EFFECTS_TYPES
 	#ifndef JLGR_EFFECTS_TYPES_H
 	#define JLGR_EFFECTS_TYPES_H

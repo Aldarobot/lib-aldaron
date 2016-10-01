@@ -1,6 +1,10 @@
-#include "la_vo.h"
-#include "la_safe.h"
-#include "la_draw.h"
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
+#include <la_vo.h>
+#include <la_safe.h>
+#include <la_draw.h>
 
 typedef struct {
 	la_vo_t external;

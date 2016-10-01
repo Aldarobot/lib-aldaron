@@ -1,8 +1,9 @@
-#ifndef JLAU
-#define JLAU
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
 
-#include "jl.h"
-#include "SDL_mixer.h"
+#ifndef LA_AUDIO
+#define LA_AUDIO
 
 // Types:
 typedef struct {

@@ -168,7 +168,7 @@ void la_window_draw__(void* context, la_window_t* window) {
 
 void jl_sg_init__(la_window_t* window) {
 	// Initialize redraw routines to do nothing.
-	la_safe_set_pointer(&window->protected.functions.primary, jl_dont);
-	la_safe_set_pointer(&window->protected.functions.secondary, jl_dont);
-	la_safe_set_pointer(&window->protected.functions.resize, jl_dont);
+	la_safe_set_pointer(&window->protected.functions.primary, la_dont);
+	la_safe_set_pointer(&window->protected.functions.secondary, la_dont);
+	la_safe_set_pointer(&window->protected.functions.resize, la_dont);
 }

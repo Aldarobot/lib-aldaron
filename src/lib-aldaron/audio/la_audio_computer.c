@@ -5,6 +5,9 @@
 #include "la.h"
 
 #ifdef LA_COMPUTER
+
+#include "SDL_mixer.h"
+
 #include "la_audio.h"
 #include "la_memory.h"
 

@@ -378,7 +378,7 @@ void jlgr_effects_vo_light(la_window_t* jlgr, la_vo_t* vo, jl_vec3_t offs,
  * @param c: The hue to make everything.
 **/
 void jlgr_effects_hue(la_window_t* jlgr, float c[]) {
-	jl_mem_copyto(c, jlgr->effects.colors, sizeof(float) * 4);
+	la_memory_copy(c, jlgr->effects.colors, sizeof(float) * 4);
 	la_pr(jlgr, jlgr, jlgr->gl.cp, (jl_fnct) jlgr_effect_pr_hue__);
 }
 

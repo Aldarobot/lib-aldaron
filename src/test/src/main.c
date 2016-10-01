@@ -84,7 +84,7 @@ static void ex_init(ctx_t* ctx, la_window_t* window) {
 	jlgr_draw_msge(window, window->textures.logo, 0, "Initializing");
 	ex_init_tasks(ctx);
 	la_mode_init(ctx, &ctx->mode, (la_mode_t)
-		{ ex_edit_loop, ex_edit_init, jl_dont } );
+		{ ex_edit_loop, ex_edit_init, la_dont } );
 }
 
 int main(int argc, char* argv[]) {

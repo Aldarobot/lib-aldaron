@@ -1,3 +1,7 @@
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
 #include "la_thread.h"
@@ -529,7 +533,7 @@ void jlgr_opengl_vertices_(la_window_t* jlgr, const float *xyzw, uint8_t vertice
 	uint16_t items = (vertices*3);
 
 	// Copy Vertices
-	jl_mem_copyto(xyzw, cv, items * sizeof(float));
+	la_memory_copy(xyzw, cv, items * sizeof(float));
 	// Copy Buffer Data "cv" to Buffer "gl"
 	jlgr_opengl_buffer_set_(jlgr, gl, cv, items);
 }

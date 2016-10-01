@@ -5,7 +5,7 @@
 #ifndef LA_VO
 #define LA_VO
 
-#include "la_draw.h"
+#include <la_draw.h>
 
 typedef jl_vec3_t la_v3_t;
 

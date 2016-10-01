@@ -2,7 +2,6 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
-#include "jl.h"
 #include "SDL_net.h"
 
 typedef struct {

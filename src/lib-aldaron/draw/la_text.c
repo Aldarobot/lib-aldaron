@@ -1,10 +1,10 @@
-/*
- * JL_Lib
- * Copyright (c) 2015 Jeron A. Lau 
-*/
+/* Lib Aldaron --- Copyright (c) 2016 Jeron A. Lau */
+/* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
+/* DO NOT REMOVE THIS NOTICE */
+
 #include "JLGRprivate.h"
-#include "la_text.h"
-#include "la_memory.h"
+
+#include <la_text.h>
 
 #define COMPARE(towhat) ( strncmp(&temp[i], towhat, strlen(towhat)) == 0 )
 

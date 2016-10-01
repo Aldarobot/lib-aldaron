@@ -5,7 +5,7 @@
 #ifndef LA_DRAW
 #define LA_DRAW
 
-#include "jl.h"
+#include <la.h>
 
 #include "SDL_events.h"
 #include "la_safe.h"
@@ -152,7 +152,6 @@ void jlgr_vo_txmap(la_window_t* jlgr, la_vo_t* vo, uint8_t orientation,
 	uint8_t w, uint8_t h, int16_t map);
 void jlgr_vo_color_gradient(la_window_t* jlgr, la_vo_t* vo, float* rgba);
 void jlgr_vo_color_solid(la_window_t* jlgr, la_vo_t* vo, float* rgba);
-void jlgr_vo_move(la_vo_t* vo, jl_vec3_t pos);
 void jlgr_vo_draw2(la_window_t* jlgr, la_vo_t* vo, jlgr_glsl_t* sh);
 void jlgr_vo_draw(la_window_t* jlgr, la_vo_t* vo);
 void jlgr_vo_draw_pr(la_window_t* jlgr, la_vo_t* vo);

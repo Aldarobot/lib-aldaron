@@ -5,6 +5,9 @@
 #ifndef LA_AUDIO
 #define LA_AUDIO
 
+#include <la_buffer.h>
+#include <la_math.h>
+
 // Types:
 typedef struct {
 	void *audio;
@@ -17,14 +20,14 @@ typedef struct{
 }jlau_t;
 
 // Prototypes:
-void jlau_play(jlau_t* jlau, jlau_audio_t* audio, float in, jl_vec3_t* vec);
-void jlau_lock(jlau_t* jlau, jlau_audio_t* audio, float in, jl_vec3_t* vec);
+void jlau_play(jlau_t* jlau, jlau_audio_t* audio, float in, la_v3_t* vec);
+void jlau_lock(jlau_t* jlau, jlau_audio_t* audio, float in, la_v3_t* vec);
 void jlau_pause(jlau_t* jlau, jlau_audio_t* audio);
 void jlau_resume(jlau_t* jlau, jlau_audio_t* audio);
 uint8_t jlau_wait(jlau_t* jlau, jlau_audio_t* w_audio, jlau_audio_t* n_audio,
-	float in, jl_vec3_t* vec);
+	float in, la_v3_t* vec);
 void jlau_stop(jlau_audio_t* audio, float out);
-void jlau_add_audio(jlau_t* jlau, jlau_audio_t* audio, data_t* zipdata,
+void jlau_add_audio(jlau_t* jlau, jlau_audio_t* audio, la_buffer_t* zipdata,
 	const char* filename, uint8_t music);
 jlau_t* jlau_init(void);
 

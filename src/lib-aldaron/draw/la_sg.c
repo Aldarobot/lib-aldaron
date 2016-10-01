@@ -48,7 +48,7 @@ uint32_t _jl_sg_gpix(/*in */ SDL_Surface* surface, int32_t x, int32_t y) {
 	return color;
 }
 
-SDL_Surface* la_window_makesurface(la_window_t* jlgr, data_t* data) {
+SDL_Surface* la_window_makesurface(la_window_t* jlgr, la_buffer_t* data) {
 	SDL_Surface *image;
 	SDL_RWops *rw;
 
@@ -60,7 +60,7 @@ SDL_Surface* la_window_makesurface(la_window_t* jlgr, data_t* data) {
 	return image;
 }
 
-void _jl_sg_load_jlpx(la_window_t* jlgr,data_t* data,void **pixels,int *w,int *h) {
+void _jl_sg_load_jlpx(la_window_t* jlgr,la_buffer_t* data,void **pixels,int *w,int *h) {
 	SDL_Surface *image;
 	uint32_t color = 0;
 	la_buffer_t pixel_data;
@@ -92,7 +92,7 @@ void _jl_sg_load_jlpx(la_window_t* jlgr,data_t* data,void **pixels,int *w,int *h
 }
 
 //Load the images in the image file
-static inline uint32_t jl_sg_add_image__(la_window_t* jlgr, data_t* data) {
+static inline uint32_t jl_sg_add_image__(la_window_t* jlgr, la_buffer_t* data) {
 	void *fpixels = NULL;
 	int fw;
 	int fh;
@@ -114,7 +114,7 @@ static inline uint32_t jl_sg_add_image__(la_window_t* jlgr, data_t* data) {
  * @param filename: Name of the image file in the package.
  * @returns: Texture object.
 */
-uint32_t jl_sg_add_image(la_window_t* jlgr, data_t* zipdata, const char* filename) {
+uint32_t jl_sg_add_image(la_window_t* jlgr, la_buffer_t* zipdata, const char* filename) {
 	la_buffer_t img;
 
 	// Load image into "img"

@@ -78,7 +78,7 @@ jl_file_save_(const void *file_data, const char *file_name, uint32_t bytes) {
 }*/
 
 static char* jl_file_get_root__(void) {
-	data_t root_path;
+	la_buffer_t root_path;
 
 	la_buffer_init(&root_path);
 #if JL_PLAT == JL_PLAT_PHONE // Android:

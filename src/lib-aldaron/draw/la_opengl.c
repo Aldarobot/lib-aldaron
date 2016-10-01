@@ -640,8 +640,8 @@ void jl_gl_viewport_screen(la_window_t* jlgr) {
  * @param near: The near clipping pane.
  * @param far: The far clipping pane.
 **/
-void jlgr_opengl_matrix(la_window_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
-	jl_vec3_t rotatev, jl_vec3_t translatev, jl_vec3_t lookv, float ar)
+void jlgr_opengl_matrix(la_window_t* jlgr, jlgr_glsl_t* sh, la_v3_t scalev,
+	la_v3_t rotatev, la_v3_t translatev, la_v3_t lookv, float ar)
 {
 	float scale[] = {
 		2. * scalev.x, 0.f, 0.f, 0.f,

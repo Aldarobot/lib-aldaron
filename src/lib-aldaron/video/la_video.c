@@ -21,7 +21,7 @@ typedef long unsigned int jpeg_long_int_t;
  * @param h: THe height
  * @returns: The data.
 **/
-void la_video_make_jpeg(data_t* rtn, uint8_t quality, uint8_t* pxdata,
+void la_video_make_jpeg(la_buffer_t* rtn, uint8_t quality, uint8_t* pxdata,
 	uint16_t w, uint16_t h)
 {
 	uint8_t* data = NULL;

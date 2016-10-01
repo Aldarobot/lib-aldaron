@@ -6,8 +6,7 @@
 #define LA_VO
 
 #include <la_draw.h>
-
-typedef jl_vec3_t la_v3_t;
+#include <la_math.h>
 
 void la_vo_rect(la_window_t* window, la_vo_t* vo, float w, float h);
 void la_vo_color_rect(la_window_t* window, la_vo_t* vo, float* colors,

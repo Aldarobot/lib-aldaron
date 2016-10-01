@@ -12,7 +12,9 @@
 #include <android/sensor.h>
 #endif
 
-#include "la_safe.h"
+#include <la_safe.h>
+#include <la_buffer.h>
+#include <la_math.h>
 
 // Print 
 #define LA_PRESET "\x1B[0m"
@@ -145,15 +147,15 @@ typedef struct {
 			int32_t shininess;
 
 			// Shader drawing settings
-			jl_vec3_t light_position;
-			jl_vec3_t light_color;
+			la_v3_t light_position;
+			la_v3_t light_color;
 			float light_power;
-			jl_vec3_t material_brightness;
+			la_v3_t material_brightness;
 			int32_t light_texture;
 		}light;
 
 		float colors[4];
-		jl_vec3_t* vec3;
+		la_v3_t* vec3;
 		la_vo_t* vo;
 
 		jlgr_effects_light_t lights;
@@ -195,7 +197,7 @@ typedef struct {
 			uint8_t c;
 		}msge;
 		struct{
-			data_t* string;
+			la_buffer_t* string;
 			float counter;
 			uint8_t do_it;
 			uint8_t cursor;

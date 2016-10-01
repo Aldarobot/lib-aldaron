@@ -5,6 +5,7 @@
 #include "JLGRprivate.h"
 
 #include <la_text.h>
+#include <la_string.h>
 
 #define COMPARE(towhat) ( strncmp(&temp[i], towhat, strlen(towhat)) == 0 )
 
@@ -25,7 +26,7 @@ void la_text(la_window_t* window, const char* format, ...) {
 	float tabsize = 8.f; // How many spaces are in a tab.
 	float distance = .75f; // X distance between letters ( X : Y )
 	float width = 1.f;
-	jl_vec3_t tr = { 0.f, 0.f, 0.f };
+	la_v3_t tr = { 0.f, 0.f, 0.f };
 	float resetx = 0.f;
 //	float resety = 0.f;
 	uint32_t limit = 0;
@@ -123,7 +124,7 @@ void la_text(la_window_t* window, const char* format, ...) {
 			// Effects
 			if(shadow) {
 				jlgr_effects_vo_hue(window, &window->gl.temp_vo,
-					(jl_vec3_t) { tr.x - 0.005, tr.y + 0.005,
+					(la_v3_t) { tr.x - 0.005, tr.y + 0.005,
 						0.f }, shadowcolor);
 			}
 			// Draw character
@@ -142,14 +143,14 @@ void la_text(la_window_t* window, const char* format, ...) {
  * @param loc: The position to draw it at
  * @param f: The font to use.
 **/
-void jlgr_text_draw(la_window_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t f) {
+void jlgr_text_draw(la_window_t* jlgr, const char* str, la_v3_t loc, jl_font_t f) {
 	if(str == NULL) return;
 
 	const uint8_t *text = (void*)str;
 	uint32_t i;
 	uint8_t bold = 0;
 	jl_rect_t rc = { loc.x, loc.y, f.size, f.size };
-	jl_vec3_t tr = { 0., 0., 0. };
+	la_v3_t tr = { 0., 0., 0. };
 	la_vo_t* vo = &jlgr->gl.temp_vo;
 
 	jlgr_vo_set_image(jlgr, vo, rc, jlgr->textures.font);
@@ -165,11 +166,11 @@ void jlgr_text_draw(la_window_t* jlgr, const char* str, jl_vec3_t loc, jl_font_t
 			if(strncmp(&str[i], JLGR_TEXT_BOLD, 2) == 0) {
 				bold = 1;
 			}else if(strncmp(&str[i], JLGR_TEXT_ALIGNC, 2) == 0) {
-				uint32_t n = jl_mem_string_upto(&str[i] + 2,
+				uint32_t n = la_string_upto(&str[i] + 2,
 					'\n');
 				tr.x -= (f.size * n) / 2.f;
 			}else if(strncmp(&str[i], JLGR_TEXT_ALIGNR, 2) == 0) {
-				uint32_t n = jl_mem_string_upto(&str[i] + 2,
+				uint32_t n = la_string_upto(&str[i] + 2,
 					'\n');
 				tr.x -= f.size * n;
 			}

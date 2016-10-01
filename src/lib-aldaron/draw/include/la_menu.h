@@ -9,7 +9,6 @@
 
 typedef struct {
 	la_window_t* window;
-	jl_mutex_t mutex;
 	la_vo_t menubar;
 
 	// Protected ....

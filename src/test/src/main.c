@@ -7,16 +7,16 @@ static void ex_redraw(ctx_t* ctx) {
 	la_window_t* window = ctx->window;
 
 	la_light_t light = {
-		(jl_vec3_t) { la_safe_get_float(&window->mouse_x),
+		(la_v3_t) { la_safe_get_float(&window->mouse_x),
 			la_safe_get_float(&window->mouse_y) },
-		(jl_vec3_t) { 1.f, 1.f, 1.f },
+		(la_v3_t) { 1.f, 1.f, 1.f },
 		.25f
 	};
 
 // Draw
 	jlgr_vo_draw(window, &ctx->vo1);
 // Light
-	la_effect_light(&ctx->vo1, &light, 1, (jl_vec3_t) { 1.f, 1.f, 1.f });
+	la_effect_light(&ctx->vo1, &light, 1, (la_v3_t) { 1.f, 1.f, 1.f });
 
 	la_text(window, LA_PXMOVE("0.1", "0.1") LA_PXSIZE("0.1") LA_PRED "WHATS THAT");
 }
@@ -29,7 +29,7 @@ void ex_wdns(ctx_t* ctx) {
 	la_window_t* jlgr = ctx->window;
 
 	jlgr_text_draw(jlgr, "testing""\xCA""1234567890",
-		(jl_vec3_t) { 0., 0., 0. },
+		(la_v3_t) { 0., 0., 0. },
 		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, .0625f });
 	ex_redraw(ctx);
 	la_menu_draw(&ctx->menu, 0);
@@ -42,7 +42,7 @@ void ex_wups(ctx_t* ctx) {
 
 	jl_gl_clear(jlgr, 1., 1., 1., 1.);
 	jlgr_text_draw(jlgr, "this IS upper",
-		(jl_vec3_t) { 0., 0., 0. },
+		(la_v3_t) { 0., 0., 0. },
 		(jl_font_t) { jlgr->textures.icon, 0, fontcolor, .0625f});
 	la_menu_draw(&ctx->menu, 0);
 }

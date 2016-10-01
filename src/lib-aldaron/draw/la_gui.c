@@ -91,7 +91,7 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
  * @param 'loc': the position to draw it at
  * @param 'f': the font to use.
  */
-void jlgr_draw_int(la_window_t* jlgr, int64_t num, jl_vec3_t loc, jl_font_t f) {
+void jlgr_draw_int(la_window_t* jlgr, int64_t num, la_v3_t loc, jl_font_t f) {
 	char display[10];
 	sprintf(display, "%ld", (long int) num);
 	jlgr_text_draw(jlgr, display, loc, f);
@@ -105,7 +105,7 @@ void jlgr_draw_int(la_window_t* jlgr, int64_t num, jl_vec3_t loc, jl_font_t f) {
  * @param 'loc': the position to draw it at
  * @param 'f': the font to use.
  */
-void jlgr_draw_dec(la_window_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
+void jlgr_draw_dec(la_window_t* jlgr, double num, uint8_t dec, la_v3_t loc,
 	jl_font_t f)
 {
 	char display[10];
@@ -125,7 +125,7 @@ void jlgr_draw_dec(la_window_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
 /*void jlgr_text_draw_area(la_window_t* jlgr, jl_sprite_t * spr, const char* txt) {
 	float fontsize = .9 / strlen(txt);
 	jlgr_text_draw(jlgr, txt,
-		(jl_vec3_t) { .05,.5 * (jl_gl_ar(jlgr) - fontsize),0. },
+		(la_v3_t) { .05,.5 * (jl_gl_ar(jlgr) - fontsize),0. },
 		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, 
 			fontsize});
 }*/
@@ -151,7 +151,7 @@ void jlgr_draw_dec(la_window_t* jlgr, double num, uint8_t dec, jl_vec3_t loc,
  */
 void jlgr_draw_ctxt(la_window_t* jlgr, const char *str, float yy, float* color) {
 	jlgr_text_draw(jlgr, str,
-		(jl_vec3_t) { 0., yy, 0. },
+		(la_v3_t) { 0., yy, 0. },
 		(jl_font_t) { jlgr->textures.icon, 0, color, 
 			1. / ((float)strlen(str))} );
 }
@@ -256,8 +256,8 @@ void jlgr_draw_ctxt(la_window_t* jlgr, const char *str, float yy, float* color) 
 
 	jl_gui_slider_main slider;
 
-	slider.draw.where[0] = (jl_vec3_t) { 0., 0., 0. };
-	slider.draw.where[1] = (jl_vec3_t) { 1. - (jl_gl_ar(jlgr) * .075),
+	slider.draw.where[0] = (la_v3_t) { 0., 0., 0. };
+	slider.draw.where[1] = (la_v3_t) { 1. - (jl_gl_ar(jlgr) * .075),
 		0., 0. };
 	slider.x1 = x1, slider.x2 = x2;
 	(*slider.x1) = 0.;
@@ -422,7 +422,7 @@ void jlgr_popup(la_window_t* jlgr, char *name, char *message,
 		jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo);
 		// Description
 		jlgr_text_draw(jlgr, txt,
-			(jl_vec3_t)
+			(la_v3_t)
 				{0., jl_gl_ar(jlgr) - .0625, 0.},
 			(jl_font_t) { jlgr->textures.icon, 0,
 				jlgr->fontcolor, .05 });
@@ -436,7 +436,7 @@ void jlgr_popup(la_window_t* jlgr, char *name, char *message,
  * @param jlgr: The library context.
  * @param string: The string to store to.
 **/
-void jlgr_gui_textbox_init(la_window_t* jlgr, data_t* string) {
+void jlgr_gui_textbox_init(la_window_t* jlgr, la_buffer_t* string) {
 	jlgr->gui.textbox.string = string;
 }
 
@@ -499,7 +499,7 @@ void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc){
 		jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo);
 	}
 	jlgr_text_draw(jlgr, (char*)(jlgr->gui.textbox.string->data),
-		(jl_vec3_t) {rc.x, rc.y, 0.},
+		(la_v3_t) {rc.x, rc.y, 0.},
 		(jl_font_t) {jlgr->textures.icon,0,jlgr->fontcolor,rc.h});
 //		jlgr_draw_image(jl, 0, 0,
 //			x + (h*((float)string->curs-.5)), y, h, h, 252, 1.);
@@ -558,7 +558,7 @@ void _jlgr_loopa(la_window_t* jlgr) {
 }
 
 void jlgr_init__(la_window_t* jlgr) {
-	data_t packagedata;
+	la_buffer_t packagedata;
 
 	la_buffer_fdata(&packagedata, aldaron_data(), aldaron_size());
 	jlgr->textures.logo = jl_sg_add_image(jlgr, &packagedata,

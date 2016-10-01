@@ -15,10 +15,10 @@ static inline void jlgr_vo_bounding_box(la_window_t* jlgr, la_vo_t* vo,
 	const float *xyzw, uint32_t vertices)
 {
 	int i;
-	vo->pr.cb.pos = (jl_vec3_t) { xyzw[0], xyzw[1], xyzw[2] };
-	vo->pr.cb.ofs = (jl_vec3_t) { xyzw[0], xyzw[1], xyzw[2] };
+	vo->pr.cb.pos = (la_v3_t) { xyzw[0], xyzw[1], xyzw[2] };
+	vo->pr.cb.ofs = (la_v3_t) { xyzw[0], xyzw[1], xyzw[2] };
 	for(i = 1; i < vertices; i++) {
-		jl_vec3_t new_vertex = {
+		la_v3_t new_vertex = {
 			xyzw[(3 * i)],
 			xyzw[(3 * i) + 1],
 			xyzw[(3 * i) + 2] };
@@ -37,7 +37,7 @@ static inline void jlgr_vo_bounding_box(la_window_t* jlgr, la_vo_t* vo,
 		if(new_vertex.z > vo->pr.cb.ofs.z)
 			vo->pr.cb.ofs.z = new_vertex.z;
 	}
-	jl_mem_vec_sub(&vo->pr.cb.ofs, vo->pr.cb.pos);
+	la_math_v3_sub(&vo->pr.cb.ofs, vo->pr.cb.pos);
 }
 
 static void jlgr_vo_vertices__(la_window_t* jlgr, la_vo_t* vo, const float *xyzw,
@@ -57,7 +57,7 @@ static void jlgr_vo_vertices__(la_window_t* jlgr, la_vo_t* vo, const float *xyzw
 		jlgr_pr_resize(jlgr, &vo->pr, vo->pr.cb.ofs.x, vo->pr.cb.ofs.y,
 			jlgr->wm.w * vo->pr.cb.ofs.x);
 	}
-	la_vo_move(vo, (jl_vec3_t) { 0.f, 0.f, 0.f });
+	la_vo_move(vo, (la_v3_t) { 0.f, 0.f, 0.f });
 }
 
 static void jlgr_vo_color_buffer__(la_window_t* jlgr, la_vo_t* vo, float* cc) {
@@ -339,10 +339,10 @@ void jlgr_vo_draw(la_window_t* jlgr, la_vo_t* vo) {
 
 	jlgr_opengl_draw1(jlgr, shader);
 	jlgr_opengl_matrix(jlgr, shader,
-		(jl_vec3_t) { 1.f, 1.f, 1.f }, // Scale
-		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Rotate
+		(la_v3_t) { 1.f, 1.f, 1.f }, // Scale
+		(la_v3_t) { 0.f, 0.f, 0.f }, // Rotate
 		vo->pr.cb.pos, // Translate
-		(jl_vec3_t) { 0.f, 0.f, 0.f }, // Look
+		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
 		jl_gl_ar(jlgr));
 	jlgr_vo_draw2(jlgr, vo, shader);
 }

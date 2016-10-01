@@ -17,7 +17,7 @@ void jlgr_mouse_resize__(la_window_t* jlgr) {
 
 void jlgr_mouse_draw__(la_window_t* jlgr) {
 	if(jlgr->mouse.window == NULL) return;
-	la_vo_move(&jlgr->mouse, (jl_vec3_t) {
+	la_vo_move(&jlgr->mouse, (la_v3_t) {
 		la_safe_get_float(&jlgr->mouse_x),
 		la_safe_get_float(&jlgr->mouse_y), 0.f});
 	la_vo_draw(&jlgr->mouse);

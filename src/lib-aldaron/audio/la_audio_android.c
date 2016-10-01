@@ -37,7 +37,7 @@ static inline void jlau_load(jlau_t* jlau, jlau_audio_t* audio,
  * @param in: Seconds of fade-in.
  * @param vec: Where sound is coming from, or NULL for no position effect.
 */
-void jlau_play(jlau_t* jlau, jlau_audio_t* audio, float in, jl_vec3_t* vec) {
+void jlau_play(jlau_t* jlau, jlau_audio_t* audio, float in, la_v3_t* vec) {
 	int32_t ms = jlau_sec2ms__(in);
 
 	if(audio->channel == JLAU_CHANNEL_MUSIC) {
@@ -47,7 +47,7 @@ void jlau_play(jlau_t* jlau, jlau_audio_t* audio, float in, jl_vec3_t* vec) {
 	}
 }
 
-void jlau_lock(jlau_t* jlau, jlau_audio_t* audio, float in, jl_vec3_t* vec) {
+void jlau_lock(jlau_t* jlau, jlau_audio_t* audio, float in, la_v3_t* vec) {
 	if(audio->channel != JLAU_CHANNEL_LOCK) jlau_play(jlau, audio, in, vec);
 	audio->channel = JLAU_CHANNEL_LOCK;
 }
@@ -69,7 +69,7 @@ void jlau_resume(jlau_t* jlau, jlau_audio_t* audio) {
  * @returns 0: Audio is still playing.
 **/
 uint8_t jlau_wait(jlau_t* jlau, jlau_audio_t* w_audio, jlau_audio_t* n_audio,
-	float in, jl_vec3_t* vec)
+	float in, la_v3_t* vec)
 {
 	// If audio is still playing, quit
 	//
@@ -94,10 +94,10 @@ void jlau_stop(jlau_audio_t* audio, float out) {
  * @param filename: Name of the audio file in the package.
  * @param music: Whether the audio is music or not.
 */
-void jlau_add_audio(jlau_t* jlau, jlau_audio_t* audio, data_t* zipdata,
+void jlau_add_audio(jlau_t* jlau, jlau_audio_t* audio, la_buffer_t* zipdata,
 	const char* filename, uint8_t music)
 {
-	data_t aud;
+	la_buffer_t aud;
 
 	la_file_loadzip(&aud, zipdata, filename);
 	la_print("Loading audiostuffs....");

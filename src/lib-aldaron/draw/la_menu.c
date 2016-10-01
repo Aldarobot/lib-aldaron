@@ -23,7 +23,7 @@ static inline void jlgr_menubar_shadow__(la_menu_t* menu) {
 			break;
 
 		// Draw shadow
-		la_vo_move(&menu->shadow, (jl_vec3_t) {
+		la_vo_move(&menu->shadow, (la_v3_t) {
 			.895 - (.1 * menu->redraw), 0.005, 0. });
 		jlgr_vo_draw(menu->window, &menu->shadow);
 		// Draw Icon
@@ -72,7 +72,7 @@ void la_menu_init(la_menu_t* menu, la_window_t* window) {
 static void jlgr_menubar_text__(la_menu_t* menu, float* color, float y,
 	const char* text)
 {
-	jl_vec3_t tr = { .9 - (.1 * menu->redraw), y, 0. };
+	la_v3_t tr = { .9 - (.1 * menu->redraw), y, 0. };
 
 	jlgr_text_draw(menu->window, text, tr,
 		(jl_font_t) { menu->window->textures.icon, 0, color, 
@@ -123,9 +123,7 @@ static void jlgr_menu_slow_draw__(la_menu_t* menu) {
 	la_menu_drawicon(menu, menu->window->textures.icon,
 		/*menu->window->sg.on_time?*/JLGR_ID_GOOD_IMAGE/*:JLGR_ID_SLOW_IMAGE*/);
 	// Report the seconds that passed.
-//	jl_mem_format(formated, "DrawFPS:%d", (int)(round(1. / menu->window->psec)));
 	jlgr_menubar_text__(menu, color, 0., "DRAW");
-//	jl_mem_format(formated, "MainFPS:%d", (int)(round(1. / jl->time.psec)));
 	jlgr_menubar_text__(menu, color, .05, "MAIN");
 }
 
@@ -174,7 +172,7 @@ void la_menu_loop(la_menu_t* menu) {
 
 void la_menu_drawicon(la_menu_t* menu, uint32_t tex, uint8_t c) {
 	jl_rect_t rc_icon = { 0., 0., .1, .1};
-	jl_vec3_t tr = { .9 - (.1 * menu->redraw), 0., 0. };
+	la_v3_t tr = { .9 - (.1 * menu->redraw), 0., 0. };
 
 	jlgr_vo_set_image(menu->window, &menu->icon, rc_icon, tex);
 	jlgr_vo_txmap(menu->window, &menu->icon, 0, 16, 16, c);

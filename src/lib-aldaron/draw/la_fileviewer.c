@@ -283,7 +283,7 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 
 			jlgr_vo_txmap(window, &fileviewer->file, 0,
 				16, 16, state == FILE_TYPE_DIR ? 12 : 11);
-			la_vo_move(&fileviewer->file, (jl_vec3_t) { x * 0.2f, 0.1f + (y * 0.2f), 0.f});
+			la_vo_move(&fileviewer->file, (la_v3_t) { x * 0.2f, 0.1f + (y * 0.2f), 0.f});
 			jlgr_vo_draw(window, &fileviewer->file);
 			la_text(window, LA_PXWIDTH("0.5") LA_PXSIZE("0.025") LA_PXMOVE("%f", "%f") LA_PBLACK "%s", .035 + (x * 0.2f), offset + (y * 0.2f), stringtoprint);
 			x++;
@@ -293,7 +293,7 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 	}
  	cl_list_iterator_destroy(iterator);
 	la_menu_draw(&fileviewer->menu, 0);
-	la_vo_move(&fileviewer->fade, (jl_vec3_t) { 0.f, window->wm.ar - .07f });
+	la_vo_move(&fileviewer->fade, (la_v3_t) { 0.f, window->wm.ar - .07f });
 	la_vo_draw(&fileviewer->fade);
 	la_text(window, LA_PXSIZE("0.05") LA_PXMOVE("0.0", "%f") "%s", window->wm.ar - .05f, la_fileviewer->dirname);
 	// Draw prompt
@@ -311,11 +311,11 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 			la_fileviewer->prompt = 0;
 		}*/
 //	}else{
-//		jlgr_text_draw(window, ">", (jl_vec3_t) {
+//		jlgr_text_draw(window, ">", (la_v3_t) {
 //			.02, .08 + (.04 * la_fileviewer->cursor), 0. },
 //			window->font);
 //		jlgr_text_draw(window, la_fileviewer->dirname,
-//			(jl_vec3_t) { .02, jl_gl_ar(window) - .02, 0. },
+//			(la_v3_t) { .02, jl_gl_ar(window) - .02, 0. },
 //			(jl_font_t) { window->textures.icon, 0,
 //				window->fontcolor, .02});
 //		jlgr_input_do(jlgr, JL_INPUT_SELECT, jl_fl_user_select_do__, NULL);

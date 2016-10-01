@@ -7,7 +7,6 @@
 
 #include <stdint.h>
 #include "clump.h" // LibClump
-#include "la_signal.h"
 
 //Platform Declarations
 #define JL_PLAT_COMPUTER 0 //PC/MAC
@@ -67,40 +66,6 @@ typedef enum{
 	JL_THREAD_PP_UF, // Push forcefully, and make unacceptable until pull
 }jl_thread_pp_t;
 
-typedef struct{
-	float x, y, z;
-}jl_vec3_t;
-
-typedef struct{
-	float x, y, z, w;
-}jl_vec4_t;
-
-//4 bytes of information about the string are included
-typedef struct{
-	uint8_t* data; //Actual String
-	size_t size; //Allocated Space In String
-	size_t curs; //Cursor In String
-}data_t;
-
-typedef struct{
-	/** Library Context **/
-	void* jl;
-	/** Mutex **/
-	SDL_mutex* mutex;
-#if JL_DEBUG
-	/** Thread **/
-	uint8_t thread_id;
-#endif
-}jl_mutex_t;
-
-// Thread-Protected Variable
-typedef struct{
-	void* jl;
-	jl_mutex_t lock;	/** The mutex lock on the "data" */
-	void* data;		/** The data attached to the mutex */
-	size_t size;		/** Size of "data" */
-}jl_pvar_t;
-
 typedef void(*la_fn_t)(void* context);
 typedef void(*jl_fnct)(void* context);
 typedef void(*jl_data_fnct)(void* context, void* data);
@@ -112,16 +77,6 @@ void la_dont(void* context);
 const char* la_error(const char* format, ...);
 int32_t la_start(void* fnc_init, jl_fnct fnc_loop, jl_fnct fnc_kill,
 	uint8_t openwindow, const char* name, size_t ctx_size);
-
-// "JLmem.c"
-void jl_mem_format(char* rtn, const char* format, ... );
-void jl_mem_format2(char* rtn, const char* format, ...);
-uint32_t jl_mem_random_int(uint32_t a);
-double jl_mem_addwrange(double v1, double v2);
-double jl_mem_difwrange(double v1, double v2);
-void jl_mem_vec_add(jl_vec3_t* v1, const jl_vec3_t* v2);
-void jl_mem_vec_sub(jl_vec3_t* v1, const jl_vec3_t v2);
-uint32_t jl_mem_string_upto(const char* string, char chr);
 
 // "cl.c"
 void jl_cl_list_alphabetize(struct cl_list *list);

@@ -2,9 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
-#include "la.h"
-#include "la_thread.h"
-#include "la_memory.h"
+#include <la_thread.h>
+
+#include <SDL_thread.h>
 
 #define JL_THREAD_MUTEX_UNLOCKED 255
 

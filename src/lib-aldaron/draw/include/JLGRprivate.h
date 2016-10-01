@@ -42,8 +42,8 @@ typedef struct{
 
 uint32_t _jl_sg_gpix(/*in */ SDL_Surface* surface, int32_t x, int32_t y);
 void jl_gl_viewport_screen(la_window_t* jlgr);
-void jlgr_opengl_matrix(la_window_t* jlgr, jlgr_glsl_t* sh, jl_vec3_t scalev,
-	jl_vec3_t rotatev, jl_vec3_t translatev, jl_vec3_t lookv, float ar);
+void jlgr_opengl_matrix(la_window_t* jlgr, jlgr_glsl_t* sh, la_v3_t scalev,
+	la_v3_t rotatev, la_v3_t translatev, la_v3_t lookv, float ar);
 void jl_gl_vo_free(la_window_t* jlgr, la_vo_t *pv);
 uint32_t jl_gl_w(la_window_t* jlgr);
 

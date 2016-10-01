@@ -28,6 +28,13 @@ double la_time(void) {
 	return ((double)time.tv_sec) + (((double)time.tv_nsec) * 0.000000001); 
 }
 
+double la_time_pulse(void) {
+	struct timespec time;
+	clock_gettime(CLOCK_MONOTONIC, &time);
+	// Convert Nanoseconds to Seconds.
+	return ((double)time.tv_nsec) * 0.000000001;
+}
+
 /**
  * Time things up to a second.
  * @param jl: The library context.

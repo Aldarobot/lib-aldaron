@@ -201,8 +201,7 @@ static void jlgr_effect_pr_hue__(la_window_t* jlgr) {
 	la_ro_image_rect(jlgr, &jlgr->gl.temp_vo, jlgr->gl.cp->tx,
 		1., jl_gl_ar(jlgr));
 	jlgr_opengl_framebuffer_addtx_(jlgr, jlgr->gl.cp->tx);
-	jlgr_effects_vo_hue(jlgr, &jlgr->gl.temp_vo, (la_v3_t) {
-		0.f, 0.f, 0.f }, jlgr->effects.colors);
+	la_effect_hue(&jlgr->gl.temp_vo, jlgr->effects.colors);
 }
 
 static void jlgr_effect_pr_light__(la_window_t* jlgr) {
@@ -236,17 +235,10 @@ void jlgr_effects_vo_alpha(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float a
 	if(a > 1.f) a = 1.f;
 	// Bind shader
 	jlgr_opengl_draw1(jlgr, &jlgr->effects.alpha.shader);
-	// Translate by offset vector
-	jlgr_opengl_matrix(jlgr, &jlgr->effects.alpha.shader,
-		(la_v3_t) { 1.f, 1.f, 1.f }, // Scale
-		(la_v3_t) { 0.f, 0.f, 0.f }, // Rotate
-		(la_v3_t) { offs.x, offs.y, offs.z }, // Translate
-		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
-		jl_gl_ar(jlgr));
 	// Set Alpha Value In Shader
 	jlgr_opengl_uniform1(jlgr, 1, jlgr->effects.alpha.fade, &a);
 	// Draw on screen
-	jlgr_vo_draw2(vo, &jlgr->effects.alpha.shader);
+	la_ro_draw_shader(vo, &jlgr->effects.alpha.shader);
 }
 
 /**
@@ -256,20 +248,15 @@ void jlgr_effects_vo_alpha(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float a
  * @param offs: The offset to draw it at.
  * @param c: The new hue ( r, g, b, a ) [ 0.f - 1.f ]
 **/
-void jlgr_effects_vo_hue(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float c[]) {
+void la_effect_hue(la_ro_t* ro, float c[]) {
+	la_window_t* window = ro->window;
+
 	// Bind shader
-	jlgr_opengl_draw1(jlgr, &jlgr->effects.hue.shader);
-	// Translate by offset vector
-	jlgr_opengl_matrix(jlgr, &jlgr->effects.hue.shader,
-		(la_v3_t) { 1.f, 1.f, 1.f }, // Scale
-		(la_v3_t) { 0.f, 0.f, 0.f }, // Rotate
-		(la_v3_t) { offs.x, offs.y + la_banner_size, offs.z }, // Translate
-		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
-		jl_gl_ar(jlgr));
+	jlgr_opengl_draw1(window, &window->effects.hue.shader);
 	// Set Hue Value In Shader
-	jlgr_opengl_uniform4(jlgr, 1, jlgr->effects.hue.new_color, c);
+	jlgr_opengl_uniform4(window, 1, window->effects.hue.new_color, c);
 	// Draw on screen
-	jlgr_vo_draw2(vo, &jlgr->effects.hue.shader);
+	la_ro_draw_shader(ro, &window->effects.hue.shader);
 }
 
 /**
@@ -285,7 +272,6 @@ void la_effect_light(la_ro_t* vo, la_light_t* lights, uint8_t light_count,
 	la_window_t* jlgr = vo->window;
 	int i;
 	jlgr_glsl_t* shader = &jlgr->effect.shader_laa[light_count];
-	float ar = jl_gl_ar(jlgr);
 
 	// Create a shader if doesn't exist.
 	if(!jlgr->effect.shader_laa_init[light_count]) {
@@ -327,15 +313,8 @@ void la_effect_light(la_ro_t* vo, la_light_t* lights, uint8_t light_count,
 		jlgr_opengl_uniform(jlgr, shader, (float*)&vo->cb.pos, 3,
 			"offset");
 	}
-	// Translate by offset vector
-	jlgr_opengl_matrix(jlgr, shader,
-		(la_v3_t) { 1.f, 1.f, 1.f }, // Scale
-		(la_v3_t) { 0.f, 0.f, 0.f }, // Rotate
-		vo->cb.pos, // Translate
-		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
-		ar);
 	// Draw on screen
-	jlgr_vo_draw2(vo, shader);
+	la_ro_draw_shader(vo, shader);
 }
 
 /**
@@ -370,7 +349,7 @@ void jlgr_effects_vo_light(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs,
 		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
 		jl_gl_ar(jlgr));
 	// Draw on screen
-	jlgr_vo_draw2(vo, &lightsource->shader);
+	la_ro_draw_shader(vo, &lightsource->shader);
 }
 
 /**

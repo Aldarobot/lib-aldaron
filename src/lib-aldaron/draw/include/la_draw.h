@@ -59,20 +59,6 @@ typedef struct{
 #define JLGR_EFFECTS_TYPES
 #include "la_effects.h"
 
-/**
- * Font type.
-**/
-typedef struct {
-	/** The texture ID of the font. */
-	int32_t tex;
-	/** Whether to allow multiple colors ( gradient ). */
-	uint8_t multicolor;
-	/** The color value(s). */
-	float* colors;
-	/** The size to draw the text ( 0. - 1. ). */
-	float size;
-}jl_font_t;
-
 typedef struct{
 	char *opt;
 	la_fn_t run;
@@ -99,11 +85,6 @@ void jlgr_fill_image_draw(la_window_t* jlgr);
 void jlgr_draw_bg(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, int16_t c);
 
 // JLGRtext.c:
-void jlgr_text_draw(la_window_t* jlgr, const char* str, la_v3_t loc, jl_font_t f);
-void jlgr_draw_int(la_window_t* jlgr, int64_t num, la_v3_t loc, jl_font_t f);
-void jlgr_draw_dec(la_window_t* jlgr, double num, uint8_t dec, la_v3_t loc,
-	jl_font_t f);
-void jlgr_draw_ctxt(la_window_t* jlgr, const char *str, float yy, float* color);
 void jlgr_draw_loadscreen(la_window_t* jlgr, la_fn_t draw_routine);
 void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ...);
 void jlgr_term_msge(la_window_t* jlgr, char* message);
@@ -111,14 +92,6 @@ void jlgr_gui_textbox_init(la_window_t* jlgr, la_buffer_t* string);
 uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr);
 void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc);
 void jlgr_notify(la_window_t* jlgr, const char* notification, ...);
-
-// JLGRvo.c
-void jlgr_vo_set_vg(la_window_t* jlgr, la_ro_t *vo, uint16_t tricount,
-	float* triangles, float* colors, uint8_t multicolor);
-void jlgr_vo_image(la_window_t* jlgr, la_ro_t *vo, uint32_t img);
-void jlgr_vo_color_gradient(la_window_t* jlgr, la_ro_t* vo, float* rgba);
-void jlgr_vo_color_solid(la_window_t* jlgr, la_ro_t* vo, float* rgba);
-void jlgr_vo_draw2(la_ro_t* ro, jlgr_glsl_t* sh);
 
 // OpenGL
 uint32_t la_texture_new(la_window_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,
@@ -148,7 +121,6 @@ void jlgr_opengl_draw1(la_window_t* jlgr, jlgr_glsl_t* sh);
 
 // JLGReffects.c
 void jlgr_effects_vo_alpha(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float a);
-void jlgr_effects_vo_hue(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float c[]);
 void jlgr_effects_vo_light(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs,
 	la_v3_t* material);
 void jlgr_effects_hue(la_window_t* jlgr, float c[]);

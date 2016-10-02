@@ -26,24 +26,19 @@ void ex_edit_loop(ctx_t* ctx) {
 }
 
 void ex_wdns(ctx_t* ctx) {
-	la_window_t* jlgr = ctx->window;
+	la_window_t* window = ctx->window;
 
-	jlgr_text_draw(jlgr, "testing""\xCA""1234567890",
-		(la_v3_t) { 0., 0., 0. },
-		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, .0625f });
 	ex_redraw(ctx);
+	la_text(window, "testing""\xCA""1234567890");
 	la_menu_draw(&ctx->menu, 0);
 }
 
 void ex_wups(ctx_t* ctx) {
 	la_window_t* jlgr = ctx->window;
-
-	float fontcolor[] = { 0.f, 0.f, 0.f, 1.f };
+	float colors[] = { 0.f, 0.f, 0.f, 1.f };
 
 	jl_gl_clear(jlgr, 1., 1., 1., 1.);
-	jlgr_text_draw(jlgr, "this IS upper",
-		(la_v3_t) { 0., 0., 0. },
-		(jl_font_t) { jlgr->textures.icon, 0, fontcolor, .0625f});
+	la_text_centered(jlgr, "this IS alternate", .1, colors);
 	la_menu_draw(&ctx->menu, 0);
 }
 

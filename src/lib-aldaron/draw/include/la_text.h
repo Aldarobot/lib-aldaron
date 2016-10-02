@@ -13,5 +13,6 @@
 #include "la_port.h"
 
 void la_text(la_window_t* window, const char* format, ...);
+void la_text_centered(la_window_t* window, const char *str, float y, float* color);
 
 #endif

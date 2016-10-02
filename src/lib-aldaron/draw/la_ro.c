@@ -181,8 +181,6 @@ static void jlgr_pr_use__(la_window_t* window, la_ro_t* ro) {
 	window->gl.cp = ro;
 }
 
-
-
 static void jlgr_pr_init__(la_window_t* jlgr, la_ro_t* ro) {
 	if(ro->pr.fb == 0 || ro->pr.tx == 0) {
 		// Make frame buffer
@@ -227,23 +225,30 @@ void la_ro_rect(la_window_t* window, la_ro_t* ro, float w, float h) {
 	jlgr_vo_poly__(window, ro, 4, rectangle_coords);
 }
 
-/**
- * Set a Vertex object to vector graphics.
- * @param jlgr: The library context.
- * @param ro: The vertex object to set.
-**/
-void jlgr_vo_set_vg(la_window_t* jlgr, la_ro_t *ro, uint16_t tricount,
-	float* triangles, float* colors, uint8_t multicolor)
+void la_ro_color_tris(la_window_t* window, la_ro_t *ro,
+	float* triangles, float* colors, uint32_t tricount)
 {
-	la_ro_init__(jlgr, ro);
-	if(ro == NULL) ro = &jlgr->gl.temp_vo;
+	la_ro_init__(window, ro);
+	if(ro == NULL) ro = &window->gl.temp_vo;
 	// Rendering Style = triangles
 	ro->rs = 1;
 	// Set the vertices of vertex object "ro"
-	jlgr_vo_vertices__(jlgr, ro, triangles, tricount * 3);
+	jlgr_vo_vertices__(window, ro, triangles, tricount * 3);
 	// Texture the vertex object
-	if(multicolor) jlgr_vo_color_gradient(jlgr, ro, colors);
-	else jlgr_vo_color_solid(jlgr, ro, colors);
+	la_ro_change_color(ro, colors);
+}
+
+void la_ro_plain_tris(la_window_t* window, la_ro_t *ro,
+	float* triangles, float* colors, uint32_t tricount)
+{
+	la_ro_init__(window, ro);
+	if(ro == NULL) ro = &window->gl.temp_vo;
+	// Rendering Style = triangles
+	ro->rs = 1;
+	// Set the vertices of vertex object "ro"
+	jlgr_vo_vertices__(window, ro, triangles, tricount * 3);
+	// Texture the vertex object
+	la_ro_change_plain(ro, colors);
 }
 
 void la_ro_color_rect(la_window_t* window, la_ro_t* ro, float* colors,
@@ -252,7 +257,7 @@ void la_ro_color_rect(la_window_t* window, la_ro_t* ro, float* colors,
 	la_ro_init__(window, ro);
 	la_ro_rect(window, ro, w, h);
 	// Texture the vertex object
-	jlgr_vo_color_gradient(window, ro, colors);
+	la_ro_change_color(ro, colors);
 }
 
 void la_ro_plain_rect(la_window_t* window, la_ro_t* ro, float* colors,
@@ -261,7 +266,7 @@ void la_ro_plain_rect(la_window_t* window, la_ro_t* ro, float* colors,
 	la_ro_init__(window, ro);
 	la_ro_rect(window, ro, w, h);
 	// Texture the vertex object
-	jlgr_vo_color_solid(window, ro, colors);
+	la_ro_change_plain(ro, colors);
 }
 
 void la_ro_image_rect(la_window_t* window, la_ro_t *ro, uint32_t tex, float w,
@@ -310,41 +315,26 @@ void la_ro_change_image(la_ro_t *ro, uint32_t img,
 	}
 }
 
-/**
- * Change the coloring scheme for a vertex object to a gradient.
- * @param jl: The library context.
- * @param ro: The Vertex Object
- * @param rgba: { (4 * vertex count) values }
-**/
-void jlgr_vo_color_gradient(la_window_t* jlgr, la_ro_t* ro, float* rgba) {
-	la_ro_init__(jlgr, ro);
-	if(ro == NULL) ro = &jlgr->gl.temp_vo;
-	jlgr_vo_color_buffer__(jlgr, ro, rgba);
+void la_ro_change_color(la_ro_t* ro, float* rgba) {
+	la_window_t* window = la_ro_panic__(ro, "Change color.");
+
+	if(ro == NULL) ro = &window->gl.temp_vo;
+	jlgr_vo_color_buffer__(window, ro, rgba);
 }
 
-/**
- * Change the coloring scheme for a vertex object to a solid.
- * @param jl: The library context.
- * @param ro: The Vertex Object
- * @param rgba: { 4 values }
-**/
-void jlgr_vo_color_solid(la_window_t* jlgr, la_ro_t* ro, float* rgba) {
-	la_ro_init__(jlgr, ro);
-	if(ro == NULL) ro = &jlgr->gl.temp_vo;
+void la_ro_change_plain(la_ro_t* ro, float* rgba) {
+	la_window_t* window = la_ro_panic__(ro, "Change plain.");
+
+	if(ro == NULL) ro = &window->gl.temp_vo;
 	float rgbav[4 * ro->vc];
 	uint32_t i;
 
 	for(i = 0; i < ro->vc; i++) {
 		la_memory_copy(rgba, &(rgbav[i * 4]), 4 * sizeof(float));
 	}
-	jlgr_vo_color_buffer__(jlgr, ro, rgbav);
+	jlgr_vo_color_buffer__(window, ro, rgbav);
 }
 
-/**
- * Move a vertex object to a new location.
- * @param ro: The vertex object.
- * @param pos: The new position.
-**/
 void la_ro_move(la_ro_t* ro, la_v3_t pos) {
 	la_ro_panic__(ro, "Can't Move!");
 	ro->cb.pos = pos;
@@ -358,10 +348,19 @@ void la_ro_move(la_ro_t* ro, la_v3_t pos) {
  * @param sh: The shader to use ( must be the same one used with
  *	jlgr_opengl_draw1(). )
 **/
-void jlgr_vo_draw2(la_ro_t* ro, jlgr_glsl_t* sh) {
+void la_ro_draw_shader(la_ro_t* ro, jlgr_glsl_t* sh) {
 	la_window_t* jlgr = la_ro_panic__(ro, "Can't Draw2!");
+
 	// Use Temporary Vertex Object If no vertex object.
 	if(ro == NULL) ro = &jlgr->gl.temp_vo;
+
+	jlgr_opengl_matrix(jlgr, sh,
+		(la_v3_t) { 1.f, 1.f, 1.f }, // Scale
+		(la_v3_t) { 0.f, 0.f, 0.f }, // Rotate
+		ro->cb.pos, // Translate
+		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
+		jl_gl_ar(jlgr));
+
 	if(ro->tx) {
 		// Bind Texture Coordinates to shader
 		jlgr_opengl_setv(jlgr, &ro->bt,
@@ -380,31 +379,15 @@ void jlgr_vo_draw2(la_ro_t* ro, jlgr_glsl_t* sh) {
 		ro->vc);
 }
 
-/**
- * Draw a vertex object with offset by translation.
- * @param jlgr: The library context.
- * @param ro: The vertex object to draw.
-**/
 void la_ro_draw(la_ro_t* ro) {
 	la_window_t* window = la_ro_panic__(ro, "Can't Draw!");
 	jlgr_glsl_t* shader = ro->tx ?
 		&window->gl.prg.texture : &window->gl.prg.color;
 
 	jlgr_opengl_draw1(window, shader);
-	jlgr_opengl_matrix(window, shader,
-		(la_v3_t) { 1.f, 1.f, 1.f }, // Scale
-		(la_v3_t) { 0.f, 0.f, 0.f }, // Rotate
-		ro->cb.pos, // Translate
-		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
-		jl_gl_ar(window));
-	jlgr_vo_draw2(ro, shader);
+	la_ro_draw_shader(ro, shader);
 }
 
-/**
- * Draw a vertex object with effects.
- * @param jlgr: The library context.
- * @param ro: The vertex object.
-**/
 void la_ro_pr_draw(la_ro_t* ro, uint8_t orient) {
 	la_window_t* window = la_ro_panic__(ro, "Can't Draw Pre-Rendered!");
 
@@ -444,13 +427,6 @@ void la_ro_pr(void* context, la_window_t* window, la_ro_t* ro, la_fn_t drawfn) {
 	oldpr ? jlgr_pr_use__(window, oldpr) : la_ro_pr_off__(window);
 }
 
-// * THREAD: Main thread only.
-// * Test if 2 renderable objects collide.
-// *
-// * @param 'ro1': ro 1
-// * @param 'ro2': ro 2
-// * @return 0: if the objects don't collide in their bounding boxes.
-// * @return 1: if the objects do collide in their bounding boxes.
 uint8_t la_ro_collide(la_ro_t *ro1, la_ro_t *ro2) {
 	if (
 		(ro1->cb.pos.y >= (ro2->cb.pos.y+ro2->cb.ofs.y)) ||
@@ -464,18 +440,13 @@ uint8_t la_ro_collide(la_ro_t *ro1, la_ro_t *ro2) {
 	}
 }
 
-
-// * Clamp a coordinate to an area.
-// * @param xyz: The vertex to clamp.
-// * @param area: The area to clamp it to.
-// * @param rtn: The return vector.
-void la_ro_clamp(la_v3_t xyz, jl_area_t area, la_v3_t* rtn) {
-	xyz.x -= area.pos.x;
-	if(area.ofs.x != 0.f) xyz.x /= area.ofs.x;
-	xyz.y -= area.pos.y;
-	if(area.ofs.y != 0.f) xyz.y /= area.ofs.y;
-	xyz.z -= area.pos.z;
-	if(area.ofs.z != 0.f) xyz.z /= area.ofs.z;
+void la_ro_clamp(la_v3_t xyz, la_ro_t *ro, la_v3_t* rtn) {
+	xyz.x -= ro->cb.pos.x;
+	if(ro->cb.ofs.x != 0.f) xyz.x /= ro->cb.ofs.x;
+	xyz.y -= ro->cb.pos.y;
+	if(ro->cb.ofs.y != 0.f) xyz.y /= ro->cb.ofs.y;
+	xyz.z -= ro->cb.pos.z;
+	if(ro->cb.ofs.z != 0.f) xyz.z /= ro->cb.ofs.z;
 	*rtn = xyz;
 }
 

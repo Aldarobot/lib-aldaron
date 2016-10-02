@@ -8,6 +8,7 @@
 #include "JLGRprivate.h"
 
 #include <la_ro.h>
+#include <la_text.h>
 
 void* aldaron_data(void);
 uint64_t aldaron_size(void);
@@ -83,38 +84,6 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
 }
 
 /**
- * Draw an integer on the screen
- * @param 'jl': library context
- * @param 'num': the number to draw
- * @param 'loc': the position to draw it at
- * @param 'f': the font to use.
- */
-void jlgr_draw_int(la_window_t* jlgr, int64_t num, la_v3_t loc, jl_font_t f) {
-	char display[10];
-	sprintf(display, "%ld", (long int) num);
-	jlgr_text_draw(jlgr, display, loc, f);
-}
-
-/**
- * draw a floating point on the screen
- * @param 'jl': library context
- * @param 'num': the number to draw
- * @param 'dec': the number of places after the decimal to include.
- * @param 'loc': the position to draw it at
- * @param 'f': the font to use.
- */
-void jlgr_draw_dec(la_window_t* jlgr, double num, uint8_t dec, la_v3_t loc,
-	jl_font_t f)
-{
-	char display[10];
-	char convert[10];
-
-	sprintf(convert, "%%.%df", dec);
-	sprintf(display, convert, num);
-	jlgr_text_draw(jlgr, display, loc, f);
-}
-
-/**
  * Draw text within the boundary of a sprite
  * @param 'jl': library context
  * @param 'spr': the boundary sprite
@@ -139,20 +108,6 @@ void jlgr_draw_dec(la_window_t* jlgr, double num, uint8_t dec, la_v3_t loc,
 	jlgr_fill_image_draw(jlgr);
 	jlgr_text_draw_area(jlgr, spr, txt);
 }*/
-
-/**
- * Draw centered text across screen
- * @param 'jl': library context.
- * @param 'str': the text to draw
- * @param 'yy': y coordinate to draw it at
- * @param 'color': 1.f = opaque, 0.f = invisible
- */
-void jlgr_draw_ctxt(la_window_t* jlgr, const char *str, float yy, float* color) {
-	jlgr_text_draw(jlgr, str,
-		(la_v3_t) { 0., yy, 0. },
-		(jl_font_t) { jlgr->textures.icon, 0, color, 
-			1. / ((float)strlen(str))} );
-}
 
 // TODO: MOVE
 /*static void jlgr_gui_slider_touch(la_window_t* jlgr, jlgr_input_t input) {
@@ -284,10 +239,11 @@ void jlgr_draw_loadingbar(la_window_t* jlgr, double loaded) {
 
 //TODO: MOVE
 static void jlgr_draw_msge__(la_window_t* window) {
+	float fc[4] = { 0.f, 0.f, 0.f, 1.f };
+
 	jlgr_draw_bg(window, window->gui.msge.t, 16, 16, window->gui.msge.c);
 	if(window->gui.msge.message[0])
-		jlgr_draw_ctxt(window, window->gui.msge.message, 9./32.,
-			window->fontcolor);
+		la_text_centered(window, window->gui.msge.message, 9./32., fc);
 }
 
 /**
@@ -497,9 +453,10 @@ void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc){
 			rc.h * .05, rc.h);
 		la_ro_draw(&jlgr->gl.temp_vo);
 	}
-	jlgr_text_draw(jlgr, (char*)(jlgr->gui.textbox.string->data),
-		(la_v3_t) {rc.x, rc.y, 0.},
-		(jl_font_t) {jlgr->textures.icon,0,jlgr->fontcolor,rc.h});
+	la_text(jlgr, (char*)(jlgr->gui.textbox.string->data));
+//	jlgr_text_draw(jlgr, (char*)(jlgr->gui.textbox.string->data),
+//		(la_v3_t) {rc.x, rc.y, 0.},
+//		(jl_font_t) {jlgr->textures.icon,0,jlgr->fontcolor,rc.h});
 //		jlgr_draw_image(jl, 0, 0,
 //			x + (h*((float)string->curs-.5)), y, h, h, 252, 1.);
 
@@ -534,11 +491,11 @@ void _jlgr_loopb(la_window_t* jlgr) {
 	if(time_until_vanish > 0.f) {
 		if(time_until_vanish > .5) {
 			float color[] = { 1., 1., 1., 1. };
-			jlgr_draw_ctxt(jlgr, la_safe_get_string(
+			la_text_centered(jlgr, la_safe_get_string(
 				&jlgr->protected.notification.message),0,color);
 		}else{
 			float color[] = { 1., 1., 1., (time_until_vanish / .5)};
-			jlgr_draw_ctxt(jlgr, la_safe_get_string(
+			la_text_centered(jlgr, la_safe_get_string(
 				&jlgr->protected.notification.message),0,color);
 		}
 		la_safe_set_float(&jlgr->protected.notification.timeTilVanish,
@@ -567,13 +524,6 @@ void jlgr_init__(la_window_t* jlgr) {
 	// Load Graphics
 	jlgr->textures.font = jl_sg_add_image(jlgr, &packagedata,
 		"/font.png");
-	// Create Font
-	jlgr->fontcolor[0] = 0.;
-	jlgr->fontcolor[1] = 0.;
-	jlgr->fontcolor[2] = 0.;
-	jlgr->fontcolor[3] = 1.;
-	jlgr->font = (jl_font_t)
-		{ jlgr->textures.font, 0, jlgr->fontcolor, .04 };
 	// Draw message on the screen
 	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "Loading Lib Aldaron....");
 	// Set other variables

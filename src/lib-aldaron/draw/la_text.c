@@ -10,13 +10,9 @@
 #include <la_text.h>
 #include <la_string.h>
 #include <la_ro.h>
+#include <la_effect.h>
 
 #define COMPARE(towhat) ( strncmp(&temp[i], towhat, strlen(towhat)) == 0 )
-
-static inline float la_text_readfloat(const char* input) {
-	float* x = (void*)input;
-	return *x;
-}
 
 void la_text(la_window_t* window, const char* format, ...) {
 	va_list arglist;
@@ -128,12 +124,13 @@ void la_text(la_window_t* window, const char* format, ...) {
 				window->textures.font, 16, 16, temp[i], 0);
 			// Effects
 			if(shadow) {
-				jlgr_effects_vo_hue(window, &window->gl.temp_vo,
-					(la_v3_t) { tr.x - 0.005, tr.y + 0.005,
-						0.f }, shadowcolor);
+				la_ro_move(&window->gl.temp_vo, (la_v3_t) {
+					tr.x - 0.005, tr.y + 0.005, 0.f });
+				la_effect_hue(&window->gl.temp_vo, shadowcolor);
 			}
 			// Draw character
-			jlgr_effects_vo_hue(window,&window->gl.temp_vo, tr, colors);
+			la_ro_move(&window->gl.temp_vo, tr);
+			la_effect_hue(&window->gl.temp_vo, colors);
 			// Advance cursor.
 			tr.x += w * distance;
 			i++;
@@ -141,63 +138,12 @@ void la_text(la_window_t* window, const char* format, ...) {
 	}
 }
 
-/**
- * Draw text on the current pre-renderer.
- * @param jlgr: The library context
- * @param str: The text to draw
- * @param loc: The position to draw it at
- * @param f: The font to use.
-**/
-void jlgr_text_draw(la_window_t* jlgr, const char* str, la_v3_t loc, jl_font_t f) {
-	if(str == NULL) return;
-
-	const uint8_t *text = (void*)str;
-	uint32_t i;
-	uint8_t bold = 0;
-	jl_rect_t rc = { loc.x, loc.y, f.size, f.size };
-	la_v3_t tr = { 0., 0., 0. };
-	la_ro_t* vo = &jlgr->gl.temp_vo;
-
-	la_ro_image_rect(jlgr, vo, jlgr->textures.font, rc.w, rc.h);
-	for(i = 0; i < strlen(str); i++) {
-		// Check for special characters
-		if(text[i] == '\n') {
-			tr.x = 0, tr.y += f.size;
-			continue;
-		} else if(text[i] == '\t') {
-			tr.x += 8.f * f.size * ( 3. / 4. );
-			continue;
-		} else if(text[i] == '\x01') {
-			if(strncmp(&str[i], JLGR_TEXT_BOLD, 2) == 0) {
-				bold = 1;
-			}else if(strncmp(&str[i], JLGR_TEXT_ALIGNC, 2) == 0) {
-				uint32_t n = la_string_upto(&str[i] + 2,
-					'\n');
-				tr.x -= (f.size * n) / 2.f;
-			}else if(strncmp(&str[i], JLGR_TEXT_ALIGNR, 2) == 0) {
-				uint32_t n = la_string_upto(&str[i] + 2,
-					'\n');
-				tr.x -= f.size * n;
-			}
-			i++;
-			continue;
-		}
-		// Set character
-		la_ro_change_image(vo, jlgr->textures.font, 16, 16, text[i], 0);
-		// Special Drawing
-		if(bold) {
-			float x = tr.x; int i;
-			for(i = 0; i < 3; i++) {
-				tr.x += .05 * f.size;
-				jlgr_effects_vo_hue(jlgr, vo, tr, f.colors);
-			}
-			tr.x = x;
-		}
-		// Draw character.
-		jlgr_effects_vo_hue(jlgr, vo, tr, f.colors);
-		// Advance cursor.
-		tr.x += f.size * ( 3. / 4. );
-	}
+void la_text_centered(la_window_t* window, const char *str, float y, float* color) {
+	la_text(window,
+		LA_PXMOVE("%f", "%f") LA_PXSIZE("%f")
+		LA_PXCOLOR("%f", "%f", "%f", "%f") "%s",
+		0.f, y, 1. / ((double)(strlen(str)-1)),
+		color[0], color[1], color[2], color[3], str);
 }
 
 #endif

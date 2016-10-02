@@ -318,10 +318,10 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 			la_fileviewer->prompt = 0;
 		}*/
 //	}else{
-//		jlgr_text_draw(window, ">", (la_v3_t) {
+//		la_text(window, ">", (la_v3_t) {
 //			.02, .08 + (.04 * la_fileviewer->cursor), 0. },
 //			window->font);
-//		jlgr_text_draw(window, la_fileviewer->dirname,
+//		la_text(window, la_fileviewer->dirname,
 //			(la_v3_t) { .02, jl_gl_ar(window) - .02, 0. },
 //			(jl_font_t) { window->textures.icon, 0,
 //				window->fontcolor, .02});

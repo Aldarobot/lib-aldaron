@@ -97,10 +97,6 @@ typedef struct {
 	} input;
 
 // from JLGR.h
-
-	// For Programer's Use
-	float fontcolor[4];
-	jl_font_t font;
 	la_ro_t mouse;
 	la_ro_t screen;
 	safe_uint8_t has_2_screens; // If 2 screens are hooked up.

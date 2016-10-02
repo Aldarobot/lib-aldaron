@@ -5,6 +5,11 @@
 #ifndef LA_AUDIO
 #define LA_AUDIO
 
+#include <la_config.h>
+#ifndef LA_FEATURE_AUDIO
+	#error "please add #define LA_FEATURE_AUDIO to your la_config.h"
+#endif
+
 #include <la_buffer.h>
 #include <la_math.h>
 
@@ -29,7 +34,5 @@ uint8_t la_audio_wait(la_audio_t* jlau, la_sound_t* w_audio, la_sound_t* n_audio
 void la_audio_stop(la_sound_t* audio, float out);
 void la_audio_load(la_audio_t* jlau, la_sound_t* audio, la_buffer_t* zipdata,
 	const char* filename, uint8_t music);
-la_audio_t* la_audio_init(void);
-void la_audio_kill(la_audio_t* audio);
 
 #endif

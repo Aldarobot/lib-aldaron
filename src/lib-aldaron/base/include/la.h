@@ -73,6 +73,6 @@ void la_panic(const char* format, ...);
 void la_dont(void* context);
 const char* la_error(const char* format, ...);
 int32_t la_start(void* fnc_init, la_fn_t fnc_loop, la_fn_t fnc_kill,
-	uint8_t openwindow, const char* name, size_t ctx_size);
+	const char* name, size_t ctx_size);
 
 #endif

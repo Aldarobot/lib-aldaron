@@ -5,6 +5,11 @@
 #ifndef LA_MENU
 #define LA_MENU
 
+#include <la_config.h>
+#ifndef LA_FEATURE_DISPLAY
+	#error "please add #define LA_FEATURE_DISPLAY to your la_config.h"
+#endif
+
 #include "la_vo.h"
 
 typedef struct {

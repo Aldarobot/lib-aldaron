@@ -88,6 +88,6 @@ static void ex_init(ctx_t* ctx, la_window_t* window) {
 }
 
 int main(int argc, char* argv[]) {
-	return la_start((la_fn_t) ex_init, (la_fn_t) ex_loop, la_dont, 1,
+	return la_start((la_fn_t) ex_init, (la_fn_t) ex_loop, la_dont,
 		"Lib Aldaron Test Program", sizeof(ctx_t));
 }

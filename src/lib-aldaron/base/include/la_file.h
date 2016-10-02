@@ -16,7 +16,7 @@ enum {
 } la_file_type_t;
 
 const char* la_file_basename(char* base, const char* filename);
-const char* la_file_append(const char* filename, const void* data, size_t size);
+const char* la_file_append(const char* filename, const void* data, uint32_t size);
 const char* la_file_truncate(const char* filename);
 uint8_t la_file_exist(const char* path);
 const char* la_file_load(la_buffer_t* load, const char* file_name);

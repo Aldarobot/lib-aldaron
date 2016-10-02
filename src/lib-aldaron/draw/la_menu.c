@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_FEATURE_DISPLAY
+
 #include "JLGRprivate.h"
 #include "la_menu.h"
 #include "la_text.h"
@@ -225,3 +228,5 @@ void la_menu_addicon_name(la_menu_t* menu) {
 		la_menu_addicon(menu, la_menu_dont, la_menu_name_drawb__);
 	la_menu_addicon(menu, la_menu_dont, la_menu_name_drawc__);
 }
+
+#endif

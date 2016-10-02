@@ -5,6 +5,11 @@
 #ifndef LA_FILEVIEWER
 #define LA_FILEVIEWER
 
+#include <la_config.h>
+#ifndef LA_FEATURE_DISPLAY
+	#error "please add #define LA_FEATURE_DISPLAY to your la_config.h"
+#endif
+
 #include "la_draw.h"
 #include "clump.h"
 #include "la_buffer.h"

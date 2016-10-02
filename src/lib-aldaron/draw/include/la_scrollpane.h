@@ -2,6 +2,14 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#ifndef LA_SCROLLPANE
+#define LA_SCROLLPANE
+
+#include <la_config.h>
+#ifndef LA_FEATURE_DISPLAY
+	#error "please add #define LA_FEATURE_DISPLAY to your la_config.h"
+#endif
+
 #include <la_vo.h>
 #include <la_safe.h>
 #include <la_draw.h>
@@ -20,3 +28,5 @@ void la_gui_scrollpane_redraw(la_window_t* window, la_gui_scrollpane_t* sp,
 void la_gui_scrollpane_draw(void* context, la_window_t* window,
 	la_gui_scrollpane_t* sp);
 void la_gui_scrollpane_loop(la_window_t* window, la_gui_scrollpane_t* sp);
+
+#endif

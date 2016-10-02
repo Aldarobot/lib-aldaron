@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_FEATURE_DISPLAY
+
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
 #include "la_thread.h"
@@ -579,10 +582,6 @@ void la_texture_set(la_window_t* jlgr, uint32_t texture, uint8_t* pixels,
 	la_opengl_error__(0, "jl_gl_pbo_set__: glTexSubImage2D");
 }
 
-/************************/
-/***  ETOM Functions  ***/
-/************************/
-
 void jlgr_opengl_viewport_(la_window_t* jlgr, uint16_t w, uint16_t h) {
 	glViewport(0, 0, w, h);
 	la_opengl_error__(w * h, "glViewport");
@@ -715,11 +714,6 @@ void _jl_gl_geta(la_window_t* jlgr, GLuint prg, int32_t *attrib, const char *tit
 	}
 }
 
-/***	  @cond	   ***/
-/************************/
-/*** Static Functions ***/
-/************************/
-
 static inline void _jl_gl_init_setup_gl(la_window_t* jlgr) {
 	la_print("setting properties....");
 	//Disallow Dither & Depth Test
@@ -808,11 +802,6 @@ static inline void _jl_gl_make_res(la_window_t* jlgr) {
 	la_print("made temp vo & default tex. c. buff!");
 }
 
-/**	  @endcond	  **/
-/************************/
-/*** Global Functions ***/
-/************************/
-
 /**
  * Get the Aspect Ratio of the pre-renderer in use.
  * @param jlgr: The library context.
@@ -852,11 +841,6 @@ void jl_gl_clear(la_window_t* jlgr, float r, float g, float b, float a) {
 	la_opengl_error__(a, "jl_gl_clear(): glClear");
 }
 
-/***	  @cond	   ***/
-/************************/
-/***  ETOM Functions  ***/
-/************************/
-
 void jl_gl_init__(la_window_t* jlgr) {
 #ifdef JL_GLTYPE_HAS_GLEW
 	if(glewInit()!=GLEW_OK) la_panic("glew fail!(no sticky)");
@@ -867,5 +851,4 @@ void jl_gl_init__(la_window_t* jlgr) {
 	jlgr_pr_off(jlgr);
 }
 
-/**	  @endcond	  **/
-/***   #End of File   ***/
+#endif

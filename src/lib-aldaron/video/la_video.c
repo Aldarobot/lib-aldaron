@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_VIDEO
+
 #include "la_memory.h"
 #include "JLGRprivate.h"
 #include "SDL_image.h"
@@ -162,3 +165,5 @@ void la_video_load_jpeg(void* output, void* data, size_t size, uint16_t* w,
 	SDL_FreeSurface(image);
 	SDL_free(rw);*/
 }
+
+#endif

@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_FEATURE_DISPLAY
+
 #include "JLGRprivate.h"
 #include "SDL_filesystem.h"
 
@@ -323,3 +326,5 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 //		jlgr_input_do(jlgr, JL_INPUT_SELECT, jl_fl_user_select_do__, NULL);
 //	}
 }
+
+#endif

@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_FEATURE_DISPLAY
+
 #include "JLGRprivate.h"
 #include "la_buffer.h"
 
@@ -21,8 +24,6 @@ typedef struct {
 	uint8_t isRange;
 	jl_gui_slider_draw draw;
 }jl_gui_slider_main;
-
-/** @cond */
 
 void jlgr_mouse_draw__(la_window_t* jlgr);
 
@@ -51,8 +52,6 @@ extern float la_banner_size;
 		}
 	}
 }*/
-
-/** @endcond */
 
 void jlgr_dont(la_window_t* jlgr) { }
 
@@ -524,7 +523,6 @@ void jlgr_notify(la_window_t* jlgr, const char* notification, ...) {
 	la_safe_set_float(&jlgr->protected.notification.timeTilVanish, 4.5);
 }
 
-/***      @cond       ***/
 /************************/
 /***  ETOM Functions  ***/
 /************************/
@@ -589,5 +587,4 @@ void jlgr_init__(la_window_t* jlgr) {
 	jlgr->textures.backdrop = jl_sg_add_image(jlgr, &packagedata, "/backdrop.png");
 }
 
-/**      @endcond      **/
-/***   #End of File   ***/
+#endif

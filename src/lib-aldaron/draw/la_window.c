@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_FEATURE_DISPLAY
+
 #include "JLGRprivate.h"
 
 #include <la_time.h>
@@ -166,3 +169,5 @@ void jl_wm_init__(la_window_t* window) {
 	// Set default values
 	la_safe_set_uint8(&window->has_2_screens, 0);
 }
+
+#endif

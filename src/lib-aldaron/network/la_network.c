@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_FEATURE_NETWORK
+
 #include <la_network.h>
 
 #include <la.h>
@@ -95,3 +98,5 @@ uint8_t aldc_pull(aldc_t* aldc, void* data) {
 void aldc_kill(void) {
 	SDLNet_Quit();
 }
+
+#endif

@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_FEATURE_DISPLAY
+
 #include "la_scrollpane.h"
 
 static la_gui_scrollpane_t* la_scrollpane = NULL;
@@ -58,3 +61,5 @@ void la_gui_scrollpane_loop(la_window_t* window, la_gui_scrollpane_t* sp) {
 		la_safe_set_uint8(&sp->external_update, 1);
 	}
 }
+
+#endif

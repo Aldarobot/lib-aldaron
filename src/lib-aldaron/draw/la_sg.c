@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_FEATURE_DISPLAY
+
 #include "JLGRprivate.h"
 #include "SDL_image.h"
 #include "la_buffer.h"
@@ -172,3 +175,5 @@ void jl_sg_init__(la_window_t* window) {
 	la_safe_set_pointer(&window->protected.functions.secondary, la_dont);
 	la_safe_set_pointer(&window->protected.functions.resize, la_dont);
 }
+
+#endif

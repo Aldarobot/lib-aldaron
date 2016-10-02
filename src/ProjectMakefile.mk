@@ -19,7 +19,6 @@ include $(shell sed '1q;d' ~/.libaldaron)/compile-scripts/platform.mk
 CURDIR=`pwd -P`
 
 # directories
-SRC = src
 BUILD_OBJ_RELEASE = build/objs
 BUILD_OBJ_TEST = build/test
 BUILD_OBJ_PROF = build/prof
@@ -33,10 +32,10 @@ AD_ID="`sed '5q;d' la_config`"
 # C & C++ Modules
 MODULES = \
 	$(subst .c,, $(subst .cpp,, $(shell basename -a \
-	$(shell find -L $(SRC)/ -type f -name '*.c') \
-	$(shell find -L $(SRC)/ -type f -name '*.cpp') \
+	$(shell find -L src/ -type f -name '*.c') \
+	$(shell find -L src/ -type f -name '*.cpp') \
 )))
-HEADERS = $(shell find -L $(SRC)/ -type f -name '*.h')
+HEADERS = $(shell find -L src/ -type f -name '*.h')
 
 # Test & Release
 OBJS_PROF = $(addprefix $(BUILD_OBJ_PROF)/, $(addsuffix .o,$(MODULES)))
@@ -44,7 +43,7 @@ OBJS_TEST = $(addprefix $(BUILD_OBJ_TEST)/, $(addsuffix .o,$(MODULES)))
 OBJS_RELEASE = $(addprefix $(BUILD_OBJ_RELEASE)/, $(addsuffix .o,$(MODULES)))
 
 # Special MAKE variable - do not rename.
-VPATH = $(shell find -L $(SRC)/ -type d)
+VPATH = $(shell find -L src/ -type d)
 # target: init
 FOLDERS = build/ src/
 
@@ -226,7 +225,9 @@ $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 		-I$(LA_HOME)/src/lib/sdl-image/\
 		-I$(LA_HOME)/src/lib/sdl-mixer/\
 		-I$(LA_HOME)/src/lib/sdl-net/\
-		-iquote $(addprefix -I, $(shell find -L src/ -type d ))\
+		-iquote\
+		-Isrc/\
+		$(addprefix -I, $(shell find -L src/ -type d ))\
 		$(PLATFORM_INCLUDES))
 	$(eval CFLAGS=$(CFLAGS_INCLUDES) -Wall)
 

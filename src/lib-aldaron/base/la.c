@@ -9,6 +9,7 @@
 #include "SDL_system.h"
 #else
 #include "SDL.h"
+#include "SDL_mixer.h"
 #endif
 
 #include "la_memory.h"
@@ -44,6 +45,18 @@ static inline void* la_init__(const char* nm, uint64_t ctx1s) {
 	la_time_init__();
 	// Initialize the SDL
 	SDL_Init(0);
+#ifndef LA_PHONE_ANDROID
+#ifdef LA_FEATURE_AUDIO
+	// Open the audio device
+	Mix_Init(MIX_INIT_OGG);
+	if ( Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 1024) < 0 ) {
+		la_panic("Couldn't set 11025 Hz 16-bit audio because: %s",
+			(char *)SDL_GetError());
+	}else{
+		la_print("audio has been set.");
+	}
+#endif
+#endif
 	return context;
 }
 
@@ -92,29 +105,33 @@ const char* la_error(const char* format, ...) {
  * @param ctx_size: The size of the program context.
 **/
 int32_t la_start(void* fnc_init, la_fn_t fnc_loop, la_fn_t fnc_kill,
-	uint8_t openwindow, const char* name, size_t ctx_size)
+	const char* name, size_t ctx_size)
 {
 	SDL_AtomicSet(&la_rmcexit, 1);
 
 #ifndef LA_PHONE_ANDROID
-	la_window_t* la_window = openwindow ?
-		la_memory_allocate(sizeof(la_window_t)) : NULL;
+#ifdef LA_FEATURE_DISPLAY
+	la_window_t* la_window = la_memory_allocate(sizeof(la_window_t));
+#endif
 #endif
 
 	// Initialize Lib Aldaron!
 	void* context = la_init__(name, ctx_size);
 
-	// Open a window, if "openwindow" is set.
-	if(openwindow) {
-		la_window_start__(context, la_window, fnc_init, fnc_loop,
-			fnc_kill, name);
-	}else{
-		((la_fn_t) fnc_init)(context);
-		while(SDL_AtomicGet(&la_rmcexit))
-			fnc_loop(context);
-		fnc_kill(context);
-	}
+	// Open a window, if LA_FEATURE_DISPLAY is set.
+#ifdef LA_FEATURE_DISPLAY
+	la_window_start__(context, la_window, fnc_init, fnc_loop,
+		fnc_kill, name);
+#else
+	((la_fn_t) fnc_init)(context);
+	while(SDL_AtomicGet(&la_rmcexit))
+		fnc_loop(context);
+	fnc_kill(context);
+#endif
 #ifndef LA_PHONE_ANDROID
+	#ifdef LA_FEATURE_AUDIO
+		Mix_CloseAudio();
+	#endif
 	// Exit.
 	la_print("SDL_Quit()");
 	SDL_Quit();

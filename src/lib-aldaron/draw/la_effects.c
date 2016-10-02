@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_FEATURE_DISPLAY
+
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
 
@@ -503,3 +506,5 @@ void jlgr_effects_init__(la_window_t* jlgr) {
 		sizeof(jlgr_effects_lightsource_t), 0);
 	jlgr_effects_light_clear(jlgr);
 }
+
+#endif

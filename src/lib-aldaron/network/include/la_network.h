@@ -2,6 +2,14 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#ifndef LA_NETWORK
+#define LA_NETWORK
+
+#include <la_config.h>
+#ifndef LA_FEATURE_NETWORK
+	#error "please add #define LA_FEATURE_NETWORK to your la_config.h"
+#endif
+
 #include "SDL_net.h"
 
 typedef struct {
@@ -23,3 +31,5 @@ typedef struct {
 	uint8_t numSockets;
 	aldc_socket_t* sockets;
 } aldc_t;
+
+#endif

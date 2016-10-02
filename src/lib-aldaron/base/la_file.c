@@ -117,7 +117,7 @@ const char* la_file_basename(char* base, const char* filename) {
 	return NULL;
 }
 
-const char* la_file_append(const char* filename, const void* data, size_t size){
+const char* la_file_append(const char* filename,const void* data,uint32_t size){
 	int fd;
 	const char* error = NULL;
 	char* fname = filename ?

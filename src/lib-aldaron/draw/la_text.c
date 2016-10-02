@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_FEATURE_DISPLAY
+
 #include "JLGRprivate.h"
 
 #include <la_text.h>
@@ -194,3 +197,5 @@ void jlgr_text_draw(la_window_t* jlgr, const char* str, la_v3_t loc, jl_font_t f
 		tr.x += f.size * ( 3. / 4. );
 	}
 }
+
+#endif

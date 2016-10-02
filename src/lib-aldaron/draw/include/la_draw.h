@@ -5,6 +5,11 @@
 #ifndef LA_DRAW
 #define LA_DRAW
 
+#include <la_config.h>
+#ifndef LA_FEATURE_DISPLAY
+	#error "please add #define LA_FEATURE_DISPLAY to your la_config.h"
+#endif
+
 #include <la.h>
 
 #include "SDL_events.h"

@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_FEATURE_DISPLAY
+
 #include "JLGRprivate.h"
 #include "jlgr_opengl_private.h"
 
@@ -382,3 +385,5 @@ void jlgr_vo_free(la_window_t* jlgr, la_vo_t *vo) {
 	// Free main structure
 	la_memory_free(vo);
 }
+
+#endif

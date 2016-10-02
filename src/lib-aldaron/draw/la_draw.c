@@ -2,6 +2,9 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+#include <la_config.h>
+#ifdef LA_FEATURE_DISPLAY
+
 #include "JLGRprivate.h"
 #include "la_memory.h"
 
@@ -179,4 +182,4 @@ void la_draw_resize(la_window_t* window, uint32_t w, uint32_t h) {
 	la_safe_set_uint8(&window->protected.needs_resize, 2);
 }
 
-// End of file.
+#endif

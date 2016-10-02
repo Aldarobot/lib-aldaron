@@ -9,6 +9,7 @@
 
 #include <la_text.h>
 #include <la_string.h>
+#include <la_ro.h>
 
 #define COMPARE(towhat) ( strncmp(&temp[i], towhat, strlen(towhat)) == 0 )
 
@@ -21,7 +22,6 @@ void la_text(la_window_t* window, const char* format, ...) {
 	va_list arglist;
 	float colors[] = { 1.f, 1.f, 1.f, 1.f }; // Color of the font.
 	float shadowcolor[] = { 0.5f, 0.5f, 0.5f, 1.f };
-	jl_rect_t rc = { 0.f, 0.f, .0625f, .0625f };
 //	uint8_t bold;
 //	uint8_t italic;
 	uint8_t shadow = 0;
@@ -34,6 +34,7 @@ void la_text(la_window_t* window, const char* format, ...) {
 //	float resety = 0.f;
 	uint32_t limit = 0;
 	char temp[1024 + 1];
+	float w = .0625f, h = .0625f;
 
 	// Format the String...
 	va_start( arglist, format );
@@ -41,7 +42,7 @@ void la_text(la_window_t* window, const char* format, ...) {
 	va_end( arglist );
 
 	// Draw
-	jlgr_vo_set_image(window, &window->gl.temp_vo, rc, window->textures.font);
+	la_ro_image_rect(window,&window->gl.temp_vo,window->textures.font,w,h);
 	while(1) {
 		if(limit && i > limit) break;
 		if(temp[i] == '\0') break;
@@ -58,11 +59,11 @@ void la_text(la_window_t* window, const char* format, ...) {
 				char* end;
 
 				i += strlen("\x1B[f");
-				rc.h = strtof(&temp[i], &end);
-				rc.w = width * rc.h;
+				h = strtof(&temp[i], &end);
+				w = width * h;
 				i += end - &temp[i] + 1;
-				jlgr_vo_set_image(window, &window->gl.temp_vo,
-					rc, window->textures.font);
+				la_ro_image_rect(window, &window->gl.temp_vo,
+					window->textures.font, w, h);
 			}else if(COMPARE("\x1B[m")) {
 				char* end;
 
@@ -88,10 +89,10 @@ void la_text(la_window_t* window, const char* format, ...) {
 
 				i += strlen("\x1B[w");
 				width = strtof(&temp[i], &end);
-				rc.w = width * rc.h;
+				w = width * h;
 				i += end - &temp[i] + 1;
-				jlgr_vo_set_image(window, &window->gl.temp_vo,
-					rc, window->textures.font);
+				la_ro_image_rect(window, &window->gl.temp_vo,
+					window->textures.font, w, h);
 			}else if(COMPARE("\x1B[l")) {
 				char* end;
 
@@ -116,10 +117,10 @@ void la_text(la_window_t* window, const char* format, ...) {
 //				shadow = 0;
 //			}
 		}else if(COMPARE("\n")) {
-			tr.x = resetx, tr.y += rc.h;
+			tr.x = resetx, tr.y += h;
 			i++;
 		}else if(COMPARE("\t")) {
-			tr.x += tabsize * rc.w * ( 3. / 4. );
+			tr.x += tabsize * w * ( 3. / 4. );
 			i++;
 		}else{ // Single Byte Character.
 			// Set character
@@ -133,7 +134,7 @@ void la_text(la_window_t* window, const char* format, ...) {
 			// Draw character
 			jlgr_effects_vo_hue(window,&window->gl.temp_vo, tr, colors);
 			// Advance cursor.
-			tr.x += rc.w * distance;
+			tr.x += w * distance;
 			i++;
 		}
 	}
@@ -156,7 +157,7 @@ void jlgr_text_draw(la_window_t* jlgr, const char* str, la_v3_t loc, jl_font_t f
 	la_v3_t tr = { 0., 0., 0. };
 	la_ro_t* vo = &jlgr->gl.temp_vo;
 
-	jlgr_vo_set_image(jlgr, vo, rc, jlgr->textures.font);
+	la_ro_image_rect(jlgr, vo, jlgr->textures.font, rc.w, rc.h);
 	for(i = 0; i < strlen(str); i++) {
 		// Check for special characters
 		if(text[i] == '\n') {

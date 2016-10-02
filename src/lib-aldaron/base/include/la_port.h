@@ -15,6 +15,7 @@
 #include <la_safe.h>
 #include <la_buffer.h>
 #include <la_math.h>
+#include <la_ro_type.h>
 
 // Print 
 #define LA_PRESET "\x1B[0m"

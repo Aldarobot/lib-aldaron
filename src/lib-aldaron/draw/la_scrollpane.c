@@ -24,7 +24,7 @@ void la_gui_scrollpane_redraw(la_window_t* window, la_gui_scrollpane_t* sp,
 	float colors[] = { 0.3f, 0.3f, 0.3f };
 //	jl_rect_t irc = (jl_rect_t) { 0.f, 0.f, 1.f, internal_height };
 
-	jlgr_vo_set_rect(window, &sp->external, rc, colors, 0);
+	la_ro_plain_rect(window, &sp->external, colors, rc.w, rc.h);
 //	jlgr_vo_set_rect(window, &sp->internal, irc, colors, 0);
 	sp->drawfn = drawfn;
 //	la_ro_pr(window, &sp->internal, drawfn);

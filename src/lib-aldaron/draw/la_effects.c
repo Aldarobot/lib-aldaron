@@ -12,6 +12,7 @@
 
 #include <la_effect.h>
 #include <la_pr.h>
+#include <la_ro.h>
 
 /** @cond */
 
@@ -198,8 +199,8 @@ static void jl_mem_format2(char* rtn, const char* format, ...) {
 
 static void jlgr_effect_pr_hue__(la_window_t* jlgr) {
 	jlgr_opengl_framebuffer_subtx_(jlgr);
-	jlgr_vo_set_image(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
-		0., 0., 1., jl_gl_ar(jlgr) }, jlgr->gl.cp->tx);
+	la_ro_image_rect(jlgr, &jlgr->gl.temp_vo, jlgr->gl.cp->tx,
+		1., jl_gl_ar(jlgr));
 	jlgr_opengl_framebuffer_addtx_(jlgr, jlgr->gl.cp->tx);
 	jlgr_effects_vo_hue(jlgr, &jlgr->gl.temp_vo, (la_v3_t) {
 		0.f, 0.f, 0.f }, jlgr->effects.colors);
@@ -207,8 +208,8 @@ static void jlgr_effect_pr_hue__(la_window_t* jlgr) {
 
 static void jlgr_effect_pr_light__(la_window_t* jlgr) {
 	jlgr_opengl_framebuffer_subtx_(jlgr);
-	jlgr_vo_set_image(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
-		0., 0., 1., jl_gl_ar(jlgr) }, jlgr->gl.cp->tx);
+	la_ro_image_rect(jlgr, &jlgr->gl.temp_vo, jlgr->gl.cp->tx, 1.,
+		jl_gl_ar(jlgr));
 	jlgr_opengl_framebuffer_addtx_(jlgr, jlgr->gl.cp->tx);
 	jlgr_effects_vo_light(jlgr, &jlgr->gl.temp_vo,
 		(la_v3_t) { 0.f, 0.f, 0.f }, jlgr->effects.vec3);

@@ -196,7 +196,8 @@ uint8_t la_fileviewer_init(la_window_t* window, la_fileviewer_t* fileviewer,
 	la_buffer_init(&fileviewer->promptstring);
 	fileviewer->filelist = cl_list_create();
 	//Create the variables
-	jlgr_vo_set_image(window, &fileviewer->file, (jl_rect_t) { 0., 0., .2, .2}, window->textures.icon);
+	la_ro_image_rect(window, &fileviewer->file, window->textures.icon,
+		.2f, .2f);
 	la_fileviewer = fileviewer;
 	//
 	la_menu_init(&fileviewer->menu, window);

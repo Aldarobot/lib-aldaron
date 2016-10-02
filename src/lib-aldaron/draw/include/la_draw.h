@@ -34,26 +34,7 @@ typedef struct{
 
 #include <la_math.h>
 
-// Collision Box / Line / Etc.
-typedef struct{
-	la_v3_t pos; // Position ( X/Y/Z )
-	la_v3_t ofs; // Position Offset ( W/H/D )
-}jl_area_t;
-
 // Graphical stuff
-
-// Pre-renderer
-typedef struct {
-	// What to render
-	uint32_t tx;	// ID to texture.
-	uint32_t fb;	// ID to Frame Buffer
-	uint16_t w, h;	// Width and hieght of texture
-	// Render Area
-	uint32_t gl;	// GL Vertex Buffer Object [ 0 = Not Enabled ]
-	float ar;	// Aspect Ratio: h:w
-	float cv[4*3];	// Converted Vertices
-	jl_area_t cb;	// 2D/3D collision box.
-}jl_pr_t;
 
 typedef struct{
 	struct {
@@ -77,23 +58,6 @@ typedef struct{
 // jlgr_effects/types
 #define JLGR_EFFECTS_TYPES
 #include "la_effects.h"
-
-//Vertex Object
-typedef struct{
-	void* window;	// Window
-	// Basic:
-	uint8_t rs;	// Rendering Style 0=GL_TRIANGLE_FAN 1=GL_TRIANGLES
-	uint32_t gl;	// GL Vertex Buffer Object [ 0 = Not Enabled ]
-	uint32_t vc;	// # of Vertices
-	float* cv;	// Converted Vertices
-	uint32_t bt;	// Buffer for Texture coordinates or Color Vertices.
-	// Coloring:
-	float* cc;	// Colors
-	// Texturing:
-	uint32_t tx;	// ID to texture. [ 0 = Colors Instead ]
-	// Pre-rendered effects (framebuffer):
-	jl_pr_t pr;
-}la_ro_t;
 
 /**
  * Font type.
@@ -151,10 +115,7 @@ void jlgr_notify(la_window_t* jlgr, const char* notification, ...);
 // JLGRvo.c
 void jlgr_vo_set_vg(la_window_t* jlgr, la_ro_t *vo, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor);
-void jlgr_vo_set_rect(la_window_t* jlgr, la_ro_t *vo, jl_rect_t rc, float* colors,
-	uint8_t multicolor);
 void jlgr_vo_image(la_window_t* jlgr, la_ro_t *vo, uint32_t img);
-void jlgr_vo_set_image(la_window_t* jlgr, la_ro_t *vo, jl_rect_t rc, uint32_t tex);
 void jlgr_vo_txmap(la_window_t* jlgr, la_ro_t* vo, uint8_t orientation,
 	uint8_t w, uint8_t h, int16_t map);
 void jlgr_vo_color_gradient(la_window_t* jlgr, la_ro_t* vo, float* rgba);

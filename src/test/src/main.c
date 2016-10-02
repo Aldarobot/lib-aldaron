@@ -50,13 +50,11 @@ void ex_wups(ctx_t* ctx) {
 // Called when window is made/resized.
 static void test_resize(ctx_t* ctx) {
 	la_window_t* jlgr = ctx->window;
-	jl_rect_t rc1 = { 0.f, 0.f, 1.f, jl_gl_ar(jlgr) };
-	jl_rect_t rc2 = { 0.f, 0.f, 2.f, 1.f };
 	float colors[] = { 1.f, 1.f, 1.f, 1.f };
 
 	la_print("EXXXXXXXXXXXXXXXXXXXXAMPLE Resizing Window....");
-	jlgr_vo_set_image(jlgr, &(ctx->vo1), rc1, jlgr->textures.game);
-	jlgr_vo_set_rect(jlgr, &(ctx->vo2), rc2, colors, 0);
+	la_ro_image_rect(jlgr, &(ctx->vo1), jlgr->textures.game, 1.f, 1.f);
+	la_ro_plain_rect(jlgr, &(ctx->vo2), colors, 2.f, 1.f);
 	la_menu_draw(&ctx->menu, 1);
 	la_print("EXXXXXXXXXXXXXXXXXXXXAMPLE Resize'd Window....");
 }

@@ -49,17 +49,15 @@ static void jlgr_menubar_draw_(la_menu_t* menu) {
 }
 
 void la_menu_init(la_menu_t* menu, la_window_t* window) {
-	jl_rect_t rc_icon = { 0., 0., .1, .1};
-	jl_rect_t rc_shadow = { -.01, .01, .1, .1 };
 	float shadow_color[] = { 0.f, 0.f, 0.f, .75f };
 	int i;
 
 	menu->window = window;
 
 	// Make the shadow vertex object.
-	jlgr_vo_set_rect(window, &menu->shadow, rc_shadow, shadow_color, 0);
+	la_ro_plain_rect(window, &menu->shadow, shadow_color, .1f, .1f);
 	// Make the icon vertex object.
-	jlgr_vo_set_image(window, &menu->icon, rc_icon, window->textures.icon);
+	la_ro_image_rect(window, &menu->icon, window->textures.icon, .1f, .1f);
 	jlgr_vo_txmap(window, &menu->icon, 0, 16, 16, JLGR_ID_UNKNOWN);
 	// Clear the menubar & make pre-renderer.
 	for( i = 0; i < 10; i++) {
@@ -75,11 +73,11 @@ void la_menu_init(la_menu_t* menu, la_window_t* window) {
 static void jlgr_menubar_text__(la_menu_t* menu, float* color, float y,
 	const char* text)
 {
-	la_v3_t tr = { .9 - (.1 * menu->redraw), y, 0. };
-
-	jlgr_text_draw(menu->window, text, tr,
-		(jl_font_t) { menu->window->textures.icon, 0, color, 
-			.1 / strlen(text)});
+	la_text(menu->window,
+		LA_PXMOVE("%f", "%f") LA_PXSIZE("%f")
+		LA_PXCOLOR("%f", "%f", "%f", "%f") "%s",
+		.9 - (.1 * menu->redraw), y, .1 / ((double)(strlen(text)-1)),
+		color[0], color[1], color[2], color[3], text);
 }
 
 static void jlgr_menu_flip_draw__(la_menu_t* menu) {
@@ -174,10 +172,9 @@ void la_menu_loop(la_menu_t* menu) {
 }
 
 void la_menu_drawicon(la_menu_t* menu, uint32_t tex, uint8_t c) {
-	jl_rect_t rc_icon = { 0., 0., .1, .1};
 	la_v3_t tr = { .9 - (.1 * menu->redraw), 0., 0. };
 
-	jlgr_vo_set_image(menu->window, &menu->icon, rc_icon, tex);
+	la_ro_image_rect(menu->window, &menu->icon, tex, .1f, .1f);
 	jlgr_vo_txmap(menu->window, &menu->icon, 0, 16, 16, c);
 	la_ro_move(&menu->icon, tr);
 	jlgr_vo_draw(menu->window, &menu->icon);

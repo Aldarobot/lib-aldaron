@@ -68,9 +68,9 @@ void jlgr_fill_image_set(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h,
 	int16_t c)
 {
 	if(!tex) la_panic("jlgr_fill_image_set: Texture Must Be Nonzero!\n");
-	jl_rect_t rc = { 0., (.5f * la_window_h(jlgr)) - 1.f, 1.f, 2.f };
+//	jl_rect_t rc = { 0., (.5f * la_window_h(jlgr)) - 1.f, 1.f, 2.f };
 
-	jlgr_vo_set_image(jlgr, &jlgr->gui.vos.whole_screen, rc, tex);
+	la_ro_image_rect(jlgr, &jlgr->gui.vos.whole_screen, tex, 1.f, 2.f);
 	jlgr_vo_txmap(jlgr, &jlgr->gui.vos.whole_screen, 0, w, h, c);
 }
 
@@ -277,11 +277,9 @@ void jlgr_draw_bg(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, int16_t
 }
 
 void jlgr_draw_loadingbar(la_window_t* jlgr, double loaded) {
-	jl_rect_t bar = { .05, jl_gl_ar(jlgr)*.4,
-		.95,jl_gl_ar(jlgr)*.45};
 	float colors[] = { 0., 1., 0., 1. };
 
-	jlgr_vo_set_rect(jlgr, NULL, bar, colors, 0);
+	la_ro_plain_rect(jlgr, NULL, colors, .95, jl_gl_ar(jlgr) * .45);
 }
 
 //TODO: MOVE
@@ -490,10 +488,13 @@ uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr) {
 */
 void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc){
 	float cursor_color[] = { 0.1f, 0.1f, 0.1f, 1.f };
+
+//(jl_rect_t) {
+//			rc.x + (jlgr->gui.textbox.string->curs * rc.h * .75),
+//			rc.y, rc.h * .05, rc.h }
 	if(jlgr->gui.textbox.cursor) {
-		jlgr_vo_set_rect(jlgr, &jlgr->gl.temp_vo, (jl_rect_t) {
-			rc.x + (jlgr->gui.textbox.string->curs * rc.h * .75),
-			rc.y, rc.h * .05, rc.h }, cursor_color, 0);
+		la_ro_plain_rect(jlgr, &jlgr->gl.temp_vo, cursor_color,
+			rc.h * .05, rc.h);
 		jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo);
 	}
 	jlgr_text_draw(jlgr, (char*)(jlgr->gui.textbox.string->data),

@@ -847,8 +847,6 @@ void jl_gl_init__(la_window_t* jlgr) {
 #endif
 	jlgr->gl.cp = NULL;
 	_jl_gl_make_res(jlgr);
-	// Make sure no pre-renderer is activated.
-	jlgr_pr_off(jlgr);
 }
 
 #endif

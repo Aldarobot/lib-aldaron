@@ -71,7 +71,7 @@ void jlgr_fill_image_set(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h,
 //	jl_rect_t rc = { 0., (.5f * la_window_h(jlgr)) - 1.f, 1.f, 2.f };
 
 	la_ro_image_rect(jlgr, &jlgr->gui.vos.whole_screen, tex, 1.f, 2.f);
-	jlgr_vo_txmap(jlgr, &jlgr->gui.vos.whole_screen, 0, w, h, c);
+	la_ro_change_image(&jlgr->gui.vos.whole_screen, tex, w, h, c, 0);
 }
 
 /**
@@ -79,7 +79,7 @@ void jlgr_fill_image_set(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h,
  * @param jl: The library context.
 **/
 void jlgr_fill_image_draw(la_window_t* jlgr) {
-	jlgr_vo_draw(jlgr, &jlgr->gui.vos.whole_screen);
+	la_ro_draw(&jlgr->gui.vos.whole_screen);
 }
 
 /**
@@ -216,7 +216,7 @@ void jlgr_draw_ctxt(la_window_t* jlgr, const char *str, float yy, float* color) 
 	
 	jlgr_vo_set_rect(jlgr, &(slider->vo[2]), rc1, colors, 0);
 	// Draw Sliders
-	jlgr_vo_draw(jlgr, &(slider->vo[0]));
+	la_ro_draw(&(slider->vo[0]));
 	// Draw Slide 1
 	la_ro_move(&slider->vo[2], slider->where[0]);
 	la_ro_draw(&slider->vo[2]);
@@ -415,7 +415,7 @@ void jlgr_popup(la_window_t* jlgr, char *name, char *message,
 
 		// Draw glow
 		jlgr_vo_set_rect(jlgr, &jlgr->gl.temp_vo, rc, glow_color, 0);
-		jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo);
+		la_ro_draw(&jlgr->gl.temp_vo);
 		// Description
 		jlgr_text_draw(jlgr, txt,
 			(la_v3_t)
@@ -495,7 +495,7 @@ void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc){
 	if(jlgr->gui.textbox.cursor) {
 		la_ro_plain_rect(jlgr, &jlgr->gl.temp_vo, cursor_color,
 			rc.h * .05, rc.h);
-		jlgr_vo_draw(jlgr, &jlgr->gl.temp_vo);
+		la_ro_draw(&jlgr->gl.temp_vo);
 	}
 	jlgr_text_draw(jlgr, (char*)(jlgr->gui.textbox.string->data),
 		(la_v3_t) {rc.x, rc.y, 0.},

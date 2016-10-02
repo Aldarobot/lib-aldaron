@@ -116,19 +116,9 @@ void jlgr_notify(la_window_t* jlgr, const char* notification, ...);
 void jlgr_vo_set_vg(la_window_t* jlgr, la_ro_t *vo, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor);
 void jlgr_vo_image(la_window_t* jlgr, la_ro_t *vo, uint32_t img);
-void jlgr_vo_txmap(la_window_t* jlgr, la_ro_t* vo, uint8_t orientation,
-	uint8_t w, uint8_t h, int16_t map);
 void jlgr_vo_color_gradient(la_window_t* jlgr, la_ro_t* vo, float* rgba);
 void jlgr_vo_color_solid(la_window_t* jlgr, la_ro_t* vo, float* rgba);
-void jlgr_vo_draw2(la_window_t* jlgr, la_ro_t* vo, jlgr_glsl_t* sh);
-void jlgr_vo_draw(la_window_t* jlgr, la_ro_t* vo);
-void jlgr_vo_draw_pr(la_window_t* jlgr, la_ro_t* vo);
-void jlgr_vo_free(la_window_t* jlgr, la_ro_t *vo);
-
-// JLGRpr.c
-void jlgr_pr_off(la_window_t* jlgr);
-void jlgr_pr_resize(la_window_t* jlgr, la_ro_t* ro, float w, float h, uint16_t w_px);
-void jlgr_pr_draw(la_window_t* jlgr, la_ro_t* ro, la_v3_t vec, uint8_t orient);
+void jlgr_vo_draw2(la_ro_t* ro, jlgr_glsl_t* sh);
 
 // OpenGL
 uint32_t la_texture_new(la_window_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,
@@ -162,7 +152,6 @@ void jlgr_effects_vo_hue(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float c[]
 void jlgr_effects_vo_light(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs,
 	la_v3_t* material);
 void jlgr_effects_hue(la_window_t* jlgr, float c[]);
-void jlgr_effects_draw(la_window_t* jlgr, la_ro_t* vo);
 
 void jlgr_effects_light(la_window_t* jlgr, la_v3_t* material);
 void jlgr_effects_light_clear(la_window_t* jlgr);

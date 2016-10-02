@@ -42,7 +42,7 @@ void la_gui_scrollpane_draw(void* context, la_window_t* window,
 		la_ro_pr(context, window, &sp->external,
 			la_gui_scrollpane_draw__);
 	}
-	jlgr_vo_draw(window, &sp->external);
+	la_ro_draw(&sp->external);
 	la_ro_pr_draw(&sp->external, 0);
 }
 

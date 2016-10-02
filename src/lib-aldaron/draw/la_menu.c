@@ -9,8 +9,6 @@
 #include "la_menu.h"
 #include "la_text.h"
 
-#include <la_pr.h>
-
 #define MENU_REDRAW_NONE -1
 #define MENU_REDRAW_ALL -2
 
@@ -28,7 +26,7 @@ static inline void jlgr_menubar_shadow__(la_menu_t* menu) {
 		// Draw shadow
 		la_ro_move(&menu->shadow, (la_v3_t) {
 			.895 - (.1 * menu->redraw), 0.005, 0. });
-		jlgr_vo_draw(menu->window, &menu->shadow);
+		la_ro_draw(&menu->shadow);
 		// Draw Icon
 		_draw_icon_(menu);
 	}
@@ -58,7 +56,8 @@ void la_menu_init(la_menu_t* menu, la_window_t* window) {
 	la_ro_plain_rect(window, &menu->shadow, shadow_color, .1f, .1f);
 	// Make the icon vertex object.
 	la_ro_image_rect(window, &menu->icon, window->textures.icon, .1f, .1f);
-	jlgr_vo_txmap(window, &menu->icon, 0, 16, 16, JLGR_ID_UNKNOWN);
+	la_ro_change_image(&menu->icon, window->textures.icon, 16, 16,
+		JLGR_ID_UNKNOWN, 0);
 	// Clear the menubar & make pre-renderer.
 	for( i = 0; i < 10; i++) {
 		menu->inputfn[i] = NULL;
@@ -67,7 +66,7 @@ void la_menu_init(la_menu_t* menu, la_window_t* window) {
 	// Make the menubar.
 	la_ro_rect(window, &menu->menubar, 1.f, .11f);
 
-	la_pr(menu, window, &menu->menubar, (la_fn_t) jlgr_menubar_draw_);
+	la_ro_pr(menu, window, &menu->menubar, (la_fn_t) jlgr_menubar_draw_);
 }
 
 static void jlgr_menubar_text__(la_menu_t* menu, float* color, float y,
@@ -146,7 +145,7 @@ void la_menu_draw(la_menu_t* menu, uint8_t resize) {
 
 	// Pre-Render
 	if(menu->redraw != MENU_REDRAW_NONE) {
-		la_pr(menu, menu->window, &menu->menubar, (la_fn_t)
+		la_ro_pr(menu, menu->window, &menu->menubar, (la_fn_t)
 			jlgr_menubar_draw_);
 	}
 	// Draw Pre-Rendered
@@ -175,9 +174,9 @@ void la_menu_drawicon(la_menu_t* menu, uint32_t tex, uint8_t c) {
 	la_v3_t tr = { .9 - (.1 * menu->redraw), 0., 0. };
 
 	la_ro_image_rect(menu->window, &menu->icon, tex, .1f, .1f);
-	jlgr_vo_txmap(menu->window, &menu->icon, 0, 16, 16, c);
+	la_ro_change_image(&menu->icon, tex, 16, 16, c, 0);
 	la_ro_move(&menu->icon, tr);
-	jlgr_vo_draw(menu->window, &menu->icon);
+	la_ro_draw(&menu->icon);
 }
 
 void la_menu_dont(la_menu_t* menu) { }

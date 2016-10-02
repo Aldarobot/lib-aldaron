@@ -124,7 +124,8 @@ void la_text(la_window_t* window, const char* format, ...) {
 			i++;
 		}else{ // Single Byte Character.
 			// Set character
-			jlgr_vo_txmap(window,&window->gl.temp_vo,0,16,16,temp[i]);
+			la_ro_change_image(&window->gl.temp_vo,
+				window->textures.font, 16, 16, temp[i], 0);
 			// Effects
 			if(shadow) {
 				jlgr_effects_vo_hue(window, &window->gl.temp_vo,
@@ -182,7 +183,7 @@ void jlgr_text_draw(la_window_t* jlgr, const char* str, la_v3_t loc, jl_font_t f
 			continue;
 		}
 		// Set character
-		jlgr_vo_txmap(jlgr, vo, 0, 16, 16, text[i]);
+		la_ro_change_image(vo, jlgr->textures.font, 16, 16, text[i], 0);
 		// Special Drawing
 		if(bold) {
 			float x = tr.x; int i;

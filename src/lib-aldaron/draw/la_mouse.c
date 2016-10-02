@@ -12,7 +12,7 @@
 //#if JL_PLAT == JL_PLAT_COMPUTER // show mouse if computer
 void jlgr_mouse_resize__(la_window_t* jlgr) {
 	la_ro_image_rect(jlgr, &jlgr->mouse, jlgr->textures.cursor, .05f, .05f);
-	jlgr_vo_txmap(jlgr, &jlgr->mouse, 0, 4, 1, 0);
+	la_ro_change_image(&jlgr->mouse, jlgr->textures.cursor, 4, 1, 0, 0);
 	// Set the mouse's collision width and height to 0
 	jlgr->mouse.cb.ofs.x = 0.f, jlgr->mouse.cb.ofs.y = 0.f;
 }

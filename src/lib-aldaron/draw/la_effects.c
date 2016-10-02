@@ -11,7 +11,6 @@
 #include "la_memory.h"
 
 #include <la_effect.h>
-#include <la_pr.h>
 #include <la_ro.h>
 
 /** @cond */
@@ -222,7 +221,7 @@ static void jlgr_effects_clear__(la_window_t* window) {
 /** @endcond */
 
 void jlgr_effects_clear(la_window_t* window, la_ro_t* vo) {
-	la_pr(window, window, vo, (la_fn_t) jlgr_effects_clear__);
+	la_ro_pr(window, window, vo, (la_fn_t) jlgr_effects_clear__);
 }
 
 /**
@@ -247,7 +246,7 @@ void jlgr_effects_vo_alpha(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float a
 	// Set Alpha Value In Shader
 	jlgr_opengl_uniform1(jlgr, 1, jlgr->effects.alpha.fade, &a);
 	// Draw on screen
-	jlgr_vo_draw2(jlgr, vo, &jlgr->effects.alpha.shader);
+	jlgr_vo_draw2(vo, &jlgr->effects.alpha.shader);
 }
 
 /**
@@ -270,16 +269,7 @@ void jlgr_effects_vo_hue(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float c[]
 	// Set Hue Value In Shader
 	jlgr_opengl_uniform4(jlgr, 1, jlgr->effects.hue.new_color, c);
 	// Draw on screen
-	jlgr_vo_draw2(jlgr, vo, &jlgr->effects.hue.shader);
-}
-
-/**
- * Draw a vertex object with effects.
- * @param jlgr: The library context.
- * @param vo: The vertex object.
-**/
-void jlgr_effects_draw(la_window_t* jlgr, la_ro_t* vo) {
-	jlgr_pr_draw(jlgr, vo, vo->cb.pos, 0);
+	jlgr_vo_draw2(vo, &jlgr->effects.hue.shader);
 }
 
 /**
@@ -345,7 +335,7 @@ void la_effect_light(la_ro_t* vo, la_light_t* lights, uint8_t light_count,
 		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
 		ar);
 	// Draw on screen
-	jlgr_vo_draw2(jlgr, vo, shader);
+	jlgr_vo_draw2(vo, shader);
 }
 
 /**
@@ -380,7 +370,7 @@ void jlgr_effects_vo_light(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs,
 		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
 		jl_gl_ar(jlgr));
 	// Draw on screen
-	jlgr_vo_draw2(jlgr, vo, &lightsource->shader);
+	jlgr_vo_draw2(vo, &lightsource->shader);
 }
 
 /**
@@ -391,7 +381,7 @@ void jlgr_effects_vo_light(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs,
 **/
 void jlgr_effects_hue(la_window_t* jlgr, float c[]) {
 	la_memory_copy(c, jlgr->effects.colors, sizeof(float) * 4);
-	la_pr(jlgr, jlgr, jlgr->gl.cp, (la_fn_t) jlgr_effect_pr_hue__);
+	la_ro_pr(jlgr, jlgr, jlgr->gl.cp, (la_fn_t) jlgr_effect_pr_hue__);
 }
 
 /**
@@ -399,7 +389,7 @@ void jlgr_effects_hue(la_window_t* jlgr, float c[]) {
 **/
 void jlgr_effects_light(la_window_t* jlgr, la_v3_t* material) {
 	jlgr->effects.vec3 = material;
-	la_pr(jlgr, jlgr, jlgr->gl.cp, (la_fn_t) jlgr_effect_pr_light__);
+	la_ro_pr(jlgr, jlgr, jlgr->gl.cp, (la_fn_t) jlgr_effect_pr_light__);
 }
 
 /**

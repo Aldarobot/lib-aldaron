@@ -287,10 +287,11 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 		if(strcmp(stringtoprint, "..") && strcmp(stringtoprint, ".")) {
 			uint8_t state = la_file_exist(stringtoprint);
 
-			jlgr_vo_txmap(window, &fileviewer->file, 0,
-				16, 16, state == FILE_TYPE_DIR ? 12 : 11);
+			la_ro_change_image(&fileviewer->file,
+				window->textures.icon,
+				16, 16, state == FILE_TYPE_DIR ? 12 : 11, 0);
 			la_ro_move(&fileviewer->file, (la_v3_t) { x * 0.2f, 0.1f + (y * 0.2f), 0.f});
-			jlgr_vo_draw(window, &fileviewer->file);
+			la_ro_draw(&fileviewer->file);
 			la_text(window, LA_PXWIDTH("0.5") LA_PXSIZE("0.025") LA_PXMOVE("%f", "%f") LA_PBLACK "%s", .035 + (x * 0.2f), offset + (y * 0.2f), stringtoprint);
 			x++;
 			if(x > 4) x = 0, y++;

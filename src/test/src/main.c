@@ -14,7 +14,7 @@ static void ex_redraw(ctx_t* ctx) {
 	};
 
 // Draw
-	jlgr_vo_draw(window, &ctx->vo1);
+	la_ro_draw(&ctx->vo1);
 // Light
 	la_effect_light(&ctx->vo1, &light, 1, (la_v3_t) { 1.f, 1.f, 1.f });
 

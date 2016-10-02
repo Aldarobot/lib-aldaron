@@ -9,10 +9,22 @@
 #include "jlgr_opengl_private.h"
 
 #include <la_ro.h>
-#include <la_pr.h>
 #include <la_memory.h>
 
 extern float la_banner_size;
+
+void jlgr_opengl_viewport_(la_window_t* jlgr, uint16_t w, uint16_t h);
+void jlgr_opengl_texture_new_(la_window_t* jlgr, uint32_t *tex, uint8_t* px,
+	uint16_t w, uint16_t h, uint8_t bytepp);
+void jl_gl_texture_free_(la_window_t* jlgr, uint32_t *tex);
+void jlgr_opengl_texture_off_(la_window_t* jlgr);
+void jl_opengl_framebuffer_make_(la_window_t* jlgr, uint32_t *fb);
+void jlgr_opengl_framebuffer_addtx_(la_window_t* jlgr, uint32_t tx);
+void jlgr_opengl_framebuffer_status_(la_window_t* jlgr);
+void jl_opengl_framebuffer_free_(la_window_t* jlgr, uint32_t *fb);
+void jlgr_opengl_framebuffer_bind_(la_window_t* jlgr, uint32_t fb);
+
+static void jlgr_pr_init__(la_window_t* jlgr, la_ro_t* ro);
 
 static inline void jlgr_vo_bounding_box(la_window_t* jlgr, la_ro_t* ro,
 	const float *xyzw, uint32_t vertices)
@@ -43,6 +55,39 @@ static inline void jlgr_vo_bounding_box(la_window_t* jlgr, la_ro_t* ro,
 	la_math_v3_sub(&ro->cb.ofs, ro->cb.pos);
 }
 
+static void jlgr_pr_set__(la_ro_t *ro, float w, float h, uint16_t w_px) {
+	const float ar = h / w; // Aspect Ratio.
+	const float h_px = w_px * ar; // Height in pixels.
+
+	// Set width and height.
+	ro->pr.w = w_px;
+	ro->pr.h = h_px;
+	// Set aspect ratio.
+	ro->pr.ar = ar;
+}
+
+static inline void la_ro_pr_resize__(la_window_t* jlgr, la_ro_t* ro, float w,
+	float h, uint16_t w_px)
+{
+	const float xyzw[] = {
+		0.f,	h,	0.f,
+		0.f,	0.f,	0.f,
+		w,	0.f,	0.f,
+		w,	h,	0.f
+	};
+
+	// If pre-renderer is initialized, reset.
+	if(ro->pr.fb) {
+		jl_gl_texture_free_(jlgr, &(ro->pr.tx));
+		jl_opengl_framebuffer_free_(jlgr, &(ro->pr.fb));
+		jlgr_opengl_buffer_old_(jlgr, &(ro->pr.gl));
+	}
+	// Create the VBO.
+	jlgr_opengl_vertices_(jlgr, xyzw, 4, ro->pr.cv, &ro->pr.gl);
+	// Set width, height and aspect ratio.
+	jlgr_pr_set__(ro, w, h, w_px);
+}
+
 static void jlgr_vo_vertices__(la_window_t* jlgr, la_ro_t* ro, const float *xyzw,
 	uint32_t vertices)
 {
@@ -57,7 +102,7 @@ static void jlgr_vo_vertices__(la_window_t* jlgr, la_ro_t* ro, const float *xyzw
 		// Set bounding box
 		jlgr_vo_bounding_box(jlgr, ro, xyzw, vertices);
 		// Update pre-renderer
-		jlgr_pr_resize(jlgr, ro, ro->cb.ofs.x, ro->cb.ofs.y,
+		la_ro_pr_resize__(jlgr, ro, ro->cb.ofs.x, ro->cb.ofs.y,
 			jlgr->wm.w * ro->cb.ofs.x);
 	}
 	la_ro_move(ro, (la_v3_t) { 0.f, 0.f, 0.f });
@@ -110,8 +155,64 @@ static void la_ro_init__(la_window_t* window, la_ro_t* ro) {
 	ro->tx = 0;
 }
 
-static void la_ro_panic__(la_ro_t* ro, const char* error) {
+static inline la_window_t* la_ro_panic__(la_ro_t* ro, const char* error) {
 	if(ro->window == NULL) la_panic("Vertex object uninit'd: %s\n", error);
+	return ro->window;
+}
+
+static void jlgr_pr_use__(la_window_t* window, la_ro_t* ro) {
+	jlgr_pr_init__(window, ro);
+	if(ro->pr.w == 0) {
+		la_panic("jlgr_pr_use__ failed: 'w' must be more than 0");
+	}else if(ro->pr.h == 0) {
+		la_panic("jlgr_pr_use__ failed: 'h' must be more than 0");
+	}else if((ro->pr.w > GL_MAX_TEXTURE_SIZE)||(ro->pr.h > GL_MAX_TEXTURE_SIZE)) {
+		la_print("_jl_gl_pr_obj_make() failed:");
+		la_print("w = %d,h = %d", ro->pr.w, ro->pr.h);
+		la_panic("texture is too big for graphics card.");
+	}
+	// Bind the texture.
+	jlgr_opengl_texture_bind_(window, ro->pr.tx);
+	// Bind the framebuffer.
+	jlgr_opengl_framebuffer_bind_(window, ro->pr.fb);
+	// Render on the whole framebuffer [ lower left -> upper right ]
+	jlgr_opengl_viewport_(window, ro->pr.w, ro->pr.h);
+	// Reset the aspect ratio.
+	window->gl.cp = ro;
+}
+
+
+
+static void jlgr_pr_init__(la_window_t* jlgr, la_ro_t* ro) {
+	if(ro->pr.fb == 0 || ro->pr.tx == 0) {
+		// Make frame buffer
+		jl_opengl_framebuffer_make_(jlgr, &ro->pr.fb);
+		// Make the texture.
+		jlgr_opengl_texture_new_(jlgr, &(ro->pr.tx), NULL, ro->pr.w,
+			ro->pr.h, 0);
+		jlgr_opengl_texture_off_(jlgr);
+		// Recursively bind the framebuffer.
+		jlgr_pr_use__(jlgr, ro);
+		// Attach texture buffer.
+		jlgr_opengl_framebuffer_addtx_(jlgr, ro->pr.tx);
+		jlgr_opengl_framebuffer_status_(jlgr);
+		// Set Viewport to image and clear.
+		jlgr_opengl_viewport_(jlgr, ro->pr.w, ro->pr.h);
+		// Clear the pre-renderer.
+		jl_gl_clear(jlgr, 0.f, 0.f, 0.f, 0.f);
+	}
+}
+
+// Stop drawing to a pre-renderer.
+static inline void la_ro_pr_off__(la_window_t* window) {
+	// Unbind the texture.
+	jlgr_opengl_texture_off_(window);
+	// Unbind the framebuffer.
+	jlgr_opengl_framebuffer_bind_(window, 0);
+	// Render to the whole screen.
+	jl_gl_viewport_screen(window);
+	// Reset the aspect ratio.
+	window->gl.cp = NULL;
 }
 
 void la_ro_rect(la_window_t* window, la_ro_t* ro, float w, float h) {
@@ -163,14 +264,6 @@ void la_ro_plain_rect(la_window_t* window, la_ro_t* ro, float* colors,
 	jlgr_vo_color_solid(window, ro, colors);
 }
 
-/**
- * Set a vertex object to an Image.
- *
- * @param jlgr: The library context
- * @param ro: The vertex object
- * @param rc: the rectangle to draw the image in.
- * @param tex:  the ID of the image.
-**/
 void la_ro_image_rect(la_window_t* window, la_ro_t *ro, uint32_t tex, float w,
 	float h)
 {
@@ -184,42 +277,22 @@ void la_ro_image_rect(la_window_t* window, la_ro_t *ro, uint32_t tex, float w,
 	// Overwrite the vertex object
 	jlgr_vo_poly__(window, ro, 4, Oone);
 	// Texture the vertex object
-	jlgr_vo_image(window, ro, tex);
+	la_ro_change_image(ro, tex, 0, 0, -1, 0);
 }
 
-/**
- * Set the vertex object's texturing to an image.
- * @param jlgr: The library context.
- * @param ro: The vertex object to modify.
- * @param img: The image to display on the vertex object.
-**/
-void jlgr_vo_image(la_window_t* jlgr, la_ro_t *ro, uint32_t img) {
-	la_ro_init__(jlgr, ro);
-	if(ro == NULL) ro = &jlgr->gl.temp_vo;
+void la_ro_change_image(la_ro_t *ro, uint32_t img,
+	uint8_t w, uint8_t h, int16_t map, uint8_t orient)
+{
+#ifdef JL_DEBUG
+	if(img == 0) la_panic("Error: Texture=0!");
+#endif
+	la_window_t* window = la_ro_panic__(ro, "Can't Draw!");
+	const float *tc = orient ?
+		( orient == 1 ? UPSIDEDOWN_TC : BACKWARD_TC ) : DEFAULT_TC;
+
+	if(ro == NULL) ro = &window->gl.temp_vo;
 	// Make sure non-textured colors aren't attempted
 	ro->tx = img;
-#ifdef JL_DEBUG
-	if(!ro->tx) la_panic("Error: Texture=0!");
-#endif
-	jlgr_vo_txmap(jlgr, ro, 0, 0, 0, -1);
-}
-
-
-/**
- * Change the character map for a texture.
- * @param jl: The library context.
- * @param ro: The vertext object to change.
- * @param w: How many characters wide the texture is.
- * @param h: How many characters high the texture is.
- * @param map: The character value to map.  -1 for full texture.
-**/
-void jlgr_vo_txmap(la_window_t* jlgr, la_ro_t* ro, uint8_t orientation,
-	uint8_t w, uint8_t h, int16_t map)
-{
-	la_ro_init__(jlgr, ro);
-	const float *tc = orientation ?
-		( orientation == 1 ? UPSIDEDOWN_TC : BACKWARD_TC )
-		: DEFAULT_TC;
 	if(map != -1) {
 		float ww = (float)w;
 		float hh = (float)h;
@@ -231,9 +304,9 @@ void jlgr_vo_txmap(la_window_t* jlgr, la_ro_t* ro, uint8_t orientation,
 			(tc[4]/ww) + CX, (tc[5]/hh) + CY,
 			(tc[6]/ww) + CX, (tc[7]/hh) + CY
 		};
-		jlgr_opengl_buffer_set_(jlgr, &ro->bt, tex1, 8);
+		jlgr_opengl_buffer_set_(window, &ro->bt, tex1, 8);
 	}else{
-		jlgr_opengl_buffer_set_(jlgr, &ro->bt, tc, 8);
+		jlgr_opengl_buffer_set_(window, &ro->bt, tc, 8);
 	}
 }
 
@@ -285,8 +358,8 @@ void la_ro_move(la_ro_t* ro, la_v3_t pos) {
  * @param sh: The shader to use ( must be the same one used with
  *	jlgr_opengl_draw1(). )
 **/
-void jlgr_vo_draw2(la_window_t* jlgr, la_ro_t* ro, jlgr_glsl_t* sh) {
-	la_ro_panic__(ro, "Can't Draw2!");
+void jlgr_vo_draw2(la_ro_t* ro, jlgr_glsl_t* sh) {
+	la_window_t* jlgr = la_ro_panic__(ro, "Can't Draw2!");
 	// Use Temporary Vertex Object If no vertex object.
 	if(ro == NULL) ro = &jlgr->gl.temp_vo;
 	if(ro->tx) {
@@ -312,24 +385,19 @@ void jlgr_vo_draw2(la_window_t* jlgr, la_ro_t* ro, jlgr_glsl_t* sh) {
  * @param jlgr: The library context.
  * @param ro: The vertex object to draw.
 **/
-void jlgr_vo_draw(la_window_t* jlgr, la_ro_t* ro) {
-	if(ro->window == NULL) la_panic("Can't Draw");
-	la_ro_panic__(ro, "Can't Draw!");
+void la_ro_draw(la_ro_t* ro) {
+	la_window_t* window = la_ro_panic__(ro, "Can't Draw!");
 	jlgr_glsl_t* shader = ro->tx ?
-		&jlgr->gl.prg.texture : &jlgr->gl.prg.color;
+		&window->gl.prg.texture : &window->gl.prg.color;
 
-	jlgr_opengl_draw1(jlgr, shader);
-	jlgr_opengl_matrix(jlgr, shader,
+	jlgr_opengl_draw1(window, shader);
+	jlgr_opengl_matrix(window, shader,
 		(la_v3_t) { 1.f, 1.f, 1.f }, // Scale
 		(la_v3_t) { 0.f, 0.f, 0.f }, // Rotate
 		ro->cb.pos, // Translate
 		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
-		jl_gl_ar(jlgr));
-	jlgr_vo_draw2(jlgr, ro, shader);
-}
-
-void la_ro_draw(la_ro_t* ro) {
-	jlgr_vo_draw(ro->window, ro);
+		jl_gl_ar(window));
+	jlgr_vo_draw2(ro, shader);
 }
 
 /**
@@ -338,12 +406,42 @@ void la_ro_draw(la_ro_t* ro) {
  * @param ro: The vertex object.
 **/
 void la_ro_pr_draw(la_ro_t* ro, uint8_t orient) {
-	la_ro_panic__(ro, "Can't Draw Pre-Rendered!");
-	jlgr_pr_draw(ro->window, ro, ro->cb.pos, orient);
+	la_window_t* window = la_ro_panic__(ro, "Can't Draw Pre-Rendered!");
+
+	// Initialize Framebuffer, if not already init'd
+	jlgr_pr_init__(window, ro);
+	// Bind texture shader.
+	jlgr_opengl_draw1(window, &window->gl.prg.texture);
+	// Transform
+	jlgr_opengl_matrix(window, &window->gl.prg.texture,
+		(la_v3_t) { 1.f, 1.f, 1.f }, // Scale
+		(la_v3_t) { 0.f, 0.f, 0.f }, // Rotate
+		ro->cb.pos, // Translate
+		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
+		jl_gl_ar(window));
+	// Bind Texture Coordinates to shader
+	jlgr_opengl_setv(window, orient
+		? &window->gl.upsidedown_tc : &window->gl.default_tc,
+		window->gl.prg.texture.attributes.texpos_color, 2);
+	// Bind the texture
+	jlgr_opengl_texture_bind_(window, ro->pr.tx);
+	// Update the position variable in shader.
+	jlgr_opengl_setv(window, &ro->pr.gl,
+		window->gl.prg.texture.attributes.position, 3);
+	// Draw the image on the screen!
+	jlgr_opengl_draw_arrays_(window, GL_TRIANGLE_FAN, 4);
 }
 
 void la_ro_pr(void* context, la_window_t* window, la_ro_t* ro, la_fn_t drawfn) {
-	la_pr(context, window, ro, drawfn);
+	la_ro_t* oldpr = window->gl.cp;
+
+	if(!ro) la_panic("Drawing on lost pre-renderer.");
+	// Use the vo's pr
+	jlgr_pr_use__(window, ro);
+	// Render to the pr.
+	drawfn(context);
+	// Go back to the previous pre-renderer or none.
+	oldpr ? jlgr_pr_use__(window, oldpr) : la_ro_pr_off__(window);
 }
 
 // * THREAD: Main thread only.
@@ -381,22 +479,15 @@ void la_ro_clamp(la_v3_t xyz, jl_area_t area, la_v3_t* rtn) {
 	*rtn = xyz;
 }
 
-/**
- * Free a vertex object.
- * @param jl: The library context
- * @param ro: The vertex object to free
-**/
-void jlgr_vo_free(la_window_t* jlgr, la_ro_t *ro) {
-	la_ro_panic__(ro, "Can't Free!");
+void la_ro_free(la_ro_t *ro) {
+	la_window_t* window = la_ro_panic__(ro, "Can't Free!");
 	// Free GL VBO
-	jlgr_opengl_buffer_old_(jlgr, &ro->gl);
+	jlgr_opengl_buffer_old_(window, &ro->gl);
 	// Free GL Texture Buffer
-	jlgr_opengl_buffer_old_(jlgr, &ro->bt);
+	jlgr_opengl_buffer_old_(window, &ro->bt);
 	// Free Converted Vertices & Colors
 	if(ro->cv) ro->cv = la_memory_resize(ro->cv, 0);
 	if(ro->cc) ro->cc = la_memory_resize(ro->cc, 0);
-	// Free main structure
-	la_memory_free(ro);
 }
 
 #endif

@@ -100,8 +100,8 @@ typedef struct {
 	// For Programer's Use
 	float fontcolor[4];
 	jl_font_t font;
-	la_vo_t mouse;
-	la_vo_t screen;
+	la_ro_t mouse;
+	la_ro_t screen;
 	safe_uint8_t has_2_screens; // If 2 screens are hooked up.
 
 	struct {
@@ -156,7 +156,7 @@ typedef struct {
 
 		float colors[4];
 		la_v3_t* vec3;
-		la_vo_t* vo;
+		la_ro_t* vo;
 
 		jlgr_effects_light_t lights;
 	}effects;
@@ -173,7 +173,7 @@ typedef struct {
 			jlgr_glsl_t color;
 		}prg;
 
-		la_vo_t temp_vo;
+		la_ro_t temp_vo;
 		// Default texture coordinates.
 		uint32_t default_tc;
 		uint32_t upsidedown_tc;
@@ -189,7 +189,7 @@ typedef struct {
 			jl_popup_button_t* btns;
 		}popup;
 		struct {
-			la_vo_t whole_screen;
+			la_ro_t whole_screen;
 		}vos;
 		struct {
 			char message[256];

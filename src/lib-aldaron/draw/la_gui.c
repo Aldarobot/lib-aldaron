@@ -6,16 +6,15 @@
 #ifdef LA_FEATURE_DISPLAY
 
 #include "JLGRprivate.h"
-#include "la_buffer.h"
 
-#include <la_vo.h>
+#include <la_ro.h>
 
 void* aldaron_data(void);
 uint64_t aldaron_size(void);
 
 typedef struct {
 	la_v3_t where[2];
-	la_vo_t vo[3]; // Vertex object [ Full, Slider 1, Slider 2 ].
+	la_ro_t vo[3]; // Vertex object [ Full, Slider 1, Slider 2 ].
 }jl_gui_slider_draw;
 
 typedef struct {
@@ -219,15 +218,15 @@ void jlgr_draw_ctxt(la_window_t* jlgr, const char *str, float yy, float* color) 
 	// Draw Sliders
 	jlgr_vo_draw(jlgr, &(slider->vo[0]));
 	// Draw Slide 1
-	la_vo_move(&slider->vo[2], slider->where[0]);
-	la_vo_draw(&slider->vo[2]);
-	la_vo_move(&slider->vo[1], slider->where[0]);
-	la_vo_draw(&slider->vo[1]);
+	la_ro_move(&slider->vo[2], slider->where[0]);
+	la_ro_draw(&slider->vo[2]);
+	la_ro_move(&slider->vo[1], slider->where[0]);
+	la_ro_draw(&slider->vo[1]);
 	// Draw Slide 2
-	la_vo_move(&slider->vo[2], slider->where[1]);
-	la_vo_draw(&slider->vo[2]);
-	la_vo_move(&slider->vo[1], slider->where[1]);
-	la_vo_draw(&slider->vo[1]);
+	la_ro_move(&slider->vo[2], slider->where[1]);
+	la_ro_draw(&slider->vo[2]);
+	la_ro_move(&slider->vo[1], slider->where[1]);
+	la_ro_draw(&slider->vo[1]);
 }*/
 
 /**

@@ -4,8 +4,8 @@
 typedef struct{
 	la_window_t* window;
 	la_mode_t mode;
-	la_vo_t vo1;
-	la_vo_t vo2;
+	la_ro_t vo1;
+	la_ro_t vo2;
 	float s1[3];
 	float s2[3];
 	uint8_t hasMenu;

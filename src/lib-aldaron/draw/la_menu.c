@@ -26,7 +26,7 @@ static inline void jlgr_menubar_shadow__(la_menu_t* menu) {
 			break;
 
 		// Draw shadow
-		la_vo_move(&menu->shadow, (la_v3_t) {
+		la_ro_move(&menu->shadow, (la_v3_t) {
 			.895 - (.1 * menu->redraw), 0.005, 0. });
 		jlgr_vo_draw(menu->window, &menu->shadow);
 		// Draw Icon
@@ -67,7 +67,7 @@ void la_menu_init(la_menu_t* menu, la_window_t* window) {
 		menu->redrawfn[i] = NULL;
 	}
 	// Make the menubar.
-	la_vo_rect(window, &menu->menubar, 1.f, .11f);
+	la_ro_rect(window, &menu->menubar, 1.f, .11f);
 
 	la_pr(menu, window, &menu->menubar.pr, (la_fn_t) jlgr_menubar_draw_);
 }
@@ -152,7 +152,7 @@ void la_menu_draw(la_menu_t* menu, uint8_t resize) {
 			jlgr_menubar_draw_);
 	}
 	// Draw Pre-Rendered
-	la_vo_pr_draw(&menu->menubar, 0);
+	la_ro_pr_draw(&menu->menubar, 0);
 }
 
 /**
@@ -179,7 +179,7 @@ void la_menu_drawicon(la_menu_t* menu, uint32_t tex, uint8_t c) {
 
 	jlgr_vo_set_image(menu->window, &menu->icon, rc_icon, tex);
 	jlgr_vo_txmap(menu->window, &menu->icon, 0, 16, 16, c);
-	la_vo_move(&menu->icon, tr);
+	la_ro_move(&menu->icon, tr);
 	jlgr_vo_draw(menu->window, &menu->icon);
 }
 

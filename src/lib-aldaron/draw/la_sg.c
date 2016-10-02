@@ -10,7 +10,7 @@
 #include "la_buffer.h"
 
 #include <la_file.h>
-#include <la_vo.h>
+#include <la_ro.h>
 
 // Constants
 	//ALL IMAGES: 1024x1024
@@ -165,8 +165,8 @@ void la_window_draw__(void* context, la_window_t* window) {
 	la_window_draw_t pass = (la_window_draw_t) { context, window };
 
 	// Draw over it.
-	la_vo_pr(&pass, window, &window->screen, (la_fn_t) la_window_draw_flipped);
-	la_vo_pr_draw(&window->screen, 1);
+	la_ro_pr(&pass, window, &window->screen, (la_fn_t) la_window_draw_flipped);
+	la_ro_pr_draw(&window->screen, 1);
 }
 
 void jl_sg_init__(la_window_t* window) {

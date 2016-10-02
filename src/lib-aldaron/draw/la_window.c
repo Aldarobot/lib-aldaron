@@ -8,7 +8,7 @@
 #include "JLGRprivate.h"
 
 #include <la_time.h>
-#include <la_vo.h>
+#include <la_ro.h>
 
 #define JL_WM_FULLSCREEN SDL_WINDOW_FULLSCREEN_DESKTOP
 
@@ -156,7 +156,7 @@ void la_window_resize__(la_window_t* window, uint32_t w, uint32_t h) {
 	window->wm.h = h;
 	window->wm.ar = ((float)h) / ((float)w);
 	jl_gl_viewport_screen(window);
-	la_vo_rect(window, &window->screen, 1.f, window->wm.ar);
+	la_ro_rect(window, &window->screen, 1.f, window->wm.ar);
 }
 
 void jl_wm_init__(la_window_t* window) {

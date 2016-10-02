@@ -93,7 +93,7 @@ typedef struct{
 	uint32_t tx;	// ID to texture. [ 0 = Colors Instead ]
 	// Pre-rendered effects (framebuffer):
 	jl_pr_t pr;
-}la_vo_t;
+}la_ro_t;
 
 /**
  * Font type.
@@ -149,20 +149,20 @@ void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc);
 void jlgr_notify(la_window_t* jlgr, const char* notification, ...);
 
 // JLGRvo.c
-void jlgr_vo_set_vg(la_window_t* jlgr, la_vo_t *vo, uint16_t tricount,
+void jlgr_vo_set_vg(la_window_t* jlgr, la_ro_t *vo, uint16_t tricount,
 	float* triangles, float* colors, uint8_t multicolor);
-void jlgr_vo_set_rect(la_window_t* jlgr, la_vo_t *vo, jl_rect_t rc, float* colors,
+void jlgr_vo_set_rect(la_window_t* jlgr, la_ro_t *vo, jl_rect_t rc, float* colors,
 	uint8_t multicolor);
-void jlgr_vo_image(la_window_t* jlgr, la_vo_t *vo, uint32_t img);
-void jlgr_vo_set_image(la_window_t* jlgr, la_vo_t *vo, jl_rect_t rc, uint32_t tex);
-void jlgr_vo_txmap(la_window_t* jlgr, la_vo_t* vo, uint8_t orientation,
+void jlgr_vo_image(la_window_t* jlgr, la_ro_t *vo, uint32_t img);
+void jlgr_vo_set_image(la_window_t* jlgr, la_ro_t *vo, jl_rect_t rc, uint32_t tex);
+void jlgr_vo_txmap(la_window_t* jlgr, la_ro_t* vo, uint8_t orientation,
 	uint8_t w, uint8_t h, int16_t map);
-void jlgr_vo_color_gradient(la_window_t* jlgr, la_vo_t* vo, float* rgba);
-void jlgr_vo_color_solid(la_window_t* jlgr, la_vo_t* vo, float* rgba);
-void jlgr_vo_draw2(la_window_t* jlgr, la_vo_t* vo, jlgr_glsl_t* sh);
-void jlgr_vo_draw(la_window_t* jlgr, la_vo_t* vo);
-void jlgr_vo_draw_pr(la_window_t* jlgr, la_vo_t* vo);
-void jlgr_vo_free(la_window_t* jlgr, la_vo_t *vo);
+void jlgr_vo_color_gradient(la_window_t* jlgr, la_ro_t* vo, float* rgba);
+void jlgr_vo_color_solid(la_window_t* jlgr, la_ro_t* vo, float* rgba);
+void jlgr_vo_draw2(la_window_t* jlgr, la_ro_t* vo, jlgr_glsl_t* sh);
+void jlgr_vo_draw(la_window_t* jlgr, la_ro_t* vo);
+void jlgr_vo_draw_pr(la_window_t* jlgr, la_ro_t* vo);
+void jlgr_vo_free(la_window_t* jlgr, la_ro_t *vo);
 
 // JLGRpr.c
 void jlgr_pr_off(la_window_t* jlgr);
@@ -196,12 +196,12 @@ void jlgr_opengl_shader_uniform(la_window_t* jlgr, jlgr_glsl_t* glsl,
 void jlgr_opengl_draw1(la_window_t* jlgr, jlgr_glsl_t* sh);
 
 // JLGReffects.c
-void jlgr_effects_vo_alpha(la_window_t* jlgr, la_vo_t* vo, la_v3_t offs, float a);
-void jlgr_effects_vo_hue(la_window_t* jlgr, la_vo_t* vo, la_v3_t offs, float c[]);
-void jlgr_effects_vo_light(la_window_t* jlgr, la_vo_t* vo, la_v3_t offs,
+void jlgr_effects_vo_alpha(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float a);
+void jlgr_effects_vo_hue(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float c[]);
+void jlgr_effects_vo_light(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs,
 	la_v3_t* material);
 void jlgr_effects_hue(la_window_t* jlgr, float c[]);
-void jlgr_effects_draw(la_window_t* jlgr, la_vo_t* vo);
+void jlgr_effects_draw(la_window_t* jlgr, la_ro_t* vo);
 
 void jlgr_effects_light(la_window_t* jlgr, la_v3_t* material);
 void jlgr_effects_light_clear(la_window_t* jlgr);

@@ -154,7 +154,7 @@ void jlgr_text_draw(la_window_t* jlgr, const char* str, la_v3_t loc, jl_font_t f
 	uint8_t bold = 0;
 	jl_rect_t rc = { loc.x, loc.y, f.size, f.size };
 	la_v3_t tr = { 0., 0., 0. };
-	la_vo_t* vo = &jlgr->gl.temp_vo;
+	la_ro_t* vo = &jlgr->gl.temp_vo;
 
 	jlgr_vo_set_image(jlgr, vo, rc, jlgr->textures.font);
 	for(i = 0; i < strlen(str); i++) {

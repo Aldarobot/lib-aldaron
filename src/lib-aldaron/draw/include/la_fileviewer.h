@@ -29,8 +29,8 @@ typedef struct{
 	uint64_t newfilesize;
 	safe_uint8_t prompt;
 	la_buffer_t promptstring;
-	la_vo_t file;
-	la_vo_t fade;
+	la_ro_t file;
+	la_ro_t fade;
 	la_menu_t menu;
 }la_fileviewer_t;
 

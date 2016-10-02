@@ -228,7 +228,7 @@ uint8_t la_fileviewer_init(la_window_t* window, la_fileviewer_t* fileviewer,
 		.5f, .5f, 1.f, 0.f,
 		.5f, .5f, 1.f, 1.f
 	};
-	la_vo_color_rect(window, &fileviewer->fade, colors, 1.f, 0.07);
+	la_ro_color_rect(window, &fileviewer->fade, colors, 1.f, 0.07);
 	return jl_fl_user_select_open_dir__(window, path);
 }
 
@@ -288,7 +288,7 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 
 			jlgr_vo_txmap(window, &fileviewer->file, 0,
 				16, 16, state == FILE_TYPE_DIR ? 12 : 11);
-			la_vo_move(&fileviewer->file, (la_v3_t) { x * 0.2f, 0.1f + (y * 0.2f), 0.f});
+			la_ro_move(&fileviewer->file, (la_v3_t) { x * 0.2f, 0.1f + (y * 0.2f), 0.f});
 			jlgr_vo_draw(window, &fileviewer->file);
 			la_text(window, LA_PXWIDTH("0.5") LA_PXSIZE("0.025") LA_PXMOVE("%f", "%f") LA_PBLACK "%s", .035 + (x * 0.2f), offset + (y * 0.2f), stringtoprint);
 			x++;
@@ -298,8 +298,8 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 	}
  	cl_list_iterator_destroy(iterator);
 	la_menu_draw(&fileviewer->menu, 0);
-	la_vo_move(&fileviewer->fade, (la_v3_t) { 0.f, window->wm.ar - .07f });
-	la_vo_draw(&fileviewer->fade);
+	la_ro_move(&fileviewer->fade, (la_v3_t) { 0.f, window->wm.ar - .07f });
+	la_ro_draw(&fileviewer->fade);
 	la_text(window, LA_PXSIZE("0.05") LA_PXMOVE("0.0", "%f") "%s", window->wm.ar - .05f, la_fileviewer->dirname);
 	// Draw prompt
 //	if(la_fileviewer->prompt) {

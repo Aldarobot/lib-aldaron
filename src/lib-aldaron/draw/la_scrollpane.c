@@ -27,7 +27,7 @@ void la_gui_scrollpane_redraw(la_window_t* window, la_gui_scrollpane_t* sp,
 	jlgr_vo_set_rect(window, &sp->external, rc, colors, 0);
 //	jlgr_vo_set_rect(window, &sp->internal, irc, colors, 0);
 	sp->drawfn = drawfn;
-//	la_vo_pr(window, &sp->internal, drawfn);
+//	la_ro_pr(window, &sp->internal, drawfn);
 	la_safe_set_float(&sp->scroller, 0.f);
 	la_safe_set_uint8(&sp->external_update, 1);
 	la_safe_set_float(&sp->internal_height, internal_height);
@@ -39,11 +39,11 @@ void la_gui_scrollpane_draw(void* context, la_window_t* window,
 {
 	if(la_safe_get_uint8(&sp->external_update)) {
 		la_scrollpane = sp;
-		la_vo_pr(context, window, &sp->external,
+		la_ro_pr(context, window, &sp->external,
 			la_gui_scrollpane_draw__);
 	}
 	jlgr_vo_draw(window, &sp->external);
-	la_vo_pr_draw(&sp->external, 0);
+	la_ro_pr_draw(&sp->external, 0);
 }
 
 void la_gui_scrollpane_loop(la_window_t* window, la_gui_scrollpane_t* sp) {

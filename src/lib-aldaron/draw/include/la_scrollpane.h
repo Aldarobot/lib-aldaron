@@ -10,12 +10,12 @@
 	#error "please add #define LA_FEATURE_DISPLAY to your la_config.h"
 #endif
 
-#include <la_vo.h>
+#include <la_ro.h>
 #include <la_safe.h>
 #include <la_draw.h>
 
 typedef struct {
-	la_vo_t external;
+	la_ro_t external;
 	safe_float_t scroller;
 	safe_float_t internal_height;
 	safe_float_t external_height;

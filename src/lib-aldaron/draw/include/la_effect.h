@@ -17,7 +17,7 @@ typedef struct {
 	float power;
 }la_light_t;
 
-void la_effect_light(la_vo_t* vo, la_light_t* lights, uint8_t light_count,
+void la_effect_light(la_ro_t* vo, la_light_t* lights, uint8_t light_count,
 	la_v3_t material_brightness);
 
 #endif

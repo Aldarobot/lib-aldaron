@@ -67,7 +67,7 @@ void la_menu_init(la_menu_t* menu, la_window_t* window) {
 	// Make the menubar.
 	la_ro_rect(window, &menu->menubar, 1.f, .11f);
 
-	la_pr(menu, window, &menu->menubar.pr, (la_fn_t) jlgr_menubar_draw_);
+	la_pr(menu, window, &menu->menubar, (la_fn_t) jlgr_menubar_draw_);
 }
 
 static void jlgr_menubar_text__(la_menu_t* menu, float* color, float y,
@@ -146,7 +146,7 @@ void la_menu_draw(la_menu_t* menu, uint8_t resize) {
 
 	// Pre-Render
 	if(menu->redraw != MENU_REDRAW_NONE) {
-		la_pr(menu, menu->window, &menu->menubar.pr, (la_fn_t)
+		la_pr(menu, menu->window, &menu->menubar, (la_fn_t)
 			jlgr_menubar_draw_);
 	}
 	// Draw Pre-Rendered

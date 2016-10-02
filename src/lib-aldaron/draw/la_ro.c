@@ -18,29 +18,29 @@ static inline void jlgr_vo_bounding_box(la_window_t* jlgr, la_ro_t* ro,
 	const float *xyzw, uint32_t vertices)
 {
 	int i;
-	ro->pr.cb.pos = (la_v3_t) { xyzw[0], xyzw[1], xyzw[2] };
-	ro->pr.cb.ofs = (la_v3_t) { xyzw[0], xyzw[1], xyzw[2] };
+	ro->cb.pos = (la_v3_t) { xyzw[0], xyzw[1], xyzw[2] };
+	ro->cb.ofs = (la_v3_t) { xyzw[0], xyzw[1], xyzw[2] };
 	for(i = 1; i < vertices; i++) {
 		la_v3_t new_vertex = {
 			xyzw[(3 * i)],
 			xyzw[(3 * i) + 1],
 			xyzw[(3 * i) + 2] };
 
-		if(new_vertex.x < ro->pr.cb.pos.x)
-			ro->pr.cb.pos.x = new_vertex.x;
-		if(new_vertex.y < ro->pr.cb.pos.y)
-			ro->pr.cb.pos.y = new_vertex.y;
-		if(new_vertex.z < ro->pr.cb.pos.z)
-			ro->pr.cb.pos.z = new_vertex.z;
+		if(new_vertex.x < ro->cb.pos.x)
+			ro->cb.pos.x = new_vertex.x;
+		if(new_vertex.y < ro->cb.pos.y)
+			ro->cb.pos.y = new_vertex.y;
+		if(new_vertex.z < ro->cb.pos.z)
+			ro->cb.pos.z = new_vertex.z;
 
-		if(new_vertex.x > ro->pr.cb.ofs.x)
-			ro->pr.cb.ofs.x = new_vertex.x;
-		if(new_vertex.y > ro->pr.cb.ofs.y)
-			ro->pr.cb.ofs.y = new_vertex.y;
-		if(new_vertex.z > ro->pr.cb.ofs.z)
-			ro->pr.cb.ofs.z = new_vertex.z;
+		if(new_vertex.x > ro->cb.ofs.x)
+			ro->cb.ofs.x = new_vertex.x;
+		if(new_vertex.y > ro->cb.ofs.y)
+			ro->cb.ofs.y = new_vertex.y;
+		if(new_vertex.z > ro->cb.ofs.z)
+			ro->cb.ofs.z = new_vertex.z;
 	}
-	la_math_v3_sub(&ro->pr.cb.ofs, ro->pr.cb.pos);
+	la_math_v3_sub(&ro->cb.ofs, ro->cb.pos);
 }
 
 static void jlgr_vo_vertices__(la_window_t* jlgr, la_ro_t* ro, const float *xyzw,
@@ -57,8 +57,8 @@ static void jlgr_vo_vertices__(la_window_t* jlgr, la_ro_t* ro, const float *xyzw
 		// Set bounding box
 		jlgr_vo_bounding_box(jlgr, ro, xyzw, vertices);
 		// Update pre-renderer
-		jlgr_pr_resize(jlgr, &ro->pr, ro->pr.cb.ofs.x, ro->pr.cb.ofs.y,
-			jlgr->wm.w * ro->pr.cb.ofs.x);
+		jlgr_pr_resize(jlgr, ro, ro->cb.ofs.x, ro->cb.ofs.y,
+			jlgr->wm.w * ro->cb.ofs.x);
 	}
 	la_ro_move(ro, (la_v3_t) { 0.f, 0.f, 0.f });
 }
@@ -274,8 +274,8 @@ void jlgr_vo_color_solid(la_window_t* jlgr, la_ro_t* ro, float* rgba) {
 **/
 void la_ro_move(la_ro_t* ro, la_v3_t pos) {
 	la_ro_panic__(ro, "Can't Move!");
-	ro->pr.cb.pos = pos;
-	ro->pr.cb.pos.y += la_banner_size;
+	ro->cb.pos = pos;
+	ro->cb.pos.y += la_banner_size;
 }
 
 /**
@@ -322,7 +322,7 @@ void jlgr_vo_draw(la_window_t* jlgr, la_ro_t* ro) {
 	jlgr_opengl_matrix(jlgr, shader,
 		(la_v3_t) { 1.f, 1.f, 1.f }, // Scale
 		(la_v3_t) { 0.f, 0.f, 0.f }, // Rotate
-		ro->pr.cb.pos, // Translate
+		ro->cb.pos, // Translate
 		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
 		jl_gl_ar(jlgr));
 	jlgr_vo_draw2(jlgr, ro, shader);
@@ -339,11 +339,46 @@ void la_ro_draw(la_ro_t* ro) {
 **/
 void la_ro_pr_draw(la_ro_t* ro, uint8_t orient) {
 	la_ro_panic__(ro, "Can't Draw Pre-Rendered!");
-	jlgr_pr_draw(ro->window, &ro->pr, ro->pr.cb.pos, orient);
+	jlgr_pr_draw(ro->window, ro, ro->cb.pos, orient);
 }
 
 void la_ro_pr(void* context, la_window_t* window, la_ro_t* ro, la_fn_t drawfn) {
-	la_pr(context, window, &ro->pr, drawfn);
+	la_pr(context, window, ro, drawfn);
+}
+
+// * THREAD: Main thread only.
+// * Test if 2 renderable objects collide.
+// *
+// * @param 'ro1': ro 1
+// * @param 'ro2': ro 2
+// * @return 0: if the objects don't collide in their bounding boxes.
+// * @return 1: if the objects do collide in their bounding boxes.
+uint8_t la_ro_collide(la_ro_t *ro1, la_ro_t *ro2) {
+	if (
+		(ro1->cb.pos.y >= (ro2->cb.pos.y+ro2->cb.ofs.y)) ||
+		(ro1->cb.pos.x >= (ro2->cb.pos.x+ro2->cb.ofs.x)) ||
+		(ro2->cb.pos.y >= (ro1->cb.pos.y+ro1->cb.ofs.y)) ||
+		(ro2->cb.pos.x >= (ro1->cb.pos.x+ro1->cb.ofs.x)) )
+	{
+		return 0;
+	}else{
+		return 1;
+	}
+}
+
+
+// * Clamp a coordinate to an area.
+// * @param xyz: The vertex to clamp.
+// * @param area: The area to clamp it to.
+// * @param rtn: The return vector.
+void la_ro_clamp(la_v3_t xyz, jl_area_t area, la_v3_t* rtn) {
+	xyz.x -= area.pos.x;
+	if(area.ofs.x != 0.f) xyz.x /= area.ofs.x;
+	xyz.y -= area.pos.y;
+	if(area.ofs.y != 0.f) xyz.y /= area.ofs.y;
+	xyz.z -= area.pos.z;
+	if(area.ofs.z != 0.f) xyz.z /= area.ofs.z;
+	*rtn = xyz;
 }
 
 /**

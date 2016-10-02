@@ -12,6 +12,6 @@
 
 #include <la_port.h>
 
-void la_pr(void* context, la_window_t* window, jl_pr_t* pr, la_fn_t redrawfn);
+void la_pr(void* context, la_window_t* window, la_ro_t* ro, la_fn_t redrawfn);
 
 #endif

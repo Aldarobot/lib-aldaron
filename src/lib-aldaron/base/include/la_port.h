@@ -179,7 +179,7 @@ typedef struct {
 		uint32_t default_tc;
 		uint32_t upsidedown_tc;
 		
-		jl_pr_t* cp; // Renderer currently being drawn on.
+		la_ro_t* cp; // Renderer currently being drawn on.
 	}gl;
 
 	// Gui

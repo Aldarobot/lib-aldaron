@@ -222,7 +222,7 @@ static void jlgr_effects_clear__(la_window_t* window) {
 /** @endcond */
 
 void jlgr_effects_clear(la_window_t* window, la_ro_t* vo) {
-	la_pr(window, window, &vo->pr, (la_fn_t) jlgr_effects_clear__);
+	la_pr(window, window, vo, (la_fn_t) jlgr_effects_clear__);
 }
 
 /**
@@ -279,7 +279,7 @@ void jlgr_effects_vo_hue(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float c[]
  * @param vo: The vertex object.
 **/
 void jlgr_effects_draw(la_window_t* jlgr, la_ro_t* vo) {
-	jlgr_pr_draw(jlgr, &vo->pr, vo->pr.cb.pos, 0);
+	jlgr_pr_draw(jlgr, vo, vo->cb.pos, 0);
 }
 
 /**
@@ -334,14 +334,14 @@ void la_effect_light(la_ro_t* vo, la_light_t* lights, uint8_t light_count,
 	if(light_count) {
 		jlgr_opengl_uniform(jlgr, shader, (float*)&material_brightness,
 			3, "brightness");
-		jlgr_opengl_uniform(jlgr, shader, (float*)&vo->pr.cb.pos, 3,
+		jlgr_opengl_uniform(jlgr, shader, (float*)&vo->cb.pos, 3,
 			"offset");
 	}
 	// Translate by offset vector
 	jlgr_opengl_matrix(jlgr, shader,
 		(la_v3_t) { 1.f, 1.f, 1.f }, // Scale
 		(la_v3_t) { 0.f, 0.f, 0.f }, // Rotate
-		vo->pr.cb.pos, // Translate
+		vo->cb.pos, // Translate
 		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
 		ar);
 	// Draw on screen

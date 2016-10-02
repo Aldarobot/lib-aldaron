@@ -127,8 +127,8 @@ void jlgr_vo_free(la_window_t* jlgr, la_ro_t *vo);
 
 // JLGRpr.c
 void jlgr_pr_off(la_window_t* jlgr);
-void jlgr_pr_resize(la_window_t* jlgr, jl_pr_t* pr, float w, float h, uint16_t w_px);
-void jlgr_pr_draw(la_window_t* jlgr, jl_pr_t* pr, la_v3_t vec, uint8_t orient);
+void jlgr_pr_resize(la_window_t* jlgr, la_ro_t* ro, float w, float h, uint16_t w_px);
+void jlgr_pr_draw(la_window_t* jlgr, la_ro_t* ro, la_v3_t vec, uint8_t orient);
 
 // OpenGL
 uint32_t la_texture_new(la_window_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,

@@ -16,12 +16,8 @@
 
 #include <la.h>
 #include <la_file.h>
-#include <la_audio.h>
 
 void la_time_init__(void);
-
-void jlau_kill(jlau_t* jlau);
-void jlgr_kill(la_window_t* jlgr);
 
 void la_window_start__(void*,la_window_t*,la_draw_fn_t,la_fn_t,la_fn_t,
 	const char*);
@@ -39,18 +35,6 @@ void la_window_start__(void*,la_window_t*,la_draw_fn_t,la_fn_t,la_fn_t,
 float la_banner_size = 0.f;
 SDL_atomic_t la_rmcexit;
 static char la_errorv[256];
-
-//return how many seconds passed since last call
-static inline void jl_seconds_passed__(la_window_t* window) {
-/*	uint8_t isOnTime;
-
-	jl->time.psec = la_time_regulatefps(&jl->time.timer, &isOnTime);
-
-	if(window) {
-		if((window->sg.changed = ( window->sg.on_time != isOnTime)))
-			window->sg.on_time = isOnTime;
-	}*/
-}
 
 static inline void* la_init__(const char* nm, uint64_t ctx1s) {
 	void* context = la_memory_allocate(ctx1s);
@@ -72,11 +56,11 @@ void la_panic(const char* format, ...) {
 	char temp[256];
 	va_list arglist;
 
-	va_start( arglist, format );
-	vsprintf( temp, format, arglist );
-	va_end( arglist );
+	va_start(arglist, format);
+	vsprintf(temp, format, arglist);
+	va_end(arglist);
 
-	la_print( "%s", temp );
+	la_print("%s", temp);
 #ifdef LA_COMPUTER
 	assert(0);
 #else
@@ -132,13 +116,10 @@ int32_t la_start(void* fnc_init, la_fn_t fnc_loop, la_fn_t fnc_kill,
 	}
 #ifndef LA_PHONE_ANDROID
 	// Exit.
-	la_print("Kill Window....");
-	if(openwindow) jlgr_kill(la_window);
 	la_print("SDL_Quit()");
 	SDL_Quit();
-	la_print("Free Context....");
+	la_print("| Free Context & Exit |");
 	free(context);
-	la_print("| success |");
 #endif
 	return 0;
 }

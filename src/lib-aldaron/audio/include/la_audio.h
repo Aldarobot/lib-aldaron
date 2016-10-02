@@ -12,23 +12,24 @@
 typedef struct {
 	void *audio;
 	int32_t channel;
-}jlau_audio_t;
+}la_sound_t;
 
 typedef struct{
 	double pofr; // Point Of Return (Where Music Should Start)
 	int32_t num_channels;
-}jlau_t;
+}la_audio_t;
 
 // Prototypes:
-void jlau_play(jlau_t* jlau, jlau_audio_t* audio, float in, la_v3_t* vec);
-void jlau_lock(jlau_t* jlau, jlau_audio_t* audio, float in, la_v3_t* vec);
-void jlau_pause(jlau_t* jlau, jlau_audio_t* audio);
-void jlau_resume(jlau_t* jlau, jlau_audio_t* audio);
-uint8_t jlau_wait(jlau_t* jlau, jlau_audio_t* w_audio, jlau_audio_t* n_audio,
+void la_audio_play(la_audio_t* jlau, la_sound_t* audio, float in, la_v3_t* vec);
+void la_audio_lock(la_audio_t* jlau, la_sound_t* audio, float in, la_v3_t* vec);
+void la_audio_pause(la_audio_t* jlau, la_sound_t* audio);
+void la_audio_resume(la_audio_t* jlau, la_sound_t* audio);
+uint8_t la_audio_wait(la_audio_t* jlau, la_sound_t* w_audio, la_sound_t* n_audio,
 	float in, la_v3_t* vec);
-void jlau_stop(jlau_audio_t* audio, float out);
-void jlau_add_audio(jlau_t* jlau, jlau_audio_t* audio, la_buffer_t* zipdata,
+void la_audio_stop(la_sound_t* audio, float out);
+void la_audio_load(la_audio_t* jlau, la_sound_t* audio, la_buffer_t* zipdata,
 	const char* filename, uint8_t music);
-jlau_t* jlau_init(void);
+la_audio_t* la_audio_init(void);
+void la_audio_kill(la_audio_t* audio);
 
 #endif

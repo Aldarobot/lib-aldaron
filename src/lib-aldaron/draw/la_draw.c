@@ -95,6 +95,13 @@ void la_window_loop__(void* context, la_window_t* window) {
 
 void la_window_kill__(la_window_t* window) {
 	SDL_AtomicSet(&la_rmcexit, 0);
+#ifndef LA_PHONE_ANDROID
+	la_print("Destroying window....");
+	SDL_DestroyWindow(window->wm.window);
+	la_print("SDL_VideoQuit()....");
+	SDL_VideoQuit();
+#endif
+	la_print("Killed DRAW Subsystem!");
 }
 
 static int32_t la_main_thread(la_main_thread_t* ctx) {
@@ -170,21 +177,6 @@ void la_draw_resize(la_window_t* window, uint32_t w, uint32_t h) {
 	la_safe_set_uint32(&window->protected.set_width, w);
 	la_safe_set_uint32(&window->protected.set_height, h);
 	la_safe_set_uint8(&window->protected.needs_resize, 2);
-}
-
-/**
- * Destroy the window and free the jlgr library context.
- * @param jlgr: The jlgr library context.
-**/
-void jlgr_kill(la_window_t* jlgr) {
-	while(SDL_AtomicGet(&la_rmcexit)); // TODO: Is needed?
-#ifndef LA_PHONE_ANDROID
-	la_print("Destroying window....");
-	SDL_DestroyWindow(jlgr->wm.window);
-	la_print("SDL_VideoQuit()....");
-	SDL_VideoQuit();
-#endif
-	la_print("Killed SDL/VIDEO Subsystem!");
 }
 
 // End of file.

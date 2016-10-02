@@ -8,12 +8,12 @@
 #include "la_audio.h"
 #include "la_memory.h"
 
-#define JLAU_CHANNEL_MUSIC -2
-#define JLAU_CHANNEL_SOUND -3
-#define JLAU_CHANNEL_LOCK -4
+#define LA_AUDIO_CHANNEL_MUSIC -2
+#define LA_AUDIO_CHANNEL_SOUND -3
+#define LA_AUDIO_CHANNEL_LOCK -4
 
 /** @cond **/
-static inline int32_t jlau_sec2ms__(float sec) {
+static inline int32_t la_audio_sec2ms__(float sec) {
 	int32_t ms = ((int32_t)(sec * 1000.f));
 	if(ms < 20) ms = 0;
 	return ms;
@@ -23,7 +23,7 @@ static inline int32_t jlau_sec2ms__(float sec) {
  * Load audio from data pointed to by "data" of length "dataSize" into "audio",
  * set volume of audio to "volumeChange"
  */
-static inline void jlau_load(jlau_t* jlau, jlau_audio_t* audio,
+static inline void la_audio_load2(la_audio_t* jlau, la_sound_t* audio,
 	uint8_t volumeChange, const void *data, uint32_t dataSize,
 	uint8_t isMusic)
 {
@@ -37,25 +37,25 @@ static inline void jlau_load(jlau_t* jlau, jlau_audio_t* audio,
  * @param in: Seconds of fade-in.
  * @param vec: Where sound is coming from, or NULL for no position effect.
 */
-void jlau_play(jlau_t* jlau, jlau_audio_t* audio, float in, la_v3_t* vec) {
-	int32_t ms = jlau_sec2ms__(in);
+void la_audio_play(la_audio_t* jlau, la_sound_t* audio, float in, la_v3_t* vec) {
+	int32_t ms = la_audio_sec2ms__(in);
 
-	if(audio->channel == JLAU_CHANNEL_MUSIC) {
+	if(audio->channel == LA_AUDIO_CHANNEL_MUSIC) {
 
 	}else{
 
 	}
 }
 
-void jlau_lock(jlau_t* jlau, jlau_audio_t* audio, float in, la_v3_t* vec) {
-	if(audio->channel != JLAU_CHANNEL_LOCK) jlau_play(jlau, audio, in, vec);
-	audio->channel = JLAU_CHANNEL_LOCK;
+void la_audio_lock(la_audio_t* jlau, la_sound_t* audio, float in, la_v3_t* vec) {
+	if(audio->channel != LA_AUDIO_CHANNEL_LOCK) la_audio_play(jlau, audio, in, vec);
+	audio->channel = LA_AUDIO_CHANNEL_LOCK;
 }
 
-void jlau_pause(jlau_t* jlau, jlau_audio_t* audio) {
+void la_audio_pause(la_audio_t* jlau, la_sound_t* audio) {
 }
 
-void jlau_resume(jlau_t* jlau, jlau_audio_t* audio) {
+void la_audio_resume(la_audio_t* jlau, la_sound_t* audio) {
 }
 
 /**
@@ -68,12 +68,12 @@ void jlau_resume(jlau_t* jlau, jlau_audio_t* audio) {
  * @returns 1: Audio has finished, and new audio is playing
  * @returns 0: Audio is still playing.
 **/
-uint8_t jlau_wait(jlau_t* jlau, jlau_audio_t* w_audio, jlau_audio_t* n_audio,
+uint8_t la_audio_wait(la_audio_t* jlau, la_sound_t* w_audio, la_sound_t* n_audio,
 	float in, la_v3_t* vec)
 {
 	// If audio is still playing, quit
 	//
-	jlau_play(jlau, n_audio, in, vec);
+	la_audio_play(jlau, n_audio, in, vec);
 	return 1;
 }
 
@@ -82,36 +82,27 @@ uint8_t jlau_wait(jlau_t* jlau, jlau_audio_t* w_audio, jlau_audio_t* n_audio,
  * @param audio: Audio to fade out, or NULL to fade out all audio.
  * @param out: How many seconds to fade audio.
 */
-void jlau_stop(jlau_audio_t* audio, float out) {
+void la_audio_stop(la_sound_t* audio, float out) {
 }
 
-/**
- * Load an audiotrack from a zipfile.
- * info: info is set to number of audiotracks loaded.
- * @param jlau: The library context
- * @param audio: Unintialized audio object.
- * @param zipdata: data for a zip file.
- * @param filename: Name of the audio file in the package.
- * @param music: Whether the audio is music or not.
-*/
-void jlau_add_audio(jlau_t* jlau, jlau_audio_t* audio, la_buffer_t* zipdata,
+void la_audio_load(la_audio_t* jlau, la_sound_t* audio, la_buffer_t* zipdata,
 	const char* filename, uint8_t music)
 {
 	la_buffer_t aud;
 
 	la_file_loadzip(&aud, zipdata, filename);
 	la_print("Loading audiostuffs....");
-	jlau_load(jlau, audio, 255, aud.data, aud.size, music);
+	la_audio_load2(jlau, audio, 255, aud.data, aud.size, music);
 	la_print("Loaded audiostuffs!");
 }
 
-jlau_t* jlau_init(void) {
-	jlau_t* jlau = la_memory_allocate(sizeof(jlau_t));
+la_audio_t* la_audio_init(void) {
+	la_audio_t* jlau = la_memory_allocate(sizeof(la_audio_t));
 
 	jlau->num_channels = 0;
 	return jlau;
 }
 
-void jlau_kill(jlau_t* jlau) {
+void la_audio_kill(la_audio_t* jlau) {
 }
 #endif

@@ -55,10 +55,6 @@ typedef struct{
 	uint32_t program;
 }jlgr_glsl_t;
 
-// jlgr_effects/types
-#define JLGR_EFFECTS_TYPES
-#include "la_effects.h"
-
 typedef struct{
 	char *opt;
 	la_fn_t run;
@@ -108,15 +104,8 @@ void jlgr_opengl_uniform(la_window_t* jlgr, jlgr_glsl_t* glsl, float* x, uint8_t
 	const char* name, ...);
 void jlgr_opengl_uniformi(la_window_t* jlgr, jlgr_glsl_t* glsl, int32_t* x,
 	uint8_t vec, const char* name, ...);
-void jlgr_opengl_uniform1(la_window_t* jlgr, uint8_t e, int32_t uv, float* x);
-void jlgr_opengl_uniform1i(la_window_t* jlgr, uint8_t e, int32_t uv, int32_t* x);
-void jlgr_opengl_uniform3(la_window_t* jlgr, uint8_t e, int32_t uv, float* xyz);
-void jlgr_opengl_uniform4(la_window_t* jlgr, uint8_t e, int32_t uv, float* xyzw);
-void jlgr_opengl_uniformM(la_window_t* jlgr, int32_t uv, float m[]);
 void jlgr_opengl_shader_init(la_window_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
 	const char* frag, uint8_t has_tex);
-void jlgr_opengl_shader_uniform(la_window_t* jlgr, jlgr_glsl_t* glsl,
-	int32_t* uniform, const char* name);
 void jlgr_opengl_draw1(la_window_t* jlgr, jlgr_glsl_t* sh);
 
 // JLGReffects.c
@@ -126,7 +115,6 @@ void jlgr_effects_vo_light(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs,
 void jlgr_effects_hue(la_window_t* jlgr, float c[]);
 
 void jlgr_effects_light(la_window_t* jlgr, la_v3_t* material);
-void jlgr_effects_light_clear(la_window_t* jlgr);
 void jlgr_effects_light_add(la_window_t* jlgr, la_v3_t point, float ambient[],
 	float diffuse[], float specular[], float power);
 void jlgr_effects_light_update(la_window_t* jlgr);

@@ -80,7 +80,7 @@ static inline void la_ro_pr_resize__(la_window_t* jlgr, la_ro_t* ro, float w,
 	if(ro->pr.fb) {
 		jl_gl_texture_free_(jlgr, &(ro->pr.tx));
 		jl_opengl_framebuffer_free_(jlgr, &(ro->pr.fb));
-		jlgr_opengl_buffer_old_(jlgr, &(ro->pr.gl));
+		la_llgraphics_buffer_free(ro->pr.gl);
 	}
 	// Create the VBO.
 	jlgr_opengl_vertices_(jlgr, xyzw, 4, ro->pr.cv, &ro->pr.gl);
@@ -112,7 +112,7 @@ static void jlgr_vo_color_buffer__(la_window_t* jlgr, la_ro_t* ro, float* cc) {
 	ro->tx = 0;
 	la_memory_copy(cc, ro->cc, ro->vc * 4 * sizeof(float));
 	// Set Color Buffer "ro->bt" to "ro->cc"
-	jlgr_opengl_buffer_set_(jlgr, &ro->bt, ro->cc, ro->vc * 4);
+	la_llgraphics_buffer_set_(&ro->bt, ro->cc, ro->vc * 4);
 }
 
 // Set vertices for a polygon.
@@ -156,7 +156,9 @@ static void la_ro_init__(la_window_t* window, la_ro_t* ro) {
 }
 
 static inline la_window_t* la_ro_panic__(la_ro_t* ro, const char* error) {
-	if(ro->window == NULL) la_panic("Vertex object uninit'd: %s\n", error);
+#ifdef JL_DEBUG
+	if(ro->window == NULL) la_panic("Render object uninit'd: %s\n", error);
+#endif
 	return ro->window;
 }
 
@@ -229,7 +231,6 @@ void la_ro_color_tris(la_window_t* window, la_ro_t *ro,
 	float* triangles, float* colors, uint32_t tricount)
 {
 	la_ro_init__(window, ro);
-	if(ro == NULL) ro = &window->gl.temp_vo;
 	// Rendering Style = triangles
 	ro->rs = 1;
 	// Set the vertices of vertex object "ro"
@@ -242,7 +243,6 @@ void la_ro_plain_tris(la_window_t* window, la_ro_t *ro,
 	float* triangles, float* colors, uint32_t tricount)
 {
 	la_ro_init__(window, ro);
-	if(ro == NULL) ro = &window->gl.temp_vo;
 	// Rendering Style = triangles
 	ro->rs = 1;
 	// Set the vertices of vertex object "ro"
@@ -290,12 +290,11 @@ void la_ro_change_image(la_ro_t *ro, uint32_t img,
 {
 #ifdef JL_DEBUG
 	if(img == 0) la_panic("Error: Texture=0!");
+	la_ro_panic__(ro, "Can't Draw!");
 #endif
-	la_window_t* window = la_ro_panic__(ro, "Can't Draw!");
 	const float *tc = orient ?
 		( orient == 1 ? UPSIDEDOWN_TC : BACKWARD_TC ) : DEFAULT_TC;
 
-	if(ro == NULL) ro = &window->gl.temp_vo;
 	// Make sure non-textured colors aren't attempted
 	ro->tx = img;
 	if(map != -1) {
@@ -309,23 +308,21 @@ void la_ro_change_image(la_ro_t *ro, uint32_t img,
 			(tc[4]/ww) + CX, (tc[5]/hh) + CY,
 			(tc[6]/ww) + CX, (tc[7]/hh) + CY
 		};
-		jlgr_opengl_buffer_set_(window, &ro->bt, tex1, 8);
+		la_llgraphics_buffer_set_(&ro->bt, tex1, 8);
 	}else{
-		jlgr_opengl_buffer_set_(window, &ro->bt, tc, 8);
+		la_llgraphics_buffer_set_(&ro->bt, tc, 8);
 	}
 }
 
 void la_ro_change_color(la_ro_t* ro, float* rgba) {
 	la_window_t* window = la_ro_panic__(ro, "Change color.");
 
-	if(ro == NULL) ro = &window->gl.temp_vo;
 	jlgr_vo_color_buffer__(window, ro, rgba);
 }
 
 void la_ro_change_plain(la_ro_t* ro, float* rgba) {
 	la_window_t* window = la_ro_panic__(ro, "Change plain.");
 
-	if(ro == NULL) ro = &window->gl.temp_vo;
 	float rgbav[4 * ro->vc];
 	uint32_t i;
 
@@ -364,7 +361,7 @@ void la_ro_draw_shader(la_ro_t* ro, jlgr_glsl_t* sh) {
 	if(ro->tx) {
 		// Bind Texture Coordinates to shader
 		jlgr_opengl_setv(jlgr, &ro->bt,
-			jlgr->effects.alpha.shader.attributes.texpos_color, 2);
+			jlgr->gl.prg.texture.attributes.texpos_color, 2);
 		// Bind the texture
 		jlgr_opengl_texture_bind_(jlgr, ro->tx);
 	}else{
@@ -451,14 +448,16 @@ void la_ro_clamp(la_v3_t xyz, la_ro_t *ro, la_v3_t* rtn) {
 }
 
 void la_ro_free(la_ro_t *ro) {
-	la_window_t* window = la_ro_panic__(ro, "Can't Free!");
+#ifdef JL_DEBUG
+	la_ro_panic__(ro, "Can't Free!");
+#endif
 	// Free GL VBO
-	jlgr_opengl_buffer_old_(window, &ro->gl);
+	la_llgraphics_buffer_free(ro->gl);
 	// Free GL Texture Buffer
-	jlgr_opengl_buffer_old_(window, &ro->bt);
+	la_llgraphics_buffer_free(ro->bt);
 	// Free Converted Vertices & Colors
-	if(ro->cv) ro->cv = la_memory_resize(ro->cv, 0);
-	if(ro->cc) ro->cc = la_memory_resize(ro->cc, 0);
+	if(ro->cv) ro->cv = la_memory_free(ro->cv);
+	if(ro->cc) ro->cc = la_memory_free(ro->cc);
 }
 
 #endif

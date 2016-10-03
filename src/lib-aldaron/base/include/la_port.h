@@ -120,47 +120,16 @@ typedef struct {
 	} protected;
 
 	struct {
-		struct {
-			jlgr_glsl_t shader;
-		}shadow;
-
-		struct {
-			jlgr_glsl_t shader;
-			int32_t fade;
-		}alpha;
-
-		struct {
-			jlgr_glsl_t shader;
-			int32_t new_color;
-		}hue;
-
-		struct {
-			jlgr_glsl_t aa;
-
-			int32_t norm;
-			int32_t lightPos;
-			int32_t color;
-			int32_t ambient;
-			int32_t shininess;
-
-			// Shader drawing settings
-			la_v3_t light_position;
-			la_v3_t light_color;
-			float light_power;
-			la_v3_t material_brightness;
-			int32_t light_texture;
-		}light;
-
 		float colors[4];
-		la_v3_t* vec3;
-		la_ro_t* vo;
-
-		jlgr_effects_light_t lights;
 	}effects;
 
 	struct {
 		jlgr_glsl_t shader_laa[32]; // Light Ambient Attenuation
 		uint8_t shader_laa_init[32];
+
+		jlgr_glsl_t shadow;
+		jlgr_glsl_t alpha;
+		jlgr_glsl_t hue;
 	} effect;
 	
 	//Opengl Data

@@ -47,10 +47,12 @@ void jlgr_opengl_matrix(la_window_t* jlgr, jlgr_glsl_t* sh, la_v3_t scalev,
 void jl_gl_vo_free(la_window_t* jlgr, la_ro_t *pv);
 uint32_t jl_gl_w(la_window_t* jlgr);
 
-// JLGRopengl.c
-void jlgr_opengl_buffer_set_(la_window_t* jlgr, uint32_t *buffer,
-	const void *buffer_data, uint16_t buffer_size);
-void jlgr_opengl_buffer_old_(la_window_t* jlgr, uint32_t *buffer);
+// Lower Level Graphics
+void la_llgraphics_buffer_set_(uint32_t *buffer, const void *buffer_data,
+	uint16_t buffer_size);
+void la_llgraphics_buffer_free(uint32_t buffer);
+
+// opengl
 void jlgr_opengl_setv(la_window_t* jlgr, uint32_t* buff, uint32_t vertexAttrib,
 	uint8_t xyzw);
 void jlgr_opengl_vertices_(la_window_t* jlgr, const float *xyzw, uint8_t vertices,

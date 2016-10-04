@@ -166,7 +166,7 @@ void la_window_draw__(void* context, la_window_t* window) {
 
 	// Draw over it.
 	la_ro_pr(&pass, window, &window->screen, (la_fn_t) la_window_draw_flipped);
-	la_ro_pr_draw(&window->screen, 1);
+	la_ro_draw(&window->screen);
 }
 
 void jl_sg_init__(la_window_t* window) {

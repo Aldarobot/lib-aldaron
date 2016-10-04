@@ -60,10 +60,10 @@ static void jlgr_pr_set__(la_ro_t *ro, float w, float h, uint16_t w_px) {
 	const float h_px = w_px * ar; // Height in pixels.
 
 	// Set width and height.
-	ro->pr.w = w_px;
-	ro->pr.h = h_px;
+	ro->w = w_px;
+	ro->h = h_px;
 	// Set aspect ratio.
-	ro->pr.ar = ar;
+	ro->ar = ar;
 }
 
 static inline void la_ro_pr_resize__(la_window_t* jlgr, la_ro_t* ro, float w,
@@ -77,13 +77,14 @@ static inline void la_ro_pr_resize__(la_window_t* jlgr, la_ro_t* ro, float w,
 	};
 
 	// If pre-renderer is initialized, reset.
-	if(ro->pr.fb) {
-		jl_gl_texture_free_(jlgr, &(ro->pr.tx));
-		jl_opengl_framebuffer_free_(jlgr, &(ro->pr.fb));
-		la_llgraphics_buffer_free(ro->pr.gl);
+	if(ro->fb) {
+		jl_gl_texture_free_(jlgr, &(ro->tx));
+		jl_opengl_framebuffer_free_(jlgr, &(ro->fb));
+		la_llgraphics_buffer_free(ro->vbo);
 	}
+	ro->cv = la_memory_resize(ro->cv, 4 * sizeof(float) * 3);
 	// Create the VBO.
-	jlgr_opengl_vertices_(jlgr, xyzw, 4, ro->pr.cv, &ro->pr.gl);
+	jlgr_opengl_vertices_(jlgr, xyzw, 4, ro->cv, &ro->vbo);
 	// Set width, height and aspect ratio.
 	jlgr_pr_set__(ro, w, h, w_px);
 }
@@ -97,8 +98,8 @@ static void jlgr_vo_vertices__(la_window_t* jlgr, la_ro_t* ro, const float *xyzw
 		ro->cc = la_memory_resize(ro->cc, vertices * sizeof(float) * 4);
 		// Re-Allocate ro->cv
 		ro->cv = la_memory_resize(ro->cv, vertices * sizeof(float) * 3);
-		// Set ro->cv & ro->gl
-		jlgr_opengl_vertices_(jlgr, xyzw, vertices, ro->cv, &ro->gl);
+		// Set ro->cv & ro->vbo
+		jlgr_opengl_vertices_(jlgr, xyzw, vertices, ro->cv, &ro->vbo);
 		// Set bounding box
 		jlgr_vo_bounding_box(jlgr, ro, xyzw, vertices);
 		// Update pre-renderer
@@ -137,10 +138,8 @@ static void jlgr_vo_poly__(la_window_t* jlgr, la_ro_t* ro, uint32_t vertices,
 static void la_ro_init__(la_window_t* window, la_ro_t* ro) {
 	// Don't do anything if already init'd
 	if(ro->window) return;
-	//
 	ro->window = window;
-	// GL VBO
-	ro->gl = 0;
+	ro->vbo = 0;
 	// GL Texture Coordinate Buffer
 	ro->bt = 0;
 	// Converted Vertices
@@ -164,42 +163,43 @@ static inline la_window_t* la_ro_panic__(la_ro_t* ro, const char* error) {
 
 static void jlgr_pr_use__(la_window_t* window, la_ro_t* ro) {
 	jlgr_pr_init__(window, ro);
-	if(ro->pr.w == 0) {
+	if(ro->w == 0) {
 		la_panic("jlgr_pr_use__ failed: 'w' must be more than 0");
-	}else if(ro->pr.h == 0) {
+	}else if(ro->h == 0) {
 		la_panic("jlgr_pr_use__ failed: 'h' must be more than 0");
-	}else if((ro->pr.w > GL_MAX_TEXTURE_SIZE)||(ro->pr.h > GL_MAX_TEXTURE_SIZE)) {
+	}else if((ro->w > GL_MAX_TEXTURE_SIZE)||(ro->h > GL_MAX_TEXTURE_SIZE)) {
 		la_print("_jl_gl_pr_obj_make() failed:");
-		la_print("w = %d,h = %d", ro->pr.w, ro->pr.h);
+		la_print("w = %d,h = %d", ro->w, ro->h);
 		la_panic("texture is too big for graphics card.");
 	}
-	// Bind the texture.
-	jlgr_opengl_texture_bind_(window, ro->pr.tx);
+	// Bind the texture. TODO: is needed ?
+	jlgr_opengl_texture_bind_(window, ro->tx);
 	// Bind the framebuffer.
-	jlgr_opengl_framebuffer_bind_(window, ro->pr.fb);
+	jlgr_opengl_framebuffer_bind_(window, ro->fb);
 	// Render on the whole framebuffer [ lower left -> upper right ]
-	jlgr_opengl_viewport_(window, ro->pr.w, ro->pr.h);
+	jlgr_opengl_viewport_(window, ro->w, ro->h);
 	// Reset the aspect ratio.
 	window->gl.cp = ro;
 }
 
 static void jlgr_pr_init__(la_window_t* jlgr, la_ro_t* ro) {
-	if(ro->pr.fb == 0 || ro->pr.tx == 0) {
+	if(ro->fb == 0 || ro->tx == 0) {
 		// Make frame buffer
-		jl_opengl_framebuffer_make_(jlgr, &ro->pr.fb);
+		jl_opengl_framebuffer_make_(jlgr, &ro->fb);
 		// Make the texture.
-		jlgr_opengl_texture_new_(jlgr, &(ro->pr.tx), NULL, ro->pr.w,
-			ro->pr.h, 0);
+		jlgr_opengl_texture_new_(jlgr, &ro->tx, NULL, ro->w, ro->h, 0);
 		jlgr_opengl_texture_off_(jlgr);
 		// Recursively bind the framebuffer.
 		jlgr_pr_use__(jlgr, ro);
 		// Attach texture buffer.
-		jlgr_opengl_framebuffer_addtx_(jlgr, ro->pr.tx);
+		jlgr_opengl_framebuffer_addtx_(jlgr, ro->tx);
 		jlgr_opengl_framebuffer_status_(jlgr);
 		// Set Viewport to image and clear.
-		jlgr_opengl_viewport_(jlgr, ro->pr.w, ro->pr.h);
+		jlgr_opengl_viewport_(jlgr, ro->w, ro->h);
 		// Clear the pre-renderer.
 		jl_gl_clear(jlgr, 0.f, 0.f, 0.f, 0.f);
+		// Set texture coordinates
+		if(!ro->bt) la_llgraphics_buffer_set_(&ro->bt, DEFAULT_TC, 8);
 	}
 }
 
@@ -283,6 +283,11 @@ void la_ro_image_rect(la_window_t* window, la_ro_t *ro, uint32_t tex, float w,
 	jlgr_vo_poly__(window, ro, 4, Oone);
 	// Texture the vertex object
 	la_ro_change_image(ro, tex, 0, 0, -1, 0);
+}
+
+void la_ro_change_orient(la_ro_t *ro, uint8_t orient) {
+	la_llgraphics_buffer_set_(&ro->bt, orient ?
+		( orient == 1 ? UPSIDEDOWN_TC : BACKWARD_TC ) : DEFAULT_TC, 8);
 }
 
 void la_ro_change_image(la_ro_t *ro, uint32_t img,
@@ -370,7 +375,7 @@ void la_ro_draw_shader(la_ro_t* ro, jlgr_glsl_t* sh) {
 			jlgr->gl.prg.color.attributes.texpos_color, 4);
 	}
 	// Update the position variable in shader.
-	jlgr_opengl_setv(jlgr, &ro->gl, sh->attributes.position, 3);
+	jlgr_opengl_setv(jlgr, &ro->vbo, sh->attributes.position, 3);
 	// Draw the image on the screen!
 	jlgr_opengl_draw_arrays_(jlgr, ro->rs ? GL_TRIANGLES : GL_TRIANGLE_FAN,
 		ro->vc);
@@ -383,33 +388,6 @@ void la_ro_draw(la_ro_t* ro) {
 
 	jlgr_opengl_draw1(window, shader);
 	la_ro_draw_shader(ro, shader);
-}
-
-void la_ro_pr_draw(la_ro_t* ro, uint8_t orient) {
-	la_window_t* window = la_ro_panic__(ro, "Can't Draw Pre-Rendered!");
-
-	// Initialize Framebuffer, if not already init'd
-	jlgr_pr_init__(window, ro);
-	// Bind texture shader.
-	jlgr_opengl_draw1(window, &window->gl.prg.texture);
-	// Transform
-	jlgr_opengl_matrix(window, &window->gl.prg.texture,
-		(la_v3_t) { 1.f, 1.f, 1.f }, // Scale
-		(la_v3_t) { 0.f, 0.f, 0.f }, // Rotate
-		ro->cb.pos, // Translate
-		(la_v3_t) { 0.f, 0.f, 0.f }, // Look
-		jl_gl_ar(window));
-	// Bind Texture Coordinates to shader
-	jlgr_opengl_setv(window, orient
-		? &window->gl.upsidedown_tc : &window->gl.default_tc,
-		window->gl.prg.texture.attributes.texpos_color, 2);
-	// Bind the texture
-	jlgr_opengl_texture_bind_(window, ro->pr.tx);
-	// Update the position variable in shader.
-	jlgr_opengl_setv(window, &ro->pr.gl,
-		window->gl.prg.texture.attributes.position, 3);
-	// Draw the image on the screen!
-	jlgr_opengl_draw_arrays_(window, GL_TRIANGLE_FAN, 4);
 }
 
 void la_ro_pr(void* context, la_window_t* window, la_ro_t* ro, la_fn_t drawfn) {
@@ -451,8 +429,7 @@ void la_ro_free(la_ro_t *ro) {
 #ifdef JL_DEBUG
 	la_ro_panic__(ro, "Can't Free!");
 #endif
-	// Free GL VBO
-	la_llgraphics_buffer_free(ro->gl);
+	la_llgraphics_buffer_free(ro->vbo);
 	// Free GL Texture Buffer
 	la_llgraphics_buffer_free(ro->bt);
 	// Free Converted Vertices & Colors

@@ -841,7 +841,7 @@ static inline void _jl_gl_make_res(la_window_t* jlgr) {
  * @param jlgr: The library context.
 **/
 float jl_gl_ar(la_window_t* jlgr) {
-	return jlgr->gl.cp ? jlgr->gl.cp->pr.ar : jlgr->wm.ar;
+	return jlgr->gl.cp ? jlgr->gl.cp->ar : jlgr->wm.ar;
 }
 
 float la_window_h(la_window_t* window) {
@@ -856,7 +856,7 @@ float la_window_h(la_window_t* window) {
 uint32_t jl_gl_w(la_window_t* jlgr) {
 	uint32_t w;
 
-	w = jlgr->gl.cp ? jlgr->gl.cp->pr.w : jlgr->wm.w;
+	w = jlgr->gl.cp ? jlgr->gl.cp->w : jlgr->wm.w;
 	return w;
 }
 

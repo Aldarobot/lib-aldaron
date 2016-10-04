@@ -149,7 +149,7 @@ void la_menu_draw(la_menu_t* menu, uint8_t resize) {
 			jlgr_menubar_draw_);
 	}
 	// Draw Pre-Rendered
-	la_ro_pr_draw(&menu->menubar, 0);
+	la_ro_draw(&menu->menubar);
 }
 
 /**

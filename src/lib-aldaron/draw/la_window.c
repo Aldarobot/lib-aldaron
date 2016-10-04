@@ -157,6 +157,7 @@ void la_window_resize__(la_window_t* window, uint32_t w, uint32_t h) {
 	window->wm.ar = ((float)h) / ((float)w);
 	jl_gl_viewport_screen(window);
 	la_ro_rect(window, &window->screen, 1.f, window->wm.ar);
+	la_ro_change_orient(&window->screen, 1);
 }
 
 void jl_wm_init__(la_window_t* window) {

@@ -19,6 +19,7 @@ typedef struct {
 
 void la_effect_light(la_ro_t* ro, la_light_t* lights, uint8_t light_count,
 	la_v3_t material_brightness);
+void la_effect_fade(la_ro_t* ro, float a);
 void la_effect_hue(la_ro_t* ro, float c[]);
 
 #endif

@@ -13,12 +13,6 @@
 #include <la_effect.h>
 #include <la_ro.h>
 
-void jlgr_opengl_framebuffer_subtx_(la_window_t* jlgr);
-void jlgr_opengl_framebuffer_addtx_(la_window_t* jlgr, uint32_t tx);
-void jlgr_opengl_blend_add_(la_window_t* jlgr);
-void jlgr_opengl_blend_default_(la_window_t* jlgr);
-void jlgr_opengl_blend_none_(la_window_t* jlgr);
-
 extern float la_banner_size;
 
 const char *JL_EFFECT_SHADOW = 
@@ -57,87 +51,6 @@ const char* JL_EFFECT_HUE =
 	"	gl_FragColor = \n"
 	"		vec4(new_color.r * grayscale, new_color.g * grayscale,"
 	"		new_color.b * grayscale, new_color.a * vcolor.a);\n"
-	"}";
-
-const char* JL_EFFECT_DIRLIGHT =
-	GLSL_HEAD
-	"uniform vec3 direction;\n"
-	"uniform vec3 direction_ambient;\n"
-	"uniform vec3 direction_diffuse;\n"
-	"uniform vec3 direction_specular;\n"
-	"\n"
-	"vec3 CalcDirLight(vec3 normal, vec3 viewDir) {\n"
-	"	vec3 lightDir = normalize(-direction);\n"
-	"	// Diffuse\n"
-	"	float diff = max(dot(normal, lightDir), 0.0);\n"
-	"	// Specular\n"
-	"	vec3 reflectDir = reflect(-lightDir, normal);\n"
-	"	float spec = pow(max(dot(viewDir, reflectDir), 0.0),\n"
-	"		material.shininess);\n"
-	"	// Combine results\n"
-	"	vec3 ambient = direction_ambient *\n"
-	"		texture2D(texture, texcoord).rgb;\n"
-	"	vec3 diffuse = direction_diffuse * diff *\n"
-	"		texture2D(texture, texcoord).rgb;\n"
-	"	vec3 specular = direction_specular * spec *\n"
-	"		texture2D(texture, texcoord).rgb;\n"
-	"	return (ambient + diffuse + specular);\n"
-	"}\n"
-	"\n"
-	"void main() {\n"
-	"	// Properties\n"
-	"	vec3 norm = normalize(normal);\n"
-	"	vec3 view_dir = normalize(-fragpos);\n"
-	"	// Directional light\n"
-	"	vec3 result = CalcDirLight(norm, view_dir);\n"
-	"}";
-
-const char* JL_EFFECT_LIGHT =
-	GLSL_HEAD
-	"uniform sampler2D texture;\n"
-	"varying vec2 texcoord;\n"
-	"\n"
-	"varying vec3 fragpos;\n"
-	"\n"
-	"uniform vec3 norm;\n"
-	"uniform float shininess;\n"
-	"uniform float max_brightness;\n"
-	"\n"
-	"#define NUM_LIGHTS %d\n"
-	"\n"
-	"struct PointLight{\n"
-	"	float power;\n"
-	"	vec3 position;\n"
-	"	vec3 diffuse;\n"
-	"	vec3 specular;\n"
-	"};\n"
-	"\n"
-	"uniform PointLight pl[32];\n"
-	"uniform vec3 ambient;\n"
-	"\n"
-	"vec3 point_light(PointLight pointlight) {\n"
-	"	vec3 difference = pointlight.position - fragpos;\n"
-	"	vec3 lightDir = normalize(difference);\n"
-	"	float distance = length(difference);\n"
-	"	vec3 light = \n"
-	// Diffuse
-	"		max(dot(norm, lightDir), 0.0) * pointlight.diffuse + \n"
-	// Specular
-	"		pointlight.specular *\n"
-	"			pow(max(dot(norm, normalize(lightDir - \n"
-	"				normalize(fragpos))), 0.0), shininess);\n"
-	// Attenuation
-	"	light /= (pointlight.power * distance * distance);\n"
-	"	return light;\n"
-	"}\n"
-	"\n"
-	"void main() {\n"
-	// Ambient
-	"	vec3 result = ambient;\n"
-	// Point light
-	"	for(int i = 0; i < NUM_LIGHTS; i++) result += point_light(pl[i]);\n"
-	// Result
-	"	gl_FragColor = vec4(max_brightness * result, 1.0) * texture2D(texture, texcoord);\n"
 	"}";
 
 // Simple Point Light.
@@ -194,31 +107,19 @@ static inline void la_effect_format__(char* rtn, const char* format, ...) {
 	va_end( arglist );
 }
 
-static void jlgr_effect_pr_hue__(la_window_t* jlgr) {
-	jlgr_opengl_framebuffer_subtx_(jlgr);
-	la_ro_image_rect(jlgr, &jlgr->gl.temp_vo, jlgr->gl.cp->tx,
-		1., jl_gl_ar(jlgr));
-	jlgr_opengl_framebuffer_addtx_(jlgr, jlgr->gl.cp->tx);
-	la_effect_hue(&jlgr->gl.temp_vo, jlgr->effects.colors);
-}
+void la_effect_fade(la_ro_t* ro, float a) {
+	la_window_t* window = ro->window;
 
-/**
- * Draw a vertex object with alpha effect.
- * @param jlgr: The library context.
- * @param vo: The vertex object to draw.
- * @param offs: The offset vector to translate by.
- * @param a: The alpha value to multiply each pixel by. [ 0.f - 1.f ]
-**/
-void jlgr_effects_vo_alpha(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float a) {
 	if(a < 0.f) a = 0.f;
 	if(a > 1.f) a = 1.f;
+
 	// Bind shader
-	jlgr_opengl_draw1(jlgr, &jlgr->effect.alpha);
+	jlgr_opengl_draw1(window, &window->effect.alpha);
 	// Set Alpha Value In Shader
-	jlgr_opengl_uniform(jlgr, &jlgr->effect.alpha, &a, 1,
+	jlgr_opengl_uniform(window, &window->effect.alpha, &a, 1,
 		"multiply_alpha");
 	// Draw on screen
-	la_ro_draw_shader(vo, &jlgr->effect.alpha);
+	la_ro_draw_shader(ro, &window->effect.alpha);
 }
 
 void la_effect_hue(la_ro_t* ro, float c[]) {
@@ -275,17 +176,6 @@ void la_effect_light(la_ro_t* ro, la_light_t* lights, uint8_t light_count,
 	}
 	// Draw on screen
 	la_ro_draw_shader(ro, shader);
-}
-
-/**
- * Apply a hue change effect to everything that's been drawn on the current pre-
- * renderer so far.
- * @param jlgr: The library context.
- * @param c: The hue to make everything.
-**/
-void jlgr_effects_hue(la_window_t* jlgr, float c[]) {
-	la_memory_copy(c, jlgr->effects.colors, sizeof(float) * 4);
-	la_ro_pr(jlgr, jlgr, jlgr->gl.cp, (la_fn_t) jlgr_effect_pr_hue__);
 }
 
 void jlgr_effects_init__(la_window_t* jlgr) {

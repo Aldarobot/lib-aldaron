@@ -109,10 +109,8 @@ void jlgr_opengl_shader_init(la_window_t* jlgr, jlgr_glsl_t* glsl, const char* v
 void jlgr_opengl_draw1(la_window_t* jlgr, jlgr_glsl_t* sh);
 
 // JLGReffects.c
-void jlgr_effects_vo_alpha(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs, float a);
 void jlgr_effects_vo_light(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs,
 	la_v3_t* material);
-void jlgr_effects_hue(la_window_t* jlgr, float c[]);
 
 void jlgr_effects_light(la_window_t* jlgr, la_v3_t* material);
 void jlgr_effects_light_add(la_window_t* jlgr, la_v3_t point, float ambient[],

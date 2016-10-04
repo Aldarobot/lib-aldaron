@@ -10,6 +10,8 @@
 #include "la_memory.h"
 #include <stdio.h>
 
+#include <la_window.h> // For fullscreen toggle on F11
+
 void la_draw_resize(la_window_t *, uint32_t, uint32_t);
 
 extern SDL_atomic_t la_rmcexit;
@@ -94,7 +96,7 @@ void la_port_input(la_window_t* window) {
 					SDL_AtomicSet(&la_rmcexit, 0);
 					break;
 				case SDL_SCANCODE_F11:
-					jlgr_wm_togglefullscreen(window);
+					la_window_fullscreen_toggle(window);
 					break;
 				case SDL_SCANCODE_BACKSPACE:
 					window->input.keyboard.k = '\b';

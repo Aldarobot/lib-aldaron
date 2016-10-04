@@ -35,51 +35,39 @@ static void jlgr_wm_fscreen__(la_window_t* jlgr, uint8_t a) {
 }
 #endif
 
-//
-// EXPORT FUNCTIONS
-//
-
-void jlgr_wm_setfullscreen(la_window_t* jlgr, uint8_t is) {
+void la_window_fullscreen(la_window_t* window, uint8_t is) {
 #if JL_PLAT == JL_PLAT_COMPUTER
-	jlgr_wm_fscreen__(jlgr, is);
+	jlgr_wm_fscreen__(window, is);
 #endif
 }
 
-void jlgr_wm_togglefullscreen(la_window_t* jlgr) {
+void la_window_fullscreen_toggle(la_window_t* window) {
 #if JL_PLAT == JL_PLAT_COMPUTER
-	jlgr_wm_fscreen__(jlgr, !jlgr->wm.fullscreen);
+	jlgr_wm_fscreen__(window, !window->wm.fullscreen);
 #endif
 }
 
-uint16_t jlgr_wm_getw(la_window_t* jlgr) {
-	return jlgr->wm.w;
+uint16_t la_window_width(la_window_t* window) {
+	return window->wm.w;
 }
 
-uint16_t jlgr_wm_geth(la_window_t* jlgr) {
-	return jlgr->wm.h;
+uint16_t la_window_height(la_window_t* window) {
+	return window->wm.h;
 }
 
 float la_window_banner_size(la_window_t* jlgr) {
 	return la_banner_size;
 }
 
-/**
- * THREAD: Drawing.
- * Set the title of a window.
- * @param jlgr: The library context.
- * @param window_name: What to name the window.
-**/
-void jlgr_wm_setwindowname(la_window_t* jlgr, const char* window_name) {
-	int ii;
-
+void la_window_name(la_window_t* window, const char* window_name) {
 #ifndef LA_PHONE_ANDROID
-	SDL_SetWindowTitle(jlgr->wm.window, window_name);
+	SDL_SetWindowTitle(window->wm.window, window_name);
 #endif
-	for(ii = 0; ii < 16; ii++) {
-		jlgr->wm.windowTitle[0][ii] = window_name[ii];
-		if(window_name[ii] == '\0') { break; }
+	for(int i = 0; i < 16; i++) {
+		window->wm.windowTitle[0][i] = window_name[i];
+		if(window_name[i] == '\0') { break; }
 	}
-	jlgr->wm.windowTitle[0][16] = '\0';
+	window->wm.windowTitle[0][16] = '\0';
 }
 
 //STATIC FUNCTIONS

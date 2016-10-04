@@ -9,6 +9,7 @@
 #include "la_memory.h"
 
 #include <la_thread.h>
+#include <la_window.h>
 
 typedef struct {
 	void* context;
@@ -45,8 +46,8 @@ static inline void la_draw_windowresize__(void* context, la_window_t* window) {
 	uint32_t h = la_safe_get_uint32(&window->protected.set_height);
 
 	jl_wm_updatewh_(window);
-	if(w == 0) w = jlgr_wm_getw(window);
-	if(h == 0) h = jlgr_wm_geth(window);
+	if(w == 0) w = la_window_width(window);
+	if(h == 0) h = la_window_height(window);
 	jlgr_thread_resize(context, window, w, h);
 }
 
@@ -68,9 +69,9 @@ la_draw_init__(void* context, la_window_t* window, const char* name) {
 	la_safe_set_uint8(&window->protected.needs_resize, 1);
 	program_init_ = la_safe_get_pointer(&window->protected.functions.fn);
 	program_init_(context, window);
-	jlgr_thread_resize(context, window, jlgr_wm_getw(window),
-		jlgr_wm_geth(window));
-	jlgr_wm_setwindowname(window, name);
+	jlgr_thread_resize(context, window, la_window_width(window),
+		la_window_height(window));
+	la_window_name(window, name);
 	la_print("Window Created!");
 }
 

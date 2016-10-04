@@ -108,23 +108,7 @@ void jlgr_opengl_shader_init(la_window_t* jlgr, jlgr_glsl_t* glsl, const char* v
 	const char* frag, uint8_t has_tex);
 void jlgr_opengl_draw1(la_window_t* jlgr, jlgr_glsl_t* sh);
 
-// JLGReffects.c
-void jlgr_effects_vo_light(la_window_t* jlgr, la_ro_t* vo, la_v3_t offs,
-	la_v3_t* material);
-
-void jlgr_effects_light(la_window_t* jlgr, la_v3_t* material);
-void jlgr_effects_light_add(la_window_t* jlgr, la_v3_t point, float ambient[],
-	float diffuse[], float specular[], float power);
-void jlgr_effects_light_update(la_window_t* jlgr);
-
 // SG
 uint32_t jl_sg_add_image(la_window_t* jlgr, la_buffer_t* zipdata, const char* filename);
-
-// JLGRwm.c
-void jlgr_wm_setfullscreen(la_window_t* jlgr, uint8_t is);
-void jlgr_wm_togglefullscreen(la_window_t* jlgr);
-uint16_t jlgr_wm_getw(la_window_t* jlgr);
-uint16_t jlgr_wm_geth(la_window_t* jlgr);
-void jlgr_wm_setwindowname(la_window_t* jlgr, const char* window_name);
 
 #endif

@@ -8,6 +8,10 @@
 #include <stdint.h>
 
 typedef struct{
+	float x, y, w, h;
+}jl_rect_t;
+
+typedef struct{
 	float x, y, z;
 }la_v3_t;
 

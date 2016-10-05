@@ -150,11 +150,6 @@ typedef struct {
 	// Gui
 	struct {
 		struct {
-			char* window_name;
-			char* message;
-			jl_popup_button_t* btns;
-		}popup;
-		struct {
 			la_ro_t whole_screen;
 		}vos;
 		struct {
@@ -193,6 +188,8 @@ typedef struct {
 		uint32_t cursor;
 		uint32_t backdrop;
 	}textures;
+
+	la_buffer_t packagedata;
 
 	double timer;
 	double psec;

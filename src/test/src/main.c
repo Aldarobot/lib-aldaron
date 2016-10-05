@@ -25,38 +25,35 @@ void ex_edit_loop(ctx_t* ctx) {
 	la_menu_loop(&ctx->menu);
 }
 
-void ex_wdns(ctx_t* ctx) {
-	la_window_t* window = ctx->window;
-
+void ex_wdns(ctx_t* ctx, la_window_t* window) {
 	ex_redraw(ctx);
 	la_text(window, "testing""\xCA""1234567890");
 	la_menu_draw(&ctx->menu, 0);
 }
 
-void ex_wups(ctx_t* ctx) {
-	la_window_t* jlgr = ctx->window;
+void ex_wups(ctx_t* ctx, la_window_t* window) {
 	float colors[] = { 0.f, 0.f, 0.f, 1.f };
 
-	jl_gl_clear(jlgr, 1., 1., 1., 1.);
-	la_text_centered(jlgr, "this IS alternate", .1, colors);
+	jl_gl_clear(window, 1., 1., 1., 1.);
+	la_text_centered(window, "this IS alternate", .1, colors);
 	la_menu_draw(&ctx->menu, 0);
 }
 
 // Called when window is made/resized.
-static void test_resize(ctx_t* ctx) {
-	la_window_t* jlgr = ctx->window;
+static void test_resize(ctx_t* ctx, la_window_t* window) {
 	float colors[] = { 1.f, 1.f, 1.f, 1.f };
 
 	la_print("EXXXXXXXXXXXXXXXXXXXXAMPLE Resizing Window....");
-	la_ro_image_rect(jlgr, &(ctx->vo1), jlgr->textures.game, 1.f, 1.f);
-	la_ro_plain_rect(jlgr, &(ctx->vo2), colors, 2.f, 1.f);
+	la_ro_image_rect(window, &(ctx->vo1), window->textures.game, 1.f, 1.f);
+	la_ro_plain_rect(window, &(ctx->vo2), colors, 2.f, 1.f);
 	la_menu_draw(&ctx->menu, 1);
 	la_print("EXXXXXXXXXXXXXXXXXXXXAMPLE Resize'd Window....");
 }
 
 void ex_edit_init(ctx_t* ctx) {
-	la_draw_fnchange(ctx->window, (la_fn_t) ex_wdns, (la_fn_t) ex_wups,
-		(la_fn_t) test_resize);
+	la_draw_fnchange(ctx->window, (la_draw_fn_t) ex_wdns,
+		(la_draw_fn_t) ex_wups,
+		(la_draw_fn_t) test_resize);
 }
 
 static inline void ex_init_tasks(ctx_t* ctx) {

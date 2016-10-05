@@ -10,9 +10,6 @@
 #include <la_ro.h>
 #include <la_text.h>
 
-void* aldaron_data(void);
-uint64_t aldaron_size(void);
-
 typedef struct {
 	la_v3_t where[2];
 	la_ro_t vo[3]; // Vertex object [ Full, Slider 1, Slider 2 ].
@@ -302,27 +299,6 @@ void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ..
 }
 
 /**
- * Print a message on the screen and then terminate the program
- * @param 'jl': library context
- * @param 'message': the message 
- */
-void jlgr_term_msge(la_window_t* jlgr, char *message) {
-	jlgr_draw_msge(jlgr, jlgr->textures.icon, 1, message);
-	la_panic(message);
-}
-
-/**
- * Create a popup window.
- */
-void jlgr_popup(la_window_t* jlgr, char *name, char *message,
-	jl_popup_button_t *btns, uint8_t opt_count)
-{
-	jlgr->gui.popup.window_name = name;
-	jlgr->gui.popup.message = message;
-	jlgr->gui.popup.btns = btns;
-}
-
-/**
  * Re-draw/-size a slide button, and activate if it is pressed.
  * @param jlgr: The library context.
  * @param spr: The slide button sprite.
@@ -480,14 +456,11 @@ void jlgr_notify(la_window_t* jlgr, const char* notification, ...) {
 	la_safe_set_float(&jlgr->protected.notification.timeTilVanish, 4.5);
 }
 
-/************************/
-/***  ETOM Functions  ***/
-/************************/
+void _jlgr_loopa(la_window_t* jlgr) {
+	float time_until_vanish = la_safe_get_float(
+		&jlgr->protected.notification.timeTilVanish);
 
-void _jlgr_loopb(la_window_t* jlgr) {
-	float time_until_vanish =
-		la_safe_get_float(&jlgr->protected.notification.timeTilVanish);
-	//Message Display
+	// Notifications:
 	if(time_until_vanish > 0.f) {
 		if(time_until_vanish > .5) {
 			float color[] = { 1., 1., 1., 1. };
@@ -501,40 +474,10 @@ void _jlgr_loopb(la_window_t* jlgr) {
 		la_safe_set_float(&jlgr->protected.notification.timeTilVanish,
 			time_until_vanish - jlgr->psec);
 	}
-}
-
-void _jlgr_loopa(la_window_t* jlgr) {
-	// Update messages.
-	_jlgr_loopb(jlgr);
 #if JL_PLAT == JL_PLAT_COMPUTER
 	// Draw mouse
 	jlgr_mouse_draw__(jlgr);
 #endif
-}
-
-void jlgr_init__(la_window_t* jlgr) {
-	la_buffer_t packagedata;
-
-	la_buffer_fromdata(&packagedata, aldaron_data(), aldaron_size());
-	jlgr->textures.logo = jl_sg_add_image(jlgr, &packagedata,
-		"/logo.png");
-	la_print("Draw Loading Screen");
-	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, 0);
-	la_print("Drew Loading Screen");
-	// Load Graphics
-	jlgr->textures.font = jl_sg_add_image(jlgr, &packagedata,
-		"/font.png");
-	// Draw message on the screen
-	jlgr_draw_msge(jlgr, jlgr->textures.logo, 0, "Loading Lib Aldaron....");
-	// Set other variables
-	la_safe_set_float(&jlgr->protected.notification.timeTilVanish, 0.f);
-	// Load other images....
-	jlgr->textures.icon = jl_sg_add_image(jlgr, &packagedata,
-		"/taskbar_items.png");
-	jlgr->textures.game = jl_sg_add_image(jlgr, &packagedata,
-		"/landscape.png");
-	jlgr->textures.cursor = jl_sg_add_image(jlgr, &packagedata, "/cursor.png");
-	jlgr->textures.backdrop = jl_sg_add_image(jlgr, &packagedata, "/backdrop.png");
 }
 
 #endif

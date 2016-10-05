@@ -11,6 +11,7 @@
 #endif
 
 #include <la.h>
+#include <la_math.h>
 
 #include "SDL_events.h"
 #include "la_safe.h"
@@ -24,15 +25,6 @@
 #define JLGR_TEXT_ALIGNC JLGR_TEXT_CMD "\x11"
 #define JLGR_TEXT_ALIGNR JLGR_TEXT_CMD "\x12"
 #define JLGR_TEXT_ALIGNJ JLGR_TEXT_CMD "\x13"
-
-// Types:
-
-// Coordinate Structures
-typedef struct{
-	float x, y, w, h;
-}jl_rect_t;
-
-#include <la_math.h>
 
 // Graphical stuff
 
@@ -55,11 +47,6 @@ typedef struct{
 	uint32_t program;
 }jlgr_glsl_t;
 
-typedef struct{
-	char *opt;
-	la_fn_t run;
-}jl_popup_button_t;
-
 #include "la_port.h"
 
 typedef void (*la_draw_fn_t)(void* context, la_window_t* window);
@@ -70,8 +57,8 @@ void la_draw_dont(void* context, la_window_t* window);
 
 // JLGR.c:
 float la_window_h(la_window_t* window);
-void la_draw_fnchange(la_window_t* window, la_fn_t primary, la_fn_t secondary,
-	la_fn_t resize);
+void la_draw_fnchange(la_window_t* window, la_draw_fn_t primary,
+	la_draw_fn_t secondary, la_draw_fn_t resize);
 
 // JLGRgraphics.c:
 void jlgr_dont(la_window_t* jlgr);
@@ -83,7 +70,6 @@ void jlgr_draw_bg(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, int16_t
 // JLGRtext.c:
 void jlgr_draw_loadscreen(la_window_t* jlgr, la_fn_t draw_routine);
 void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ...);
-void jlgr_term_msge(la_window_t* jlgr, char* message);
 void jlgr_gui_textbox_init(la_window_t* jlgr, la_buffer_t* string);
 uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr);
 void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc);

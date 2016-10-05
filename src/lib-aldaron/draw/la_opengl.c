@@ -559,20 +559,6 @@ void jlgr_opengl_blend_none_(la_window_t* jlgr) {
 	la_opengl_disable(GL_BLEND);
 }
 
-static inline void _jl_gl_init_disable_extras(la_window_t* jlgr) {
-	la_opengl_disable(GL_DEPTH_TEST);
-	la_opengl_disable(GL_DITHER);
-}
-
-static inline void _jl_gl_init_enable_alpha(la_window_t* jlgr) {
-	la_opengl_enable(GL_CULL_FACE);
-	glBlendColor(0.f,0.f,0.f,0.f);
-#ifdef JL_DEBUG
-	la_opengl_error__(0,"glBlendColor");
-#endif
-	jlgr_opengl_blend_default_(jlgr);
-}
-
 // Copy & Push vertices to a VBO.
 void jlgr_opengl_vertices_(la_window_t* jlgr, const float *xyzw, uint8_t vertices,
 	float* cv, uint32_t* gl)
@@ -766,17 +752,6 @@ void jlgr_opengl_draw1(la_window_t* jlgr, jlgr_glsl_t* sh) {
 	jl_gl_usep__(jlgr, sh->program);
 }
 
-static inline void _jl_gl_init_setup_gl(la_window_t* jlgr) {
-	la_print("setting properties....");
-	//Disallow Dither & Depth Test
-	_jl_gl_init_disable_extras(jlgr);
-	//Set alpha=0 to transparent
-	_jl_gl_init_enable_alpha(jlgr);
-//	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-//	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	la_print("set glproperties.");
-}
-
 /**
  * Create a GLSL shader program.
  * @param jlgr: The library context.
@@ -812,28 +787,6 @@ void jlgr_opengl_shader_init(la_window_t* jlgr, jlgr_glsl_t* glsl, const char* v
 		glsl->attributes.texpos_color = _jl_gl_geta(glsl->program,
 			"acolor");
 	}
-}
-
-static inline void _jl_gl_init_shaders(la_window_t* jlgr) {
-	la_print("Making Shader: texture");
-	jlgr_opengl_shader_init(jlgr, &jlgr->gl.prg.texture, NULL,
-		JL_SHADER_TEX_FRAG, 1);
-	la_print("Making Shader: color");
-	jlgr_opengl_shader_init(jlgr, &jlgr->gl.prg.color, JL_SHADER_CLR_VERT,
-		JL_SHADER_CLR_FRAG, 0);
-	la_print("Set up shaders!");
-}
-
-//Load and create all resources
-static inline void _jl_gl_make_res(la_window_t* jlgr) {
-	// Setup opengl properties
-	_jl_gl_init_setup_gl(jlgr);
-	// Create shaders and set up attribute/uniform variable communication
-	_jl_gl_init_shaders(jlgr);
-	// Default GL Texture Coordinate Buffer
-	la_llgraphics_buffer_set_(&jlgr->gl.default_tc, DEFAULT_TC, 8);
-	la_llgraphics_buffer_set_(&jlgr->gl.upsidedown_tc, UPSIDEDOWN_TC, 8);
-	la_print("made temp vo & default tex. c. buff!");
 }
 
 /**
@@ -880,11 +833,26 @@ void jl_gl_clear(la_window_t* jlgr, float r, float g, float b, float a) {
 }
 
 void jl_gl_init__(la_window_t* jlgr) {
-#ifdef JL_GLTYPE_HAS_GLEW
-	if(glewInit()!=GLEW_OK) la_panic("glew fail!(no sticky)");
-#endif
 	jlgr->gl.cp = NULL;
-	_jl_gl_make_res(jlgr);
+	// Disable dither for high quality faster output.
+	la_opengl_disable(GL_DITHER);
+	la_opengl_enable(GL_CULL_FACE);
+	jlgr_opengl_blend_default_(jlgr);
+//	la_opengl_enable(GL_DEPTH_TEST); // TODO: enable / disable functions 3d
+	// Create shaders and set up attribute/uniform variable communication
+	la_print("Making Shader: texture");
+	jlgr_opengl_shader_init(jlgr, &jlgr->gl.prg.texture, NULL,
+		JL_SHADER_TEX_FRAG, 1);
+	// Default GL Texture Coordinate Buffer
+	la_llgraphics_buffer_set_(&jlgr->gl.default_tc, DEFAULT_TC, 8);
+	la_llgraphics_buffer_set_(&jlgr->gl.upsidedown_tc, UPSIDEDOWN_TC, 8);
+	la_print("made temp vo & default tex. c. buff!");
+}
+
+void la_llgraphics_initshader_color__(la_window_t* window) {
+	la_print("Making Shader: color");
+	jlgr_opengl_shader_init(window, &window->gl.prg.color, JL_SHADER_CLR_VERT,
+		JL_SHADER_CLR_FRAG, 0);
 }
 
 #endif

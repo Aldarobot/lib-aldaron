@@ -9,6 +9,7 @@
 
 #include <la_time.h>
 #include <la_ro.h>
+#include <la_memory.h>
 
 #define JL_WM_FULLSCREEN SDL_WINDOW_FULLSCREEN_DESKTOP
 
@@ -63,37 +64,27 @@ void la_window_name(la_window_t* window, const char* window_name) {
 #ifndef LA_PHONE_ANDROID
 	SDL_SetWindowTitle(window->wm.window, window_name);
 #endif
-	for(int i = 0; i < 16; i++) {
-		window->wm.windowTitle[0][i] = window_name[i];
-		if(window_name[i] == '\0') { break; }
-	}
-	window->wm.windowTitle[0][16] = '\0';
-}
+	uint32_t len = strlen(window_name);
 
-//STATIC FUNCTIONS
+	if(len > 16) {
+		la_memory_copy(window_name, window->wm.windowTitle[0], 16);
+		window->wm.windowTitle[0][16] = 0;
+	}else{
+		la_memory_copy(window_name, window->wm.windowTitle[0], len + 1);
+	}
+}
 
 #ifndef LA_PHONE_ANDROID
 static inline SDL_Window* jlgr_wm_mkwindow__(la_window_t* jlgr) {
-	int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+	int flags = SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE|SDL_WINDOW_MAXIMIZED;
 
-	if(jlgr->wm.fullscreen)
-		flags |= JL_WM_FULLSCREEN;
-	else
-		flags |= SDL_WINDOW_MAXIMIZED;
 	SDL_Window* rtn = SDL_CreateWindow(
-		"Initializing....",			// window title
-		SDL_WINDOWPOS_UNDEFINED,		// initial x position
-		SDL_WINDOWPOS_UNDEFINED,		// initial y position
-		640, 360, flags
-	);
+		"Initializing....", SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_UNDEFINED, 640, 360, flags);
+#ifdef JL_DEBUG
 	if(rtn == NULL) jl_wm_killedit("SDL_CreateWindow");
+#endif
 	SDL_ShowCursor(SDL_DISABLE);
-	return rtn;
-}
-
-static inline SDL_GLContext* jl_wm_gl_context(la_window_t* jlgr) {
-	SDL_GLContext* rtn = SDL_GL_CreateContext(jlgr->wm.window);
-	if(rtn == NULL) jl_wm_killedit("SDL_GL_CreateContext");
 	return rtn;
 }
 #endif
@@ -123,20 +114,20 @@ static inline void jlgr_wm_create__(la_window_t* jlgr) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 	// Create window.
 	jlgr->wm.window = jlgr_wm_mkwindow__(jlgr);
-	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-	jlgr->wm.glcontext = jl_wm_gl_context(jlgr);
+	jlgr->wm.glcontext = SDL_GL_CreateContext(jlgr->wm.window);
+#ifdef JL_DEBUG
+	if(jlgr->wm.glcontext == NULL) jl_wm_killedit("SDL_GL_CreateContext");
+#endif
 #endif
 }
 
-// ETOM FUNCTIONS
-
-void jl_wm_loop__(la_window_t* jlgr) {
+void jl_wm_loop__(la_window_t* window) {
 #ifndef LA_PHONE_ANDROID
 	//Update Screen
-	SDL_GL_SwapWindow(jlgr->wm.window); //end current draw
+	SDL_GL_SwapWindow(window->wm.window); //end current draw
 #endif
 	// milliseconds / 1000 to get seconds
-	jlgr->psec = la_time_regulatefps(&jlgr->timer, &jlgr->on_time);
+	window->psec = la_time_regulatefps(&window->timer, &window->on_time);
 }
 
 void la_window_resize__(la_window_t* window, uint32_t w, uint32_t h) {
@@ -153,8 +144,6 @@ void jl_wm_init__(la_window_t* window) {
 	jlgr_wm_create__(window);
 	// Get Resize Event
 	la_port_input(window);
-	// Get Window Size
-	jl_wm_updatewh_(window);
 	// Set default values
 	la_safe_set_uint8(&window->has_2_screens, 0);
 }

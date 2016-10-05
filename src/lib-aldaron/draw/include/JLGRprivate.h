@@ -62,9 +62,7 @@ void jlgr_opengl_texture_bind_(la_window_t* jlgr, uint32_t tex);
 // init functions.
 void jl_wm_init__(la_window_t* jlgr);
 void jlgr_text_init__(la_window_t* jlgr);
-void jl_sg_init__(la_window_t* jlgr);
 void jl_gl_init__(la_window_t* jlgr);
-void jlgr_init__(la_window_t* jlgr);
 void jlgr_effects_init__(la_window_t* jlgr);
 // loop
 void jl_wm_loop__(la_window_t* jlgr);

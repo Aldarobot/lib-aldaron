@@ -44,7 +44,16 @@ static inline void* la_init__(const char* nm, uint64_t ctx1s) {
 	// Reset Time
 	la_time_init__();
 	// Initialize the SDL
-	SDL_Init(0);
+	SDL_Init(0
+#ifndef LA_PHONE_ANDROID
+	#ifdef LA_FEATURE_AUDIO
+		| SDL_INIT_AUDIO
+	#endif
+	#ifdef LA_FEATURE_DISPLAY
+		| SDL_INIT_VIDEO
+	#endif
+#endif
+		);
 #ifndef LA_PHONE_ANDROID
 #ifdef LA_FEATURE_AUDIO
 	// Open the audio device

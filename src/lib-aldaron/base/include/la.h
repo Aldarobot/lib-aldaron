@@ -25,27 +25,19 @@
 	#define LA_COMPUTER
 #endif
 
-//Determine Which OpenGL to use.
-
-#define JL_GLTYPE_NO_SPRT 0 // No Support for OpenGL
-// GLES version 2
-#define JL_GLTYPE_SDL_GL2 1 // Include OpenGL with SDL
-#define JL_GLTYPE_OPENGL2 2 // Include OpenGL with glut.
-#define JL_GLTYPE_SDL_ES2 3 // Include OpenGLES 2 with SDL
-#define JL_GLTYPE_OPENES2 4 // Include OpenGLES 2 standardly.
-// Newer versions...
-
-#define JL_GLTYPE JL_GLTYPE_NO_SPRT
+//Determine Which Graphics Library to use.
+#define JL_GLTYPE_SDL_GL2 1 // Use OpenGL with SDL
+#define JL_GLTYPE_SDL_ES2 3 // Use OpenGLES 2 with SDL
+#define JL_GLTYPE_OPENES2 4 // Use OpenGLES 2 standardly.
+#define LA_GLTYPE_VULKAN 5 // Use Vulkan
 
 // Platform Capabilities.
 #if JL_PLAT == JL_PLAT_COMPUTER
 	// All Linux Platforms
-	#undef JL_GLTYPE
 	#define JL_GLTYPE JL_GLTYPE_SDL_ES2
 	// Windows
 	// #define JL_GLTYPE JL_GLTYPE_SDL_GL2
 #elif JL_PLAT == JL_PLAT_PHONE
-	#undef JL_GLTYPE
 	#define JL_GLTYPE JL_GLTYPE_SDL_ES2
 #else
 	#error "NO OpenGL support for this platform!"

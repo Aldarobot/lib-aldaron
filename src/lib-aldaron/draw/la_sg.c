@@ -150,13 +150,13 @@ typedef struct{
 }la_window_draw_t;
 
 static void la_window_draw_flipped(la_window_draw_t* param) {
-	la_fn_t redraw = la_safe_get_pointer(
+	la_draw_fn_t redraw = la_safe_get_pointer(
 		&param->window->protected.functions.primary);
 
 	// Clear the screen.
 	jl_gl_clear(param->window, 0., .5, .66, 1.);
 	// Run the screen's redraw function
-	redraw(param->context);
+	redraw(param->context, param->window);
 	// Draw Menu Bar & Mouse
 	_jlgr_loopa(param->window);
 }
@@ -167,13 +167,6 @@ void la_window_draw__(void* context, la_window_t* window) {
 	// Draw over it.
 	la_ro_pr(&pass, window, &window->screen, (la_fn_t) la_window_draw_flipped);
 	la_ro_draw(&window->screen);
-}
-
-void jl_sg_init__(la_window_t* window) {
-	// Initialize redraw routines to do nothing.
-	la_safe_set_pointer(&window->protected.functions.primary, la_dont);
-	la_safe_set_pointer(&window->protected.functions.secondary, la_dont);
-	la_safe_set_pointer(&window->protected.functions.resize, la_dont);
 }
 
 #endif

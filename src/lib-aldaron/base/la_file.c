@@ -381,6 +381,8 @@ const char* la_file_loadzip(la_buffer_t* rtn, la_buffer_t* data,
  * @returns error: If there was an error.
 */
 const char* la_file_mkdir(const char* path) {
+	if(path == NULL) return NULL;
+	if(path[0] == 0) return NULL;
 	if(mkdir(path, JL_FL_PERMISSIONS)) {
 		int errsv = errno;
 		if(errsv == EEXIST) {

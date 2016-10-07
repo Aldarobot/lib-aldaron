@@ -107,6 +107,9 @@ void la_port_input(la_window_t* window) {
 				case SDL_SCANCODE_RETURN:
 					window->input.keyboard.k = '\n';
 					break;
+				case SDL_SCANCODE_SPACE:
+					window->input.keyboard.k = ' ';
+					break;
 				default:;
 					char key = SDL_GetKeyFromScancode(
 						window->sdl_event.key.keysym

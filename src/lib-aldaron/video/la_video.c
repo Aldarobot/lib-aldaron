@@ -3,7 +3,7 @@
 /* DO NOT REMOVE THIS NOTICE */
 
 #include <la_config.h>
-#ifdef LA_VIDEO
+#ifdef LA_FEATURE_VIDEO
 
 #include "la_memory.h"
 #include "JLGRprivate.h"
@@ -139,9 +139,9 @@ void la_video_make_jpeg(la_buffer_t* rtn, uint8_t quality, uint8_t* pxdata,
 void la_video_load_jpeg(void* output, void* data, size_t size, uint16_t* w,
 	uint16_t* h)
 {
-/*	SDL_Surface *image; //  Free'd by SDL_free(image);
+	SDL_Surface *image; //  Free'd by SDL_free(image);
 	SDL_RWops *rw; // Free'd by SDL_RWFromMem
-	data_t pixel_data; // Free'd by jl_mem_string_fstrt
+	la_buffer_t pixel_data; // Free'd by jl_mem_string_fstrt
 	uint32_t color = 0;
 	int i, j;
 
@@ -149,21 +149,21 @@ void la_video_load_jpeg(void* output, void* data, size_t size, uint16_t* w,
 	if ((image = IMG_Load_RW(rw, 0)) == NULL)
 		la_panic("Couldn't load image: %s", IMG_GetError());
 	// Covert SDL_Surface.
-	jl_data_init(jl, &pixel_data, image->w * image->h * 3);
+	la_buffer_init(&pixel_data);//jl, &pixel_data, image->w * image->h * 3);
 	for(i = 0; i < image->h; i++) {
 		for(j = 0; j < image->w; j++) {
 			color = _jl_sg_gpix(image, j, i);
-			jl_data_saveto(&pixel_data, 3, &color);
+			la_buffer_write(&pixel_data, &color, 3);
 		}
 	}
 	//Set Return values
-	la_memory_copy(pixel_data.data, output, pixel_data.size);
-	jl_data_free(&pixel_data);
+	la_memory_copy(pixel_data.data, output, image->w * image->h * 3);
+	la_buffer_free(&pixel_data);
 	*w = image->w;
 	*h = image->h;
 	// Clean-up
 	SDL_FreeSurface(image);
-	SDL_free(rw);*/
+	SDL_free(rw);
 }
 
 #endif

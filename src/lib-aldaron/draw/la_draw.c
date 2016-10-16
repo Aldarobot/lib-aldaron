@@ -63,9 +63,9 @@ static inline void la_draw_windowresize__(void* context, la_window_t* window) {
 static void la_draw_loader(void* context, la_window_t* window) {
 	jlgr_draw_bg(window, window->textures.backdrop, 0, 0, -1);
 	la_ro_image_rect(window, &window->gl.temp_vo, window->textures.logo, 1.,
-		5./31.);
+		90./251.);
 	la_ro_move(&window->gl.temp_vo, (la_v3_t) {
-		0.f, (jl_gl_ar(window) - (5./31.)) / 2.f, 0.f });
+		0.f, (jl_gl_ar(window) - (90./251.)) / 2.f, 0.f });
 	la_ro_draw(&window->gl.temp_vo);
 //	SDL_Delay(100);
 }

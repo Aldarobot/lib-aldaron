@@ -29,37 +29,22 @@
 #endif
 
 //Determine Which Graphics Library to use.
-#define JL_GLTYPE_SDL_GL2 1 // Use OpenGL with SDL
-#define JL_GLTYPE_SDL_ES2 3 // Use OpenGLES 2 with SDL
-#define JL_GLTYPE_OPENES2 4 // Use OpenGLES 2 standardly.
+#define LA_GLTYPE_SDL_GL2 1 // Use OpenGL with SDL
+#define LA_GLTYPE_SDL_ES2 3 // Use OpenGLES 2 with SDL
+#define LA_GLTYPE_OPENES2 4 // Use OpenGLES 2 standardly.
 #define LA_GLTYPE_VULKAN 5 // Use Vulkan
 
 // Platform Capabilities.
 #if JL_PLAT == JL_PLAT_COMPUTER
 	// All Linux Platforms
-	#define JL_GLTYPE JL_GLTYPE_SDL_ES2
+	#define LA_GLTYPE LA_GLTYPE_SDL_ES2
 	// Windows
-	// #define JL_GLTYPE JL_GLTYPE_SDL_GL2
+	// #define LA_GLTYPE LA_GLTYPE_SDL_GL2
 #elif JL_PLAT == JL_PLAT_PHONE
-	#define JL_GLTYPE JL_GLTYPE_SDL_ES2
+	#define LA_GLTYPE LA_GLTYPE_SDL_ES2
 #else
 	#error "NO OpenGL support for this platform!"
 #endif
-
-//ERROR MESSAGES
-typedef enum{
-	JL_ERR_NERR, //NO ERROR
-	JL_ERR_NONE, //Something requested is Non-existant
-	JL_ERR_FIND, //Can not find the thing requested
-	JL_ERR_NULL, //Something requested is empty/null
-}jl_err_t;
-
-typedef enum{
-	JL_THREAD_PP_AA, // Push if acceptable
-	JL_THREAD_PP_UA, // Push if acceptable, & make unacceptable until pull. 
-	JL_THREAD_PP_FF, // Push forcefully.
-	JL_THREAD_PP_UF, // Push forcefully, and make unacceptable until pull
-}jl_thread_pp_t;
 
 typedef void(*la_fn_t)(void* context);
 

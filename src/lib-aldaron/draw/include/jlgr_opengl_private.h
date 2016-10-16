@@ -2,12 +2,12 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
-#if JL_GLTYPE == JL_GLTYPE_SDL_GL2  // SDL OpenGL 2
+#if LA_GLTYPE == LA_GLTYPE_SDL_GL2  // SDL OpenGL 2
 	#include "SDL_opengl.h"
 	#include "SDL_opengl_glext.h"
-#elif JL_GLTYPE == JL_GLTYPE_SDL_ES2 // SDL OpenGLES 2
+#elif LA_GLTYPE == LA_GLTYPE_SDL_ES2 // SDL OpenGLES 2
 	#include "SDL_opengles2.h"
-#elif JL_GLTYPE == JL_GLTYPE_OPENES2 // OpenGLES 2
+#elif LA_GLTYPE == LA_GLTYPE_OPENES2 // OpenGLES 2
 	#include <GLES2/gl2.h>
 	#include <GLES2/gl2ext.h>
 #endif

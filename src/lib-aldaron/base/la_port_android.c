@@ -303,8 +303,6 @@ void la_print(const char* format, ...) {
 	ANDROID_LOG("%s", temp); // To Logcat
 }
 
-void jl_mode_loop__(jl_t* jl);
-
 void la_port_input(la_window_t* window) {
 	// Touch Input
 	window->input.touch.x = al_safe_get_float(&window->mouse_x);
@@ -323,7 +321,7 @@ void la_port_input(la_window_t* window) {
 	if(safe_get_uint8(&window->in.back)) {
 		la_print("Back");
 		safe_set_uint8(&window->in.back, 0);
-		jl_mode_exit(window->jl);
+		SDL_AtomicSet(&la_rmcexit, 0);
 	}
 }
 

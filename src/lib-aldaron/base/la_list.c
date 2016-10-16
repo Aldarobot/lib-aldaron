@@ -5,7 +5,7 @@
 #include <la_list.h>
 #include <la.h>
 
-static inline void *_jl_cl_list_alphabetize_lowest(struct cl_list *list) {
+static inline void* la_list_alphabetize_lowest__(struct cl_list *list) {
 	int i, j, k;
 	char *rtn = NULL;
 	//Allocate and clear checked
@@ -47,7 +47,7 @@ void la_list_alphabetize(la_list_t *list) {
 
 	struct cl_list *alphabetized = cl_list_create();
 	while(!cl_list_is_empty(list)) {
-		void *l = _jl_cl_list_alphabetize_lowest(list);
+		void *l = la_list_alphabetize_lowest__(list);
 		cl_list_remove(list, l);
 		cl_list_add_tail(alphabetized, l);
 	}

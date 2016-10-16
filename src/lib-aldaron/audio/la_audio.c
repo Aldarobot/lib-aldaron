@@ -31,7 +31,7 @@ static inline void la_audio_load2(la_audio_t* jlau, la_sound_t* audio,
 	uint8_t volumeChange, const void *data, uint32_t dataSize,
 	uint8_t isMusic)
 {
-#ifdef LA_PHONE_ANDROID
+#ifdef LA_ANDROID
 #else
 	SDL_RWops *rw;
 
@@ -65,7 +65,7 @@ void la_audio_play(la_audio_t* jlau, la_sound_t* audio, float in, la_v3_t* vec) 
 	int32_t ms = la_audio_sec2ms__(in);
 
 	if(audio->channel == LA_AUDIO_CHANNEL_MUSIC) {
-#ifdef LA_PHONE_ANDROID
+#ifdef LA_ANDROID
 #else
 		Mix_HaltMusic();
 		// Get around SDL_Mixer Bug.
@@ -73,7 +73,7 @@ void la_audio_play(la_audio_t* jlau, la_sound_t* audio, float in, la_v3_t* vec) 
 		else Mix_PlayMusic(audio->audio, 1);
 #endif
 	}else{
-#ifdef LA_PHONE_ANDROID
+#ifdef LA_ANDROID
 #else
 		JLAU_PLAY_MIX_PLAY_CHANNEL:
 		if((audio->channel = Mix_FadeInChannel(-1, audio->audio, 0,
@@ -106,7 +106,7 @@ void la_audio_lock(la_audio_t* jlau, la_sound_t* audio, float in, la_v3_t* vec) 
 }
 
 void la_audio_pause(la_audio_t* jlau, la_sound_t* audio) {
-#ifdef LA_PHONE_ANDROID
+#ifdef LA_ANDROID
 #else
 	if(audio->channel == LA_AUDIO_CHANNEL_MUSIC)
 		Mix_PauseMusic();
@@ -116,7 +116,7 @@ void la_audio_pause(la_audio_t* jlau, la_sound_t* audio) {
 }
 
 void la_audio_resume(la_audio_t* jlau, la_sound_t* audio) {
-#ifdef LA_PHONE_ANDROID
+#ifdef LA_ANDROID
 #else
 	if(audio->channel == LA_AUDIO_CHANNEL_MUSIC)
 		Mix_ResumeMusic();
@@ -138,7 +138,7 @@ void la_audio_resume(la_audio_t* jlau, la_sound_t* audio) {
 uint8_t la_audio_wait(la_audio_t* jlau, la_sound_t* w_audio, la_sound_t* n_audio,
 	float in, la_v3_t* vec)
 {
-#ifdef LA_PHONE_ANDROID
+#ifdef LA_ANDROID
 #else
 	// If audio is still playing, quit
 	if(w_audio ? Mix_Playing(w_audio->channel) : Mix_PlayingMusic())
@@ -149,7 +149,7 @@ uint8_t la_audio_wait(la_audio_t* jlau, la_sound_t* w_audio, la_sound_t* n_audio
 }
 
 void la_audio_stop(la_sound_t* audio, float out) {
-#ifdef LA_PHONE_ANDROID
+#ifdef LA_ANDROID
 #else
 	int32_t channel = (audio == NULL) ? -1 : audio->channel;
 	int32_t ms = la_audio_sec2ms__(out);

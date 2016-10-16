@@ -61,7 +61,7 @@ float la_window_banner_size(la_window_t* jlgr) {
 }
 
 void la_window_name(la_window_t* window, const char* window_name) {
-#ifndef LA_PHONE_ANDROID
+#ifndef LA_ANDROID
 	SDL_SetWindowTitle(window->wm.window, window_name);
 #endif
 	uint32_t len = strlen(window_name);
@@ -74,7 +74,7 @@ void la_window_name(la_window_t* window, const char* window_name) {
 	}
 }
 
-#ifndef LA_PHONE_ANDROID
+#ifndef LA_ANDROID
 static inline SDL_Window* jlgr_wm_mkwindow__(la_window_t* jlgr) {
 	int flags = SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE|SDL_WINDOW_MAXIMIZED;
 
@@ -92,7 +92,7 @@ static inline SDL_Window* jlgr_wm_mkwindow__(la_window_t* jlgr) {
 //Update the SDL_displayMode structure
 void jl_wm_updatewh_(la_window_t* window) {
 	// Get Window Size
-#ifndef LA_PHONE_ANDROID
+#ifndef LA_ANDROID
 	SDL_GetWindowSize(window->wm.window, &window->wm.w, &window->wm.h);
 #else
 	window->wm.w = window->width, window->wm.h = window->height;
@@ -122,7 +122,7 @@ static inline void jlgr_wm_create__(la_window_t* jlgr) {
 }
 
 void jl_wm_loop__(la_window_t* window) {
-#ifndef LA_PHONE_ANDROID
+#ifndef LA_ANDROID
 	//Update Screen
 	SDL_GL_SwapWindow(window->wm.window); //end current draw
 #endif

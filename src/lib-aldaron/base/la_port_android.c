@@ -4,7 +4,7 @@
 
 #include "la_draw.h"
 
-#ifdef LA_PHONE_ANDROID
+#ifdef LA_ANDROID
 
 #include "la_port.h"
 #include "la_memory.h"

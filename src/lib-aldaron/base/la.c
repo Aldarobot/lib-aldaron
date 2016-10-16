@@ -45,7 +45,7 @@ static inline void* la_init__(const char* nm, uint64_t ctx1s) {
 	la_time_init__();
 	// Initialize the SDL
 	SDL_Init(0
-#ifndef LA_PHONE_ANDROID
+#ifndef LA_ANDROID
 	#ifdef LA_FEATURE_AUDIO
 		| SDL_INIT_AUDIO
 	#endif
@@ -54,7 +54,7 @@ static inline void* la_init__(const char* nm, uint64_t ctx1s) {
 	#endif
 #endif
 		);
-#ifndef LA_PHONE_ANDROID
+#ifndef LA_ANDROID
 #ifdef LA_FEATURE_AUDIO
 	// Open the audio device
 	Mix_Init(MIX_INIT_OGG);
@@ -118,7 +118,7 @@ int32_t la_start(void* fnc_init, la_fn_t fnc_loop, la_fn_t fnc_kill,
 {
 	SDL_AtomicSet(&la_rmcexit, 1);
 
-#ifndef LA_PHONE_ANDROID
+#ifndef LA_ANDROID
 #ifdef LA_FEATURE_DISPLAY
 	la_window_t* la_window = la_memory_allocate(sizeof(la_window_t));
 #endif
@@ -137,7 +137,7 @@ int32_t la_start(void* fnc_init, la_fn_t fnc_loop, la_fn_t fnc_kill,
 		fnc_loop(context);
 	fnc_kill(context);
 #endif
-#ifndef LA_PHONE_ANDROID
+#ifndef LA_ANDROID
 	#ifdef LA_FEATURE_AUDIO
 		Mix_CloseAudio();
 	#endif

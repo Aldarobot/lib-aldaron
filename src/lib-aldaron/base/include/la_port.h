@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#ifdef LA_PHONE_ANDROID
+#ifdef LA_ANDROID
 #include <EGL/egl.h>
 #include <android/sensor.h>
 #endif
@@ -53,7 +53,7 @@ typedef struct{
 }jlgr_input_t;
 
 typedef struct {
-#ifdef LA_PHONE_ANDROID
+#ifdef LA_ANDROID
 	struct android_app* app;
 
 	ASensorManager* sensorManager;

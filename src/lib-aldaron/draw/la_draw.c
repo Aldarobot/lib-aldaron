@@ -164,7 +164,7 @@ void la_window_loop__(void* context, la_window_t* window) {
 
 void la_window_kill__(la_window_t* window) {
 	SDL_AtomicSet(&la_rmcexit, 0);
-#ifndef LA_PHONE_ANDROID
+#ifndef LA_ANDROID
 	la_print("Destroying window....");
 	SDL_DestroyWindow(window->wm.window);
 #endif
@@ -203,7 +203,7 @@ void la_window_start__(void* context, la_window_t* window, la_draw_fn_t fn_,
 	la_main_thread_t ctx = (la_main_thread_t) { context, window,
 		fnc_loop, fnc_kill };
 	la_thread_new(NULL, (la_thread_fn_t)la_main_thread, "la_main", &ctx);
-#ifndef LA_PHONE_ANDROID
+#ifndef LA_ANDROID
 	// Redraw loop
 	while(SDL_AtomicGet(&la_rmcexit)) la_window_loop__(context, window);
 	// Free stuff.

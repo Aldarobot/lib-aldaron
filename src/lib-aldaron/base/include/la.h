@@ -15,7 +15,7 @@
 #if defined(__ANDROID__)
         #define JL_PLAT JL_PLAT_PHONE
 	#define LA_PHONE
-	#define LA_PHONE_ANDROID
+	#define LA_ANDROID
 #elif defined(__IPHONEOS__)
         #define JL_PLAT JL_PLAT_PHONE
 	#define LA_PHONE
@@ -23,6 +23,9 @@
 #else
         #define JL_PLAT JL_PLAT_COMPUTER
 	#define LA_COMPUTER
+	#define LA_LINUX
+	#define LA_APPLE
+	//#define LA_WINDOWS
 #endif
 
 //Determine Which Graphics Library to use.

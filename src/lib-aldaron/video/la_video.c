@@ -25,7 +25,7 @@ typedef long unsigned int jpeg_long_int_t;
  * @returns: The data.
 **/
 void la_video_make_jpeg(la_buffer_t* rtn, uint8_t quality, uint8_t* pxdata,
-	uint16_t w, uint16_t h)
+	uint32_t w, uint32_t h)
 {
 	uint8_t* data = NULL;
 	jpeg_long_int_t data_size = 0;
@@ -136,29 +136,26 @@ void la_video_make_jpeg(la_buffer_t* rtn, uint8_t quality, uint8_t* pxdata,
  * @param w: Pointer to the width variable.
  * @param h: Pointer to the height variable.
 **/
-void la_video_load_jpeg(void* output, void* data, size_t size, uint16_t* w,
-	uint16_t* h)
+void la_video_load_jpeg(void* output, void* data, uint32_t size, uint32_t* w,
+	uint32_t* h)
 {
 	SDL_Surface *image; //  Free'd by SDL_free(image);
 	SDL_RWops *rw; // Free'd by SDL_RWFromMem
-	la_buffer_t pixel_data; // Free'd by jl_mem_string_fstrt
 	uint32_t color = 0;
-	int i, j;
+	uint8_t* pixels = output;
 
 	rw = SDL_RWFromMem(data, size);
 	if ((image = IMG_Load_RW(rw, 0)) == NULL)
 		la_panic("Couldn't load image: %s", IMG_GetError());
 	// Covert SDL_Surface.
-	la_buffer_init(&pixel_data);//jl, &pixel_data, image->w * image->h * 3);
-	for(i = 0; i < image->h; i++) {
-		for(j = 0; j < image->w; j++) {
+	for(int i = 0; i < image->h; i++) {
+		for(int j = 0; j < image->w; j++) {
 			color = _jl_sg_gpix(image, j, i);
-			la_buffer_write(&pixel_data, &color, 3);
+			la_memory_copy(&color,
+				&(pixels[((i * image->w) + j) * 3]), 3);
 		}
 	}
 	//Set Return values
-	la_memory_copy(pixel_data.data, output, image->w * image->h * 3);
-	la_buffer_free(&pixel_data);
 	*w = image->w;
 	*h = image->h;
 	// Clean-up

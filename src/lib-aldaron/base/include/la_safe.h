@@ -8,33 +8,35 @@
 #include "SDL_thread.h"
 #include <stdint.h>
 
+typedef SDL_SpinLock la_safe_t;
+
 typedef struct {
-	SDL_SpinLock lock;
+	la_safe_t lock;
 	uint8_t value;
 } safe_uint8_t;
 
 typedef struct {
-	SDL_SpinLock lock;
+	la_safe_t lock;
 	uint16_t value;
 } safe_uint16_t;
 
 typedef struct {
-	SDL_SpinLock lock;
+	la_safe_t lock;
 	uint32_t value;
 } safe_uint32_t;
 
 typedef struct {
-	SDL_SpinLock lock;
+	la_safe_t lock;
 	float value;
 } safe_float_t;
 
 typedef struct {
-	SDL_SpinLock lock;
+	la_safe_t lock;
 	char value[256];
 } safe_string_t;
 
 typedef struct {
-	SDL_SpinLock lock;
+	la_safe_t lock;
 	void* value;
 } safe_pointer_t;
 

@@ -12,9 +12,9 @@
 
 #include <la_buffer.h>
 
-void la_video_load_jpeg(void* output, void* data, size_t size, uint16_t* w,
-	uint16_t* h);
+void la_video_load_jpeg(void* output, void* data, uint32_t size, uint32_t* w,
+	uint32_t* h);
 void la_video_make_jpeg(la_buffer_t* rtn, uint8_t quality, uint8_t* pxdata,
-	uint16_t w, uint16_t h);
+	uint32_t w, uint32_t h);
 
 #endif

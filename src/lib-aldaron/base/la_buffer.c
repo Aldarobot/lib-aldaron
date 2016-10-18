@@ -59,7 +59,7 @@ void la_buffer_read(la_buffer_t* buffer, void* var, uint32_t varsize) {
 }
 
 void la_buffer_write(la_buffer_t* buffer, const void* var, uint32_t varsize) {
-	void* dest = ((void*)buffer->data) + buffer->curs;
+	void* dest = &(buffer->data[buffer->curs]);
 
 	buffer->curs = buffer->curs + varsize;
 	la_buffer_resize(buffer);
@@ -67,15 +67,15 @@ void la_buffer_write(la_buffer_t* buffer, const void* var, uint32_t varsize) {
 }
 
 void la_buffer_resize(la_buffer_t* buffer) {
-	LA_BUFFER_RESIZE:
-		if(buffer->curs < buffer->size) return;
+	while(1) {
+		if(buffer->curs < buffer->size) break;
 
 		uint64_t oldsize = buffer->size;
 
 		buffer->size *= 2;
 		buffer->data = la_memory_resize(buffer->data, buffer->size);
 		la_memory_clear(buffer->data + oldsize, oldsize);
-		goto LA_BUFFER_RESIZE;
+	}
 }
 
 void la_buffer_del(la_buffer_t* buffer) {

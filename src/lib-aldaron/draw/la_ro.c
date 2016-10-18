@@ -290,8 +290,8 @@ void la_ro_change_orient(la_ro_t *ro, uint8_t orient) {
 		( orient == 1 ? UPSIDEDOWN_TC : BACKWARD_TC ) : DEFAULT_TC, 8);
 }
 
-void la_ro_change_image(la_ro_t *ro, uint32_t img,
-	uint8_t w, uint8_t h, int16_t map, uint8_t orient)
+void la_ro_change_image(la_ro_t *ro, uint32_t img, uint8_t w, uint8_t h,
+	int16_t map, uint8_t orient)
 {
 #ifdef JL_DEBUG
 	if(img == 0) la_panic("Error: Texture=0!");

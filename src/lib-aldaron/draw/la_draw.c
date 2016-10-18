@@ -179,7 +179,7 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 		// Program loop
 		ctx->loop(ctx->context);
 	}
-	// Kill the loop.
+	la_print("Kill The Loop -> 0.");
 	ctx->kill(ctx->context);
 	la_print("Exit Program -> 0.");
 	return 0;
@@ -193,6 +193,8 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 void la_window_start__(void* context, la_window_t* window, la_draw_fn_t fn_,
 	la_fn_t fnc_loop, la_fn_t fnc_kill, const char* name)
 {
+	la_thread_t mti; // Main Thread Id
+
 	// Set init function
 	la_safe_set_pointer(&window->protected.functions.fn, fn_);
 	// Initialize subsystems
@@ -202,10 +204,13 @@ void la_window_start__(void* context, la_window_t* window, la_draw_fn_t fn_,
 	// Branch a new thread.
 	la_main_thread_t ctx = (la_main_thread_t) { context, window,
 		fnc_loop, fnc_kill };
-	la_thread_new(NULL, (la_thread_fn_t)la_main_thread, "la_main", &ctx);
+	la_thread_new(&mti, (la_thread_fn_t)la_main_thread, "la_main", &ctx);
+	printf("SSSSSSSSSSSS# %p\n", mti.thread);
 #ifndef LA_ANDROID
 	// Redraw loop
 	while(SDL_AtomicGet(&la_rmcexit)) la_window_loop__(context, window);
+	// Wait on other thread
+	la_thread_old(&mti);
 	// Free stuff.
 	la_window_kill__(window);
 #endif

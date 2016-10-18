@@ -25,8 +25,8 @@ void la_ro_plain_rect(la_window_t* window, la_ro_t* ro, float* colors,
 void la_ro_image_rect(la_window_t* window, la_ro_t *ro, uint32_t tex, float w,
 	float h);
 void la_ro_change_orient(la_ro_t *ro, uint8_t orient);
-void la_ro_change_image(la_ro_t *ro, uint32_t img,
-	uint8_t w, uint8_t h, int16_t map, uint8_t orient);
+void la_ro_change_image(la_ro_t *ro, uint32_t img, uint8_t w, uint8_t h,
+	int16_t map, uint8_t orient);
 void la_ro_change_color(la_ro_t* ro, float* rgba);
 void la_ro_change_plain(la_ro_t* ro, float* rgba);
 void la_ro_move(la_ro_t* ro, la_v3_t pos);

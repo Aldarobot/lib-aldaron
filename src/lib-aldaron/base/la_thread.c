@@ -8,7 +8,7 @@
 
 #define JL_THREAD_MUTEX_UNLOCKED 255
 
-const char* la_thread_new(la_thread_t* thread, la_thread_fn_t fn,
+const char* la_thread_new(la_thread_t* thread_out, la_thread_fn_t fn,
 	const char* name, void* data)
 {
 	la_thread_t newthread;
@@ -16,20 +16,15 @@ const char* la_thread_new(la_thread_t* thread, la_thread_fn_t fn,
 	newthread.fn = fn;
 	newthread.thread = SDL_CreateThread(fn, name, data);
 	newthread.id = SDL_GetThreadID(newthread.thread);
-	if(newthread.thread == NULL) {
-		return SDL_GetError();
-	}else{
-		return NULL;
-	}
-	SDL_DetachThread(newthread.thread);
 	// Set thread.
-	if(thread) *thread = newthread;
+	if(thread_out != NULL)
+		*thread_out = newthread;
+	else
+		SDL_DetachThread(newthread.thread);
+	// Return error, if there is one.
+	return (newthread.thread == NULL) ? SDL_GetError() : NULL;
 }
 
-/**
- * Wait for a thread to exit.
- * @returns: Value returned from the thread.
-**/
 int32_t la_thread_old(la_thread_t* thread) {
 	int32_t threadReturnValue = 0;
 

@@ -22,6 +22,8 @@
 #include "la_fileviewer.h"
 #include "la_text.h"
 
+#include <la_gui.h>
+
 static la_fileviewer_t* la_fileviewer = NULL;
 
 static void la_file_user_select_check_extradir__(char *dirname) {
@@ -174,7 +176,6 @@ static void la_filemanager_blank_draw(la_menu_t* menu) {
  * Open directory for file viewer.
  * If '!' is put at the beginning of "program_name", then it's treated as a
  *	relative path instead of a program name.
- * @param jl: The library context
  * @param directory: relative or absolute path to open
  * @param newfiledata: any new files created with the fileviewer will
  *	automatically be saved with this data.
@@ -273,8 +274,7 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 
 	iterator = cl_list_iterator_create(la_fileviewer->filelist);
 
-	jlgr_fill_image_set(window, window->textures.backdrop, 0, 0, -1);
-	jlgr_fill_image_draw(window);
+	la_gui_bg(window, window->textures.backdrop);
 
 	//Draw files
 	for(i = 0; i < cl_list_count(la_fileviewer->filelist); i++) {
@@ -310,7 +310,7 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 				la_fileviewer->dirname,
 				(char*)la_fileviewer->promptstring->data);
 			name[strlen(name) - 1] = '\0';
-			la_file_save(window->jl, la_fileviewer->newfiledata,
+			la_file_save(la_fileviewer->newfiledata,
 				name, la_fileviewer->newfilesize);
 			la_file_user_select_open_dir__(la_fileviewer->dirname);
 			la_fileviewer->prompt = 0;
@@ -323,7 +323,7 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 //			(la_v3_t) { .02, la_ro_ar(window) - .02, 0. },
 //			{ window->textures.icon, 0,
 //				window->fontcolor, .02});
-//		la_input_do(window, JL_INPUT_SELECT, la_file_user_select_do__, NULL);
+//		la_input_do(window, LA_INPUT_SELECT, la_file_user_select_do__, NULL);
 //	}
 }
 

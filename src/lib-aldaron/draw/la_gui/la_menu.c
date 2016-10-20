@@ -25,7 +25,7 @@ typedef enum{
 
 void la_draw_resize(la_window_t *, uint32_t, uint32_t);
 
-static inline void jlgr_menubar_shadow__(la_menu_t* menu) {
+static inline void la_menu_shadow__(la_menu_t* menu) {
 	// Clear Texture.
 	la_window_clear(0.f, 0.f, 0.f, 0.f);
 	// Draw Shadows.
@@ -44,10 +44,10 @@ static inline void jlgr_menubar_shadow__(la_menu_t* menu) {
 }
 
 // Run whenever a redraw is needed for an icon.
-static void jlgr_menubar_draw_(la_menu_t* menu) {
+static void la_menu_draw__(la_menu_t* menu) {
 	if(menu->redraw == MENU_REDRAW_ALL) {
 		// If needed, draw shadow.
-		jlgr_menubar_shadow__(menu);
+		la_menu_shadow__(menu);
 	}else if(menu->redraw != MENU_REDRAW_NONE) {
 		// Redraw only the selected icon.
 		if(menu->redrawfn[menu->redraw])
@@ -77,10 +77,10 @@ void la_menu_init(la_menu_t* menu, la_window_t* window) {
 	// Make the menubar.
 	la_ro_rect(window, &menu->menubar, 1.f, .11f);
 
-	la_ro_pr(menu, window, &menu->menubar, (la_fn_t) jlgr_menubar_draw_);
+	la_ro_pr(menu, window, &menu->menubar, (la_fn_t) la_menu_draw__);
 }
 
-static void jlgr_menubar_text__(la_menu_t* menu, float* color, float y,
+static void la_menu_text__(la_menu_t* menu, float* color, float y,
 	const char* text)
 {
 	la_text(menu->window,
@@ -90,11 +90,11 @@ static void jlgr_menubar_text__(la_menu_t* menu, float* color, float y,
 		color[0], color[1], color[2], color[3], text);
 }
 
-static void jlgr_menu_flip_draw__(la_menu_t* menu) {
+static void la_menu_flip_draw__(la_menu_t* menu) {
 	la_menu_drawicon(menu, menu->window->textures.icon, LA_MENU_ID_FLIP_IMAGE);
 }
 
-static void jlgr_menu_flip_press__(la_menu_t* menu) {
+static void la_menu_flip_press__(la_menu_t* menu) {
 	if(!menu->window->input.mouse.h && !menu->window->input.touch.h) return;
 	if(!menu->window->input.mouse.p && !menu->window->input.touch.p) return;
 //
@@ -107,7 +107,7 @@ static void jlgr_menu_flip_press__(la_menu_t* menu) {
 		secondary);
 	la_safe_set_pointer(&menu->window->protected.functions.secondary,
 		primary);
-//	jlgr_notify(menu->window, GMessage[menu->window->sg.cs]);
+//	la_notify(menu->window, GMessage[menu->window->sg.cs]);
 }
 
 static void la_menu_name_drawa__(la_menu_t* menu) {
@@ -126,7 +126,7 @@ static void la_menu_name_drawc__(la_menu_t* menu) {
 	la_text(menu->window, LA_PXSIZE("0.04") LA_PXMOVE("%f", "0.055") "%s", offset, menu->window->wm.windowTitle[1]);
 }
 
-static void jlgr_menu_slow_draw__(la_menu_t* menu) {
+static void la_menu_slow_draw__(la_menu_t* menu) {
 	float color[] = { .5, .5, 1., 1. };
 //	char formated[80];
 
@@ -134,11 +134,11 @@ static void jlgr_menu_slow_draw__(la_menu_t* menu) {
 	la_menu_drawicon(menu, menu->window->textures.icon,
 		/*menu->window->sg.on_time?*/LA_MENU_ID_GOOD_IMAGE/*:LA_MENU_ID_SLOW_IMAGE*/);
 	// Report the seconds that passed.
-	jlgr_menubar_text__(menu, color, 0., "DRAW");
-	jlgr_menubar_text__(menu, color, .05, "MAIN");
+	la_menu_text__(menu, color, 0., "DRAW");
+	la_menu_text__(menu, color, .05, "MAIN");
 }
 
-static void jlgr_menu_slow_loop__(la_menu_t* menu) {
+static void la_menu_slow_loop__(la_menu_t* menu) {
 	menu->redraw = menu->cursor;
 }
 
@@ -147,8 +147,7 @@ static void jlgr_menu_slow_loop__(la_menu_t* menu) {
 //
 
 /**
- * Draw the menu bar.  Should be paired with jlgr_menu_loop().
- * @param jlgr: The library context
+ * Draw the menu bar.  Should be paired with la_menu_loop().
  * @param resize: Is window is being resized?
 **/
 void la_menu_draw(la_menu_t* menu, uint8_t resize) {
@@ -157,7 +156,7 @@ void la_menu_draw(la_menu_t* menu, uint8_t resize) {
 	// Pre-Render
 	if(menu->redraw != MENU_REDRAW_NONE) {
 		la_ro_pr(menu, menu->window, &menu->menubar, (la_fn_t)
-			jlgr_menubar_draw_);
+			la_menu_draw__);
 	}
 	// Draw Pre-Rendered
 	la_ro_draw(&menu->menubar);
@@ -165,7 +164,6 @@ void la_menu_draw(la_menu_t* menu, uint8_t resize) {
 
 /**
  * Check for menubar input.  Should be paired with la_menu_draw().
- * @param jlgr: The library context
 **/
 void la_menu_loop(la_menu_t* menu) {
 	const float mouse_x = la_safe_get_float(&menu->window->mouse_x);
@@ -195,7 +193,6 @@ void la_menu_dont(la_menu_t* menu) { }
 /**
  * Add an icon to the menubar
  *
- * @param jlgr: the libary context
  * @param inputfn: The function to run when the icon is / isn't pressed.
  * @param rdr: the function to run when redraw is called.
 **/
@@ -210,23 +207,20 @@ void la_menu_addicon(la_menu_t* menu, la_menu_fn_t inputfn, la_menu_fn_t rdr) {
 
 /**
  * Add the flip screen icon to the menubar.
- * @param jlgr: the libary context
 **/
 void la_menu_addicon_flip(la_menu_t* menu) {
-	la_menu_addicon(menu, jlgr_menu_flip_press__, jlgr_menu_flip_draw__);	
+	la_menu_addicon(menu, la_menu_flip_press__, la_menu_flip_draw__);	
 }
 
 /**
  * Add slowness detector to the menubar.
- * @param jlgr: the libary context
 **/
 void la_menu_addicon_slow(la_menu_t* menu) {
-	la_menu_addicon(menu, jlgr_menu_slow_loop__, jlgr_menu_slow_draw__);
+	la_menu_addicon(menu, la_menu_slow_loop__, la_menu_slow_draw__);
 }
 
 /**
  * Add program title to the menubar.
- * @param jlgr: the libary context
 **/
 void la_menu_addicon_name(la_menu_t* menu) {
 	int i;

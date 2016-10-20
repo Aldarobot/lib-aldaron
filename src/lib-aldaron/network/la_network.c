@@ -12,7 +12,6 @@
 
 /**
  * Initialize Lib-Aldaron-Comm
- * @param jl: The library context.
  * @param sockets: Number of sockets to allocate.
 **/
 aldc_t* aldc_init(uint8_t sockets) {
@@ -52,7 +51,6 @@ void aldc_tcp(aldc_t* aldc, aldc_tcp_socket_t* socket, const char* hostname,
 
 /**
  * Open a udp client connection
- * @param jl: The library context.
  * @param socket: Pointer to uninit'd socket variable.
  * @param port: Port to connect to.
 **/

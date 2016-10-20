@@ -102,11 +102,6 @@ typedef struct {
 
 	struct {
 		struct {
-			safe_float_t timeTilVanish;
-			safe_string_t message;
-		} notification;
-
-		struct {
 			safe_pointer_t fn;
 			safe_pointer_t resize;
 			safe_pointer_t primary;
@@ -156,17 +151,11 @@ typedef struct {
 			uint16_t t;
 			uint8_t c;
 		}msge;
-		struct{
-			la_buffer_t* string;
-			float counter;
-			uint8_t do_it;
-			uint8_t cursor;
-		}textbox;
 	}gui;
 
 	// Window Management
 	struct {
-	#if JL_PLAT == JL_PLAT_COMPUTER
+	#if defined(LA_COMPUTER)
 		uint8_t fullscreen;
 
 		SDL_Window* window;
@@ -180,8 +169,8 @@ typedef struct {
 	}wm;
 
 	struct {
-		uint32_t font; // JL_Lib font
-		uint32_t logo; // JL_Lib Loading Logo
+		uint32_t font; // Lib Aldaron Default font
+		uint32_t logo; // Lib Aldaron Loading Logo
 		uint32_t game; // Game Graphics
 		uint32_t icon; // Icons
 		uint32_t cursor;

@@ -6,8 +6,6 @@
 
 #include <SDL_thread.h>
 
-#define JL_THREAD_MUTEX_UNLOCKED 255
-
 const char* la_thread_new(la_thread_t* thread_out, la_thread_fn_t fn,
 	const char* name, void* data)
 {

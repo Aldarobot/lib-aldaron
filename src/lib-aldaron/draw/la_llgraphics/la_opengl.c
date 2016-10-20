@@ -9,13 +9,13 @@
 #include <la_string.h>
 
 #include "la_draw.h"
-#include "jlgr_opengl_private.h"
+#include "la_opengl__.h"
 #include "la_thread.h"
 #include "la_memory.h"
 
 extern float la_banner_size;
 
-const char *JL_SHADER_CLR_FRAG = 
+const char *LA_SHADER_CLR_FRAG = 
 	GLSL_HEAD
 	"varying vec4 vcolor;\n"
 	"\n"
@@ -23,7 +23,7 @@ const char *JL_SHADER_CLR_FRAG =
 	"	gl_FragColor = vec4(vcolor.rgba);\n"
 	"}";
 
-const char *JL_SHADER_CLR_VERT = 
+const char *LA_SHADER_CLR_VERT = 
 	GLSL_HEAD
 	"uniform mat4 scale_object;\n"
 	"uniform mat4 rotate_object;\n"
@@ -43,7 +43,7 @@ const char *JL_SHADER_CLR_VERT =
 	"		position;\n"
 	"}";
 
-const char *JL_SHADER_TEX_FRAG = 
+const char *LA_SHADER_TEX_FRAG = 
 	GLSL_HEAD
 	"uniform sampler2D texture;\n"
 	"\n"
@@ -53,7 +53,7 @@ const char *JL_SHADER_TEX_FRAG =
 	"	gl_FragColor = texture2D(texture, texcoord);\n"
 	"}";
 
-const char *JL_SHADER_TEX_VERT = 
+const char *LA_SHADER_TEX_VERT = 
 	GLSL_HEAD
 	"uniform mat4 scale_object;\n"
 	"uniform mat4 rotate_object;\n"
@@ -73,7 +73,7 @@ const char *JL_SHADER_TEX_VERT =
 	"		position;\n"
 	"}";
 
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 static void la_opengl_error__(int data, const char* fname) {
 	GLenum err= glGetError();
 	if(err == GL_NO_ERROR) return;
@@ -101,14 +101,14 @@ static void la_opengl_error__(int data, const char* fname) {
 
 static inline void la_opengl_enable(int32_t what) {
 	glEnable(what);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(0, "glEnable()");
 #endif
 }
 
 static inline void la_opengl_disable(int32_t what) {
 	glDisable(what);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(0, "glDisable()");
 #endif
 }
@@ -116,7 +116,7 @@ static inline void la_opengl_disable(int32_t what) {
 static inline uint32_t la_opengl_genbuffer(void) {
 	uint32_t buffer;
 	glGenBuffers(1, &buffer);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(buffer, "glGenBuffers");
 	if(buffer == 0) {
 		la_panic("buffer is made wrongly on thread #%X!",
@@ -128,35 +128,35 @@ static inline uint32_t la_opengl_genbuffer(void) {
 
 static inline void la_opengl_freebuffer(uint32_t buffer) {
 	glDeleteBuffers(1, &buffer);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(0, "buffer free");
 #endif
 }
 
 static inline void la_opengl_bindbuffer(uint32_t buffer) {
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(buffer, "bind buffer");
 #endif
 }
 
 static inline void la_opengl_bufferdata(const void* data, uint32_t size) {
 	glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(size, "buffer data");
 #endif
 }
 
 static inline void la_opengl_attachshader(uint32_t program, uint32_t shader) {
 	glAttachShader(program, shader);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(0, "glAttachShader()");
 #endif
 }
 
 static inline uint32_t la_opengl_makeprogram(void) {
 	uint32_t program = glCreateProgram();
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(0,"glCreateProgram");
 	if (!program) {
 		la_panic("Failed to load program");
@@ -167,7 +167,7 @@ static inline uint32_t la_opengl_makeprogram(void) {
 
 static inline uint32_t la_opengl_makeshader(uint32_t type) {
 	uint32_t shader = glCreateShader(type);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(shader, "Couldn't create shader");
 	if(!shader)
 		la_panic("Couldn't create shader: opengl context not made?");
@@ -177,26 +177,26 @@ static inline uint32_t la_opengl_makeshader(uint32_t type) {
 
 static inline void la_opengl_shader_setsource(uint32_t shader, const char* src){
 	glShaderSource(shader, 1, &src, NULL);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(shader, "glShaderSource");
 #endif
 }
 
 static inline void la_opengl_shader_compile(uint32_t shader) {
 	glCompileShader(shader);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(shader, "glCompileShader");
 #endif
 }
 
 static inline void la_opengl_program_link(uint32_t program) {
 	glLinkProgram(program);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(program, "glLinkProgram");
 #endif
 }
 
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 
 static int32_t la_opengl_shader_getiv(uint32_t shader, uint32_t get_what) {
 	int32_t value;
@@ -247,7 +247,7 @@ static uint32_t la_opengl_texture_make__(void) {
 	uint32_t tex;
 
 	glGenTextures(1, &tex);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(0, "glGenTextures");
 	if(!tex) la_panic("glGenTextures => 0");
 #endif
@@ -259,7 +259,7 @@ static void la_opengl_texture_2d__(uint8_t* px,uint32_t w,uint32_t h,uint8_t a){
 
 	glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format,
 		GL_UNSIGNED_BYTE, px);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(w, "glTexImage2D");
 #endif
 }
@@ -267,28 +267,28 @@ static void la_opengl_texture_2d__(uint8_t* px,uint32_t w,uint32_t h,uint8_t a){
 // TODO: ADD PARAM
 static inline void la_opengl_texture_param__(uint32_t filter) {
 	glTexParameteri(GL_TEXTURE_2D, filter, GL_NEAREST);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(filter, "glTexParameteri");
 #endif
 }
 
 static inline void la_opengl_texture_bind__(uint32_t tex) {
 	glBindTexture(GL_TEXTURE_2D, tex);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(tex, "la_opengl_texture_bind__: glBindTexture");
 #endif
 }
 
 static inline void la_opengl_texture_free__(uint32_t tex) {
 	glDeleteTextures(1, &tex);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(0, "glDeleteTextures");
 #endif
 }
 
 static inline int32_t la_opengl_uniform__(GLuint prg, const char *var) {
 	int32_t a = glGetUniformLocation(prg, var);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	if(a == -1) la_panic("opengl: bad name; is: %s", var);
 	la_opengl_error__(a, "glGetUniformLocation");
 #endif
@@ -297,39 +297,39 @@ static inline int32_t la_opengl_uniform__(GLuint prg, const char *var) {
 
 static inline int32_t la_opengl_attribute__(GLuint prg, const char *var) {
 	int32_t a = glGetAttribLocation(prg, var);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	if(a == -1) {
 		la_print("for name \"%s\":", var);
 		la_panic("attribute name is either reserved or non-existant");
 	}
 #endif
 	glEnableVertexAttribArray(a);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(a, "glEnableVertexAttribArray");
 #endif
 	return a;
 }
 
 static inline void la_opengl_use_program__(GLuint prg) {
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	if(!prg) la_panic("shader program uninit'd!");
 #endif
 	glUseProgram(prg);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(prg, "glUseProgram");
 #endif
 }
 
 static inline void la_opengl_uniform_1int__(int32_t uv, int32_t v1) {
 	glUniform1i(uv, v1);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(uv, "la_opengl_uniform_1int__");
 #endif
 }
 
 static inline void la_opengl_uniform_2int__(int32_t uv, int32_t v1, int32_t v2){
 	glUniform2i(uv, v1, v2);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(uv, "la_opengl_uniform_2int__");
 #endif
 }
@@ -338,7 +338,7 @@ static inline void la_opengl_uniform_3int__(int32_t uv, int32_t v1, int32_t v2,
 	int32_t v3)
 {
 	glUniform3i(uv, v1, v2, v3);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(uv, "la_opengl_uniform_3int__");
 #endif
 }
@@ -347,14 +347,14 @@ static inline void la_opengl_uniform_4int__(int32_t uv, int32_t v1, int32_t v2,
 	int32_t v3, int32_t v4)
 {
 	glUniform4i(uv, v1, v2, v3, v4);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(uv, "la_opengl_uniform_4int__");
 #endif
 }
 
 static inline void la_opengl_uniform_1float__(int32_t uv, float v1) {
 	glUniform1f(uv, v1);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(uv, "la_opengl_uniform_1float__");
 #endif
 }
@@ -363,7 +363,7 @@ static inline void la_opengl_uniform_2float__(int32_t uv, float v1,
 	float v2)
 {
 	glUniform2f(uv, v1, v2);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(uv, "la_opengl_uniform_2float__");
 #endif
 }
@@ -372,7 +372,7 @@ static inline void la_opengl_uniform_3float__(int32_t uv, float v1,
 	float v2, float v3)
 {
 	glUniform3f(uv, v1, v2, v3);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(uv, "la_opengl_uniform_3float__");
 #endif
 }
@@ -381,21 +381,21 @@ static inline void la_opengl_uniform_4float__(int32_t uv, float v1,
 	float v2, float v3, float v4)
 {
 	glUniform4f(uv, v1, v2, v3, v4);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(uv, "la_opengl_uniform_4float__");
 #endif
 }
 
 static inline void la_opengl_attribute_pointer(int32_t attrib,uint8_t elementc){
 	glVertexAttribPointer(attrib, elementc, GL_FLOAT, GL_FALSE, 0, 0);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(attrib, "la_opengl_attribute_pointer");
 #endif
 }
 
 static inline void la_opengl_draw_arrays(uint32_t mode, uint32_t count) {
 	glDrawArrays(mode, 0, count);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(0,"glDrawArrays");
 #endif
 }
@@ -403,14 +403,14 @@ static inline void la_opengl_draw_arrays(uint32_t mode, uint32_t count) {
 static inline void la_opengl_blend_default__(void) {
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA,
 		GL_DST_ALPHA);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(0, "glBlendFuncSeparate");
 #endif
 }
 
 static void la_opengl_viewport(uint32_t w, uint32_t h) {
 	glViewport(0, 0, w, h);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(w, "glViewport");
 #endif
 }
@@ -419,7 +419,7 @@ static inline uint32_t la_opengl_gen_framebuffer(void) {
 	uint32_t fb;
 
 	glGenFramebuffers(1, &fb);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	if(!fb) la_panic("la_opengl_gen_framebuffer: GL FB = 0");
 	la_opengl_error__(fb, "la_opengl_gen_framebuffer");
 #endif
@@ -428,7 +428,7 @@ static inline uint32_t la_opengl_gen_framebuffer(void) {
 
 static inline void la_opengl_framebuffer_bind(uint32_t framebuffer) {
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(framebuffer, "glBindFramebuffer");
 #endif
 }
@@ -436,25 +436,25 @@ static inline void la_opengl_framebuffer_bind(uint32_t framebuffer) {
 static inline void la_opengl_framebuffer_tx2d(uint32_t texture) {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 		GL_TEXTURE_2D, texture, 0);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(texture, "glFramebufferTexture2D");
 #endif
 }
 
 static inline void la_opengl_framebuffer_free(uint32_t fb) {
 	glDeleteFramebuffers(1, &fb);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(fb, "glDeleteFramebuffers");
 #endif
 }
 
 static inline void la_opengl_clear(float r, float g, float b, float a){
 	glClearColor(r, g, b, a);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(a, "la_opengl_clear/glClearColor");
 #endif
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(a, "la_opengl_clear/glClear");
 #endif
 }
@@ -473,7 +473,7 @@ static uint32_t la_llgraphics_load_shader__(GLenum type, const char* src) {
 
 	la_opengl_shader_setsource(shader, src);
 	la_opengl_shader_compile(shader);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	if (!la_opengl_shader_getiv(shader, GL_COMPILE_STATUS)) {
 		int32_t infoLen =
 			la_opengl_shader_getiv(shader, GL_INFO_LOG_LENGTH);
@@ -501,7 +501,7 @@ la_llgraphics_shader_new__(const char* vert, const char* frag) {
 	la_opengl_attachshader(program, vertexShader);
 	la_opengl_attachshader(program, fragmentShader);
 	la_opengl_program_link(program);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_program_validate(program);
 	if(la_opengl_program_getiv(program, GL_LINK_STATUS) != GL_TRUE) {
 		GLint bufLength =
@@ -544,7 +544,7 @@ static int32_t la_llgraphics_uniform__(la_window_t* window, la_shader_t* glsl,
 
 static inline void la_llgraphics_uniform_matrix(int32_t uniform, float* matrix){
 	glUniformMatrix4fv(uniform, 1, 0, matrix);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(uniform, "matrix_object - scale");
 #endif
 }
@@ -565,7 +565,7 @@ void la_llgraphics_buffer_free(uint32_t buffer) {
 }
 
 void la_llgraphics_texture_bind(uint32_t tex) {
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	if(tex == 0)
 		la_panic("la_llgraphics_texture_bind(): tex = 0");
 #endif
@@ -661,10 +661,9 @@ void la_llgraphics_push_vertices(const float *xyzw, uint32_t vertices,
 // TODO: MOVE
 /**
  * Create a new texture object.
- * @param jlgr: The library context.
 **/
-uint32_t la_texture_new(la_window_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,
-	uint8_t bpp)
+uint32_t la_texture_new(la_window_t* window, uint8_t* pixels, uint16_t w,
+	uint16_t h, uint8_t bpp)
 {
 	uint32_t texture = la_opengl_texture_make__();
 
@@ -678,13 +677,12 @@ uint32_t la_texture_new(la_window_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t
 // TODO: MOVE
 /**
  * Set a texture object.
- * @param jlgr: The library context.
  * @param texture: The texture to modify.
  * @param pixels: The pixels to set the texture to.
  * @param w, h: The dimensions
  * @param bpp: The bytes per pixel.  Must be 3 or 4.
 **/
-void la_texture_set(la_window_t* jlgr, uint32_t texture, uint8_t* pixels,
+void la_texture_set(la_window_t* window, uint32_t texture, uint8_t* pixels,
 	uint16_t w, uint16_t h, uint8_t bpp)
 {
 	GLenum format = GL_RGBA;
@@ -696,7 +694,7 @@ void la_texture_set(la_window_t* jlgr, uint32_t texture, uint8_t* pixels,
 	// Copy to texture.
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, format, GL_UNSIGNED_BYTE,
 		pixels);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	la_opengl_error__(0, "glTexSubImage2D");
 #endif
 }
@@ -773,7 +771,7 @@ void la_llgraphics_shader_bind(la_shader_t* sh) {
 void la_llgraphics_shader_make(la_shader_t* glsl, const char* vert,
 	const char* frag, uint8_t has_tex)
 {
-	const char* vertShader = vert ? vert : JL_SHADER_TEX_VERT;
+	const char* vertShader = vert ? vert : LA_SHADER_TEX_VERT;
 	// Program
 	glsl->program = la_llgraphics_shader_new__(vertShader, frag);
 	// Matrices
@@ -821,7 +819,7 @@ void la_llgraphics_init__(la_window_t* window) {
 	// Create shaders and set up attribute/uniform variable communication
 	la_print("Making Shader: texture");
 	la_llgraphics_shader_make(&window->gl.prg.texture, NULL,
-		JL_SHADER_TEX_FRAG, 1);
+		LA_SHADER_TEX_FRAG, 1);
 	// Default GL Texture Coordinate Buffer
 	la_llgraphics_buffer_set_(&window->gl.default_tc, DEFAULT_TC, 8);
 	la_llgraphics_buffer_set_(&window->gl.upsidedown_tc, UPSIDEDOWN_TC, 8);
@@ -830,8 +828,8 @@ void la_llgraphics_init__(la_window_t* window) {
 
 void la_llgraphics_initshader_color__(la_window_t* window) {
 	la_print("Making Shader: color");
-	la_llgraphics_shader_make(&window->gl.prg.color, JL_SHADER_CLR_VERT,
-		JL_SHADER_CLR_FRAG, 0);
+	la_llgraphics_shader_make(&window->gl.prg.color, LA_SHADER_CLR_VERT,
+		LA_SHADER_CLR_FRAG, 0);
 }
 
 #endif

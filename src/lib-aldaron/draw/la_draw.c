@@ -11,6 +11,7 @@
 #include <la_thread.h>
 #include <la_window.h>
 #include <la_ro.h>
+#include <la_gui.h>
 
 typedef struct {
 	void* context;
@@ -22,35 +23,35 @@ typedef struct {
 extern SDL_atomic_t la_rmcexit;
 SDL_atomic_t la_rmcwait;
 
-void la_window_update_size(la_window_t* window);
-void jlgr_mouse_resize__(la_window_t* jlgr);
-void la_window_resize__(la_window_t* window, uint32_t w, uint32_t h);
+void la_window_update_size(la_window_t*);
+void la_mouse_resize__(la_window_t*);
+void la_window_resize__(la_window_t*, uint32_t, uint32_t);
 
-void la_window_draw__(void* context, la_window_t* window);
+void la_window_draw__(void*, la_window_t*);
 
 void* aldaron_data(void);
 uint64_t aldaron_size(void);
 
-void la_llgraphics_initshader_color__(la_window_t* window);
-void la_llgraphics_init__(la_window_t* window);
-void la_effects_init__(la_window_t* jlgr);
-void la_window_init__(la_window_t* window);
+void la_llgraphics_initshader_color__(la_window_t*);
+void la_llgraphics_init__(la_window_t*);
+void la_effects_init__(la_window_t*);
+void la_window_init__(la_window_t*);
 
-void la_window_update__(la_window_t* window);
+void la_window_update__(la_window_t*);
 
-static void jlgr_thread_programsresize(void* context, la_window_t* window) {
+static void la_draw_programsresize__(void* context, la_window_t* window) {
 	((la_draw_fn_t)la_safe_get_pointer(&window->protected.functions.resize))
 		(context, window);
 }
 
 static void
-jlgr_thread_resize(void* context, la_window_t* window, uint32_t w, uint32_t h) {
+la_draw_resize__(void* context, la_window_t* window, uint32_t w, uint32_t h) {
 	la_print("Resizing to %dx%d....", w, h);
 	la_window_resize__(window, w, h);
 	la_print("User's resize....");
-	jlgr_thread_programsresize(context, window);
+	la_draw_programsresize__(context, window);
 	la_print("Resizing the mouse....");
-	jlgr_mouse_resize__(window);
+	la_mouse_resize__(window);
 	la_print("Resized.");
 }
 
@@ -61,13 +62,13 @@ static inline void la_draw_windowresize__(void* context, la_window_t* window) {
 	la_window_update_size(window);
 	if(w == 0) w = la_window_width(window);
 	if(h == 0) h = la_window_height(window);
-	jlgr_thread_resize(context, window, w, h);
+	la_draw_resize__(context, window, w, h);
 }
 
 #include <SDL.h>
 
 static void la_draw_loader(void* context, la_window_t* window) {
-	jlgr_draw_bg(window, window->textures.backdrop, 0, 0, -1);
+	la_gui_bg(window, window->textures.backdrop);
 	la_ro_image_rect(window, &window->gl.temp_vo, window->textures.logo, 1.,
 		90./251.);
 	la_ro_move(&window->gl.temp_vo, (la_v3_t) {
@@ -80,7 +81,7 @@ static void la_draw_loader_f(void* context, la_window_t* window) {
 	la_print("User's Init....");
 	((la_draw_fn_t)la_safe_get_pointer(&window->protected.functions.fn))(
 		context, window);
-	jlgr_thread_programsresize(context, window);
+	la_draw_programsresize__(context, window);
 	SDL_AtomicSet(&la_rmcwait, 0);
 	la_draw_loader(context, window);
 }
@@ -120,7 +121,7 @@ static void la_draw_loader_b(void* context, la_window_t* window) {
 static void la_draw_loader_a(void* context, la_window_t* window) {
 	window->textures.backdrop = la_texture_fpk(window, &window->packagedata,
 		"/backdrop.png");
-	jlgr_draw_bg(window, window->textures.backdrop, 0, 0, -1);
+	la_gui_bg(window, window->textures.backdrop);
 	la_draw_fnchange(window, la_draw_loader_b, la_draw_dont, la_draw_dont);
 }
 
@@ -148,18 +149,18 @@ la_draw_init__(void* context, la_window_t* window, const char* name) {
 
 void la_draw_dont(void* context, la_window_t* window) { return; }
 
-void jlgr_thead_check_resize(void* context, la_window_t* window) {
+void la_draw_checkresize__(void* context, la_window_t* window) {
 	uint8_t should_resize =
 		la_safe_get_uint8(&window->protected.needs_resize);
 	la_safe_set_uint8(&window->protected.needs_resize, 0);
 
-	if(should_resize == 1) jlgr_thread_programsresize(context, window);
+	if(should_resize == 1) la_draw_programsresize__(context, window);
 	if(should_resize == 2) la_draw_windowresize__(context, window);
 }
 
 void la_window_loop__(void* context, la_window_t* window) {
 	// Check for resize
-	jlgr_thead_check_resize(context, window);
+	la_draw_checkresize__(context, window);
 	// Deselect any pre-renderer.
 	window->gl.cp = NULL;
 	//Redraw screen.
@@ -224,7 +225,6 @@ void la_window_start__(void* context, la_window_t* window, la_draw_fn_t fn_,
 
 /**
  * Set the functions to be called when the window redraws.
- * @param jlgr: The jlgr library context.
  * @param onescreen: The function to redraw the screen when there's only 1 
  *  screen.
  * @param upscreen: The function to redraw the upper or primary display.
@@ -242,7 +242,6 @@ void la_draw_fnchange(la_window_t* window, la_draw_fn_t primary,
 
 /**
  * Resize the window.
- * @param jlgr: The library context.
 **/
 void la_draw_resize(la_window_t* window, uint32_t w, uint32_t h) {
 	la_safe_set_uint32(&window->protected.set_width, w);

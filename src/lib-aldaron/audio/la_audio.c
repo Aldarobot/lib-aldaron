@@ -27,7 +27,7 @@ static inline int32_t la_audio_sec2ms__(float sec) {
  * Load audio from data pointed to by "data" of length "dataSize" into "audio",
  * set volume of audio to "volumeChange"
  */
-static inline void la_audio_load2(la_audio_t* jlau, la_sound_t* audio,
+static inline void la_audio_load2(la_sound_t* audio,
 	uint8_t volumeChange, const void *data, uint32_t dataSize,
 	uint8_t isMusic)
 {
@@ -56,12 +56,12 @@ static inline void la_audio_load2(la_audio_t* jlau, la_sound_t* audio,
 
 /** 
  * Fade in audio.
- * @param jlau: The jlau library context.
+ * @param laa: The laa library context.
  * @param audio: The audio to play.
  * @param in: Seconds of fade-in.
  * @param vec: Where sound is coming from, or NULL for no position effect.
 */
-void la_audio_play(la_audio_t* jlau, la_sound_t* audio, float in, la_v3_t* vec) {
+void la_audio_play(la_audio_t* laa, la_sound_t* audio, float in, la_v3_t* vec) {
 	int32_t ms = la_audio_sec2ms__(in);
 
 	if(audio->channel == LA_AUDIO_CHANNEL_MUSIC) {
@@ -75,13 +75,13 @@ void la_audio_play(la_audio_t* jlau, la_sound_t* audio, float in, la_v3_t* vec) 
 	}else{
 #ifdef LA_ANDROID
 #else
-		JLAU_PLAY_MIX_PLAY_CHANNEL:
+		LA_AUDIO_PLAY_MIX_PLAY_CHANNEL:
 		if((audio->channel = Mix_FadeInChannel(-1, audio->audio, 0,
 			ms + 1)) == -1)
 		{
-			jlau->num_channels++;
-			Mix_ReserveChannels(jlau->num_channels);
-			goto JLAU_PLAY_MIX_PLAY_CHANNEL;
+			laa->num_channels++;
+			Mix_ReserveChannels(laa->num_channels);
+			goto LA_AUDIO_PLAY_MIX_PLAY_CHANNEL;
 		}
 		// Calculate Position
 		if(vec == NULL) {
@@ -100,12 +100,12 @@ void la_audio_play(la_audio_t* jlau, la_sound_t* audio, float in, la_v3_t* vec) 
 	}
 }
 
-void la_audio_lock(la_audio_t* jlau, la_sound_t* audio, float in, la_v3_t* vec) {
-	if(audio->channel != LA_AUDIO_CHANNEL_LOCK) la_audio_play(jlau, audio, in, vec);
+void la_audio_lock(la_audio_t* laa, la_sound_t* audio, float in, la_v3_t* vec) {
+	if(audio->channel != LA_AUDIO_CHANNEL_LOCK) la_audio_play(laa, audio, in, vec);
 	audio->channel = LA_AUDIO_CHANNEL_LOCK;
 }
 
-void la_audio_pause(la_audio_t* jlau, la_sound_t* audio) {
+void la_audio_pause(la_audio_t* laa, la_sound_t* audio) {
 #ifdef LA_ANDROID
 #else
 	if(audio->channel == LA_AUDIO_CHANNEL_MUSIC)
@@ -115,7 +115,7 @@ void la_audio_pause(la_audio_t* jlau, la_sound_t* audio) {
 #endif
 }
 
-void la_audio_resume(la_audio_t* jlau, la_sound_t* audio) {
+void la_audio_resume(la_audio_t* laa, la_sound_t* audio) {
 #ifdef LA_ANDROID
 #else
 	if(audio->channel == LA_AUDIO_CHANNEL_MUSIC)
@@ -127,7 +127,7 @@ void la_audio_resume(la_audio_t* jlau, la_sound_t* audio) {
 
 /**
  * Wait on an audio track to stop.  If it is stopped, fade in a new one.
- * @param jlau: The jlau library context.
+ * @param laa: The laa library context.
  * @param w_audio: The audio to wait on, NULL to wait on music to finish.
  * @param n_audio: The audio to play.
  * @param in: Seconds of fade-in.
@@ -135,7 +135,7 @@ void la_audio_resume(la_audio_t* jlau, la_sound_t* audio) {
  * @returns 1: Audio has finished, and new audio is playing
  * @returns 0: Audio is still playing.
 **/
-uint8_t la_audio_wait(la_audio_t* jlau, la_sound_t* w_audio, la_sound_t* n_audio,
+uint8_t la_audio_wait(la_audio_t* laa, la_sound_t* w_audio, la_sound_t* n_audio,
 	float in, la_v3_t* vec)
 {
 #ifdef LA_ANDROID
@@ -144,7 +144,7 @@ uint8_t la_audio_wait(la_audio_t* jlau, la_sound_t* w_audio, la_sound_t* n_audio
 	if(w_audio ? Mix_Playing(w_audio->channel) : Mix_PlayingMusic())
 		return 0;
 #endif
-	la_audio_play(jlau, n_audio, in, vec);
+	la_audio_play(laa, n_audio, in, vec);
 	return 1;
 }
 
@@ -161,13 +161,13 @@ void la_audio_stop(la_sound_t* audio, float out) {
 #endif
 }
 
-void la_audio_load(la_audio_t* jlau, la_sound_t* audio, la_buffer_t* zipdata,
+void la_audio_load(la_audio_t* laa, la_sound_t* audio, la_buffer_t* zipdata,
 	const char* filename, uint8_t music)
 {
 	la_buffer_t aud;
 
 	la_file_loadzip(&aud, zipdata, filename);
-	la_audio_load2(jlau, audio, 255, aud.data, aud.size, music);
+	la_audio_load2(audio, 255, aud.data, aud.size, music);
 }
 
 #endif

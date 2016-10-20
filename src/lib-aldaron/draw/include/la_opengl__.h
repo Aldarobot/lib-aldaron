@@ -2,6 +2,8 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
+// TODO: Move entire file contents into la_opengl.c
+
 #if LA_GLTYPE == LA_GLTYPE_SDL_GL2  // SDL OpenGL 2
 	#include "SDL_opengl.h"
 	#include "SDL_opengl_glext.h"

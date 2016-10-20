@@ -79,16 +79,16 @@ src/lib-aldaron/:
 -prof: build-notify $(FOLDERS) -test2 $(OBJS_PROF) -link
 
 prof: -prof
-	./$(JL_OUT)
+	./$(LA_OUT)
 
 test: -test
-	./$(JL_OUT)
+	./$(LA_OUT)
 
 debug: -test
-	gdb ./$(JL_OUT)
+	gdb ./$(LA_OUT)
 
 release: -release
-	./$(JL_OUT)
+	./$(LA_OUT)
 
 install: -release
 	printf "Installing....\n"
@@ -198,23 +198,17 @@ clean:
 	rm -fr build/bin/ build/objs/ build/test/
 	mkdir -p build/bin/ build/objs/ build/test/
 
-clean-jl-lib:
-	rm -fr src/lib/jl-lib/
-
-update-jl-lib: clean-jl-lib jl-lib
-	# Done!
-
 ################################################################################
 
 $(BUILD_OBJ_PROF)/%.o: %.c $(HEADERS)
 	echo Compiling Build $<....
-	$(CC) $(CFLAGS) -o $@ -c $< $(JL_DEBUG)
+	$(CC) $(CFLAGS) -o $@ -c $< $(LA_DEBUG)
 $(BUILD_OBJ_TEST)/%.o: %.c $(HEADERS)
 	echo Compiling Test $<....
-	$(CC) $(CFLAGS) -o $@ -c $< $(JL_DEBUG)
+	$(CC) $(CFLAGS) -o $@ -c $< $(LA_DEBUG)
 $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 	echo Compiling Release $<....
-	$(CC) $(CFLAGS) -o $@ -c $< $(JL_DEBUG)
+	$(CC) $(CFLAGS) -o $@ -c $< $(LA_DEBUG)
 
 -init-vars:
 	# Build Project
@@ -234,28 +228,28 @@ $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 -test1: -init-vars
 #	$(eval GL_VERSION=-lGL) ## OpenGL
 	$(eval GL_VERSION=-lGLESv2) ## OpenGL ES
-	$(eval JL_DEBUG=-g -DJL_DEBUG)
-	$(eval JL_OUT=build/test.out)
+	$(eval LA_DEBUG=-g -DLA_DEBUG)
+	$(eval LA_OUT=build/test.out)
 	$(eval OBJS=$(OBJS_TEST))
 -test2: -init-vars
 #	$(eval GL_VERSION=-lGL) ## OpenGL
 	$(eval GL_VERSION=-lGLESv2) ## OpenGL ES
-	$(eval JL_DEBUG=-pg -g)
-	$(eval JL_OUT=build/test.out)
+	$(eval LA_DEBUG=-pg -g)
+	$(eval LA_OUT=build/test.out)
 	$(eval OBJS=$(OBJS_TEST))
 -publish: -init-vars
 #	$(eval GL_VERSION=-lGL) ## OpenGL
 	$(eval GL_VERSION=-lGLESv2) ## OpenGL ES
-	$(eval JL_DEBUG=-O3 -Werror)
-	$(eval JL_OUT=build/bin/$(PACKNAME))
+	$(eval LA_DEBUG=-O3 -Werror)
+	$(eval LA_OUT=build/bin/$(PACKNAME))
 	$(eval OBJS=$(OBJS_RELEASE))
 -link:
 	echo Linking....
 	$(CC) $(OBJS) $(LA_HOME)/build/deps.o $(LA_DEPS) \
-		-o $(JL_OUT) $(CFLAGS) \
+		-o $(LA_OUT) $(CFLAGS) \
 		-lm -lz -ldl -lpthread -lstdc++ -ljpeg \
 		$(LINKER_LIBS) $(PLATFORM_CFLAGS) \
-		$(GL_VERSION) $(JL_DEBUG)
+		$(GL_VERSION) $(LA_DEBUG)
 	echo Done! # [ OpenGL Version = $(GL_VERSION) ]
 build/:
 	# Generated Files

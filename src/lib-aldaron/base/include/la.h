@@ -8,20 +8,13 @@
 #include <stdint.h>
 #include "clump.h" // LibClump
 
-//Platform Declarations
-#define JL_PLAT_COMPUTER 0 //PC/MAC
-#define JL_PLAT_PHONE 1 //ANDROID/IPHONE
-#define JL_PLAT_GAME 2 // 3DS
 #if defined(__ANDROID__)
-        #define JL_PLAT JL_PLAT_PHONE
 	#define LA_PHONE
 	#define LA_ANDROID
 #elif defined(__IPHONEOS__)
-        #define JL_PLAT JL_PLAT_PHONE
 	#define LA_PHONE
 	#define LA_PHONE_APPLE
 #else
-        #define JL_PLAT JL_PLAT_COMPUTER
 	#define LA_COMPUTER
 	#define LA_LINUX
 	#define LA_APPLE
@@ -35,12 +28,12 @@
 #define LA_GLTYPE_VULKAN 5 // Use Vulkan
 
 // Platform Capabilities.
-#if JL_PLAT == JL_PLAT_COMPUTER
+#if defined(LA_COMPUTER)
 	// All Linux Platforms
 	#define LA_GLTYPE LA_GLTYPE_SDL_ES2
 	// Windows
 	// #define LA_GLTYPE LA_GLTYPE_SDL_GL2
-#elif JL_PLAT == JL_PLAT_PHONE
+#elif defined(LA_PHONE)
 	#define LA_GLTYPE LA_GLTYPE_SDL_ES2
 #else
 	#error "NO OpenGL support for this platform!"

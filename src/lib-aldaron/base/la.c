@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <la_draw.h>
 
-#if JL_PLAT == JL_PLAT_PHONE
+#if defined(LA_PHONE)
 #include "SDL_system.h"
 #else
 #include "SDL.h"
@@ -23,7 +23,7 @@ void la_time_init__(void);
 void la_window_start__(void*,la_window_t*,la_draw_fn_t,la_fn_t,la_fn_t,
 	const char*);
 
-#if JL_PLAT == JL_PLAT_PHONE
+#if defined(LA_PHONE)
 	#include <jni.h>
 	#include "SDL_log.h"
 
@@ -92,7 +92,6 @@ void la_panic(const char* format, ...) {
 
 /**
  * Do Nothing
- * @param jl: The library's context.
 **/
 void la_dont(void* context) { }
 

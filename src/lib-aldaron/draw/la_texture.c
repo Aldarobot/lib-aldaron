@@ -12,7 +12,7 @@
 #include <la_ro.h>
 #include <la_window.h>
 
-void _jlgr_loopa(la_window_t* jlgr);
+void la_mouse_draw__(la_window_t*);
 
 uint32_t la_texture_ssp__(SDL_Surface* surface, int32_t x, int32_t y) {
 	int32_t bpp = surface->format->BytesPerPixel;
@@ -38,7 +38,7 @@ uint32_t la_texture_ssp__(SDL_Surface* surface, int32_t x, int32_t y) {
 	return color;
 }
 
-SDL_Surface* la_window_makesurface(la_window_t* jlgr, la_buffer_t* data) {
+SDL_Surface* la_window_makesurface(la_window_t* window, la_buffer_t* data) {
 	SDL_Surface *image;
 	SDL_RWops *rw;
 
@@ -95,7 +95,6 @@ static inline uint32_t la_texture_fpk__(la_window_t* window,la_buffer_t* data) {
 
 /**
  * Load an image from a zipfile.
- * @param jlgr: The library context
  * @param zipdata: data for a zip file.
  * @param filename: Name of the image file in the package.
  * @returns: Texture object.
@@ -142,8 +141,10 @@ static void la_window_draw_flipped(la_window_draw_t* param) {
 	la_window_clear(0., .5, .66, 1.);
 	// Run the screen's redraw function
 	redraw(param->context, param->window);
-	// Draw Menu Bar & Mouse
-	_jlgr_loopa(param->window);
+	// Draw Mouse
+	#if defined(LA_COMPUTER)
+	la_mouse_draw__(param->window);
+	#endif
 }
 
 void la_window_draw__(void* context, la_window_t* window) {

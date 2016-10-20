@@ -11,8 +11,6 @@
 #include <la_memory.h>
 #include <la_llgraphics.h>
 
-#define JL_WM_FULLSCREEN SDL_WINDOW_FULLSCREEN_DESKTOP
-
 extern float la_banner_size;
 
 void la_draw_resize(la_window_t *, uint32_t, uint32_t);
@@ -22,13 +20,13 @@ static inline void la_window_killedit__(const char *str) {
 	la_panic(SDL_GetError());
 }
 
-#if JL_PLAT == JL_PLAT_COMPUTER
+#if defined(LA_COMPUTER)
 static void la_window_fscreen__(la_window_t* window, uint8_t a) {
 	// Make sure the fullscreen value is either a 1 or a 0.
 	window->wm.fullscreen = !!a;
 	// Actually set whether fullscreen or not.
 	if(SDL_SetWindowFullscreen(window->wm.window,
-	 window->wm.fullscreen ? JL_WM_FULLSCREEN : 0))
+	 window->wm.fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0))
 		la_window_killedit__("SDL_SetWindowFullscreen");
 	la_print("Switched fullscreen on/off");
 	// Resize window
@@ -37,13 +35,13 @@ static void la_window_fscreen__(la_window_t* window, uint8_t a) {
 #endif
 
 void la_window_fullscreen(la_window_t* window, uint8_t is) {
-#if JL_PLAT == JL_PLAT_COMPUTER
+#if defined(LA_COMPUTER)
 	la_window_fscreen__(window, is);
 #endif
 }
 
 void la_window_fullscreen_toggle(la_window_t* window) {
-#if JL_PLAT == JL_PLAT_COMPUTER
+#if defined(LA_COMPUTER)
 	la_window_fscreen__(window, !window->wm.fullscreen);
 #endif
 }
@@ -89,7 +87,7 @@ static inline SDL_Window* la_window_make__(void) {
 	SDL_Window* rtn = SDL_CreateWindow(
 		"Initializing....", SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED, 640, 360, flags);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	if(rtn == NULL) la_window_killedit__("SDL_CreateWindow");
 #endif
 	SDL_ShowCursor(SDL_DISABLE);
@@ -111,7 +109,7 @@ void la_window_update_size(la_window_t* window) {
 
 //This is the code that actually creates the window by accessing SDL
 static inline void la_window_create__(la_window_t* window) {
-#if JL_PLAT == JL_PLAT_COMPUTER
+#if defined(LA_COMPUTER)
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -122,7 +120,7 @@ static inline void la_window_create__(la_window_t* window) {
 	// Create window.
 	window->wm.window = la_window_make__();
 	window->wm.glcontext = SDL_GL_CreateContext(window->wm.window);
-#ifdef JL_DEBUG
+#ifdef LA_DEBUG
 	if(window->wm.glcontext == NULL)
 		la_window_killedit__("SDL_GL_CreateContext");
 #endif

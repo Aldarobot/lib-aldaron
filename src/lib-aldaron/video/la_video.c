@@ -6,7 +6,6 @@
 #ifdef LA_FEATURE_VIDEO
 
 #include "la_memory.h"
-#include "JLGRprivate.h"
 #include "SDL_image.h"
 #include "jpeglib.h"
 #include "la_video.h"

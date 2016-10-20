@@ -5,8 +5,7 @@
 #include <la_config.h>
 #ifdef LA_FEATURE_DISPLAY
 
-#include "JLGRprivate.h"
-
+#include <la_draw.h>
 #include <la_time.h>
 #include <la_ro.h>
 #include <la_memory.h>
@@ -99,7 +98,7 @@ static inline SDL_Window* jlgr_wm_mkwindow__(la_window_t* jlgr) {
 #endif
 
 //Update the SDL_displayMode structure
-void jl_wm_updatewh_(la_window_t* window) {
+void la_window_update_size(la_window_t* window) {
 	// Get Window Size
 #ifndef LA_ANDROID
 	SDL_GetWindowSize(window->wm.window, &window->wm.w, &window->wm.h);
@@ -108,7 +107,6 @@ void jl_wm_updatewh_(la_window_t* window) {
 #endif
 	// Get Aspect Ratio
 	window->wm.ar = ((double)window->wm.h) / ((double)window->wm.w);
-	la_print("size = %dx%d", window->wm.w, window->wm.h);
 }
 
 //This is the code that actually creates the window by accessing SDL
@@ -130,7 +128,7 @@ static inline void jlgr_wm_create__(la_window_t* jlgr) {
 #endif
 }
 
-void jl_wm_loop__(la_window_t* window) {
+void la_window_update__(la_window_t* window) {
 #ifndef LA_ANDROID
 	//Update Screen
 	SDL_GL_SwapWindow(window->wm.window); //end current draw
@@ -148,7 +146,7 @@ void la_window_resize__(la_window_t* window, uint32_t w, uint32_t h) {
 	la_ro_change_orient(&window->screen, 1);
 }
 
-void jl_wm_init__(la_window_t* window) {
+void la_window_init__(la_window_t* window) {
 	// Create Window
 	jlgr_wm_create__(window);
 	// Get Resize Event

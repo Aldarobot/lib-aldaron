@@ -15,8 +15,8 @@ void la_window_fullscreen_toggle(la_window_t* window);
 uint16_t la_window_width(la_window_t* window);
 uint16_t la_window_height(la_window_t* window);
 void la_window_name(la_window_t* window, const char* window_name);
+void la_window_icon(la_window_t* window,la_buffer_t* buffer,const char* fname);
 float la_window_h(la_window_t* window);
 void la_window_clear(float r, float g, float b, float a);
-void la_window_icon(la_window_t* window,la_buffer_t* buffer,const char* fname);
 
 #endif

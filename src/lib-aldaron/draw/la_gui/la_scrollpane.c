@@ -19,15 +19,12 @@ static void la_gui_scrollpane_draw__(void* context) {
 }
 
 void la_gui_scrollpane_redraw(la_window_t* window, la_gui_scrollpane_t* sp,
-	jl_rect_t rc, float internal_height, la_fn_t drawfn)
+	la_rect_t rc, float internal_height, la_fn_t drawfn)
 {
 	float colors[] = { 0.3f, 0.3f, 0.3f };
-//	jl_rect_t irc = (jl_rect_t) { 0.f, 0.f, 1.f, internal_height };
 
 	la_ro_plain_rect(window, &sp->external, colors, rc.w, rc.h);
-//	jlgr_vo_set_rect(window, &sp->internal, irc, colors, 0);
 	sp->drawfn = drawfn;
-//	la_ro_pr(window, &sp->internal, drawfn);
 	la_safe_set_float(&sp->scroller, 0.f);
 	la_safe_set_uint8(&sp->external_update, 1);
 	la_safe_set_float(&sp->internal_height, internal_height);

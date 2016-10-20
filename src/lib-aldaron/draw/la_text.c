@@ -5,8 +5,7 @@
 #include <la_config.h>
 #ifdef LA_FEATURE_DISPLAY
 
-#include "JLGRprivate.h"
-
+#include <la_draw.h>
 #include <la_text.h>
 #include <la_string.h>
 #include <la_ro.h>

@@ -17,3 +17,24 @@
 //#else
 //	#define GLSL_HEAD "#version 100\n"
 //#endif
+
+#define DEFAULT_TC (const float[]) { \
+	0., 1., \
+	0., 0., \
+	1., 0., \
+	1., 1. \
+}
+
+#define UPSIDEDOWN_TC (const float[]) { \
+	0., 0., \
+	0., 1., \
+	1., 1., \
+	1., 0. \
+}
+
+#define BACKWARD_TC (const float[]) {\
+	1., 1., \
+	1., 0., \
+	0., 0., \
+	0., 1. \
+}

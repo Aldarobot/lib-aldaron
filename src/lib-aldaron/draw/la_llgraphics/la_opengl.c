@@ -8,7 +8,7 @@
 #include <la_llgraphics.h>
 #include <la_string.h>
 
-#include "JLGRprivate.h"
+#include "la_draw.h"
 #include "jlgr_opengl_private.h"
 #include "la_thread.h"
 #include "la_memory.h"

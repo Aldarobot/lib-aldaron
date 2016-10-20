@@ -5,7 +5,7 @@
 #include <la_config.h>
 #ifdef LA_FEATURE_DISPLAY
 
-#include "JLGRprivate.h"
+#include "la_draw.h"
 #include "SDL_filesystem.h"
 
 #include <la_list.h>

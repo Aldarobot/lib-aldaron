@@ -5,7 +5,7 @@
 #include <la_config.h>
 #ifdef LA_FEATURE_DISPLAY
 
-#include "JLGRprivate.h"
+#include <la_draw.h>
 #include "jlgr_opengl_private.h"
 
 #include "la_memory.h"
@@ -179,7 +179,7 @@ void la_effect_light(la_ro_t* ro, la_light_t* lights, uint8_t light_count,
 	la_ro_draw_shader(ro, shader);
 }
 
-void jlgr_effects_init__(la_window_t* jlgr) {
+void la_effects_init__(la_window_t* jlgr) {
 	la_print("MAKING EFFECT: ALPHA");
 	la_llgraphics_shader_make(&jlgr->effect.alpha, NULL, JL_EFFECT_ALPHA, 1);
 	la_print("MAKING EFFECT: HUE");

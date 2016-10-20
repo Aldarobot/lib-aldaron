@@ -5,7 +5,6 @@
 #include <la_config.h>
 #ifdef LA_FEATURE_DISPLAY
 
-#include "JLGRprivate.h"
 #include "SDL_image.h"
 #include "la_buffer.h"
 
@@ -13,22 +12,9 @@
 #include <la_ro.h>
 #include <la_window.h>
 
-// Constants
-	//ALL IMAGES: 1024x1024
-	#define TEXTURE_WH 1024*1024 
-	//1bpp Bitmap = 1048832 bytes (Color Key(256)*RGBA(4), 1024*1024)
-	#define IMG_FORMAT_LOW 1048832 
-	//2bpp HQ bitmap = 2097664 bytes (Color Key(256*2=512)*RGBA(4), 2*1024*1024)
-	#define IMG_FORMAT_MED 2097664
-	//3bpp Picture = 3145728 bytes (No color key, RGB(3)*1024*1024)
-	#define IMG_FORMAT_PIC 3145728
-	//
-	#define IMG_SIZE_LOW (1+strlen(JL_IMG_HEADER)+(256*4)+(1024*1024)+1)
-	
-//Functions:
+void _jlgr_loopa(la_window_t* jlgr);
 
-//Get a pixels RGBA values from a surface and xy
-uint32_t _jl_sg_gpix(/*in */ SDL_Surface* surface, int32_t x, int32_t y) {
+uint32_t la_texture_ssp__(SDL_Surface* surface, int32_t x, int32_t y) {
 	int32_t bpp = surface->format->BytesPerPixel;
 	uint8_t *p = (uint8_t *)surface->pixels + (y * surface->pitch) + (x * bpp);
 	uint32_t color_orig;
@@ -75,15 +61,9 @@ void _jl_sg_load_jlpx(la_window_t* jlgr,la_buffer_t* data,void **pixels,int *w,i
 	image = la_window_makesurface(jlgr, data);
 	// Covert SDL_Surface.
 	la_buffer_init(&pixel_data);
-//	pixel_data.data = realloc(pixel_data.data, 16);
-//	pixel_data.data = realloc(pixel_data.data, 32);
-//	pixel_data.data = realloc(pixel_data.data, 32);
-//	pixel_data.data = realloc(pixel_data.data, 64);
-//	pixel_data.size = 64;
-	printf("n %p\n", pixel_data.data);
 	for(i = 0; i < image->h; i++) {
 		for(j = 0; j < image->w; j++) {
-			color = _jl_sg_gpix(image, j, i);
+			color = la_texture_ssp__(image, j, i);
 			la_buffer_write(&pixel_data, &color, 4);
 		}
 	}

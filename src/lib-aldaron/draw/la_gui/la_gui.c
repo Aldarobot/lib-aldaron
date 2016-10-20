@@ -5,8 +5,7 @@
 #include <la_config.h>
 #ifdef LA_FEATURE_DISPLAY
 
-#include "JLGRprivate.h"
-
+#include <la_draw.h>
 #include <la_ro.h>
 #include <la_text.h>
 
@@ -50,8 +49,6 @@ extern float la_banner_size;
 	}
 }*/
 
-void jlgr_dont(la_window_t* jlgr) { }
-
 /**
  * Prepare to draw an image that takes up the entire pre-renderer or
  * screen.
@@ -66,7 +63,7 @@ void jlgr_fill_image_set(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h,
 	int16_t c)
 {
 	if(!tex) la_panic("jlgr_fill_image_set: Texture Must Be Nonzero!\n");
-//	jl_rect_t rc = { 0., (.5f * la_window_h(jlgr)) - 1.f, 1.f, 2.f };
+//	la_rect_t rc = { 0., (.5f * la_window_h(jlgr)) - 1.f, 1.f, 2.f };
 
 	la_ro_image_rect(jlgr, &jlgr->gui.vos.whole_screen, tex, 1.f, 2.f);
 	la_ro_change_image(&jlgr->gui.vos.whole_screen, tex, w, h, c, 0);
@@ -153,10 +150,10 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
 	la_window_t* jlgr = d2;
 	jl_gui_slider_draw* slider = data;
 
-	jl_rect_t rc = { 0.005, 0.005, .99, la_ro_ar(jlgr) - .01 };
-	jl_rect_t rc1 = { 0.0012, 0.0012, (la_ro_ar(jlgr) * .5) + .0075,
+	la_rect_t rc = { 0.005, 0.005, .99, la_ro_ar(jlgr) - .01 };
+	la_rect_t rc1 = { 0.0012, 0.0012, (la_ro_ar(jlgr) * .5) + .0075,
 		la_ro_ar(jlgr) - .0024};
-	jl_rect_t rc2 = { 0.005, 0.005, (la_ro_ar(jlgr) * .5) -.001,
+	la_rect_t rc2 = { 0.005, 0.005, (la_ro_ar(jlgr) * .5) -.001,
 		la_ro_ar(jlgr) - .01};
 	float colors[] = { .06f, .04f, 0.f, 1.f };
 
@@ -193,7 +190,7 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
 	value.  Ignored if #isdouble is 0.
  * @returns: The slider sprite.
 **/
-/*void jlgr_gui_slider(la_window_t* jlgr, jl_sprite_t* sprite, jl_rect_t rectangle,
+/*void jlgr_gui_slider(la_window_t* jlgr, jl_sprite_t* sprite, la_rect_t rectangle,
 	uint8_t isdouble, float* x1, float* x2)
 {
 //	jlgr_sprite_loop_fnt jlgr_gui_slider_loop;
@@ -244,34 +241,6 @@ static void jlgr_draw_msge__(la_window_t* window) {
 }
 
 /**
- * Display on the screen.
- * @param jlgr: The library context.
- * @param draw_routine: Function that draws on screen.
-**/
-void jlgr_draw_loadscreen(la_window_t* window, la_fn_t draw_routine) {
-/*	jl_thread_mutex_lock(&jlgr->protected.mutex);
-	jlgr_redraw_t old_redrawfns = jlgr->protected.functions.redraw;
-
-	// Set Graphical loops.
-	jlgr->protected.functions.redraw = (jlgr_redraw_t) {
-		draw_routine, draw_routine,
-		draw_routine, jl_dont };
-
-	jl_thread_mutex_unlock(&jlgr->protected.mutex);
-
-	// Update events
-	la_port_input(jlgr);
-	// Redraw screen.
-	la_window_loop(context, jlgr);
-	// Update Screen.
-	jl_wm_loop__(jlgr);
-	//
-	jl_thread_mutex_lock(&jlgr->protected.mutex);
-	jlgr->protected.functions.redraw = old_redrawfns;
-	jl_thread_mutex_unlock(&jlgr->protected.mutex);*/
-}
-
-/**
  * Print message on the screen.
  * @param jlgr: The library context.
  * @param tex: The background texture.
@@ -294,7 +263,7 @@ void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ..
 	jlgr->gui.msge.c = c;
 	la_print("DRAW LOADSCREEN");
 	
-	jlgr_draw_loadscreen(jlgr, (la_fn_t) jlgr_draw_msge__);
+	jlgr_draw_msge__(jlgr);
 	la_print("DREW LOADSCREEN");
 }
 
@@ -341,7 +310,7 @@ void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ..
 //		jlgr_sprite_redraw(jlgr, spr);
 //	jlgr_sprite_draw(jlgr, spr);
 	if(jlgr_sprite_collide(jlgr, &jlgr->mouse.pr, &spr->pr)) {
-		jl_rect_t rc = { spr->pr.cb.pos.x, spr->pr.cb.pos.y,
+		la_rect_t rc = { spr->pr.cb.pos.x, spr->pr.cb.pos.y,
 			spr->pr.cb.ofs.x, spr->pr.cb.ofs.y };
 		float glow_color[] = { 1., 1., 1., .25 };
 
@@ -418,10 +387,10 @@ uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr) {
  * @param jlgr: The library context.
  * @param rc: Dimensions to draw textbox.
 */
-void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc){
+void jlgr_gui_textbox_draw(la_window_t* jlgr, la_rect_t rc){
 	float cursor_color[] = { 0.1f, 0.1f, 0.1f, 1.f };
 
-//(jl_rect_t) {
+//(la_rect_t) {
 //			rc.x + (jlgr->gui.textbox.string->curs * rc.h * .75),
 //			rc.y, rc.h * .05, rc.h }
 	if(jlgr->gui.textbox.cursor) {

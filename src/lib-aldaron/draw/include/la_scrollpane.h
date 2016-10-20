@@ -24,7 +24,7 @@ typedef struct {
 } la_gui_scrollpane_t;
 
 void la_gui_scrollpane_redraw(la_window_t* window, la_gui_scrollpane_t* sp,
-	jl_rect_t rc, float internal_height, la_fn_t drawfn);
+	la_rect_t rc, float internal_height, la_fn_t drawfn);
 void la_gui_scrollpane_draw(void* context, la_window_t* window,
 	la_gui_scrollpane_t* sp);
 void la_gui_scrollpane_loop(la_window_t* window, la_gui_scrollpane_t* sp);

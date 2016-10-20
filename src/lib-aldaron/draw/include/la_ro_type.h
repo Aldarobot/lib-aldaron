@@ -5,7 +5,7 @@
 #ifndef LA_RO_TYPE
 #define LA_RO_TYPE
 
-#include <stdint.h>
+#include <la_math.h>
 
 // Render-able Object
 typedef struct{
@@ -25,7 +25,7 @@ typedef struct{
 	uint32_t w, h;	// Dimensions of texture
 	float ar;	// Aspect Ratio: h:w
 	// Collision Detection
-	jl_area_t cb;	// Collision box.
+	la_area_t cb;	// Collision box.
 }la_ro_t;
 
 #endif

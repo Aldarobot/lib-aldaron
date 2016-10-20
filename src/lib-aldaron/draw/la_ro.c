@@ -5,7 +5,7 @@
 #include <la_config.h>
 #ifdef LA_FEATURE_DISPLAY
 
-#include "JLGRprivate.h"
+#include <la_draw.h>
 #include "jlgr_opengl_private.h"
 
 #include <la_ro.h>
@@ -398,14 +398,6 @@ void la_ro_pr(void* context, la_window_t* window, la_ro_t* ro, la_fn_t drawfn) {
 float la_ro_ar(la_window_t* window) {
 	return window->gl.cp ? window->gl.cp->ar : window->wm.ar;
 }
-
-// TODO: is needed?
-/*uint32_t la_ro_w(la_window_t* window) {
-	uint32_t w;
-
-	w = window->gl.cp ? window->gl.cp->w : window->wm.w;
-	return w;
-}*/
 
 uint8_t la_ro_collide(la_ro_t *ro1, la_ro_t *ro2) {
 	if (

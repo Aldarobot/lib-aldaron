@@ -5,7 +5,7 @@
 #include <la_config.h>
 #ifdef LA_FEATURE_DISPLAY
 
-#include "JLGRprivate.h"
+#include "la_draw.h"
 #include "la_memory.h"
 
 #include <la_thread.h>
@@ -22,6 +22,7 @@ typedef struct {
 extern SDL_atomic_t la_rmcexit;
 SDL_atomic_t la_rmcwait;
 
+void la_window_update_size(la_window_t* window);
 void jlgr_mouse_resize__(la_window_t* jlgr);
 void la_window_resize__(la_window_t* window, uint32_t w, uint32_t h);
 
@@ -32,6 +33,10 @@ uint64_t aldaron_size(void);
 
 void la_llgraphics_initshader_color__(la_window_t* window);
 void la_llgraphics_init__(la_window_t* window);
+void la_effects_init__(la_window_t* jlgr);
+void la_window_init__(la_window_t* window);
+
+void la_window_update__(la_window_t* window);
 
 static void jlgr_thread_programsresize(void* context, la_window_t* window) {
 	((la_draw_fn_t)la_safe_get_pointer(&window->protected.functions.resize))
@@ -53,7 +58,7 @@ static inline void la_draw_windowresize__(void* context, la_window_t* window) {
 	uint32_t w = la_safe_get_uint32(&window->protected.set_width);
 	uint32_t h = la_safe_get_uint32(&window->protected.set_height);
 
-	jl_wm_updatewh_(window);
+	la_window_update_size(window);
 	if(w == 0) w = la_window_width(window);
 	if(h == 0) h = la_window_height(window);
 	jlgr_thread_resize(context, window, w, h);
@@ -100,7 +105,7 @@ static void la_draw_loader_d(void* context, la_window_t* window) {
 }
 
 static void la_draw_loader_c(void* context, la_window_t* window) {
-	jlgr_effects_init__(window);
+	la_effects_init__(window);
 	la_draw_loader(context, window);
 	la_draw_fnchange(window, la_draw_loader_d, la_draw_dont, la_draw_dont);
 }
@@ -123,7 +128,7 @@ static inline void
 la_draw_init__(void* context, la_window_t* window, const char* name) {
 	// Initialize subsystems
 	la_print("Creating the window....");
-	jl_wm_init__(window);
+	la_window_init__(window);
 	la_print("Setting up OpenGL....");
 	la_llgraphics_init__(window);
 	la_print("Resize....");
@@ -160,7 +165,7 @@ void la_window_loop__(void* context, la_window_t* window) {
 	//Redraw screen.
 	la_window_draw__(context, window);
 	//Update Screen.
-	jl_wm_loop__(window);
+	la_window_update__(window);
 }
 
 void la_window_kill__(la_window_t* window) {

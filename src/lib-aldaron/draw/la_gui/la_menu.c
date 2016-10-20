@@ -5,7 +5,7 @@
 #include <la_config.h>
 #ifdef LA_FEATURE_DISPLAY
 
-#include "JLGRprivate.h"
+#include "la_draw.h"
 #include "la_menu.h"
 #include "la_text.h"
 
@@ -13,6 +13,15 @@
 
 #define MENU_REDRAW_NONE -1
 #define MENU_REDRAW_ALL -2
+
+typedef enum{
+	LA_MENU_ID_NULL,
+	LA_MENU_ID_UNKNOWN,
+	LA_MENU_ID_FLIP_IMAGE,
+	LA_MENU_ID_SLOW_IMAGE,
+	LA_MENU_ID_GOOD_IMAGE,
+	LA_MENU_ID_TASK_MAX //how many taskbuttons
+}la_menu_id_t;
 
 void la_draw_resize(la_window_t *, uint32_t, uint32_t);
 
@@ -59,7 +68,7 @@ void la_menu_init(la_menu_t* menu, la_window_t* window) {
 	// Make the icon vertex object.
 	la_ro_image_rect(window, &menu->icon, window->textures.icon, .1f, .1f);
 	la_ro_change_image(&menu->icon, window->textures.icon, 16, 16,
-		JLGR_ID_UNKNOWN, 0);
+		LA_MENU_ID_UNKNOWN, 0);
 	// Clear the menubar & make pre-renderer.
 	for( i = 0; i < 10; i++) {
 		menu->inputfn[i] = NULL;
@@ -82,7 +91,7 @@ static void jlgr_menubar_text__(la_menu_t* menu, float* color, float y,
 }
 
 static void jlgr_menu_flip_draw__(la_menu_t* menu) {
-	la_menu_drawicon(menu, menu->window->textures.icon, JLGR_ID_FLIP_IMAGE);
+	la_menu_drawicon(menu, menu->window->textures.icon, LA_MENU_ID_FLIP_IMAGE);
 }
 
 static void jlgr_menu_flip_press__(la_menu_t* menu) {
@@ -123,7 +132,7 @@ static void jlgr_menu_slow_draw__(la_menu_t* menu) {
 
 	// Draw the icon based on whether on time or not.
 	la_menu_drawicon(menu, menu->window->textures.icon,
-		/*menu->window->sg.on_time?*/JLGR_ID_GOOD_IMAGE/*:JLGR_ID_SLOW_IMAGE*/);
+		/*menu->window->sg.on_time?*/LA_MENU_ID_GOOD_IMAGE/*:LA_MENU_ID_SLOW_IMAGE*/);
 	// Report the seconds that passed.
 	jlgr_menubar_text__(menu, color, 0., "DRAW");
 	jlgr_menubar_text__(menu, color, .05, "MAIN");

@@ -9,7 +9,7 @@
 
 typedef struct{
 	float x, y, w, h;
-}jl_rect_t;
+}la_rect_t;
 
 typedef struct{
 	float x, y, z;
@@ -23,7 +23,7 @@ typedef struct{
 typedef struct{
 	la_v3_t pos; // Position ( X/Y/Z )
 	la_v3_t ofs; // Position Offset ( W/H/D )
-}jl_area_t;
+}la_area_t;
 
 uint32_t la_math_random(uint32_t a);
 double la_math_add01(double v1, double v2);

@@ -5,8 +5,7 @@
 #include <la_config.h>
 #ifdef LA_FEATURE_DISPLAY
 
-#include "JLGRprivate.h"
-
+#include <la_draw.h>
 #include <la_ro.h>
 
 //#if JL_PLAT == JL_PLAT_COMPUTER // show mouse if computer

@@ -55,24 +55,20 @@ typedef void (*jlgr_fnct)(la_window_t* window);
 // la_draw.c
 void la_draw_dont(void* context, la_window_t* window);
 
-// JLGR.c:
-float la_window_h(la_window_t* window);
 void la_draw_fnchange(la_window_t* window, la_draw_fn_t primary,
 	la_draw_fn_t secondary, la_draw_fn_t resize);
 
 // JLGRgraphics.c:
-void jlgr_dont(la_window_t* jlgr);
 void jlgr_fill_image_set(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, 
 	int16_t c);
 void jlgr_fill_image_draw(la_window_t* jlgr);
 void jlgr_draw_bg(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, int16_t c);
 
 // JLGRtext.c:
-void jlgr_draw_loadscreen(la_window_t* jlgr, la_fn_t draw_routine);
 void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ...);
 void jlgr_gui_textbox_init(la_window_t* jlgr, la_buffer_t* string);
 uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr);
-void jlgr_gui_textbox_draw(la_window_t* jlgr, jl_rect_t rc);
+void jlgr_gui_textbox_draw(la_window_t* jlgr, la_rect_t rc);
 void jlgr_notify(la_window_t* jlgr, const char* notification, ...);
 
 // OpenGL

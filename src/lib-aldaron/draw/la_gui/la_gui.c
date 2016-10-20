@@ -12,14 +12,14 @@
 typedef struct {
 	la_v3_t where[2];
 	la_ro_t vo[3]; // Vertex object [ Full, Slider 1, Slider 2 ].
-}jl_gui_slider_draw;
+}la_gui_slider_draw;
 
 typedef struct {
 	float* x1;
 	float* x2;
 	uint8_t isRange;
-	jl_gui_slider_draw draw;
-}jl_gui_slider_main;
+	la_gui_slider_draw draw;
+}la_gui_slider_main;
 
 void jlgr_mouse_draw__(la_window_t* jlgr);
 
@@ -83,12 +83,10 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
  * @param 'spr': the boundary sprite
  * @param 'txt': the text to draw
 **/
-/*void jlgr_text_draw_area(la_window_t* jlgr, jl_sprite_t * spr, const char* txt) {
+/*void jlgr_text_draw_area(la_window_t* jlgr, la_ro_t * spr, const char* txt) {
 	float fontsize = .9 / strlen(txt);
 	jlgr_text_draw(jlgr, txt,
-		(la_v3_t) { .05,.5 * (la_ro_ar(jlgr) - fontsize),0. },
-		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, 
-			fontsize});
+		(la_v3_t) { .05,.5 * (la_ro_ar(jlgr) - fontsize),0. });
 }*/
 
 /**
@@ -97,7 +95,7 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
  * @param 'spr': the boundary sprite
  * @param 'txt': the text to draw
 **/
-/*void jlgr_draw_text_sprite(la_window_t* jlgr, jl_sprite_t* spr, const char* txt) {
+/*void jlgr_draw_text_sprite(la_window_t* jlgr, la_ro_t* spr, const char* txt) {
 	jlgr_fill_image_set(jlgr, jlgr->textures.icon, 16, 16, 1);
 	jlgr_fill_image_draw(jlgr);
 	jlgr_text_draw_area(jlgr, spr, txt);
@@ -105,8 +103,8 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
 
 // TODO: MOVE
 /*static void jlgr_gui_slider_touch(la_window_t* jlgr, jlgr_input_t input) {
-	jl_sprite_t* spr = input.data;
-	jl_gui_slider_main* slider = jlgr_sprite_getcontext(spr);
+	la_ro_t* spr = input.data;
+	la_gui_slider_main* slider = jlgr_sprite_getcontext(spr);
 
 	if(jlgr_sprite_collide(jlgr, &spr->pr, &jlgr->mouse.pr) == 0 ||
 	 input.h == 0)
@@ -138,17 +136,17 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
 	jlgr_sprite_redraw(jlgr, spr, &slider->draw);
 }*/
 
-//static void jlgr_gui_slider_singleloop(void* jl, jl_sprite_t* spr) {
+//static void jlgr_gui_slider_singleloop(void* jl, la_ro_t* spr) {
 //	jlgr_input_do(jl->jlgr, JL_INPUT_PRESS, jlgr_gui_slider_touch, spr);
 //}
 
-//static void jlgr_gui_slider_doubleloop(void* jl, jl_sprite_t* spr) {
+//static void jlgr_gui_slider_doubleloop(void* jl, la_ro_t* spr) {
 //	jlgr_input_do(jl->jlgr, JL_INPUT_PRESS, jlgr_gui_slider_touch, spr);
 //}
 
 /*static void jlgr_gui_slider_draw(void* d2, uint8_t resize, void* data){
 	la_window_t* jlgr = d2;
-	jl_gui_slider_draw* slider = data;
+	la_gui_slider_draw* slider = data;
 
 	la_rect_t rc = { 0.005, 0.005, .99, la_ro_ar(jlgr) - .01 };
 	la_rect_t rc1 = { 0.0012, 0.0012, (la_ro_ar(jlgr) * .5) + .0075,
@@ -190,7 +188,7 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
 	value.  Ignored if #isdouble is 0.
  * @returns: The slider sprite.
 **/
-/*void jlgr_gui_slider(la_window_t* jlgr, jl_sprite_t* sprite, la_rect_t rectangle,
+/*void jlgr_gui_slider(la_window_t* jlgr, la_ro_t* sprite, la_rect_t rectangle,
 	uint8_t isdouble, float* x1, float* x2)
 {
 //	jlgr_sprite_loop_fnt jlgr_gui_slider_loop;
@@ -201,7 +199,7 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
 //		jlgr_gui_slider_loop = jlgr_gui_slider_singleloop;
 //	}
 
-	jl_gui_slider_main slider;
+	la_gui_slider_main slider;
 
 	slider.draw.where[0] = (la_v3_t) { 0., 0., 0. };
 	slider.draw.where[1] = (la_v3_t) { 1. - (la_ro_ar(jlgr) * .075),
@@ -213,8 +211,8 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
 
 //	jlgr_sprite_init(jlgr, sprite, rectangle,
 //		jlgr_gui_slider_loop, jlgr_gui_slider_draw,
-//		&slider, sizeof(jl_gui_slider_main),
-//		&slider.draw, sizeof(jl_gui_slider_draw));
+//		&slider, sizeof(la_gui_slider_main),
+//		&slider.draw, sizeof(la_gui_slider_draw));
 }*/
 
 /**
@@ -273,7 +271,7 @@ void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ..
  * @param spr: The slide button sprite.
  * @param txt: The text to draw on the button.
 **/
-/*void jlgr_slidebtn_rsz(la_window_t* jlgr, jl_sprite_t * spr, const char* txt) {
+/*void jlgr_slidebtn_rsz(la_window_t* jlgr, la_ro_t * spr, const char* txt) {
 	jlgr_draw_text_sprite(jlgr, spr, txt);
 }*/
 
@@ -286,7 +284,7 @@ void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ..
  * @param 'slidex': how much the x should change when hovered above.
  * @param 'prun': the function to run when pressed.
 **/
-/*void jlgr_slidebtn_loop(la_window_t* jlgr, jl_sprite_t * spr, float defaultx,
+/*void jlgr_slidebtn_loop(la_window_t* jlgr, la_ro_t * spr, float defaultx,
 	float slidex, jlgr_fnct prun)
 {
 	spr->pr.cb.pos.x = defaultx;
@@ -304,7 +302,7 @@ void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ..
  * @param 'txt': the text to draw on the button.
  * @param 'prun': the function to run when pressed.
 **/
-/*void jlgr_glow_button_draw(la_window_t* jlgr, jl_sprite_t * spr,
+/*void jlgr_glow_button_draw(la_window_t* jlgr, la_ro_t * spr,
 	char *txt, jlgr_fnct prun)
 {
 //		jlgr_sprite_redraw(jlgr, spr);
@@ -321,7 +319,6 @@ void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ..
 		jlgr_text_draw(jlgr, txt,
 			(la_v3_t)
 				{0., la_ro_ar(jlgr) - .0625, 0.},
-			(jl_font_t) { jlgr->textures.icon, 0,
 				jlgr->fontcolor, .05 });
 		// Run if press
 //		jlgr_input_do(jlgr, JL_INPUT_PRESS, prun, NULL);
@@ -401,7 +398,6 @@ void jlgr_gui_textbox_draw(la_window_t* jlgr, la_rect_t rc){
 	la_text(jlgr, (char*)(jlgr->gui.textbox.string->data));
 //	jlgr_text_draw(jlgr, (char*)(jlgr->gui.textbox.string->data),
 //		(la_v3_t) {rc.x, rc.y, 0.},
-//		(jl_font_t) {jlgr->textures.icon,0,jlgr->fontcolor,rc.h});
 //		jlgr_draw_image(jl, 0, 0,
 //			x + (h*((float)string->curs-.5)), y, h, h, 252, 1.);
 

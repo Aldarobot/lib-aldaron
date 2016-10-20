@@ -50,7 +50,7 @@ typedef struct{
 	uint8_t p; // Pressure 0-255
 	uint8_t h; // true if just pressed, otherwise false.
 	uint8_t k; // Which key [ a-z, 0-9 , left/right click ]
-}jlgr_input_t;
+}la_input_t;
 
 typedef struct {
 #ifdef LA_ANDROID
@@ -80,23 +80,22 @@ typedef struct {
 	SDL_Event sdl_event;
 #endif
 	struct {
-		jlgr_input_t touch; // Touchscreen Tap
-		jlgr_input_t mouse; // Mouse Location / L/M/R Click
-		jlgr_input_t scroll; // Mouse Scroll Wheel
-		jlgr_input_t keyboard; // Physical and Virtual keyboard.
-		jlgr_input_t drag; // Drag with left click, or finger on touchscreen
-		jlgr_input_t joystick_a; // Physical or Virtual joystick (phone)
-		jlgr_input_t joystick_b; // Physical or Virtual joystick (phone)
-		jlgr_input_t lbutton; // L Button
-		jlgr_input_t rbutton; // R Button
-		jlgr_input_t zlbutton; // ZL Button
-		jlgr_input_t zrbutton; // ZR Button
-		jlgr_input_t accel; // Accelerometer
+		la_input_t touch; // Touchscreen Tap
+		la_input_t mouse; // Mouse Location / L/M/R Click
+		la_input_t scroll; // Mouse Scroll Wheel
+		la_input_t keyboard; // Physical and Virtual keyboard.
+		la_input_t drag; // Drag with left click, or finger on touchscreen
+		la_input_t joystick_a; // Physical or Virtual joystick (phone)
+		la_input_t joystick_b; // Physical or Virtual joystick (phone)
+		la_input_t lbutton; // L Button
+		la_input_t rbutton; // R Button
+		la_input_t zlbutton; // ZL Button
+		la_input_t zrbutton; // ZR Button
+		la_input_t accel; // Accelerometer
 
 		char text[32]; // Unicode Text Input.
 	} input;
 
-// from JLGR.h
 	la_ro_t mouse;
 	la_ro_t screen;
 	safe_uint8_t has_2_screens; // If 2 screens are hooked up.
@@ -124,19 +123,19 @@ typedef struct {
 	}effects;
 
 	struct {
-		jlgr_glsl_t shader_laa[32]; // Light Ambient Attenuation
+		la_shader_t shader_laa[32]; // Light Ambient Attenuation
 		uint8_t shader_laa_init[32];
 
-		jlgr_glsl_t shadow;
-		jlgr_glsl_t alpha;
-		jlgr_glsl_t hue;
+		la_shader_t shadow;
+		la_shader_t alpha;
+		la_shader_t hue;
 	} effect;
 	
 	//Opengl Data
 	struct {
 		struct {
-			jlgr_glsl_t texture;
-			jlgr_glsl_t color;
+			la_shader_t texture;
+			la_shader_t color;
 		}prg;
 
 		la_ro_t temp_vo;

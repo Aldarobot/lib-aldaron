@@ -45,7 +45,7 @@ typedef struct{
 	}uniforms;
 
 	uint32_t program;
-}jlgr_glsl_t;
+}la_shader_t;
 
 #include "la_port.h"
 
@@ -71,13 +71,12 @@ uint8_t jlgr_gui_textbox_loop(la_window_t* jlgr);
 void jlgr_gui_textbox_draw(la_window_t* jlgr, la_rect_t rc);
 void jlgr_notify(la_window_t* jlgr, const char* notification, ...);
 
-// OpenGL
+// la_texture.h
 uint32_t la_texture_new(la_window_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t h,
 	uint8_t bpp);
 void la_texture_set(la_window_t* jlgr, uint32_t texture, uint8_t* pixels,
 	uint16_t w, uint16_t h, uint8_t bpp);
-
-// SG
-uint32_t jl_sg_add_image(la_window_t* jlgr, la_buffer_t* zipdata, const char* filename);
+uint32_t la_texture_fpk(la_window_t* window, la_buffer_t* zipdata,
+	const char* filename);
 
 #endif

@@ -86,11 +86,11 @@ static void la_draw_loader_f(void* context, la_window_t* window) {
 }
 
 static void la_draw_loader_e(void* context, la_window_t* window) {
-	window->textures.game = jl_sg_add_image(window, &window->packagedata,
+	window->textures.game = la_texture_fpk(window, &window->packagedata,
 		"/landscape.png");
-	window->textures.font = jl_sg_add_image(window, &window->packagedata,
+	window->textures.font = la_texture_fpk(window, &window->packagedata,
 		"/font.png");
-	window->textures.icon = jl_sg_add_image(window, &window->packagedata,
+	window->textures.icon = la_texture_fpk(window, &window->packagedata,
 		"/taskbar_items.png");
 	la_draw_loader(context, window);
 	la_draw_fnchange(window, la_draw_loader_f, la_draw_dont, la_draw_dont);
@@ -111,14 +111,14 @@ static void la_draw_loader_c(void* context, la_window_t* window) {
 }
 
 static void la_draw_loader_b(void* context, la_window_t* window) {
-	window->textures.logo = jl_sg_add_image(window, &window->packagedata,
+	window->textures.logo = la_texture_fpk(window, &window->packagedata,
 		"/logo.png");
 	la_draw_loader(context, window);
 	la_draw_fnchange(window, la_draw_loader_c, la_draw_dont, la_draw_dont);
 }
 
 static void la_draw_loader_a(void* context, la_window_t* window) {
-	window->textures.backdrop = jl_sg_add_image(window, &window->packagedata,
+	window->textures.backdrop = la_texture_fpk(window, &window->packagedata,
 		"/backdrop.png");
 	jlgr_draw_bg(window, window->textures.backdrop, 0, 0, -1);
 	la_draw_fnchange(window, la_draw_loader_b, la_draw_dont, la_draw_dont);
@@ -134,7 +134,7 @@ la_draw_init__(void* context, la_window_t* window, const char* name) {
 	la_print("Resize....");
 
 	la_buffer_fromdata(&window->packagedata, aldaron_data(), aldaron_size());
-	window->textures.cursor = jl_sg_add_image(window, &window->packagedata,
+	window->textures.cursor = la_texture_fpk(window, &window->packagedata,
 		"/cursor.png");
 	// Set window loops
 	la_safe_set_pointer(&window->protected.functions.primary, la_draw_loader_a);

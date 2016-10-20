@@ -140,7 +140,7 @@ void la_effect_light(la_ro_t* ro, la_light_t* lights, uint8_t light_count,
 {
 	la_window_t* jlgr = ro->window;
 	int i;
-	jlgr_glsl_t* shader = &jlgr->effect.shader_laa[light_count];
+	la_shader_t* shader = &jlgr->effect.shader_laa[light_count];
 
 	// Create a shader if doesn't exist.
 	if(!jlgr->effect.shader_laa_init[light_count]) {

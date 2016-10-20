@@ -521,7 +521,7 @@ la_llgraphics_shader_new__(const char* vert, const char* frag) {
 	return program;
 }
 
-static int32_t la_llgraphics_uniform__(la_window_t* window, jlgr_glsl_t* glsl,
+static int32_t la_llgraphics_uniform__(la_window_t* window, la_shader_t* glsl,
 	const char* name, int16_t index)
 {
 	// Bind Shader
@@ -581,7 +581,7 @@ void la_llgraphics_texture_free(uint32_t tex) {
 }
 
 // TODO: window is not needed as argument
-void la_llgraphics_uniformf(la_window_t* window, jlgr_glsl_t* glsl, float* x,
+void la_llgraphics_uniformf(la_window_t* window, la_shader_t* glsl, float* x,
 	uint8_t num_elements, const char* name, int16_t index)
 {
 	int32_t uv = la_llgraphics_uniform__(window, glsl, name, index);
@@ -606,7 +606,7 @@ void la_llgraphics_uniformf(la_window_t* window, jlgr_glsl_t* glsl, float* x,
 	}
 }
 
-void la_llgraphics_uniformi(la_window_t* window, jlgr_glsl_t* glsl, int32_t* x,
+void la_llgraphics_uniformi(la_window_t* window, la_shader_t* glsl, int32_t* x,
 	uint8_t num_elements, const char* name, int16_t index)
 {
 	int32_t uv = la_llgraphics_uniform__(window, glsl, name, index);
@@ -721,7 +721,7 @@ void la_llgraphics_framebuffer_free(uint32_t fb) {
 	la_opengl_framebuffer_free(fb);
 }
 
-void la_llgraphics_setmatrix(jlgr_glsl_t* sh, la_v3_t scalev, la_v3_t rotatev,
+void la_llgraphics_setmatrix(la_shader_t* sh, la_v3_t scalev, la_v3_t rotatev,
 	la_v3_t translatev, la_v3_t lookv, float ar)
 {
 	float scale[] = {
@@ -766,11 +766,11 @@ void la_llgraphics_setmatrix(jlgr_glsl_t* sh, la_v3_t scalev, la_v3_t rotatev,
 	la_llgraphics_uniform_matrix(sh->uniforms.project_scene, projection);
 }
 
-void la_llgraphics_shader_bind(jlgr_glsl_t* sh) {
+void la_llgraphics_shader_bind(la_shader_t* sh) {
 	la_opengl_use_program__(sh->program);
 }
 
-void la_llgraphics_shader_make(jlgr_glsl_t* glsl, const char* vert,
+void la_llgraphics_shader_make(la_shader_t* glsl, const char* vert,
 	const char* frag, uint8_t has_tex)
 {
 	const char* vertShader = vert ? vert : JL_SHADER_TEX_VERT;

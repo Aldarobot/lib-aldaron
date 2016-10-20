@@ -30,7 +30,7 @@ void la_ro_change_image(la_ro_t *ro, uint32_t img, uint8_t w, uint8_t h,
 void la_ro_change_color(la_ro_t* ro, float* rgba);
 void la_ro_change_plain(la_ro_t* ro, float* rgba);
 void la_ro_move(la_ro_t* ro, la_v3_t pos);
-void la_ro_draw_shader(la_ro_t* ro, jlgr_glsl_t* sh);
+void la_ro_draw_shader(la_ro_t* ro, la_shader_t* sh);
 void la_ro_draw(la_ro_t* ro);
 void la_ro_pr(void* context, la_window_t* window, la_ro_t* ro, la_fn_t drawfn);
 float la_ro_ar(la_window_t* window);

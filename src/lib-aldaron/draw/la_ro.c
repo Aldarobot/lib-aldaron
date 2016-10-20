@@ -162,7 +162,7 @@ static void la_ro_pr_use__(la_window_t* window, la_ro_t* ro) {
 	}else if(ro->h == 0) {
 		la_panic("la_ro_pr_use__ failed: 'h' must be more than 0");
 	}else if((ro->w > GL_MAX_TEXTURE_SIZE)||(ro->h > GL_MAX_TEXTURE_SIZE)) {
-		la_print("_jl_gl_pr_obj_make() failed:");
+		la_print("la_ro_pr_use__() failed:");
 		la_print("w = %d,h = %d", ro->w, ro->h);
 		la_panic("texture is too big for graphics card.");
 	}
@@ -342,7 +342,7 @@ void la_ro_move(la_ro_t* ro, la_v3_t pos) {
  * @param sh: The shader to use ( must be the same one used with
  *	la_llgraphics_shader_bind(). )
 **/
-void la_ro_draw_shader(la_ro_t* ro, jlgr_glsl_t* sh) {
+void la_ro_draw_shader(la_ro_t* ro, la_shader_t* sh) {
 	la_window_t* jlgr = la_ro_panic__(ro, "Can't Draw2!");
 
 	// Use Temporary Vertex Object If no vertex object.
@@ -376,7 +376,7 @@ void la_ro_draw_shader(la_ro_t* ro, jlgr_glsl_t* sh) {
 
 void la_ro_draw(la_ro_t* ro) {
 	la_window_t* window = la_ro_panic__(ro, "Can't Draw!");
-	jlgr_glsl_t* shader = ro->tx ?
+	la_shader_t* shader = ro->tx ?
 		&window->gl.prg.texture : &window->gl.prg.color;
 
 	la_llgraphics_shader_bind(shader);

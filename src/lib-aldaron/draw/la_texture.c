@@ -50,7 +50,9 @@ SDL_Surface* la_window_makesurface(la_window_t* jlgr, la_buffer_t* data) {
 	return image;
 }
 
-void _jl_sg_load_jlpx(la_window_t* jlgr,la_buffer_t* data,void **pixels,int *w,int *h) {
+static inline void la_texture_load__(la_window_t* window, la_buffer_t* data,
+	void **pixels, int *w, int *h)
+{
 	SDL_Surface *image;
 	uint32_t color = 0;
 	la_buffer_t pixel_data;
@@ -58,7 +60,7 @@ void _jl_sg_load_jlpx(la_window_t* jlgr,la_buffer_t* data,void **pixels,int *w,i
 
 	if(data->data[0] == 0) la_panic("NO DATA!");
 
-	image = la_window_makesurface(jlgr, data);
+	image = la_window_makesurface(window, data);
 	// Covert SDL_Surface.
 	la_buffer_init(&pixel_data);
 	for(i = 0; i < image->h; i++) {
@@ -76,7 +78,7 @@ void _jl_sg_load_jlpx(la_window_t* jlgr,la_buffer_t* data,void **pixels,int *w,i
 }
 
 //Load the images in the image file
-static inline uint32_t jl_sg_add_image__(la_window_t* jlgr, la_buffer_t* data) {
+static inline uint32_t la_texture_fpk__(la_window_t* window,la_buffer_t* data) {
 	void *fpixels = NULL;
 	int fw;
 	int fh;
@@ -84,9 +86,9 @@ static inline uint32_t jl_sg_add_image__(la_window_t* jlgr, la_buffer_t* data) {
 
 	la_print("size = %d", data->size);
 //load textures
-	_jl_sg_load_jlpx(jlgr, data, &fpixels, &fw, &fh);
+	la_texture_load__(window, data, &fpixels, &fw, &fh);
 	la_print("creating image....");
-	rtn = la_texture_new(jlgr, fpixels, fw, fh, 0);
+	rtn = la_texture_new(window, fpixels, fw, fh, 0);
 	la_print("created image!");
 	return rtn;
 }
@@ -98,7 +100,9 @@ static inline uint32_t jl_sg_add_image__(la_window_t* jlgr, la_buffer_t* data) {
  * @param filename: Name of the image file in the package.
  * @returns: Texture object.
 */
-uint32_t jl_sg_add_image(la_window_t* jlgr, la_buffer_t* zipdata, const char* filename) {
+uint32_t la_texture_fpk(la_window_t* window, la_buffer_t* zipdata,
+	const char* filename)
+{
 	la_buffer_t img;
 
 	// Load image into "img"
@@ -106,7 +110,7 @@ uint32_t jl_sg_add_image(la_window_t* jlgr, la_buffer_t* zipdata, const char* fi
 		la_panic("add-image: pk_load_fdata failed!");
 
 	la_print("Loading Image....");
-	uint32_t rtn = jl_sg_add_image__(jlgr, &img);
+	uint32_t rtn = la_texture_fpk__(window, &img);
 	la_print("Loaded Image!");
 	return rtn;
 }

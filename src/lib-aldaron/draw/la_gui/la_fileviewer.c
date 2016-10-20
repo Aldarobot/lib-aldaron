@@ -24,7 +24,7 @@
 
 static la_fileviewer_t* la_fileviewer = NULL;
 
-static void jl_fl_user_select_check_extradir__(char *dirname) {
+static void la_file_user_select_check_extradir__(char *dirname) {
 	if(dirname[strlen(dirname)-1] == '/' && strlen(dirname) > 1) {
 		if(dirname[strlen(dirname)-2] == '/')
 			dirname[strlen(dirname)-1] = '\0';
@@ -33,16 +33,15 @@ static void jl_fl_user_select_check_extradir__(char *dirname) {
 
 // Return 1 on success
 // Return 0 if directory not available
-static uint8_t jl_fl_user_select_open_dir__(la_window_t* jlgr, char *dirname) {
+static uint8_t la_file_user_select_open_dir__(char *dirname){
 	DIR *dir;
 	struct dirent *ent;
 	const char* converted_filename;
 
-	jl_fl_user_select_check_extradir__(dirname);
+	la_file_user_select_check_extradir__(dirname);
 	if(dirname[1] == '\0') {
-//		jl_mem(jlgr->jl, dirname, 0);
-		dirname = SDL_GetPrefPath("JL_Lib", "\0");
-		jl_fl_user_select_check_extradir__(dirname);
+		dirname = SDL_GetPrefPath("aldaron", "\0");
+		la_file_user_select_check_extradir__(dirname);
 	}
 	la_fileviewer->dirname = dirname;
 	la_fileviewer->cursor = 0;
@@ -85,11 +84,11 @@ static uint8_t jl_fl_user_select_open_dir__(la_window_t* jlgr, char *dirname) {
 	return 0;
 }
 
-/*static void jl_fl_user_select_up__(la_window_t* jlgr) {
+/*static void la_file_user_select_up__(la_window_t* window) {
 	if((la_fileviewer->cursor > 0) || la_fileviewer->cpage) la_fileviewer->cursor--;
 }
 
-static void jl_fl_user_select_dn__(la_window_t* jlgr) {
+static void la_file_user_select_dn__(la_window_t* window) {
 	if(la_fileviewer->cursor + (la_fileviewer->cpage * (la_fileviewer->drawupto+1)) <
 		cl_list_count(la_fileviewer->filelist) - 1)
 	{
@@ -97,16 +96,16 @@ static void jl_fl_user_select_dn__(la_window_t* jlgr) {
 	}
 }
 
-static void jl_fl_open_file__(la_window_t* jlgr, char *selecteditem) {
-	char *newdir = jlgr_file_fullname__(jlgr,
+static void la_file_open_file__(la_window_t* window, char *selecteditem) {
+	char *newdir = la_file_fullname__(window,
 		la_fileviewer->dirname, selecteditem);
 
 	free(la_fileviewer->dirname);
 	la_fileviewer->dirname = NULL;
-	jl_fl_user_select_open_dir__(jlgr,newdir);
+	la_file_user_select_open_dir__(newdir);
 }
 
-static void jl_fl_user_select_do__(la_window_t* jlgr, jlgr_input_t input) {
+static void la_file_user_select_do__(la_window_t* window, la_input_t input) {
 	if(input.h == 1) {
 		struct cl_list_iterator *iterator;
 		int i;
@@ -129,11 +128,11 @@ static void jl_fl_user_select_do__(la_window_t* jlgr, jlgr_input_t input) {
 				if(la_fileviewer->dirname[i] == '/') break;
 				else la_fileviewer->dirname[i] = '\0';
 			}
-			jl_fl_user_select_open_dir__(jlgr,la_fileviewer->dirname);
+			la_file_user_select_open_dir__(la_fileviewer->dirname);
 		}else if(strcmp(la_fileviewer->selecteditem, ".") == 0) {
-			jl_mode_switch(jlgr->jl, jlgr->jl->mode.which);
+			// THIS DIRECTORY
 		}else{
-			jl_fl_open_file__(jlgr, la_fileviewer->selecteditem);
+			la_file_open_file__(window, la_fileviewer->selecteditem);
 		}
 	}
 }*/
@@ -230,12 +229,11 @@ uint8_t la_fileviewer_init(la_window_t* window, la_fileviewer_t* fileviewer,
 		.5f, .5f, 1.f, 1.f
 	};
 	la_ro_color_rect(window, &fileviewer->fade, colors, 1.f, 0.07);
-	return jl_fl_user_select_open_dir__(window, path);
+	return la_file_user_select_open_dir__(path);
 }
 
 /**
  * Get the results from the file viewer.
- * @param jlgr: Library Context.
  * @returns: If done, name of selected file.  If not done, NULL is returned.
 **/
 const char* la_fileviewer_loop(la_fileviewer_t* fileviewer) {
@@ -248,8 +246,8 @@ const char* la_fileviewer_loop(la_fileviewer_t* fileviewer) {
 		la_fileviewer->cpage--;
 	}
 	// Sprite loops
-	jlgr_sprite_loop(fileviewer->window, &la_fileviewer->btns[0]);
-	jlgr_sprite_loop(fileviewer->window, &la_fileviewer->btns[1]);
+	la_sprite_loop(fileviewer->window, &la_fileviewer->btns[0]);
+	la_sprite_loop(fileviewer->window, &la_fileviewer->btns[1]);
 	// Free if done.
 	if(fileviewer->returnit) {
 		cl_list_destroy(fileviewer->filelist);
@@ -305,16 +303,16 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 	la_text(window, LA_PXSIZE("0.05") LA_PXMOVE("0.0", "%f") "%s", window->wm.ar - .05f, la_fileviewer->dirname);
 	// Draw prompt
 //	if(la_fileviewer->prompt) {
-/*		if(jlgr_draw_textbox(jlgr, .02, la_ro_ar(jlgr) - .06, .94, .02,
+/*		if(la_draw_textbox(window, .02, la_ro_ar(window) - .06, .94, .02,
 			la_fileviewer->promptstring))
 		{
-			char *name = jlgr_file_fullname__(jlgr,
+			char *name = la_file_fullname__(window,
 				la_fileviewer->dirname,
 				(char*)la_fileviewer->promptstring->data);
 			name[strlen(name) - 1] = '\0';
-			jl_file_save(jlgr->jl, la_fileviewer->newfiledata,
+			la_file_save(window->jl, la_fileviewer->newfiledata,
 				name, la_fileviewer->newfilesize);
-			jl_fl_user_select_open_dir__(jlgr, la_fileviewer->dirname);
+			la_file_user_select_open_dir__(la_fileviewer->dirname);
 			la_fileviewer->prompt = 0;
 		}*/
 //	}else{
@@ -323,9 +321,9 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 //			window->font);
 //		la_text(window, la_fileviewer->dirname,
 //			(la_v3_t) { .02, la_ro_ar(window) - .02, 0. },
-//			(jl_font_t) { window->textures.icon, 0,
+//			{ window->textures.icon, 0,
 //				window->fontcolor, .02});
-//		jlgr_input_do(jlgr, JL_INPUT_SELECT, jl_fl_user_select_do__, NULL);
+//		la_input_do(window, JL_INPUT_SELECT, la_file_user_select_do__, NULL);
 //	}
 }
 

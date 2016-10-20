@@ -17,34 +17,34 @@ extern float la_banner_size;
 
 void la_draw_resize(la_window_t *, uint32_t, uint32_t);
 
-static inline void jl_wm_killedit(const char *str) {
+static inline void la_window_killedit__(const char *str) {
 	la_print(str);
 	la_panic(SDL_GetError());
 }
 
 #if JL_PLAT == JL_PLAT_COMPUTER
-static void jlgr_wm_fscreen__(la_window_t* jlgr, uint8_t a) {
+static void la_window_fscreen__(la_window_t* window, uint8_t a) {
 	// Make sure the fullscreen value is either a 1 or a 0.
-	jlgr->wm.fullscreen = !!a;
+	window->wm.fullscreen = !!a;
 	// Actually set whether fullscreen or not.
-	if(SDL_SetWindowFullscreen(jlgr->wm.window,
-	 jlgr->wm.fullscreen ? JL_WM_FULLSCREEN : 0))
-		jl_wm_killedit("SDL_SetWindowFullscreen");
+	if(SDL_SetWindowFullscreen(window->wm.window,
+	 window->wm.fullscreen ? JL_WM_FULLSCREEN : 0))
+		la_window_killedit__("SDL_SetWindowFullscreen");
 	la_print("Switched fullscreen on/off");
 	// Resize window
-	la_draw_resize(jlgr, 0, 0);
+	la_draw_resize(window, 0, 0);
 }
 #endif
 
 void la_window_fullscreen(la_window_t* window, uint8_t is) {
 #if JL_PLAT == JL_PLAT_COMPUTER
-	jlgr_wm_fscreen__(window, is);
+	la_window_fscreen__(window, is);
 #endif
 }
 
 void la_window_fullscreen_toggle(la_window_t* window) {
 #if JL_PLAT == JL_PLAT_COMPUTER
-	jlgr_wm_fscreen__(window, !window->wm.fullscreen);
+	la_window_fscreen__(window, !window->wm.fullscreen);
 #endif
 }
 
@@ -83,14 +83,14 @@ void la_window_clear(float r, float g, float b, float a) {
 }
 
 #ifndef LA_ANDROID
-static inline SDL_Window* jlgr_wm_mkwindow__(la_window_t* jlgr) {
+static inline SDL_Window* la_window_make__(void) {
 	int flags = SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE|SDL_WINDOW_MAXIMIZED;
 
 	SDL_Window* rtn = SDL_CreateWindow(
 		"Initializing....", SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED, 640, 360, flags);
 #ifdef JL_DEBUG
-	if(rtn == NULL) jl_wm_killedit("SDL_CreateWindow");
+	if(rtn == NULL) la_window_killedit__("SDL_CreateWindow");
 #endif
 	SDL_ShowCursor(SDL_DISABLE);
 	return rtn;
@@ -110,7 +110,7 @@ void la_window_update_size(la_window_t* window) {
 }
 
 //This is the code that actually creates the window by accessing SDL
-static inline void jlgr_wm_create__(la_window_t* jlgr) {
+static inline void la_window_create__(la_window_t* window) {
 #if JL_PLAT == JL_PLAT_COMPUTER
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -120,10 +120,11 @@ static inline void jlgr_wm_create__(la_window_t* jlgr) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 	// Create window.
-	jlgr->wm.window = jlgr_wm_mkwindow__(jlgr);
-	jlgr->wm.glcontext = SDL_GL_CreateContext(jlgr->wm.window);
+	window->wm.window = la_window_make__();
+	window->wm.glcontext = SDL_GL_CreateContext(window->wm.window);
 #ifdef JL_DEBUG
-	if(jlgr->wm.glcontext == NULL) jl_wm_killedit("SDL_GL_CreateContext");
+	if(window->wm.glcontext == NULL)
+		la_window_killedit__("SDL_GL_CreateContext");
 #endif
 #endif
 }
@@ -148,7 +149,7 @@ void la_window_resize__(la_window_t* window, uint32_t w, uint32_t h) {
 
 void la_window_init__(la_window_t* window) {
 	// Create Window
-	jlgr_wm_create__(window);
+	la_window_create__(window);
 	// Get Resize Event
 	la_port_input(window);
 	// Set default values

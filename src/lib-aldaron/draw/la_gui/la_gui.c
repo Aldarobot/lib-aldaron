@@ -89,7 +89,7 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
 /*void jlgr_text_draw_area(la_window_t* jlgr, jl_sprite_t * spr, const char* txt) {
 	float fontsize = .9 / strlen(txt);
 	jlgr_text_draw(jlgr, txt,
-		(la_v3_t) { .05,.5 * (jl_gl_ar(jlgr) - fontsize),0. },
+		(la_v3_t) { .05,.5 * (la_ro_ar(jlgr) - fontsize),0. },
 		(jl_font_t) { jlgr->textures.icon, 0, jlgr->fontcolor, 
 			fontsize});
 }*/
@@ -114,28 +114,28 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
 	if(jlgr_sprite_collide(jlgr, &spr->pr, &jlgr->mouse.pr) == 0 ||
 	 input.h == 0)
 		return;
-	float x = al_safe_get_float(&jlgr->main.ct.msx) - (jl_gl_ar(jlgr) * .05 * spr->pr.cb.ofs.x);
+	float x = al_safe_get_float(&jlgr->main.ct.msx) - (la_ro_ar(jlgr) * .05 * spr->pr.cb.ofs.x);
 	x -= spr->pr.cb.pos.x;
 	x /= spr->pr.cb.ofs.x;
-//		x += 1.5;// - (jl_gl_ar(jl->jlgr) * .1);
+//		x += 1.5;// - (la_ro_ar(jl->jlgr) * .1);
 	if(x <= 0.) x = 0.;
-	if(x > 1. - (jl_gl_ar(jlgr) * .15))
-		x = 1. - (jl_gl_ar(jlgr) * .15);
+	if(x > 1. - (la_ro_ar(jlgr) * .15))
+		x = 1. - (la_ro_ar(jlgr) * .15);
 //
 	if(slider->isRange) {
 		double v0 = fabs((*slider->x1) - x);
 		double v1 = fabs((*slider->x2) - x);
 		if(v1 < v0) {
 			(*slider->x2) = x /
-				(1. - (jl_gl_ar(jlgr) * .15));
+				(1. - (la_ro_ar(jlgr) * .15));
 			slider->draw.where[1].x = x;
 		}else{
 			(*slider->x1) = x /
-				(1. - (jl_gl_ar(jlgr) * .15));
+				(1. - (la_ro_ar(jlgr) * .15));
 			slider->draw.where[0].x = x;
 		}
 	}else{
-		(*slider->x1) = x / (1. - (jl_gl_ar(jlgr) * .15));
+		(*slider->x1) = x / (1. - (la_ro_ar(jlgr) * .15));
 		slider->draw.where[0].x = x;
 	}
 	jlgr_sprite_redraw(jlgr, spr, &slider->draw);
@@ -153,14 +153,14 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
 	la_window_t* jlgr = d2;
 	jl_gui_slider_draw* slider = data;
 
-	jl_rect_t rc = { 0.005, 0.005, .99, jl_gl_ar(jlgr) - .01 };
-	jl_rect_t rc1 = { 0.0012, 0.0012, (jl_gl_ar(jlgr) * .5) + .0075,
-		jl_gl_ar(jlgr) - .0024};
-	jl_rect_t rc2 = { 0.005, 0.005, (jl_gl_ar(jlgr) * .5) -.001,
-		jl_gl_ar(jlgr) - .01};
+	jl_rect_t rc = { 0.005, 0.005, .99, la_ro_ar(jlgr) - .01 };
+	jl_rect_t rc1 = { 0.0012, 0.0012, (la_ro_ar(jlgr) * .5) + .0075,
+		la_ro_ar(jlgr) - .0024};
+	jl_rect_t rc2 = { 0.005, 0.005, (la_ro_ar(jlgr) * .5) -.001,
+		la_ro_ar(jlgr) - .01};
 	float colors[] = { .06f, .04f, 0.f, 1.f };
 
-	jl_gl_clear(jlgr, .01, .08, 0., 1.);
+	la_window_clear(.01, .08, 0., 1.);
 	jlgr_vo_set_image(jlgr, &(slider->vo[0]), rc, jlgr->textures.font);
 	jlgr_vo_txmap(jlgr, &(slider->vo[0]), 0, 16, 16, 235);
 	jlgr_vo_set_image(jlgr, &(slider->vo[1]), rc2, jlgr->textures.game);
@@ -207,7 +207,7 @@ void jlgr_fill_image_draw(la_window_t* jlgr) {
 	jl_gui_slider_main slider;
 
 	slider.draw.where[0] = (la_v3_t) { 0., 0., 0. };
-	slider.draw.where[1] = (la_v3_t) { 1. - (jl_gl_ar(jlgr) * .075),
+	slider.draw.where[1] = (la_v3_t) { 1. - (la_ro_ar(jlgr) * .075),
 		0., 0. };
 	slider.x1 = x1, slider.x2 = x2;
 	(*slider.x1) = 0.;
@@ -231,7 +231,7 @@ void jlgr_draw_bg(la_window_t* jlgr, uint32_t tex, uint8_t w, uint8_t h, int16_t
 void jlgr_draw_loadingbar(la_window_t* jlgr, double loaded) {
 	float colors[] = { 0., 1., 0., 1. };
 
-	la_ro_plain_rect(jlgr, NULL, colors, .95, jl_gl_ar(jlgr) * .45);
+	la_ro_plain_rect(jlgr, NULL, colors, .95, la_ro_ar(jlgr) * .45);
 }
 
 //TODO: MOVE
@@ -351,7 +351,7 @@ void jlgr_draw_msge(la_window_t* jlgr, uint32_t tex, uint8_t c, char* format, ..
 		// Description
 		jlgr_text_draw(jlgr, txt,
 			(la_v3_t)
-				{0., jl_gl_ar(jlgr) - .0625, 0.},
+				{0., la_ro_ar(jlgr) - .0625, 0.},
 			(jl_font_t) { jlgr->textures.icon, 0,
 				jlgr->fontcolor, .05 });
 		// Run if press

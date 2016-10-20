@@ -2,6 +2,7 @@
 #include "la_effect.h"
 #include "la_text.h"
 #include "la_memory.h"
+#include <la_window.h>
 
 static void ex_redraw(ctx_t* ctx) {
 	la_window_t* window = ctx->window;
@@ -34,7 +35,7 @@ void ex_wdns(ctx_t* ctx, la_window_t* window) {
 void ex_wups(ctx_t* ctx, la_window_t* window) {
 	float colors[] = { 0.f, 0.f, 0.f, 1.f };
 
-	jl_gl_clear(window, 1., 1., 1., 1.);
+	la_window_clear(1., 1., 1., 1.);
 	la_text_centered(window, "this IS alternate", .1, colors);
 	la_menu_draw(&ctx->menu, 0);
 }

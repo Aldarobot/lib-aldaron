@@ -271,7 +271,7 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 	uint8_t y = 0;
 	uint8_t alternate = 0;
 
-	la_fileviewer->drawupto = ((int)(20.f * jl_gl_ar(window))) - 1;
+	la_fileviewer->drawupto = ((int)(20.f * la_ro_ar(window))) - 1;
 
 	iterator = cl_list_iterator_create(la_fileviewer->filelist);
 
@@ -305,7 +305,7 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 	la_text(window, LA_PXSIZE("0.05") LA_PXMOVE("0.0", "%f") "%s", window->wm.ar - .05f, la_fileviewer->dirname);
 	// Draw prompt
 //	if(la_fileviewer->prompt) {
-/*		if(jlgr_draw_textbox(jlgr, .02, jl_gl_ar(jlgr) - .06, .94, .02,
+/*		if(jlgr_draw_textbox(jlgr, .02, la_ro_ar(jlgr) - .06, .94, .02,
 			la_fileviewer->promptstring))
 		{
 			char *name = jlgr_file_fullname__(jlgr,
@@ -322,7 +322,7 @@ void la_fileviewer_draw(la_fileviewer_t* fileviewer) {
 //			.02, .08 + (.04 * la_fileviewer->cursor), 0. },
 //			window->font);
 //		la_text(window, la_fileviewer->dirname,
-//			(la_v3_t) { .02, jl_gl_ar(window) - .02, 0. },
+//			(la_v3_t) { .02, la_ro_ar(window) - .02, 0. },
 //			(jl_font_t) { window->textures.icon, 0,
 //				window->fontcolor, .02});
 //		jlgr_input_do(jlgr, JL_INPUT_SELECT, jl_fl_user_select_do__, NULL);

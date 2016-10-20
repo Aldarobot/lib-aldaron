@@ -11,6 +11,7 @@
 
 #include <la_file.h>
 #include <la_ro.h>
+#include <la_window.h>
 
 // Constants
 	//ALL IMAGES: 1024x1024
@@ -105,7 +106,7 @@ static inline uint32_t jl_sg_add_image__(la_window_t* jlgr, la_buffer_t* data) {
 //load textures
 	_jl_sg_load_jlpx(jlgr, data, &fpixels, &fw, &fh);
 	la_print("creating image....");
-	rtn = jl_gl_maketexture(jlgr, fpixels, fw, fh, 0);
+	rtn = la_texture_new(jlgr, fpixels, fw, fh, 0);
 	la_print("created image!");
 	return rtn;
 }
@@ -154,7 +155,7 @@ static void la_window_draw_flipped(la_window_draw_t* param) {
 		&param->window->protected.functions.primary);
 
 	// Clear the screen.
-	jl_gl_clear(param->window, 0., .5, .66, 1.);
+	la_window_clear(0., .5, .66, 1.);
 	// Run the screen's redraw function
 	redraw(param->context, param->window);
 	// Draw Menu Bar & Mouse

@@ -9,6 +9,8 @@
 #include "la_menu.h"
 #include "la_text.h"
 
+#include <la_window.h>
+
 #define MENU_REDRAW_NONE -1
 #define MENU_REDRAW_ALL -2
 
@@ -16,7 +18,7 @@ void la_draw_resize(la_window_t *, uint32_t, uint32_t);
 
 static inline void jlgr_menubar_shadow__(la_menu_t* menu) {
 	// Clear Texture.
-	jl_gl_clear(menu->window, 0.f, 0.f, 0.f, 0.f);
+	la_window_clear(0.f, 0.f, 0.f, 0.f);
 	// Draw Shadows.
 	for(menu->redraw = 0; menu->redraw < 10; menu->redraw++) {
 		la_menu_fn_t _draw_icon_;

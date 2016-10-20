@@ -33,6 +33,7 @@ void la_ro_move(la_ro_t* ro, la_v3_t pos);
 void la_ro_draw_shader(la_ro_t* ro, jlgr_glsl_t* sh);
 void la_ro_draw(la_ro_t* ro);
 void la_ro_pr(void* context, la_window_t* window, la_ro_t* ro, la_fn_t drawfn);
+float la_ro_ar(la_window_t* window);
 uint8_t la_ro_collide(la_ro_t *ro1, la_ro_t *ro2);
 void la_ro_clamp(la_v3_t xyz, la_ro_t *ro, la_v3_t* rtn);
 void la_ro_free(la_ro_t *ro);

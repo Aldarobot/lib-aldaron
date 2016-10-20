@@ -80,19 +80,6 @@ uint32_t la_texture_new(la_window_t* jlgr, uint8_t* pixels, uint16_t w, uint16_t
 	uint8_t bpp);
 void la_texture_set(la_window_t* jlgr, uint32_t texture, uint8_t* pixels,
 	uint16_t w, uint16_t h, uint8_t bpp);
-uint32_t jl_gl_maketexture(la_window_t* jlgr, void* pixels,
-	uint32_t width, uint32_t height, uint8_t bytepp);
-float jl_gl_ar(la_window_t* jlgr);
-void jl_gl_clear(la_window_t* jlgr, float r, float g, float b, float a);
-
-// JLGRopengl.c
-void jlgr_opengl_uniform(la_window_t* jlgr, jlgr_glsl_t* glsl, float* x, uint8_t vec,
-	const char* name, ...);
-void jlgr_opengl_uniformi(la_window_t* jlgr, jlgr_glsl_t* glsl, int32_t* x,
-	uint8_t vec, const char* name, ...);
-void jlgr_opengl_shader_init(la_window_t* jlgr, jlgr_glsl_t* glsl, const char* vert,
-	const char* frag, uint8_t has_tex);
-void jlgr_opengl_draw1(la_window_t* jlgr, jlgr_glsl_t* sh);
 
 // SG
 uint32_t jl_sg_add_image(la_window_t* jlgr, la_buffer_t* zipdata, const char* filename);

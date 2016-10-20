@@ -10,6 +10,7 @@
 #include <la_time.h>
 #include <la_ro.h>
 #include <la_memory.h>
+#include <la_llgraphics.h>
 
 #define JL_WM_FULLSCREEN SDL_WINDOW_FULLSCREEN_DESKTOP
 
@@ -56,7 +57,7 @@ uint16_t la_window_height(la_window_t* window) {
 	return window->wm.h;
 }
 
-float la_window_banner_size(la_window_t* jlgr) {
+float la_window_banner_size(la_window_t* window) {
 	return la_banner_size;
 }
 
@@ -72,6 +73,14 @@ void la_window_name(la_window_t* window, const char* window_name) {
 	}else{
 		la_memory_copy(window_name, window->wm.windowTitle[0], len + 1);
 	}
+}
+
+float la_window_h(la_window_t* window) {
+	return (1. - la_banner_size) * la_ro_ar(window);
+}
+
+void la_window_clear(float r, float g, float b, float a) {
+	la_llgraphics_clear(r, g, b, a);
 }
 
 #ifndef LA_ANDROID
@@ -134,7 +143,7 @@ void la_window_resize__(la_window_t* window, uint32_t w, uint32_t h) {
 	window->wm.w = w;
 	window->wm.h = h;
 	window->wm.ar = ((float)h) / ((float)w);
-	jl_gl_viewport_screen(window);
+	la_llgraphics_viewport(w, h);
 	la_ro_rect(window, &window->screen, 1.f, window->wm.ar);
 	la_ro_change_orient(&window->screen, 1);
 }

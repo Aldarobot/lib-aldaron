@@ -12,6 +12,7 @@
 
 #include <la_effect.h>
 #include <la_ro.h>
+#include <la_llgraphics.h>
 
 extern float la_banner_size;
 
@@ -114,10 +115,10 @@ void la_effect_fade(la_ro_t* ro, float a) {
 	if(a > 1.f) a = 1.f;
 
 	// Bind shader
-	jlgr_opengl_draw1(window, &window->effect.alpha);
+	la_llgraphics_shader_bind(&window->effect.alpha);
 	// Set Alpha Value In Shader
-	jlgr_opengl_uniform(window, &window->effect.alpha, &a, 1,
-		"multiply_alpha");
+	la_llgraphics_uniformf(window, &window->effect.alpha, &a, 1,
+		"multiply_alpha", -1);
 	// Draw on screen
 	la_ro_draw_shader(ro, &window->effect.alpha);
 }
@@ -126,10 +127,10 @@ void la_effect_hue(la_ro_t* ro, float c[]) {
 	la_window_t* window = ro->window;
 
 	// Bind shader
-	jlgr_opengl_draw1(window, &window->effect.hue);
+	la_llgraphics_shader_bind(&window->effect.hue);
 	// Set Hue Value In Shader
-	jlgr_opengl_uniform(window, &window->effect.hue, c, 4,
-		"new_color");
+	la_llgraphics_uniformf(window, &window->effect.hue, c, 4,
+		"new_color", -1);
 	// Draw on screen
 	la_ro_draw_shader(ro, &window->effect.hue);
 }
@@ -147,32 +148,32 @@ void la_effect_light(la_ro_t* ro, la_light_t* lights, uint8_t light_count,
 			char frag_code[strlen(JL_EFFECT_LIGHT_AA) + 128];
 
 			la_effect_format__(frag_code, JL_EFFECT_LIGHT_AA, light_count);
-			jlgr_opengl_shader_init(jlgr, shader, JL_EFFECT_LIGHTV,
+			la_llgraphics_shader_make(shader, JL_EFFECT_LIGHTV,
 				frag_code, 1);
 		}else{
-			jlgr_opengl_shader_init(jlgr, shader, NULL,
+			la_llgraphics_shader_make(shader, NULL,
 				JL_EFFECT_SHADOW, 1);
 		}
 		jlgr->effect.shader_laa_init[light_count] = 1;
 	}
 	// Bind shader
-	jlgr_opengl_draw1(jlgr, shader);
+	la_llgraphics_shader_bind(shader);
 	// Update uniforms for material.
 	for(i = 0; i < light_count; i++) {
 		float power = 1.f / lights[i].power;
 		// Push the uniform
-		jlgr_opengl_uniform(jlgr, shader, (float*)&lights[i].position,
-			3, "where[%d]", i);
-		jlgr_opengl_uniform(jlgr, shader, (float*)&lights[i].color,
-			3, "color[%d]", i);
-		jlgr_opengl_uniform(jlgr, shader, (float*)&power,
-			1, "power[%d]", i);
+		la_llgraphics_uniformf(jlgr, shader, (float*)&lights[i].position,
+			3, "where", i);
+		la_llgraphics_uniformf(jlgr, shader, (float*)&lights[i].color,
+			3, "color", i);
+		la_llgraphics_uniformf(jlgr, shader, (float*)&power,
+			1, "power", i);
 	}
 	if(light_count) {
-		jlgr_opengl_uniform(jlgr, shader, (float*)&material_brightness,
-			3, "brightness");
-		jlgr_opengl_uniform(jlgr, shader, (float*)&ro->cb.pos, 3,
-			"offset");
+		la_llgraphics_uniformf(jlgr, shader,
+			(float*)&material_brightness, 3, "brightness", -1);
+		la_llgraphics_uniformf(jlgr, shader, (float*)&ro->cb.pos, 3,
+			"offset", -1);
 	}
 	// Draw on screen
 	la_ro_draw_shader(ro, shader);
@@ -180,17 +181,11 @@ void la_effect_light(la_ro_t* ro, la_light_t* lights, uint8_t light_count,
 
 void jlgr_effects_init__(la_window_t* jlgr) {
 	la_print("MAKING EFFECT: ALPHA");
-	jlgr_opengl_shader_init(jlgr, &jlgr->effect.alpha, NULL,
-		JL_EFFECT_ALPHA, 1);
-
+	la_llgraphics_shader_make(&jlgr->effect.alpha, NULL, JL_EFFECT_ALPHA, 1);
 	la_print("MAKING EFFECT: HUE");
-	jlgr_opengl_shader_init(jlgr, &jlgr->effect.hue, NULL,
-		JL_EFFECT_HUE, 1);
-
+	la_llgraphics_shader_make(&jlgr->effect.hue, NULL, JL_EFFECT_HUE, 1);
 	la_print("MAKING EFFECT: SHADOW");
-	jlgr_opengl_shader_init(jlgr, &jlgr->effect.shadow, NULL,
-		JL_EFFECT_SHADOW, 1);
-
+	la_llgraphics_shader_make(&jlgr->effect.shadow, NULL, JL_EFFECT_SHADOW, 1);
 	la_print("MADE EFFECTS!");
 }
 

@@ -31,6 +31,7 @@ void* aldaron_data(void);
 uint64_t aldaron_size(void);
 
 void la_llgraphics_initshader_color__(la_window_t* window);
+void la_llgraphics_init__(la_window_t* window);
 
 static void jlgr_thread_programsresize(void* context, la_window_t* window) {
 	((la_draw_fn_t)la_safe_get_pointer(&window->protected.functions.resize))
@@ -65,7 +66,7 @@ static void la_draw_loader(void* context, la_window_t* window) {
 	la_ro_image_rect(window, &window->gl.temp_vo, window->textures.logo, 1.,
 		90./251.);
 	la_ro_move(&window->gl.temp_vo, (la_v3_t) {
-		0.f, (jl_gl_ar(window) - (90./251.)) / 2.f, 0.f });
+		0.f, (la_ro_ar(window) - (90./251.)) / 2.f, 0.f });
 	la_ro_draw(&window->gl.temp_vo);
 //	SDL_Delay(100);
 }
@@ -124,7 +125,7 @@ la_draw_init__(void* context, la_window_t* window, const char* name) {
 	la_print("Creating the window....");
 	jl_wm_init__(window);
 	la_print("Setting up OpenGL....");
-	jl_gl_init__(window);
+	la_llgraphics_init__(window);
 	la_print("Resize....");
 
 	la_buffer_fromdata(&window->packagedata, aldaron_data(), aldaron_size());

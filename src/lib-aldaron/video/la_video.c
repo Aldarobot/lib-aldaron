@@ -9,6 +9,7 @@
 #include "SDL_image.h"
 #include "jpeglib.h"
 #include "la_video.h"
+#include "la.h"
 
 typedef long unsigned int jpeg_long_int_t;
 typedef JSAMPROW jpeg_sample_row_t;

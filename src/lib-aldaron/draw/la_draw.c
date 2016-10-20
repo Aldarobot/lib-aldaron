@@ -44,17 +44,6 @@ static void la_draw_programsresize__(void* context, la_window_t* window) {
 		(context, window);
 }
 
-static void
-la_draw_resize__(void* context, la_window_t* window, uint32_t w, uint32_t h) {
-	la_print("Resizing to %dx%d....", w, h);
-	la_window_resize__(window, w, h);
-	la_print("User's resize....");
-	la_draw_programsresize__(context, window);
-	la_print("Resizing the mouse....");
-	la_mouse_resize__(window);
-	la_print("Resized.");
-}
-
 static inline void la_draw_windowresize__(void* context, la_window_t* window) {
 	uint32_t w = la_safe_get_uint32(&window->protected.set_width);
 	uint32_t h = la_safe_get_uint32(&window->protected.set_height);
@@ -62,7 +51,14 @@ static inline void la_draw_windowresize__(void* context, la_window_t* window) {
 	la_window_update_size(window);
 	if(w == 0) w = la_window_width(window);
 	if(h == 0) h = la_window_height(window);
-	la_draw_resize__(context, window, w, h);
+
+	la_print("Resizing to %dx%d....", w, h);
+	la_window_resize__(window, w, h);
+	la_print("User's resize....");
+	la_draw_programsresize__(context, window);
+	la_print("Resizing the mouse....");
+	la_mouse_resize__(window);
+	la_print("Resized.");
 }
 
 #include <SDL.h>
@@ -156,6 +152,9 @@ void la_draw_checkresize__(void* context, la_window_t* window) {
 
 	if(should_resize == 1) la_draw_programsresize__(context, window);
 	if(should_resize == 2) la_draw_windowresize__(context, window);
+//TODO: REMOVE
+	la_window_clear(0.f, 1.f, 0.f, 1.f);
+	la_print("Cleared.");
 }
 
 void la_window_loop__(void* context, la_window_t* window) {

@@ -46,7 +46,7 @@ static inline void la_ro_collision_box__(la_ro_t* ro,
 	la_math_v3_sub(&ro->cb.ofs, ro->cb.pos);
 }
 
-static inline void la_ro_pr_set__(la_ro_t *ro, float w, float h, uint16_t w_px){
+static inline void la_ro_pr_set__(la_ro_t *ro, float w, float h, uint32_t w_px){
 	const float ar = h / w; // Aspect Ratio.
 	const float h_px = w_px * ar; // Height in pixels.
 
@@ -57,9 +57,7 @@ static inline void la_ro_pr_set__(la_ro_t *ro, float w, float h, uint16_t w_px){
 	ro->ar = ar;
 }
 
-static inline void la_ro_pr_resize__(la_ro_t* ro, float w, float h,
-	uint16_t w_px)
-{
+static inline void la_ro_pr_resize__(la_ro_t* ro,float w,float h,uint32_t w_px){
 	const float xyzw[] = {
 		0.f,	h,	0.f,
 		0.f,	0.f,	0.f,
@@ -72,6 +70,7 @@ static inline void la_ro_pr_resize__(la_ro_t* ro, float w, float h,
 		la_llgraphics_texture_free(ro->tx);
 		la_llgraphics_framebuffer_free(ro->fb);
 		la_llgraphics_buffer_free(ro->vbo);
+		ro->fb = 0;
 	}
 	ro->cv = la_memory_resize(ro->cv, 4 * sizeof(float) * 3);
 	// Create the VBO.
@@ -179,7 +178,6 @@ static void la_ro_pr_init__(la_window_t* window, la_ro_t* ro) {
 		ro->fb = la_llgraphics_framebuffer_make();
 		// Make the texture.
 		ro->tx = la_texture_new(window, NULL, ro->w, ro->h, 0);
-		la_llgraphics_texture_unbind();
 		// Recursively bind the framebuffer.
 		la_ro_pr_use__(window, ro);
 		// Attach texture buffer.
@@ -195,8 +193,6 @@ static void la_ro_pr_init__(la_window_t* window, la_ro_t* ro) {
 
 // Stop drawing to a pre-renderer.
 static inline void la_ro_pr_off__(la_window_t* window) {
-	// Unbind the texture.
-	la_llgraphics_texture_unbind();
 	// Unbind the framebuffer.
 	la_llgraphics_framebuffer_bind(0);
 	// Render to the whole screen.

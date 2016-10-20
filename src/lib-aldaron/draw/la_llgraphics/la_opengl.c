@@ -662,8 +662,8 @@ void la_llgraphics_push_vertices(const float *xyzw, uint32_t vertices,
 /**
  * Create a new texture object.
 **/
-uint32_t la_texture_new(la_window_t* window, uint8_t* pixels, uint16_t w,
-	uint16_t h, uint8_t bpp)
+uint32_t la_texture_new(la_window_t* window, uint8_t* pixels, uint32_t w,
+	uint32_t h, uint8_t bpp)
 {
 	uint32_t texture = la_opengl_texture_make__();
 
@@ -683,7 +683,7 @@ uint32_t la_texture_new(la_window_t* window, uint8_t* pixels, uint16_t w,
  * @param bpp: The bytes per pixel.  Must be 3 or 4.
 **/
 void la_texture_set(la_window_t* window, uint32_t texture, uint8_t* pixels,
-	uint16_t w, uint16_t h, uint8_t bpp)
+	uint32_t w, uint32_t h, uint8_t bpp)
 {
 	GLenum format = GL_RGBA;
 

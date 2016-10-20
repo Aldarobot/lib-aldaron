@@ -57,10 +57,10 @@ void la_draw_fnchange(la_window_t* window, la_draw_fn_t primary,
 	la_draw_fn_t secondary, la_draw_fn_t resize);
 
 // la_texture.h
-uint32_t la_texture_new(la_window_t*, uint8_t* pixels, uint16_t w, uint16_t h,
+uint32_t la_texture_new(la_window_t*, uint8_t* pixels, uint32_t w, uint32_t h,
 	uint8_t bpp);
 void la_texture_set(la_window_t*, uint32_t texture, uint8_t* pixels,
-	uint16_t w, uint16_t h, uint8_t bpp);
+	uint32_t w, uint32_t h, uint8_t bpp);
 uint32_t la_texture_fpk(la_window_t* window, la_buffer_t* zipdata,
 	const char* filename);
 

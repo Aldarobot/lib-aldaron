@@ -1,6 +1,7 @@
-PLATFORM = Linux
-LD = ld -r
-S = "/"
+PLATFORM = Windows
+LD = ld -m i386pe -r
+WGET = wget --no-check-certificate
+S = /
 
 $(OBJ_SDL): $(SRC_SDL)
 	printf "[COMP] compiling SDL...\n"

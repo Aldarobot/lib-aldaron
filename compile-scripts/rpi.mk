@@ -2,6 +2,7 @@ PLATFORM = Raspberry Pi
 LD = ld -r
 WGET = wget
 S = /
+LN = ln -s
 
 $(OBJ_SDL): $(SRC_SDL)
 	# Compiling SDL for $(PLATFORM)....

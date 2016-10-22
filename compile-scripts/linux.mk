@@ -1,6 +1,7 @@
 PLATFORM = Linux
 LD = ld -r
 S = "/"
+LN = ln -s
 
 $(OBJ_SDL): $(SRC_SDL)
 	printf "[COMP] compiling SDL...\n"

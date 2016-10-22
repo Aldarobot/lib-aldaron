@@ -15,7 +15,7 @@
 
 extern float la_banner_size;
 
-const char *LA_SHADER_CLR_FRAG = 
+const char *LA_SHADER_CLR_FRAG =
 	GLSL_HEAD
 	"varying vec4 vcolor;\n"
 	"\n"
@@ -23,7 +23,7 @@ const char *LA_SHADER_CLR_FRAG =
 	"	gl_FragColor = vec4(vcolor.rgba);\n"
 	"}";
 
-const char *LA_SHADER_CLR_VERT = 
+const char *LA_SHADER_CLR_VERT =
 	GLSL_HEAD
 	"uniform mat4 scale_object;\n"
 	"uniform mat4 rotate_object;\n"
@@ -43,7 +43,7 @@ const char *LA_SHADER_CLR_VERT =
 	"		position;\n"
 	"}";
 
-const char *LA_SHADER_TEX_FRAG = 
+const char *LA_SHADER_TEX_FRAG =
 	GLSL_HEAD
 	"uniform sampler2D texture;\n"
 	"\n"
@@ -53,7 +53,7 @@ const char *LA_SHADER_TEX_FRAG =
 	"	gl_FragColor = texture2D(texture, texcoord);\n"
 	"}";
 
-const char *LA_SHADER_TEX_VERT = 
+const char *LA_SHADER_TEX_VERT =
 	GLSL_HEAD
 	"uniform mat4 scale_object;\n"
 	"uniform mat4 rotate_object;\n"
@@ -98,6 +98,10 @@ static void la_opengl_error__(int data, const char* fname) {
 #endif
 
 // Wrapper around opengl / es
+
+#if defined(LA_WINDOWS)
+	
+#endif
 
 static inline void la_opengl_enable(int32_t what) {
 	glEnable(what);
@@ -585,7 +589,7 @@ void la_llgraphics_uniformf(la_window_t* window, la_shader_t* glsl, float* x,
 	uint8_t num_elements, const char* name, int16_t index)
 {
 	int32_t uv = la_llgraphics_uniform__(window, glsl, name, index);
-	
+
 	// Push data to uniform
 	switch(num_elements) {
 		case 1:
@@ -737,7 +741,7 @@ void la_llgraphics_setmatrix(la_shader_t* sh, la_v3_t scalev, la_v3_t rotatev,
 	float translate[] = {
 		1.f, 0.f, 0.f, 0.f,
 		0.f, 1.f, 0.f, 0.f,
-		0.f, 0.f, 1.f, 0.f, 
+		0.f, 0.f, 1.f, 0.f,
 		(translatev.x * 2.f) - 1.f, (translatev.y * 2.f / ar) - 1.f,
 			(translatev.z * 2.f), 1.f
 	};

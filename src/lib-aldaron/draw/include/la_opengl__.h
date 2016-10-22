@@ -5,6 +5,7 @@
 // TODO: Move entire file contents into la_opengl.c
 
 #if LA_GLTYPE == LA_GLTYPE_SDL_GL2  // SDL OpenGL 2
+	#define GL_GLEXT_PROTOTYPES
 	#include "SDL_opengl.h"
 	#include "SDL_opengl_glext.h"
 #elif LA_GLTYPE == LA_GLTYPE_SDL_ES2 // SDL OpenGLES 2

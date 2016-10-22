@@ -2,7 +2,6 @@
 /* This file must be distributed with the GNU LESSER GENERAL PUBLIC LICENSE. */
 /* DO NOT REMOVE THIS NOTICE */
 
-#include "la.h"
 #include "SDL_filesystem.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -15,16 +14,21 @@
 #define ZIP_DISABLE_DEPRECATED //Don't allow the old functions.
 #include "zip.h"
 
-#include "la_file.h"
-#include "la_memory.h"
-#include "la_buffer.h"
+#include <la.h>
+#include <la_file.h>
+#include <la_memory.h>
+#include <la_buffer.h>
 
 #define PKFMAX 10000000
-#define LA_FILE_PERMISSIONS ( S_IRUSR | S_IWUSR | S_IWGRP | S_IWOTH )
 #if defined(LA_WINDOWS)
 	#define LA_FILE_ROOT "C:\\Program Files\\aldaron"
 #elif defined(LA_ANDROID)
 	extern const char* LA_FILE_ROOT;
+#endif
+#if defined(LA_WINDOWS)
+	#define LA_FILE_PERMISSIONS ( _S_IREAD | _S_IWRITE )
+#else
+	#define LA_FILE_PERMISSIONS ( S_IRUSR | S_IWUSR | S_IWGRP | S_IWOTH )
 #endif
 
 static char la_file_string[256];
@@ -163,10 +167,19 @@ const char* la_file_truncate(const char* filename) {
 	char* fname = filename ?
 		la_memory_makecopy(filename, strlen(filename) + 1) :
 		la_file_log__();
+#if defined(LA_WINDOWS)
+	int32_t fd;
+	if((fd = open(fname, O_TRUNC | O_WRONLY)) <= 0) {
+		la_memory_free(fname);
+		return la_error("Couldn't Truncate");
+	}
+	close(fd);
+#else
 	if(truncate(fname, 0)) {
 		la_memory_free(fname);
 		return la_error("Couldn't Truncate");
 	}
+#endif
 	la_memory_free(fname);
 	return NULL;
 }
@@ -206,7 +219,7 @@ const char* la_file_load(la_buffer_t* load, const char* file_name) {
 	int size = lseek(fd, 0, SEEK_END);
 	unsigned char *file = malloc(size);
 	int32_t bytes;
-	
+
 	if(fd <= 0) {
 		int errsv = errno;
 
@@ -264,7 +277,7 @@ char* la_file_compress(const char* folder) {
 	struct cl_list * filelist = la_file_ls(folder, 1);
 	// Save Files Into Package
 	la_list_iterate(pkName, filelist, la_file_pk_compress_iterate__);
-	// Free 
+	// Free
 	cl_list_destroy(filelist);
 	return pkName;
 }
@@ -337,7 +350,11 @@ const char* la_file_loadzip(la_buffer_t* rtn, la_buffer_t* data,
 const char* la_file_mkdir(const char* path) {
 	if(path == NULL) return NULL;
 	if(path[0] == 0) return NULL;
+#if defined(LA_WINDOWS)
+	if(mkdir(path)) {
+#else
 	if(mkdir(path, LA_FILE_PERMISSIONS)) {
+#endif
 		int errsv = errno;
 		if(errsv == EEXIST) {
 			return NULL;

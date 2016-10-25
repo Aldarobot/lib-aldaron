@@ -242,9 +242,7 @@ $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 	echo Linking....
 	gcc $(OBJS) $(LA_HOME)/build/deps.o $(LA_DEPS) \
 		-o $(LA_OUT) $(CFLAGS) \
-#		-lm -lz -ldl -lpthread -lstdc++ -ljpeg
-		-lm -lz -lmingw32 -mwindows -lpthread -lstdc++ -ljpeg \
-		$(LINKER_LIBS) $(PLATFORM_CFLAGS) \
+		$(PLAT_LINK) $(LINKER_LIBS) $(PLATFORM_CFLAGS) \
 		$(GL_VERSION) $(LA_DEBUG)
 	echo Done! # [ OpenGL Version = $(GL_VERSION) ]
 build/:

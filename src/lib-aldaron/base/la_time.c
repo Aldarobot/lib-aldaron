@@ -6,9 +6,10 @@
 #include <la.h>
 
 #include <time.h>
-#include <Windows.h>
 
 #if defined(LA_WINDOWS)
+	#include <Windows.h>
+
 //	struct timespec { long tv_sec; long tv_nsec; };   //header part
 	#define exp7           10000000LL     //1E+7     //C-file part
 	#define exp9         1000000000LL     //1E+9

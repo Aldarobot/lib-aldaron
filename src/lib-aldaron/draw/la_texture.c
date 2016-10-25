@@ -138,9 +138,7 @@ static void la_window_draw_flipped(la_window_draw_t* param) {
 		&param->window->protected.functions.primary);
 
 	// Clear the screen.
-	la_print("CLEARER");
 	la_window_clear(0., .5, .66, 1.);
-	la_print("CLEARED");
 	// Run the screen's redraw function
 	redraw(param->context, param->window);
 	// Draw Mouse
@@ -152,9 +150,7 @@ static void la_window_draw_flipped(la_window_draw_t* param) {
 void la_window_draw__(void* context, la_window_t* window) {
 	la_window_draw_t pass = (la_window_draw_t) { context, window };
 
-	la_print("CLEAROUT");
 	la_window_clear(0., .5, .66, 1.);
-	la_print("CLEAROUT2");
 	// Draw over it.
 	la_ro_pr(&pass, window, &window->screen, (la_fn_t) la_window_draw_flipped);
 	la_ro_draw(&window->screen);

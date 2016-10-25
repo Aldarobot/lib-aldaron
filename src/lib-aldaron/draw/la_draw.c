@@ -154,7 +154,6 @@ void la_draw_checkresize__(void* context, la_window_t* window) {
 	if(should_resize == 2) la_draw_windowresize__(context, window);
 //TODO: REMOVE
 	la_window_clear(0.f, 1.f, 0.f, 1.f);
-	la_print("Cleared.");
 }
 
 void la_window_loop__(void* context, la_window_t* window) {

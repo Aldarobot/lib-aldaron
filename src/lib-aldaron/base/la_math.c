@@ -3,13 +3,23 @@
 /* DO NOT REMOVE THIS NOTICE */
 
 #include <la_math.h>
+#include <la.h>
 
 #include <math.h>
 #include <time.h>
 
+#if defined(LA_WINDOWS)
+//	struct timespec { long tv_sec; long tv_nsec; };
+	int clock_gettime(int, struct timespec *spec);
+#endif
+
 uint32_t la_math_random(uint32_t a) {
 	struct timespec time;
+#if defined(LA_WINDOWS)
+	clock_gettime(0, &time);
+#else
 	clock_gettime(CLOCK_MONOTONIC, &time);
+#endif
 	// Convert Nanoseconds to Seconds.
 	return time.tv_nsec % a;
 }

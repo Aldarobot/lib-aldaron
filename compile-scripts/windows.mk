@@ -1,7 +1,8 @@
-PLATFORM = Linux
-LD = ld -r
-S = "/"
-LN = ln -s
+PLATFORM = Windows
+LD = ld -m i386pe -r
+WGET = wget --no-check-certificate
+S = /
+LN = mklink /D 
 
 $(OBJ_SDL): $(SRC_SDL)
 	printf "[COMP] compiling SDL...\n"

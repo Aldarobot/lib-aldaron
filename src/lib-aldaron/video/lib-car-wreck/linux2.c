@@ -1,3 +1,7 @@
+#include <la.h>
+
+#if defined(LA_LINUX)
+
 #include <car.h>
 
 #include <fcntl.h>
@@ -63,7 +67,7 @@ const char* car_camera_init(car_camera_t* camera, uint16_t id,
 	req.count = 1;
 	req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	req.memory = V4L2_MEMORY_MMAP;
-	 
+
 	if (-1 == xioctl(fd, VIDIOC_REQBUFS, &req))
 	{
 		ERROR("Requesting Buffer\n");
@@ -160,3 +164,5 @@ const char* car_camera_kill(car_camera_t* camera) {
 	}
 	return NULL;
 }
+
+#endif

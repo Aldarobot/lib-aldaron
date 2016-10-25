@@ -19,7 +19,7 @@ OBJ_SDL_NET = build/deps/sdl-net.o
 OBJ_LIBZIP = build/deps/libzip.o
 
 # Default target
-build: build/ $(OBJ_CLUMP) $(OBJ_SDL) $(OBJ_SDL_IMAGE) $(OBJ_SDL_MIXER) $(OBJ_SDL_NET) $(OBJ_LIBZIP) ~/.libaldaron
+default: build/ $(OBJ_CLUMP) $(OBJ_SDL) $(OBJ_SDL_IMAGE) $(OBJ_SDL_MIXER) $(OBJ_SDL_NET) $(OBJ_LIBZIP) ~/.libaldaron
 	rm -f build/deps.o
 	# Linking library dependencies....
 	ar csr build/deps.o build/deps/*.o
@@ -39,7 +39,8 @@ ifneq ("$(shell uname | grep Linux)", "")
   include compile-scripts/linux.mk
  endif
 else
- $(error "Platform is not supported")
+ include compile-scripts/windows.mk
+# $(error "Platform is not supported")
 endif
 #TODO: Darwin is mac OS for uname
 
@@ -63,14 +64,14 @@ src/lib/include/:
 
 $(SRC_SDL):
 	cd src/lib/ && \
-	wget https://www.libsdl.org/release/$(DEPS_VER_SDL).zip && \
+	$(WGET) https://www.libsdl.org/release/$(DEPS_VER_SDL).zip && \
 	unzip $(DEPS_VER_SDL).zip && \
 	rm $(DEPS_VER_SDL).zip && \
 	mv $(DEPS_VER_SDL) sdl
 
 download-ems:
 	cd deps/&& \
-	wget https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-portable.tar.gz && \
+	$(WGET) https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-portable.tar.gz && \
 	tar -xzf emsdk-portable.tar.gz && \
 	rm emsdk-portable.tar.gz
 
@@ -84,43 +85,43 @@ build-emscripten:
 $(OBJ_LIBZIP):
 	# Downloading libzip....
 	cd src/lib && \
-	wget -4 http://www.nih.at/libzip/$(DEPS_VER_ZIP).tar.gz && \
+	$(WGET) http://www.nih.at/libzip/$(DEPS_VER_ZIP).tar.gz && \
 	tar -xzf $(DEPS_VER_ZIP).tar.gz && \
 	rm $(DEPS_VER_ZIP).tar.gz && \
 	mv $(DEPS_VER_ZIP)/ libzip
 	# Compiling libzip....
 	cd $(SRC_LIBZIP)/ && sh configure && make
-	ld -r $(SRC_LIBZIP)/lib/*.o -o $(OBJ_LIBZIP)
+	$(LD) $(SRC_LIBZIP)/lib/*.o -o $(OBJ_LIBZIP)
 	# Done!
 $(OBJ_SDL_IMAGE):
 	# Downloading SDL_Image....
 	cd src/lib/ && \
-	wget https://www.libsdl.org/projects/SDL_image/release/$(DEPS_VER_SDL_IMAGE).zip && \
+	$(WGET) https://www.libsdl.org/projects/SDL_image/release/$(DEPS_VER_SDL_IMAGE).zip && \
 	unzip $(DEPS_VER_SDL_IMAGE).zip && \
 	rm $(DEPS_VER_SDL_IMAGE).zip && \
 	mv $(DEPS_VER_SDL_IMAGE) sdl-image
 	# Compiling SDL_image....
 	export PATH=$$PATH:`pwd`/$(SRC_SDL)/usr_local/bin/ && \
 	cd $(SRC_SDL_IMAGE)/ && sh configure && make
-	ld -r $(SRC_SDL_IMAGE)/.libs/*.o -o $(OBJ_SDL_IMAGE)
+	$(LD) $(SRC_SDL_IMAGE)/.libs/*.o -o $(OBJ_SDL_IMAGE)
 	# Done!
 $(OBJ_SDL_NET):
 	# Downloading SDL_net....
-	cd src/lib/ && \
-	wget https://www.libsdl.org/projects/SDL_net/release/$(DEPS_VER_SDL_NET).zip && \
-	unzip $(DEPS_VER_SDL_NET).zip && \
-	rm $(DEPS_VER_SDL_NET).zip && \
-	mv $(DEPS_VER_SDL_NET) sdl-net
-	# Compiling SDL_net...,
-	cd $(SRC_SDL_NET)/ && export SDL2_CONFIG=`pwd`/../sdl/usr_local/bin/sdl2-config && sh configure && make
-	# Linking....
-	ld -r $(SRC_SDL_NET)/.libs/*.o -o $(OBJ_SDL_NET)
-	printf "[COMP] done!\n"
+#	cd src/lib/ && \
+#	$(WGET) https://www.libsdl.org/projects/SDL_net/release/$(DEPS_VER_SDL_NET).zip && \
+#	unzip $(DEPS_VER_SDL_NET).zip && \
+#	rm $(DEPS_VER_SDL_NET).zip && \
+#	mv $(DEPS_VER_SDL_NET) sdl-net
+#	# Compiling SDL_net...,
+#	cd $(SRC_SDL_NET)/ && export SDL2_CONFIG=`pwd`/../sdl/usr_local/bin/sdl2-config && ./configure --disable-gui --with-sdl-exec-prefix=`pwd`/../sdl/usr_local/bin/ && make
+#	# Linking....
+#	$(LD) $(SRC_SDL_NET)/.libs/*.o -o $(OBJ_SDL_NET)
+#	printf "[COMP] done!\n"
 
 $(OBJ_SDL_MIXER):
 	# Downloading SDL_mixer....
 	cd src/lib/ && \
-	wget https://www.libsdl.org/projects/SDL_mixer/release/$(DEPS_VER_SDL_MIXER).zip && \
+	$(WGET) https://www.libsdl.org/projects/SDL_mixer/release/$(DEPS_VER_SDL_MIXER).zip && \
 	unzip $(DEPS_VER_SDL_MIXER).zip && \
 	rm $(DEPS_VER_SDL_MIXER).zip && \
 	mv $(DEPS_VER_SDL_MIXER) sdl-mixer
@@ -129,7 +130,7 @@ $(OBJ_SDL_MIXER):
 	cd $(SRC_SDL_MIXER)/ && sh configure && make
 	# Linking....
 	rm -f $(SRC_SDL_MIXER)/build/playmus.o $(SRC_SDL_MIXER)/build/playwave.o
-	ld -r $(SRC_SDL_MIXER)/build/*.o -o $(OBJ_SDL_MIXER)
+	$(LD) $(SRC_SDL_MIXER)/build/*.o -o $(OBJ_SDL_MIXER)
 	# Done!
 
 $(OBJ_CLUMP): src/lib/clump/*
@@ -143,7 +144,7 @@ $(OBJ_CLUMP): src/lib/clump/*
 	gcc src/lib/clump/pool.c -c -std=c99 -o build/obj/clump_pool.o
 	gcc src/lib/clump/rhash.c -c -std=c99 -o build/obj/clump_rhash.o
 	gcc src/lib/clump/tree.c -c -std=c99 -o build/obj/clump_tree.o
-	ld -r build/obj/clump_*.o -o $(OBJ_CLUMP)
-	# Done!	
+	$(LD) build/obj/clump_*.o -o $(OBJ_CLUMP)
+	# Done!
 
 ################################################################################

@@ -72,7 +72,8 @@ la_config2:
 
 src/lib-aldaron/:
 	# linking lib-aldaron
-	ln -s $(LA_HOME)/src/lib-aldaron src/
+	#ln -s $(LA_HOME)/src/lib-aldaron src/
+	$(LN)
 
 -release: build-notify $(FOLDERS) -publish $(OBJS_RELEASE) -link
 -test: build-notify $(FOLDERS) -test1 $(OBJS_TEST) -link
@@ -202,13 +203,13 @@ clean:
 
 $(BUILD_OBJ_PROF)/%.o: %.c $(HEADERS)
 	echo Compiling Build $<....
-	$(CC) $(CFLAGS) -o $@ -c $< $(LA_DEBUG)
+	gcc $(CFLAGS) -o $@ -c $< $(LA_DEBUG)
 $(BUILD_OBJ_TEST)/%.o: %.c $(HEADERS)
 	echo Compiling Test $<....
-	$(CC) $(CFLAGS) -o $@ -c $< $(LA_DEBUG)
+	gcc $(CFLAGS) -o $@ -c $< $(LA_DEBUG)
 $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 	echo Compiling Release $<....
-	$(CC) $(CFLAGS) -o $@ -c $< $(LA_DEBUG)
+	gcc $(CFLAGS) -o $@ -c $< $(LA_DEBUG)
 
 -init-vars:
 	# Build Project
@@ -226,28 +227,23 @@ $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 	$(eval CFLAGS=$(CFLAGS_INCLUDES) -Wall)
 
 -test1: -init-vars
-#	$(eval GL_VERSION=-lGL) ## OpenGL
-	$(eval GL_VERSION=-lGLESv2) ## OpenGL ES
 	$(eval LA_DEBUG=-g -DLA_DEBUG)
 	$(eval LA_OUT=build/test.out)
 	$(eval OBJS=$(OBJS_TEST))
 -test2: -init-vars
-#	$(eval GL_VERSION=-lGL) ## OpenGL
-	$(eval GL_VERSION=-lGLESv2) ## OpenGL ES
 	$(eval LA_DEBUG=-pg -g)
 	$(eval LA_OUT=build/test.out)
 	$(eval OBJS=$(OBJS_TEST))
 -publish: -init-vars
-#	$(eval GL_VERSION=-lGL) ## OpenGL
-	$(eval GL_VERSION=-lGLESv2) ## OpenGL ES
 	$(eval LA_DEBUG=-O3 -Werror)
 	$(eval LA_OUT=build/bin/$(PACKNAME))
 	$(eval OBJS=$(OBJS_RELEASE))
 -link:
 	echo Linking....
-	$(CC) $(OBJS) $(LA_HOME)/build/deps.o $(LA_DEPS) \
+	gcc $(OBJS) $(LA_HOME)/build/deps.o $(LA_DEPS) \
 		-o $(LA_OUT) $(CFLAGS) \
-		-lm -lz -ldl -lpthread -lstdc++ -ljpeg \
+#		-lm -lz -ldl -lpthread -lstdc++ -ljpeg
+		-lm -lz -lmingw32 -mwindows -lpthread -lstdc++ -ljpeg \
 		$(LINKER_LIBS) $(PLATFORM_CFLAGS) \
 		$(GL_VERSION) $(LA_DEBUG)
 	echo Done! # [ OpenGL Version = $(GL_VERSION) ]

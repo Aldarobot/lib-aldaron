@@ -16,10 +16,14 @@ static la_memory_collector_t la_memory_collection[64];
 static safe_uint8_t la_memory_collection_index;
 
 uint64_t la_memory_used(void) {
+#if defined(LA_WINDOWS)
+	return 0;
+#else
 	struct mallinfo mi;
 
 	mi = mallinfo();
 	return mi.uordblks;
+#endif
 }
 
 void* la_memory_clear(void* data, uint64_t size) {

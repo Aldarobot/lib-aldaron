@@ -7,13 +7,17 @@ this library will run on any supported platform, no extra code writing needed.
 The documentation can be found on the [Lib Aldaron Wiki](https://github.com/OxyDeadbeef/lib-aldaron/wiki).
 
 #Downloads
-None yet - Still in Beta stage
+You can download any version lib-aldaron and/or it's documentation [here](https://github.com/PlopGrizzly/lib-aldaron/releases).
 
 #Supported Platforms
 The goal for Lib Aldaron is to support all platforms.
 
-Heres a list of the currently supported platforms.
+Here's a list of the currently supported platforms.
 
 - Fedora ( and probably any other linux )
 - Android
 - Raspberry Pi.
+
+Here's a list of platforms that have been worked on, but are not complete:
+
+- Windows

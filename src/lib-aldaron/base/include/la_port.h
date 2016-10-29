@@ -32,12 +32,23 @@
 #define LA_PCYAN "\x1B[36m"
 #define LA_PWHITE "\x1B[37m"
 
+#define LA_PBLACKH "\x1B[40m"
+#define LA_PREDH "\x1B[41m"
+#define LA_PGREENH "\x1B[42m"
+#define LA_PYELLOWH "\x1B[43m"
+#define LA_PBLUEH "\x1B[44m"
+#define LA_PMAGENTAH "\x1B[45m"
+#define LA_PCYANH "\x1B[46m"
+#define LA_PWHITEH "\x1B[47m"
+
 // Print eXtension
 #define LA_PXSIZE(size) "\x1B[f" size ";"
 #define LA_PXMOVE(x, y) "\x1B[m" x "," y ";"
 #define LA_PXCOLOR(r, g, b, a) "\x1B[c" r "," g "," b "," a ";"
 #define LA_PXWIDTH(width) "\x1B[w" width ";"
 #define LA_PXLIMIT(limit) "\x1B[l" limit ";"
+#define LA_PXBGCOLOR(r, g, b, a) "\x1B[g" r "," g "," b "," a ";"
+#define LA_PXBGOFF "\x1B[og"
 
 //
 

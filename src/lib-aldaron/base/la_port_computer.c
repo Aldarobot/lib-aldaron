@@ -126,7 +126,7 @@ void la_port_input(la_window_t* window) {
 			break;
 		case SDL_MOUSEMOTION: {
 			float x = (float)window->sdl_event.motion.x /
-				(float)window->wm.w;
+				(float)(window->wm.w - 5);
 			float y = (float)window->sdl_event.motion.y /
 				(float)window->wm.h;
 			if(window->wm.w == 0) x = 0.f;

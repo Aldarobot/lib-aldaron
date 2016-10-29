@@ -1,8 +1,0 @@
-TODO:
-	* Rename functions to la_ instead of jl_ & add deprecated jl_ functions
-		to jl.h
-	* Allow pause and resume on android by using native window functions
-		instead of using SDL.
-	* Fix Documentation problems
-	* Add bluetooth communications ( for android )
-	* Add 3D support

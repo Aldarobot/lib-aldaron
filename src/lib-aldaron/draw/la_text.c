@@ -33,15 +33,14 @@ void la_text(la_window_t* window, const char* format, ...) {
 
 	// Format the String...
 	va_start( arglist, format );
-	vsnprintf(temp, 1024, format, arglist);
+	vsnprintf(temp, 4096, format, arglist);
 	va_end( arglist );
 
 	// Draw
 	la_ro_image_rect(window,&window->gl.temp_vo,window->textures.font,w,h);
-	while(1) {
+	while(temp[i]) {
 		if(limit && i > limit) break;
-		if(temp[i] == '\0') break;
-		if(COMPARE("\x1B[")) {
+		if(temp[i] == '\x1B') {
 			if(COMPARE(LA_PRED)) {
 				i += strlen(LA_PRED);
 				colors[0] = 1.f, colors[1] = 0.f, colors[2] = 0.f,
@@ -98,23 +97,10 @@ void la_text(la_window_t* window, const char* format, ...) {
 				la_print("%c", temp[i]);
 				la_panic("Unknown Ansi Escape Sequence");
 			}
-//		}else if(COMPARE(LA_TEXT_CMD)) {
-//			if(COMPARE(LA_TEXT_ALIGN)) {
-//				i += 2;
-//			}else if(COMPARE(LA_TEXT_UNDERLAY)) {
-//				i += 2;
-//				for(int k = 0; k < 4; k++) { // RGBA
-//					shadowcolor[k] = la_text_readfloat(&temp[i]);
-//					i += sizeof(float);
-//				}
-//				shadow = 1;
-//			}else if(COMPARE(LA_TEXT_SHADOWOFF)) {
-//				shadow = 0;
-//			}
-		}else if(COMPARE("\n")) {
+		}else if(temp[i] == '\n') {
 			tr.x = resetx, tr.y += h;
 			i++;
-		}else if(COMPARE("\t")) {
+		}else if(temp[i] == '\t') {
 			tr.x += tabsize * w * ( 3. / 4. );
 			i++;
 		}else{ // Single Byte Character.

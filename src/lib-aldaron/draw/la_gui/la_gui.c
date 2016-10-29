@@ -25,6 +25,7 @@ extern float la_banner_size;
 
 void la_gui_bg(la_window_t* window, uint32_t tex) {
 	la_ro_image_rect(window, &window->gui.vos.whole_screen, tex, 1.f, 2.f);
+	la_ro_move(&window->gui.vos.whole_screen, (la_v3_t) { 0., (2. - la_ro_ar(window)) * -.5, 0. });
 //	la_ro_change_image(&window->gui.vos.whole_screen, tex, w, h, c, 0);
 	la_ro_draw(&window->gui.vos.whole_screen);
 }

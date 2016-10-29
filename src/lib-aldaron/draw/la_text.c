@@ -121,6 +121,8 @@ void la_text(la_window_t* window, const char* format, ...) {
 			i++;
 			j += 8;
 		}else if(temp[i] == ' ') {
+			tr.x += w * ( 3. / 4. );
+			i++, j++;
 		}else{ // Single Byte Character.
 			if(bg) {
 				la_ro_change_image(&window->gl.temp_vo,

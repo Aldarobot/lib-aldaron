@@ -105,7 +105,7 @@ void la_audio_lock(la_audio_t* laa, la_sound_t* audio, float in, la_v3_t* vec) {
 	audio->channel = LA_AUDIO_CHANNEL_LOCK;
 }
 
-void la_audio_pause(la_audio_t* laa, la_sound_t* audio) {
+void la_audio_pause(la_sound_t* audio) {
 #ifdef LA_ANDROID
 #else
 	if(audio->channel == LA_AUDIO_CHANNEL_MUSIC)
@@ -115,7 +115,7 @@ void la_audio_pause(la_audio_t* laa, la_sound_t* audio) {
 #endif
 }
 
-void la_audio_resume(la_audio_t* laa, la_sound_t* audio) {
+void la_audio_resume(la_sound_t* audio) {
 #ifdef LA_ANDROID
 #else
 	if(audio->channel == LA_AUDIO_CHANNEL_MUSIC)
@@ -161,7 +161,7 @@ void la_audio_stop(la_sound_t* audio, float out) {
 #endif
 }
 
-void la_audio_load(la_audio_t* laa, la_sound_t* audio, la_buffer_t* zipdata,
+void la_audio_load(la_sound_t* audio, la_buffer_t* zipdata,
 	const char* filename, uint8_t music)
 {
 	la_buffer_t aud;

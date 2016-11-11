@@ -27,12 +27,11 @@ typedef struct{
 // Prototypes:
 void la_audio_play(la_audio_t*, la_sound_t* audio, float in, la_v3_t* vec);
 void la_audio_lock(la_audio_t*, la_sound_t* audio, float in, la_v3_t* vec);
-void la_audio_pause(la_audio_t*, la_sound_t* audio);
-void la_audio_resume(la_audio_t*, la_sound_t* audio);
+void la_audio_pause(la_sound_t*);
+void la_audio_resume(la_sound_t*);
 uint8_t la_audio_wait(la_audio_t*, la_sound_t* w_audio, la_sound_t* n_audio,
 	float in, la_v3_t* vec);
-void la_audio_stop(la_sound_t*, float out);
-void la_audio_load(la_audio_t*, la_sound_t* audio, la_buffer_t* zipdata,
-	const char* filename, uint8_t music);
+void la_audio_stop(la_sound_t*, float);
+void la_audio_load(la_sound_t*, la_buffer_t*, const char*, uint8_t);
 
 #endif

@@ -57,7 +57,7 @@ void la_print(const char* format, ...);
 void la_panic(const char* format, ...);
 void la_dont(void* context);
 const char* la_error(const char* format, ...);
-int32_t la_start(void* fnc_init, la_fn_t fnc_loop, la_fn_t fnc_kill,
-	const char* name, size_t ctx_size);
+int32_t la_start(void* fnc_init, la_fn_t* loop, la_fn_t fnc_kill,
+	void* ctx, uint64_t ctx_size);
 
 #endif

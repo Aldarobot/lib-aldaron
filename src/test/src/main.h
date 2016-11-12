@@ -1,9 +1,8 @@
 #include <la_menu.h>
-#include <la_mode.h>
 
 typedef struct{
 	la_window_t* window;
-	la_mode_t mode;
+	la_fn_t loop;
 	la_ro_t vo1;
 	la_ro_t vo2;
 	float s1[3];

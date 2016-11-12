@@ -84,8 +84,7 @@ void la_window_clear(float r, float g, float b, float a) {
 static inline SDL_Window* la_window_make__(void) {
 	int flags = SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE|SDL_WINDOW_MAXIMIZED;
 
-	SDL_Window* rtn = SDL_CreateWindow(
-		"Initializing....", SDL_WINDOWPOS_UNDEFINED,
+	SDL_Window* rtn = SDL_CreateWindow(NULL, SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED, 640, 360, flags);
 #ifdef LA_DEBUG
 	if(rtn == NULL) la_window_killedit__("SDL_CreateWindow");
@@ -110,14 +109,6 @@ void la_window_update_size(la_window_t* window) {
 //This is the code that actually creates the window by accessing SDL
 static inline void la_window_create__(la_window_t* window) {
 #if defined(LA_COMPUTER)
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-	// OpenGL Version
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-	// Create window.
 	window->wm.window = la_window_make__();
 	window->wm.glcontext = SDL_GL_CreateContext(window->wm.window);
 #ifdef LA_DEBUG

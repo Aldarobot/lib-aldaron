@@ -20,8 +20,7 @@
 
 void la_time_init__(void);
 
-void la_window_start__(void*,la_window_t*,la_draw_fn_t,la_fn_t,la_fn_t,
-	const char*);
+void la_window_start__(void*,la_window_t*,la_draw_fn_t,la_fn_t*,la_fn_t);
 
 #if defined(LA_PHONE)
 	#include <jni.h>
@@ -37,8 +36,8 @@ float la_banner_size = 0.f;
 SDL_atomic_t la_rmcexit;
 static char la_errorv[256];
 
-static inline void* la_init__(const char* nm, uint64_t ctx1s) {
-	void* context = la_memory_allocate(ctx1s);
+static inline void la_init__(void* ctx, uint64_t ctx_size) {
+	la_memory_clear(ctx, ctx_size);
 	// Clear error file
 	la_file_truncate(NULL);
 	// Reset Time
@@ -66,7 +65,6 @@ static inline void* la_init__(const char* nm, uint64_t ctx1s) {
 	}
 #endif
 #endif
-	return context;
 }
 
 // EXPORT FUNCTIONS
@@ -106,14 +104,13 @@ const char* la_error(const char* format, ...) {
 }
 
 /**
- * Start Lib-Aldaron on a separate thread.
  * @param fnc_init: The function initialize the program.
  * @param fnc_kill: The function to free anything that needs to be freed.
  * @param name: The name of the program, used for storage / window name etc.
  * @param ctx_size: The size of the program context.
 **/
-int32_t la_start(void* fnc_init, la_fn_t fnc_loop, la_fn_t fnc_kill,
-	const char* name, size_t ctx_size)
+int32_t la_start(void* fnc_init, la_fn_t* loop, la_fn_t fnc_kill,
+	void* ctx, uint64_t ctx_size)
 {
 	SDL_AtomicSet(&la_rmcexit, 1);
 
@@ -124,27 +121,25 @@ int32_t la_start(void* fnc_init, la_fn_t fnc_loop, la_fn_t fnc_kill,
 #endif
 
 	// Initialize Lib Aldaron!
-	void* context = la_init__(name, ctx_size);
+	la_init__(ctx, ctx_size);
 
 	// Open a window, if LA_FEATURE_DISPLAY is set.
 #ifdef LA_FEATURE_DISPLAY
-	la_window_start__(context, la_window, fnc_init, fnc_loop,
-		fnc_kill, name);
+	la_window_start__(ctx, la_window, fnc_init, loop, fnc_kill);
 #else
-	((la_fn_t) fnc_init)(context);
-	while(SDL_AtomicGet(&la_rmcexit))
-		fnc_loop(context);
-	fnc_kill(context);
+	((la_fn_t) fnc_init)(ctx);
+	while(SDL_AtomicGet(&la_rmcexit)) {
+		(*loop)(ctx);
+	}
+	fnc_kill(ctx);
 #endif
 #ifndef LA_ANDROID
 	#ifdef LA_FEATURE_AUDIO
 		Mix_CloseAudio();
 	#endif
 	// Exit.
-	la_print("SDL_Quit()");
+	la_print("SDL_Quit(), Exit 0");
 	SDL_Quit();
-	la_print("| Free Context & Exit |");
-	free(context);
 #endif
 	return 0;
 }

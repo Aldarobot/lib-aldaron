@@ -16,7 +16,7 @@
 typedef struct {
 	void* context;
 	la_window_t* window;
-	la_fn_t loop;
+	la_fn_t* loop;
 	la_fn_t kill;
 } la_main_thread_t;
 
@@ -121,8 +121,7 @@ static void la_draw_loader_a(void* context, la_window_t* window) {
 	la_draw_fnchange(window, la_draw_loader_b, la_draw_dont, la_draw_dont);
 }
 
-static inline void
-la_draw_init__(void* context, la_window_t* window, const char* name) {
+static inline void la_draw_init__(void* context, la_window_t* window) {
 	// Initialize subsystems
 	la_print("Creating the window....");
 	la_window_init__(window);
@@ -139,7 +138,6 @@ la_draw_init__(void* context, la_window_t* window, const char* name) {
 	la_safe_set_pointer(&window->protected.functions.resize, la_draw_dont);
 	la_safe_set_uint8(&window->protected.needs_resize, 2);
 
-	la_window_name(window, name);
 	la_print("Window Created!");
 }
 
@@ -182,7 +180,7 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
 		// Poll For Input & Regulate FPS
 		la_port_input(ctx->window);
 		// Program loop
-		ctx->loop(ctx->context);
+		(*(ctx->loop))(ctx->context);
 	}
 	la_print("Kill The Loop -> 0.");
 	ctx->kill(ctx->context);
@@ -196,19 +194,19 @@ static int32_t la_main_thread(la_main_thread_t* ctx) {
  * @param fn_: Graphic initialization function run on graphical thread.
 **/
 void la_window_start__(void* context, la_window_t* window, la_draw_fn_t fn_,
-	la_fn_t fnc_loop, la_fn_t fnc_kill, const char* name)
+	la_fn_t* loop, la_fn_t fnc_kill)
 {
 	la_thread_t mti; // Main Thread Id
 
 	// Set init function
 	la_safe_set_pointer(&window->protected.functions.fn, fn_);
 	// Initialize subsystems
-	la_draw_init__(context, window, name);
+	la_draw_init__(context, window);
 	// Main loop delay
 	SDL_AtomicSet(&la_rmcwait, 1);
 	// Branch a new thread.
 	la_main_thread_t ctx = (la_main_thread_t) { context, window,
-		fnc_loop, fnc_kill };
+		loop, fnc_kill };
 	la_thread_new(&mti, (la_thread_fn_t)la_main_thread, "la_main", &ctx);
 	printf("SSSSSSSSSSSS# %p\n", mti.thread);
 #ifndef LA_ANDROID

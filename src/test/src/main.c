@@ -66,18 +66,14 @@ static inline void ex_init_tasks(ctx_t* ctx) {
 	la_menu_addicon_name(&ctx->menu);
 }
 
-static void ex_loop(ctx_t* ctx) {
-	la_mode_run(ctx, ctx->mode);
-}
-
 static void ex_init(ctx_t* ctx, la_window_t* window) {
 	ctx->window = window;
+	ctx->loop = (la_fn_t) ex_edit_loop;
 	ex_init_tasks(ctx);
-	la_mode_init(ctx, &ctx->mode, (la_mode_t)
-		{ ex_edit_loop, ex_edit_init, la_dont } );
+	ex_edit_init(ctx);
 }
 
 int main(int argc, char* argv[]) {
-	return la_start((la_fn_t) ex_init, (la_fn_t) ex_loop, la_dont,
-		"Lib Aldaron Test Program", sizeof(ctx_t));
+	ctx_t ctx;
+	return la_start(ex_init, &ctx.loop, la_dont, &ctx, sizeof(ctx_t));
 }

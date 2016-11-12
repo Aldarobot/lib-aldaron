@@ -61,8 +61,9 @@ static inline void la_audio_load2(la_sound_t* audio,
  * @param in: Seconds of fade-in.
  * @param vec: Where sound is coming from, or NULL for no position effect.
 */
-void la_audio_play(la_audio_t* laa, la_sound_t* audio, float in, la_v3_t* vec) {
+void la_audio_play(la_sound_t* audio, float in, la_v3_t* vec) {
 	int32_t ms = la_audio_sec2ms__(in);
+	uint32_t nc = 0;
 
 	if(audio->channel == LA_AUDIO_CHANNEL_MUSIC) {
 #ifdef LA_ANDROID
@@ -79,8 +80,8 @@ void la_audio_play(la_audio_t* laa, la_sound_t* audio, float in, la_v3_t* vec) {
 		if((audio->channel = Mix_FadeInChannel(-1, audio->audio, 0,
 			ms + 1)) == -1)
 		{
-			laa->num_channels++;
-			Mix_ReserveChannels(laa->num_channels);
+			nc++;
+			Mix_ReserveChannels(nc);
 			goto LA_AUDIO_PLAY_MIX_PLAY_CHANNEL;
 		}
 		// Calculate Position
@@ -100,8 +101,8 @@ void la_audio_play(la_audio_t* laa, la_sound_t* audio, float in, la_v3_t* vec) {
 	}
 }
 
-void la_audio_lock(la_audio_t* laa, la_sound_t* audio, float in, la_v3_t* vec) {
-	if(audio->channel != LA_AUDIO_CHANNEL_LOCK) la_audio_play(laa, audio, in, vec);
+void la_audio_lock(la_sound_t* audio, float in, la_v3_t* vec) {
+	if(audio->channel != LA_AUDIO_CHANNEL_LOCK) la_audio_play(audio, in, vec);
 	audio->channel = LA_AUDIO_CHANNEL_LOCK;
 }
 
@@ -127,7 +128,6 @@ void la_audio_resume(la_sound_t* audio) {
 
 /**
  * Wait on an audio track to stop.  If it is stopped, fade in a new one.
- * @param laa: The laa library context.
  * @param w_audio: The audio to wait on, NULL to wait on music to finish.
  * @param n_audio: The audio to play.
  * @param in: Seconds of fade-in.
@@ -135,7 +135,7 @@ void la_audio_resume(la_sound_t* audio) {
  * @returns 1: Audio has finished, and new audio is playing
  * @returns 0: Audio is still playing.
 **/
-uint8_t la_audio_wait(la_audio_t* laa, la_sound_t* w_audio, la_sound_t* n_audio,
+uint8_t la_audio_wait(la_sound_t* w_audio, la_sound_t* n_audio,
 	float in, la_v3_t* vec)
 {
 #ifdef LA_ANDROID
@@ -144,7 +144,7 @@ uint8_t la_audio_wait(la_audio_t* laa, la_sound_t* w_audio, la_sound_t* n_audio,
 	if(w_audio ? Mix_Playing(w_audio->channel) : Mix_PlayingMusic())
 		return 0;
 #endif
-	la_audio_play(laa, n_audio, in, vec);
+	la_audio_play(n_audio, in, vec);
 	return 1;
 }
 

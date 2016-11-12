@@ -71,6 +71,7 @@ static void ex_init(ctx_t* ctx, la_window_t* window) {
 	ctx->loop = (la_fn_t) ex_edit_loop;
 	ex_init_tasks(ctx);
 	ex_edit_init(ctx);
+	la_window_clear(0.f, 0.f, 0.f, 1.f);
 }
 
 int main(int argc, char* argv[]) {

@@ -23,8 +23,6 @@ typedef enum{
 	LA_MENU_ID_TASK_MAX //how many taskbuttons
 }la_menu_id_t;
 
-void la_draw_resize(la_window_t *, uint32_t, uint32_t);
-
 static inline void la_menu_shadow__(la_menu_t* menu) {
 	// Clear Texture.
 	la_window_clear(0.f, 0.f, 0.f, 0.f);
@@ -98,14 +96,14 @@ static void la_menu_flip_press__(la_menu_t* menu) {
 	if(!menu->window->input.mouse.h && !menu->window->input.touch.h) return;
 	if(!menu->window->input.mouse.p && !menu->window->input.touch.p) return;
 //
-	const void* primary = la_safe_get_pointer(&menu->window->protected
-		.functions.primary);
-	const void* secondary = la_safe_get_pointer(&menu->window->protected
-		.functions.secondary);
+	const void* primary = la_safe_get_pointer(&menu->window->functions
+		.primary);
+	const void* secondary = la_safe_get_pointer(&menu->window->functions
+		.secondary);
 
-	la_safe_set_pointer(&menu->window->protected.functions.primary,
+	la_safe_set_pointer(&menu->window->functions.primary,
 		secondary);
-	la_safe_set_pointer(&menu->window->protected.functions.secondary,
+	la_safe_set_pointer(&menu->window->functions.secondary,
 		primary);
 //	la_notify(menu->window, GMessage[menu->window->sg.cs]);
 }

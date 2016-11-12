@@ -40,13 +40,13 @@ void la_window_init__(la_window_t*);
 void la_window_update__(la_window_t*);
 
 static void la_draw_programsresize__(void* context, la_window_t* window) {
-	((la_draw_fn_t)la_safe_get_pointer(&window->protected.functions.resize))
+	((la_draw_fn_t)la_safe_get_pointer(&window->functions.resize))
 		(context, window);
 }
 
 static inline void la_draw_windowresize__(void* context, la_window_t* window) {
-	uint32_t w = la_safe_get_uint32(&window->protected.set_width);
-	uint32_t h = la_safe_get_uint32(&window->protected.set_height);
+	uint32_t w = la_safe_get_uint32(&window->set_width);
+	uint32_t h = la_safe_get_uint32(&window->set_height);
 
 	la_window_update_size(window);
 	if(w == 0) w = la_window_width(window);
@@ -61,8 +61,6 @@ static inline void la_draw_windowresize__(void* context, la_window_t* window) {
 	la_print("Resized.");
 }
 
-#include <SDL.h>
-
 static void la_draw_loader(void* context, la_window_t* window) {
 	la_gui_bg(window, window->textures.backdrop);
 	la_ro_image_rect(window, &window->gl.temp_vo, window->textures.logo, 1.,
@@ -70,16 +68,12 @@ static void la_draw_loader(void* context, la_window_t* window) {
 	la_ro_move(&window->gl.temp_vo, (la_v3_t) {
 		0.f, (la_ro_ar(window) - (90./251.)) / 2.f, 0.f });
 	la_ro_draw(&window->gl.temp_vo);
-//	SDL_Delay(100);
 }
 
 static void la_draw_loader_f(void* context, la_window_t* window) {
-	la_print("User's Init....");
-	((la_draw_fn_t)la_safe_get_pointer(&window->protected.functions.fn))(
-		context, window);
-	la_draw_programsresize__(context, window);
 	SDL_AtomicSet(&la_rmcwait, 0);
-	la_draw_loader(context, window);
+	((la_draw_fn_t)la_safe_get_pointer(&window->functions.fn))(
+		context, window);
 }
 
 static void la_draw_loader_e(void* context, la_window_t* window) {
@@ -90,35 +84,34 @@ static void la_draw_loader_e(void* context, la_window_t* window) {
 	window->textures.icon = la_texture_fpk(window, &window->packagedata,
 		"/taskbar_items.png");
 	la_draw_loader(context, window);
-	la_draw_fnchange(window, la_draw_loader_f, la_draw_dont, la_draw_dont);
+	la_screen_setprimary(window, la_draw_loader_f);
 }
 
 static void la_draw_loader_d(void* context, la_window_t* window) {
 	la_llgraphics_initshader_color__(window);
 	// Load other images....
 	la_draw_loader(context, window);
-	la_draw_fnchange(window, la_draw_loader_e, la_draw_dont, la_draw_dont);
-	SDL_Delay(1000);
+	la_screen_setprimary(window, la_draw_loader_e);
 }
 
 static void la_draw_loader_c(void* context, la_window_t* window) {
 	la_effects_init__(window);
 	la_draw_loader(context, window);
-	la_draw_fnchange(window, la_draw_loader_d, la_draw_dont, la_draw_dont);
+	la_screen_setprimary(window, la_draw_loader_d);
 }
 
 static void la_draw_loader_b(void* context, la_window_t* window) {
 	window->textures.logo = la_texture_fpk(window, &window->packagedata,
 		"/logo.png");
 	la_draw_loader(context, window);
-	la_draw_fnchange(window, la_draw_loader_c, la_draw_dont, la_draw_dont);
+	la_screen_setprimary(window, la_draw_loader_c);
 }
 
 static void la_draw_loader_a(void* context, la_window_t* window) {
 	window->textures.backdrop = la_texture_fpk(window, &window->packagedata,
 		"/backdrop.png");
 	la_gui_bg(window, window->textures.backdrop);
-	la_draw_fnchange(window, la_draw_loader_b, la_draw_dont, la_draw_dont);
+	la_screen_setprimary(window, la_draw_loader_b);
 }
 
 static inline void la_draw_init__(void* context, la_window_t* window) {
@@ -133,20 +126,18 @@ static inline void la_draw_init__(void* context, la_window_t* window) {
 	window->textures.cursor = la_texture_fpk(window, &window->packagedata,
 		"/cursor.png");
 	// Set window loops
-	la_safe_set_pointer(&window->protected.functions.primary, la_draw_loader_a);
-	la_safe_set_pointer(&window->protected.functions.secondary, la_draw_dont);
-	la_safe_set_pointer(&window->protected.functions.resize, la_draw_dont);
-	la_safe_set_uint8(&window->protected.needs_resize, 2);
+	la_screen_setprimary(window, la_draw_loader_a);
+	la_safe_set_pointer(&window->functions.secondary, la_draw_dont);
+	la_safe_set_pointer(&window->functions.resize, la_draw_dont);
+	la_safe_set_uint8(&window->needs_resize, 2);
 
 	la_print("Window Created!");
 }
 
-void la_draw_dont(void* context, la_window_t* window) { return; }
-
 void la_draw_checkresize__(void* context, la_window_t* window) {
 	uint8_t should_resize =
-		la_safe_get_uint8(&window->protected.needs_resize);
-	la_safe_set_uint8(&window->protected.needs_resize, 0);
+		la_safe_get_uint8(&window->needs_resize);
+	la_safe_set_uint8(&window->needs_resize, 0);
 
 	if(should_resize == 1) la_draw_programsresize__(context, window);
 	if(should_resize == 2) la_draw_windowresize__(context, window);
@@ -199,7 +190,7 @@ void la_window_start__(void* context, la_window_t* window, la_draw_fn_t fn_,
 	la_thread_t mti; // Main Thread Id
 
 	// Set init function
-	la_safe_set_pointer(&window->protected.functions.fn, fn_);
+	la_safe_set_pointer(&window->functions.fn, fn_);
 	// Initialize subsystems
 	la_draw_init__(context, window);
 	// Main loop delay
@@ -219,6 +210,12 @@ void la_window_start__(void* context, la_window_t* window, la_draw_fn_t fn_,
 #endif
 }
 
+void la_draw_dont(void* context, la_window_t* window) { return; }
+
+void la_screen_setprimary(la_window_t* window, la_draw_fn_t new_fn) {
+	la_safe_set_pointer(&window->functions.primary, new_fn);
+}
+
 /**
  * Set the functions to be called when the window redraws.
  * @param onescreen: The function to redraw the screen when there's only 1 
@@ -230,19 +227,19 @@ void la_window_start__(void* context, la_window_t* window, la_draw_fn_t fn_,
 void la_draw_fnchange(la_window_t* window, la_draw_fn_t primary,
 	la_draw_fn_t secondary, la_draw_fn_t resize)
 {
-	la_safe_set_pointer(&window->protected.functions.primary, primary);
-	la_safe_set_pointer(&window->protected.functions.secondary, secondary);
-	la_safe_set_pointer(&window->protected.functions.resize, resize);
-	la_safe_set_uint8(&window->protected.needs_resize, 1);
+	la_safe_set_pointer(&window->functions.primary, primary);
+	la_safe_set_pointer(&window->functions.secondary, secondary);
+	la_safe_set_pointer(&window->functions.resize, resize);
+	la_safe_set_uint8(&window->needs_resize, 1);
 }
 
 /**
  * Resize the window.
 **/
 void la_draw_resize(la_window_t* window, uint32_t w, uint32_t h) {
-	la_safe_set_uint32(&window->protected.set_width, w);
-	la_safe_set_uint32(&window->protected.set_height, h);
-	la_safe_set_uint8(&window->protected.needs_resize, 2);
+	la_safe_set_uint32(&window->set_width, w);
+	la_safe_set_uint32(&window->set_height, h);
+	la_safe_set_uint8(&window->needs_resize, 2);
 }
 
 #endif

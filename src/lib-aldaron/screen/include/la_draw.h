@@ -53,6 +53,7 @@ typedef void (*la_draw_fn_t)(void* context, la_window_t* window);
 
 // la_draw.c
 void la_draw_dont(void* context, la_window_t* window);
+void la_screen_setprimary(la_window_t* window, la_draw_fn_t new_fn);
 void la_draw_fnchange(la_window_t* window, la_draw_fn_t primary,
 	la_draw_fn_t secondary, la_draw_fn_t resize);
 

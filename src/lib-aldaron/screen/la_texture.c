@@ -134,8 +134,8 @@ typedef struct{
 }la_window_draw_t;
 
 static void la_window_draw_flipped(la_window_draw_t* param) {
-	la_draw_fn_t redraw = la_safe_get_pointer(
-		&param->window->protected.functions.primary);
+	la_draw_fn_t redraw = la_safe_get_pointer(&param->window->functions
+		.primary);
 
 	// Clear the screen.
 	la_window_clear(1., 1., 1., 1.);

@@ -109,20 +109,18 @@ typedef struct {
 
 	la_ro_t mouse;
 	la_ro_t screen;
+
+	safe_uint8_t needs_resize;
+	safe_uint32_t set_width;
+	safe_uint32_t set_height;
 	safe_uint8_t has_2_screens; // If 2 screens are hooked up.
 
 	struct {
-		struct {
-			safe_pointer_t fn;
-			safe_pointer_t resize;
-			safe_pointer_t primary;
-			safe_pointer_t secondary;
-		} functions;
-
-		safe_uint8_t needs_resize;
-		safe_uint32_t set_width;
-		safe_uint32_t set_height;
-	} protected;
+		safe_pointer_t fn;
+		safe_pointer_t resize;
+		safe_pointer_t primary;
+		safe_pointer_t secondary;
+	} functions;
 
 	struct {
 		float colors[4];

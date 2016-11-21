@@ -26,7 +26,7 @@ else ifneq ("$(shell uname | grep Darwin)", "")
  GL_VERSION=-lGLESv2
 else
  PLATFORM = windows
- PLATFORM_CFLAGS = -lm -lz -lmingw32 -mwindows -lpthread -lstdc++ -ljpeg
+ PLATFORM_CFLAGS = -lm -lz -lmingw32 -mwindows -lpthread -lstdc++
  PLATFORM_INCLUDES =
  S = "\\"
  LN = ln -s $(LA_HOME)/src/lib-aldaron src/

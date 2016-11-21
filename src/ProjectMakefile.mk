@@ -216,10 +216,10 @@ $(BUILD_OBJ_RELEASE)/%.o: %.c $(HEADERS)
 	$(eval CFLAGS_INCLUDES=\
 		-I$(LA_HOME)/src/lib/clump/\
 		-I$(LA_HOME)/src/lib/libzip/lib\
-		-I$(LA_HOME)/src/lib/sdl/include/\
-		-I$(LA_HOME)/src/lib/sdl-image/\
-		-I$(LA_HOME)/src/lib/sdl-mixer/\
-		-I$(LA_HOME)/src/lib/sdl-net/\
+		-I$(LA_HOME)/src/lib/sdl/x86_64-w64-mingw32/include/SDL2/\
+		-I$(LA_HOME)/src/lib/sdl-image/x86_64-w64-mingw32/include/SDL2/\
+		-I$(LA_HOME)/src/lib/sdl-mixer/x86_64-w64-mingw32/include/SDL2/\
+		-I$(LA_HOME)/src/lib/sdl-net/x86_64-w64-mingw32/include/SDL2/\
 		-iquote\
 		-Isrc/\
 		$(addprefix -I, $(shell find -L src/ -type d ))\

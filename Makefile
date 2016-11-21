@@ -1,5 +1,6 @@
 # Makefile to build the C version of jl_lib.
 DEPS_VER_SDL = SDL2-2.0.4
+#DEPS_VER_SDL = SDL-devel-1.2.15-mingw32.tar.gz
 DEPS_VER_SDL_IMAGE = SDL2_image-2.0.1
 DEPS_VER_SDL_MIXER = SDL2_mixer-2.0.1
 DEPS_VER_SDL_NET = SDL2_net-2.0.1
@@ -64,10 +65,14 @@ src/lib/include/:
 
 $(SRC_SDL):
 	cd src/lib/ && \
-	$(WGET) https://www.libsdl.org/release/$(DEPS_VER_SDL).zip && \
-	unzip $(DEPS_VER_SDL).zip && \
-	rm $(DEPS_VER_SDL).zip && \
-	mv $(DEPS_VER_SDL) sdl
+	$(WGET) http://www.libsdl.org/release/SDL2-devel-2.0.5-mingw.tar.gz && \
+	tar xvfz SDL2-devel-2.0.5-mingw.tar.gz
+	rm src/lib/SDL2-devel-2.0.5-mingw.tar.gz
+	mv src/lib/SDL2-2.0.5 src/lib/sdl
+#	$(WGET) https://www.libsdl.org/release/$(DEPS_VER_SDL).zip && \
+#	unzip $(DEPS_VER_SDL).zip && \
+#	rm $(DEPS_VER_SDL).zip && \
+#	mv $(DEPS_VER_SDL) sdl
 
 download-ems:
 	cd deps/&& \
@@ -83,6 +88,14 @@ build-emscripten:
 	./emsdk install latest && \
 	./emsdk activate latest
 $(OBJ_LIBZIP):
+	# For windows, install zlib
+#	cd src/lib && \
+#	$(WGET) http://pilotfiber.dl.sourceforge.net/project/gnuwin32/zlib/1.2.3/zlib-1.2.3-src.zip && \
+#	unzip zlib-1.2.3-src.zip
+#	mv src/lib/src/zlib/1.2.3/zlib-1.2.3/ src/lib/zlib/
+#	rm -r src/lib/src/
+#	cd src/lib/zlib/ && \
+#	./configure && make install
 	# Downloading libzip....
 	cd src/lib && \
 	$(WGET) http://www.nih.at/libzip/$(DEPS_VER_ZIP).tar.gz && \
@@ -94,16 +107,24 @@ $(OBJ_LIBZIP):
 	$(LD) $(SRC_LIBZIP)/lib/*.o -o $(OBJ_LIBZIP)
 	# Done!
 $(OBJ_SDL_IMAGE):
-	# Downloading SDL_Image....
-	cd src/lib/ && \
-	$(WGET) https://www.libsdl.org/projects/SDL_image/release/$(DEPS_VER_SDL_IMAGE).zip && \
-	unzip $(DEPS_VER_SDL_IMAGE).zip && \
-	rm $(DEPS_VER_SDL_IMAGE).zip && \
-	mv $(DEPS_VER_SDL_IMAGE) sdl-image
+	# WINDOWS: Downloading SDL_Image....
+#	cd src/lib/ && \
+#	$(WGET) https://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.0.1-mingw.tar.gz && \
+#	tar xvfz SDL2_image-devel-2.0.1-mingw.tar.gz && \
+#	rm SDL2_image-devel-2.0.1-mingw.tar.gz
+#	mv src/lib/SDL2_image-2.0.1 src/lib/sdl-image
+	cp src/lib/sdl-image/x86_64-w64-mingw32/lib/libSDL2_image.dll.a $(OBJ_SDL_IMAGE)
+	# UNIX: Downloading SDL_Image
+#	cd src/lib/ && \
+#	$(WGET) https://www.libsdl.org/projects/SDL_image/release/$(DEPS_VER_SDL_IMAGE).zip && \
+#	unzip $(DEPS_VER_SDL_IMAGE).zip && \
+#	rm $(DEPS_VER_SDL_IMAGE).zip && \
+#	mv $(DEPS_VER_SDL_IMAGE) sdl-image
 	# Compiling SDL_image....
-	export PATH=$$PATH:`pwd`/$(SRC_SDL)/usr_local/bin/ && \
-	cd $(SRC_SDL_IMAGE)/ && sh configure && make
-	$(LD) $(SRC_SDL_IMAGE)/.libs/*.o -o $(OBJ_SDL_IMAGE)
+#	export PATH=$$PATH:`pwd`/$(SRC_SDL)/usr_local/bin/
+#	export SDL2_CONFIG=../../sdl2-config && \
+#	cd $(SRC_SDL_IMAGE)/ && sh configure && make
+#	$(LD) $(SRC_SDL_IMAGE)/.libs/*.o -o $(OBJ_SDL_IMAGE)
 	# Done!
 $(OBJ_SDL_NET):
 	# Downloading SDL_net....
@@ -120,30 +141,35 @@ $(OBJ_SDL_NET):
 
 $(OBJ_SDL_MIXER):
 	# Downloading SDL_mixer....
-	cd src/lib/ && \
-	$(WGET) https://www.libsdl.org/projects/SDL_mixer/release/$(DEPS_VER_SDL_MIXER).zip && \
-	unzip $(DEPS_VER_SDL_MIXER).zip && \
-	rm $(DEPS_VER_SDL_MIXER).zip && \
-	mv $(DEPS_VER_SDL_MIXER) sdl-mixer
+	cd src/lib/ && $(WGET) https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.1-mingw.tar.gz && \
+	tar xvfz SDL2_mixer-devel-2.0.1-mingw.tar.gz && \
+	rm SDL2_mixer-devel-2.0.1-mingw.tar.gz
+	mv src/lib/SDL2_mixer-2.0.1 src/lib/sdl-mixer
+	mv src/lib/sdl-mixer/x86_64-w64-mingw32/bin/SDL2_mixer.dll $(OBJ_SDL_MIXER)
+#	cd src/lib/ && \
+#	$(WGET) https://www.libsdl.org/projects/SDL_mixer/release/$(DEPS_VER_SDL_MIXER).zip && \
+#	unzip $(DEPS_VER_SDL_MIXER).zip && \
+#	rm $(DEPS_VER_SDL_MIXER).zip && \
+#	mv $(DEPS_VER_SDL_MIXER) sdl-mixer
 	# Compiling SDL_mixer....
-	export PATH=$$PATH:`pwd`/$(SRC_SDL)/usr_local/bin/ && \
-	cd $(SRC_SDL_MIXER)/ && sh configure && make
+#	export PATH=$$PATH:`pwd`/$(SRC_SDL)/usr_local/bin/ && \
+#	cd $(SRC_SDL_MIXER)/ && sh configure && make
 	# Linking....
-	rm -f $(SRC_SDL_MIXER)/build/playmus.o $(SRC_SDL_MIXER)/build/playwave.o
-	$(LD) $(SRC_SDL_MIXER)/build/*.o -o $(OBJ_SDL_MIXER)
+#	rm -f $(SRC_SDL_MIXER)/build/playmus.o $(SRC_SDL_MIXER)/build/playwave.o
+#	$(LD) $(SRC_SDL_MIXER)/build/*.o -o $(OBJ_SDL_MIXER)
 	# Done!
 
 $(OBJ_CLUMP): src/lib/clump/*
 	# Compiling clump....
-	gcc src/lib/clump/array.c -c -std=c99 -o build/obj/clump_array.o
-	gcc src/lib/clump/bitarray.c -std=c99 -c -o build/obj/clump_bitarray.o
-	gcc src/lib/clump/clump.c -c -std=c99 -o build/obj/clump_clump.o
-	gcc src/lib/clump/hash.c -c -std=c99 -o build/obj/clump_hash.o
-	gcc src/lib/clump/hcodec.c -std=c99 -c -o build/obj/clump_hcodec.o
-	gcc src/lib/clump/list.c -c -std=c99 -o build/obj/clump_list.o
-	gcc src/lib/clump/pool.c -c -std=c99 -o build/obj/clump_pool.o
-	gcc src/lib/clump/rhash.c -c -std=c99 -o build/obj/clump_rhash.o
-	gcc src/lib/clump/tree.c -c -std=c99 -o build/obj/clump_tree.o
+	$(GCC) src/lib/clump/array.c -c -std=c99 -o build/obj/clump_array.o
+	$(GCC) src/lib/clump/bitarray.c -std=c99 -c -o build/obj/clump_bitarray.o
+	$(GCC) src/lib/clump/clump.c -c -std=c99 -o build/obj/clump_clump.o
+	$(GCC) src/lib/clump/hash.c -c -std=c99 -o build/obj/clump_hash.o
+	$(GCC) src/lib/clump/hcodec.c -std=c99 -c -o build/obj/clump_hcodec.o
+	$(GCC) src/lib/clump/list.c -c -std=c99 -o build/obj/clump_list.o
+	$(GCC) src/lib/clump/pool.c -c -std=c99 -o build/obj/clump_pool.o
+	$(GCC) src/lib/clump/rhash.c -c -std=c99 -o build/obj/clump_rhash.o
+	$(GCC) src/lib/clump/tree.c -c -std=c99 -o build/obj/clump_tree.o
 	$(LD) build/obj/clump_*.o -o $(OBJ_CLUMP)
 	# Done!
 
